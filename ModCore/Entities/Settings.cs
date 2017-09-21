@@ -18,5 +18,8 @@ namespace ModCore.Entities
 
         [JsonProperty("prefix")]
         public string Prefix = "+";
+
+        [JsonProperty("blockinvites")]
+        public bool BlockInvites = true;
     }
 }

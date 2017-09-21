@@ -48,6 +48,7 @@ namespace ModCore
 
             Commands.RegisterCommands<ModCore.Commands.Main>();
             Commands.RegisterCommands<ModCore.Commands.Owner>();
+            Commands.RegisterCommands<ModCore.Commands.Chat>();
 
             CTS = new CancellationTokenSource();
 
@@ -55,6 +56,12 @@ namespace ModCore
             {
                 await Task.Yield();
                 SocketStart = DateTimeOffset.Now;
+            };
+
+            Client.MessageCreated += async (e) =>
+            {
+                // Am a bit lazy, pasting regex form later use
+                // discord(\.gg|app\.com\/invite)\/.+
             };
         }
 
