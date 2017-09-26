@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using DSharpPlus.CommandsNext;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -25,26 +23,24 @@ namespace ModCore.Commands
             var sup = DateTimeOffset.Now.Subtract(b.SocketStart);
 
             // Needs improvement
-            await ctx.RespondAsync($"Program uptime: {String.Format(@"{0} days, {1}", bup.ToString(@"dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
-                $"Socket uptime: {String.Format(@"{0} days, {1}", sup.ToString(@"dd"), sup.ToString(@"hh\:mm\:ss"))}");
+            await ctx.RespondAsync($"Program uptime: {string.Format("{0} days, {1}", bup.ToString("dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
+                $"Socket uptime: {string.Format("{0} days, {1}", sup.ToString("dd"), sup.ToString(@"hh\:mm\:ss"))}");
         }
 
         [Command("purgeuser"), Aliases("pu"), RequirePermissions(Permissions.ManageMessages)]
-        public async Task PurgeUserAsync(CommandContext ctx, DiscordUser User, int skip = 0)
+        public async Task PurgeUserAsync(CommandContext ctx, DiscordUser user, int skip = 0)
         {
-            int i = 0;
+            var i = 0;
             var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
             foreach (var m in ms)
             {
-                if (User == null || m.Author.Id == User.Id)
-                {
-                    if (i < skip)
-                        i++;
-                    else
-                        await m.DeleteAsync();
-                }
+                if (user != null && m.Author.Id != user.Id) continue;
+                if (i < skip)
+                    i++;
+                else
+                    await m.DeleteAsync();
             }
-            var resp = await ctx.RespondAsync($"Latest messages by {User.Mention} (ID:{User.Id}) deleted.");
+            var resp = await ctx.RespondAsync($"Latest messages by {user.Mention} (ID:{user.Id}) deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
             await ctx.Message.DeleteAsync("Purge command executed.");
@@ -53,7 +49,7 @@ namespace ModCore.Commands
         [Command("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages)]
         public async Task PurgeUserAsync(CommandContext ctx, int skip = 0)
         {
-            int i = 0;
+            var i = 0;
             var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
             foreach (var m in ms)
             {
