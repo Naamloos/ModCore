@@ -19,6 +19,9 @@ namespace ModCore.Entities
         [JsonProperty("prefix")]
         public string Prefix = "+";
 
+        [JsonProperty("muterole")]
+        public ulong MuteRoleId = 0;
+
         [JsonProperty("blockinvites")]
         public bool BlockInvites = true;
     }

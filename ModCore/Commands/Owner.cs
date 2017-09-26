@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Commands
 {
-    [Group("owner"), Aliases("o")]
+    [Group("owner"), Aliases("o"), RequireOwner]
     public class Owner
     {
         [Command("exit"), Aliases("e")]

@@ -1,10 +1,13 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using ModCore.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,9 +21,11 @@ namespace ModCore
         public DateTimeOffset ProgramStart;
         public DateTimeOffset SocketStart;
         public CancellationTokenSource CTS;
+        public Settings settings;
 
         public Bot(Settings settings)
         {
+            this.settings = settings;
             ProgramStart = DateTimeOffset.Now;
             Client = new DiscordClient(new DiscordConfiguration()
             {
@@ -48,7 +53,6 @@ namespace ModCore
 
             Commands.RegisterCommands<ModCore.Commands.Main>();
             Commands.RegisterCommands<ModCore.Commands.Owner>();
-            Commands.RegisterCommands<ModCore.Commands.Chat>();
 
             CTS = new CancellationTokenSource();
 
@@ -60,8 +64,19 @@ namespace ModCore
 
             Client.MessageCreated += async (e) =>
             {
-                // Am a bit lazy, pasting regex form later use
-                // discord(\.gg|app\.com\/invite)\/.+
+                if (settings.BlockInvites && (e.Channel.PermissionsFor(e.Author as DiscordMember) & Permissions.ManageMessages) == 0)
+                {
+                    var m = Regex.Match(e.Message.Content, "discord(\\.gg|app\\.com\\/invite)\\/.+");
+                    if (m.Success)
+                    {
+                        await e.Message.DeleteAsync("Discovered invite and deleted message");
+                    }
+                }
+            };
+
+            Commands.CommandErrored += async (e) =>
+            {
+                e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "Commands", e.Exception.ToString(), DateTime.Now);
             };
         }
 
