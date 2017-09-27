@@ -55,6 +55,12 @@ namespace ModCore
 
             CTS = new CancellationTokenSource();
 
+            Client.SocketOpened += async () =>
+            {
+                await Task.Yield();
+                SocketStart = DateTimeOffset.Now;
+            };
+
             Commands.CommandErrored += async e =>
             {
                 e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "Commands", e.Exception.ToString(), DateTime.Now);
