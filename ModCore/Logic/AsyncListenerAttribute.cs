@@ -20,7 +20,7 @@ namespace ModCore.Logic
             // nope, there's no cleaner way to do this. sorry
             Task OnEventWithArgs(object e)
             {
-                _ = Task.Run(async () => await (Task) listener.Invoke(null, new[] { bot, e}));
+                _ = Task.Run(async () => await (Task) listener.Invoke(null, new[] { bot, e }));
                 return Task.CompletedTask;
             }
 

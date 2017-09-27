@@ -6,7 +6,7 @@ using DSharpPlus;
 
 namespace ModCore.Logic
 {
-    public class AsyncListenerHandler
+    public static class AsyncListenerHandler
     {
         public static IEnumerable<ListenerMethod> ListenerMethods { get; private set; }
         
