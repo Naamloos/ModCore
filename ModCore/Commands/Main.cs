@@ -1,9 +1,9 @@
 ﻿using System;
-using DSharpPlus.CommandsNext;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.CommandsNext.Attributes;
 using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 
 namespace ModCore.Commands
 {
@@ -109,7 +109,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
-            var b = ctx.Dependencies.GetDependency<Bot>().settings.MuteRoleId;
+            var b = ctx.Dependencies.GetDependency<Bot>().Settings.MuteRoleId;
             var mute = ctx.Guild.GetRole(b);
             await m.GrantRoleAsync(mute);
             await ctx.RespondAsync($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
@@ -123,7 +123,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
-            var b = ctx.Dependencies.GetDependency<Bot>().settings.MuteRoleId;
+            var b = ctx.Dependencies.GetDependency<Bot>().Settings.MuteRoleId;
             var mute = ctx.Guild.GetRole(b);
             await m.RevokeRoleAsync(mute);
             await ctx.RespondAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");

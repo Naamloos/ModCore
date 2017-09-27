@@ -1,15 +1,15 @@
-﻿using ModCore.Entities;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
+using ModCore.Entities;
+using Newtonsoft.Json;
 
 namespace ModCore
 {
-    class Program
+    internal static class Program
     {
-        static Bot ModCore;
-        static void Main(string[] args)
+        public static Bot ModCore;
+        private static void Main(string[] args)
         {
             if (!File.Exists("settings.json"))
             {
