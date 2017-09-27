@@ -1,30 +1,32 @@
-﻿using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using ModCore.Entities;
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
+using ModCore.Commands;
+using ModCore.Entities;
+using ModCore.Logic;
 
 namespace ModCore
 {
     public class Bot
     {
-        public DiscordClient Client;
-        public InteractivityModule Interactivity;
-        public CommandsNextModule Commands;
+        public readonly DiscordClient Client;
+        public readonly InteractivityModule Interactivity;
+        public readonly CommandsNextModule Commands;
         public DateTimeOffset ProgramStart;
         public DateTimeOffset SocketStart;
-        public CancellationTokenSource CTS;
-        public Settings settings;
+        public readonly CancellationTokenSource CTS;
+        public readonly Settings Settings;
 
         public Bot(Settings settings)
         {
-            this.settings = settings;
+            this.Settings = settings;
             ProgramStart = DateTimeOffset.Now;
-            Client = new DiscordClient(new DiscordConfiguration()
+            Client = new DiscordClient(new DiscordConfiguration
             {
                 AutoReconnect = true,
                 EnableCompression = true,
@@ -38,7 +40,7 @@ namespace ModCore
 
             var deps = new DependencyCollectionBuilder().AddInstance(this).Build();
 
-            Commands = Client.UseCommandsNext(new CommandsNextConfiguration()
+            Commands = Client.UseCommandsNext(new CommandsNextConfiguration
             {
                 CaseSensitive = false,
                 EnableDefaultHelp = true,
@@ -48,33 +50,17 @@ namespace ModCore
                 Dependencies = deps
             });
 
-            Commands.RegisterCommands<ModCore.Commands.Main>();
-            Commands.RegisterCommands<ModCore.Commands.Owner>();
+            Commands.RegisterCommands<Main>();
+            Commands.RegisterCommands<Owner>();
 
             CTS = new CancellationTokenSource();
 
-            Client.SocketOpened += async () =>
-            {
-                await Task.Yield();
-                SocketStart = DateTimeOffset.Now;
-            };
-
-            Client.MessageCreated += async (e) =>
-            {
-                if (settings.BlockInvites && (e.Channel.PermissionsFor(e.Author as DiscordMember) & Permissions.ManageMessages) == 0)
-                {
-                    var m = Regex.Match(e.Message.Content, "discord(\\.gg|app\\.com\\/invite)\\/.+");
-                    if (m.Success)
-                    {
-                        await e.Message.DeleteAsync("Discovered invite and deleted message");
-                    }
-                }
-            };
-
-            Commands.CommandErrored += async (e) =>
+            Commands.CommandErrored += async e =>
             {
                 e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "Commands", e.Exception.ToString(), DateTime.Now);
             };
+            
+            AsyncListenerHandler.InstallListeners(Client, this);
         }
 
         public async Task RunAsync()
@@ -92,7 +78,6 @@ namespace ModCore
             {
                 await Task.Delay(500);
             }
-            return;
         }
     }
 }
