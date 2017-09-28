@@ -16,7 +16,7 @@ namespace ModCore.Logic
             ListenerMethods =
                 from a in AppDomain.CurrentDomain.GetAssemblies()
                 from t in a.GetTypes()
-                where t.Namespace.StartsWith("ModCore")
+                //where t.Namespace.StartsWith("ModCore")
                 from m in t.GetMethods()
                 let attribute = m.GetCustomAttribute(typeof(AsyncListenerAttribute), true)
                 where attribute != null
