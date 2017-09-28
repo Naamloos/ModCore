@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using DSharpPlus.Entities;
 using Newtonsoft.Json;
-using DSharpPlus.Entities;
 
 namespace ModCore.Entities
 {
@@ -11,8 +8,9 @@ namespace ModCore.Entities
         [JsonProperty("token")]
         internal string Token = "Your token";
 
-        [JsonProperty("color")]
-        string _color = "";
+        [JsonProperty("color")] 
+        private string _color = "";
+        
         [JsonIgnore]
         public DiscordColor Color => new DiscordColor(_color);
 
@@ -20,7 +18,7 @@ namespace ModCore.Entities
         public string Prefix = "+";
 
         [JsonProperty("muterole")]
-        public ulong MuteRoleId = 0;
+        public ulong MuteRoleId;
 
         [JsonProperty("blockinvites")]
         public bool BlockInvites = true;

@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DSharpPlus.CommandsNext;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.CommandsNext.Attributes;
 using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 
 namespace ModCore.Commands
 {

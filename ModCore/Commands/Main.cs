@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DSharpPlus.CommandsNext;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.CommandsNext.Attributes;
 using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 
 namespace ModCore.Commands
 {
@@ -25,8 +23,8 @@ namespace ModCore.Commands
             var sup = DateTimeOffset.Now.Subtract(b.SocketStart);
 
             // Needs improvement
-            await ctx.RespondAsync($"Program uptime: {String.Format(@"{0} days, {1}", bup.ToString(@"dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
-                $"Socket uptime: {String.Format(@"{0} days, {1}", sup.ToString(@"dd"), sup.ToString(@"hh\:mm\:ss"))}");
+            await ctx.RespondAsync($"Program uptime: {string.Format("{0} days, {1}", bup.ToString("dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
+                $"Socket uptime: {string.Format("{0} days, {1}", sup.ToString("dd"), sup.ToString(@"hh\:mm\:ss"))}");
         }
 
         [Command("purgeuser"), Aliases("pu"), RequirePermissions(Permissions.ManageMessages)]
@@ -36,13 +34,11 @@ namespace ModCore.Commands
             var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
             foreach (var m in ms)
             {
-                if (User == null || m.Author.Id == User.Id)
-                {
-                    if (i < skip)
-                        i++;
-                    else
-                        await m.DeleteAsync();
-                }
+                if (User != null && m.Author.Id != User.Id) continue;
+                if (i < skip)
+                    i++;
+                else
+                    await m.DeleteAsync();
             }
             var resp = await ctx.RespondAsync($"Latest messages by {User.Mention} (ID:{User.Id}) deleted.");
             await Task.Delay(2000);
@@ -113,7 +109,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
-            var b = ctx.Dependencies.GetDependency<Bot>().settings.MuteRoleId;
+            var b = ctx.Dependencies.GetDependency<Bot>().Settings.MuteRoleId;
             var mute = ctx.Guild.GetRole(b);
             await m.GrantRoleAsync(mute);
             await ctx.RespondAsync($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
@@ -127,7 +123,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
-            var b = ctx.Dependencies.GetDependency<Bot>().settings.MuteRoleId;
+            var b = ctx.Dependencies.GetDependency<Bot>().Settings.MuteRoleId;
             var mute = ctx.Guild.GetRole(b);
             await m.RevokeRoleAsync(mute);
             await ctx.RespondAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
