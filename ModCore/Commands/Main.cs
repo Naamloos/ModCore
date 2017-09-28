@@ -30,10 +30,10 @@ namespace ModCore.Commands
         }
 
         [Command("purgeuser"), Aliases("pu"), RequirePermissions(Permissions.ManageMessages)]
-        public async Task PurgeUserAsync(CommandContext ctx, DiscordUser User, int skip = 0)
+        public async Task PurgeUserAsync(CommandContext ctx, DiscordUser User, int limit, int skip = 0)
         {
             int i = 0;
-            var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
+            var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
             foreach (var m in ms)
             {
                 if (User == null || m.Author.Id == User.Id)
@@ -51,10 +51,10 @@ namespace ModCore.Commands
         }
 
         [Command("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages)]
-        public async Task PurgeUserAsync(CommandContext ctx, int skip = 0)
+        public async Task PurgeUserAsync(CommandContext ctx, int limit, int skip = 0)
         {
             int i = 0;
-            var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
+            var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
             foreach (var m in ms)
             {
                 if (i < skip)
