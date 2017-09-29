@@ -17,13 +17,16 @@ namespace ModCore.Entities
         [JsonProperty("prefix")]
         public string Prefix = "+";
 
-        [JsonProperty("muterole")]
+        [JsonProperty("mute_role")]
         public ulong MuteRoleId;
 
-        [JsonProperty("blockinvites")]
+        [JsonProperty("block_invites")]
         public bool BlockInvites = true;
 
-        [JsonProperty("shardcount")]
+        [JsonProperty("shard_count")]
         public int ShardCount = 1;
+
+        [JsonProperty("message_cache_size")]
+        public int MessageCacheSize = 50;
     }
 }
