@@ -1,11 +1,12 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using ModCore.Commands;
 using ModCore.Entities;
 using ModCore.Logic;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace ModCore
@@ -37,10 +38,13 @@ namespace ModCore
             {
                 AutoReconnect = true,
                 EnableCompression = true,
+                LargeThreshold = 250,
                 LogLevel = LogLevel.Debug,
                 Token = Settings.Token,
                 TokenType = TokenType.Bot,
-                UseInternalLogHandler = true
+                UseInternalLogHandler = true,
+                ShardCount = this.Settings.ShardCount,
+                ShardId = this.ShardId
             });
 
             this.Interactivity = Client.UseInteractivity();
@@ -79,9 +83,17 @@ namespace ModCore
                 StartTimes.SocketStartTime = DateTime.Now;
             };
 
+            this.Client.Ready += Client_Ready;
+
             this.Commands.CommandErrored += Commands_CommandErrored;
 
             AsyncListenerHandler.InstallListeners(Client, this);
+        }
+
+        private Task Client_Ready(ReadyEventArgs e)
+        {
+           Client.UpdateStatusAsync(new Game($"I'm on {this.Settings.ShardCount} shards! This is Shard {++this.ShardId}!"));
+           return Task.Delay(0);
         }
 
         private Task Commands_CommandErrored(CommandErrorEventArgs e)
