@@ -22,5 +22,8 @@ namespace ModCore.Entities
 
         [JsonProperty("blockinvites")]
         public bool BlockInvites = true;
+
+        [JsonProperty("shardcount")]
+        public int ShardCount = 1;
     }
 }

@@ -15,7 +15,7 @@ namespace ModCore.Logic
             Target = targetType;
         }
 
-        public void Register(Bot bot, DiscordClient client, MethodInfo listener)
+        public void Register(ModCoreShard bot, DiscordClient client, MethodInfo listener)
         {
             // nope, there's no cleaner way to do this. sorry
             Task OnEventWithArgs(object e)
