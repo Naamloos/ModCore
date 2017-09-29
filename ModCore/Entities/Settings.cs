@@ -1,26 +1,55 @@
-﻿using DSharpPlus.Entities;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Npgsql;
 
 namespace ModCore.Entities
 {
-    public class Settings
+    public struct Settings
     {
         [JsonProperty("token")]
-        internal string Token = "Your token";
-
-        [JsonProperty("color")] 
-        private string _color = "";
-        
-        [JsonIgnore]
-        public DiscordColor Color => new DiscordColor(_color);
+        internal string Token { get; private set; }
 
         [JsonProperty("prefix")]
-        public string Prefix = "+";
+        internal string DefaultPrefix { get; private set; }
 
-        [JsonProperty("muterole")]
-        public ulong MuteRoleId;
+        [JsonProperty("database")]
+        public DatabaseSettings Database { get; private set; }
+    }
 
-        [JsonProperty("blockinvites")]
-        public bool BlockInvites = true;
+    public struct DatabaseSettings
+    {
+        [JsonProperty("hostname")]
+        public string Hostname { get; private set; }
+
+        [JsonProperty("port")]
+        public int Port { get; private set; }
+
+        [JsonProperty("database")]
+        public string Database { get; private set; }
+
+        [JsonProperty("username")]
+        public string Username { get; private set; }
+
+        [JsonProperty("password")]
+        public string Password { get; private set; }
+
+        public string BuildConnectionString()
+        {
+            var csb = new NpgsqlConnectionStringBuilder
+            {
+                Host = this.Hostname,
+                Port = this.Port,
+                Database = this.Database,
+                Username = this.Username,
+                Password = this.Password,
+
+                SslMode = SslMode.Require,
+                TrustServerCertificate = true,
+
+                Pooling = true,
+                MaxPoolSize = 100
+            };
+
+            return csb.ConnectionString;
+        }
     }
 }

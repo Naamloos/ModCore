@@ -67,8 +67,21 @@ alter sequence mcore_guild_config_id_seq owned by mcore_guild_config.id;
 -- Config structure (JSON):
 -- 
 -- {
+--   "prefix": "+",
 --   "mute_role_id": 0,
---   "rolestate": {
+--   "invite_blocker": {
+--     "enabled": true,
+--     "ban_threshold": 3,
+--     "exempt_role_ids": [],
+--     "exempt_user_ids": [],
+--     "exempt_invite_guild_ids": []
+--   },
+--   "invisi_cop": {
+--     "enabled": true,
+--     "exempt_role_ids": [],
+--     "exempt_user_ids": []
+--   },
+--   "role_state": {
 --     "enabled": true,
 --     "ignored_role_ids": [],
 --     "ignored_channel_ids": []
@@ -137,4 +150,4 @@ create table mcore_modnotes(
     contents text,
     unique(member_id, guild_id)
 );
-create sequence mcore_modnotes_id_seq owned by mcore_modnotes.id;
+alter sequence mcore_modnotes_id_seq owned by mcore_modnotes.id;

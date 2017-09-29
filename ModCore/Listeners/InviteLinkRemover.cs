@@ -10,16 +10,16 @@ namespace ModCore.Listeners
     public static class InviteLinkRemover
     {
         [AsyncListener(EventTypes.MessageCreated)]
-        public static  async Task RemoveInviteLinks(Bot bot, MessageCreateEventArgs e)
+        public static async Task RemoveInviteLinks(Bot bot, MessageCreateEventArgs e)
         {
-            if (bot.Settings.BlockInvites && (e.Channel.PermissionsFor(e.Author as DiscordMember) & Permissions.ManageMessages) == 0)
+            /*if (bot.Settings.BlockInvites && (e.Channel.PermissionsFor(e.Author as DiscordMember) & Permissions.ManageMessages) == 0)
             {
                 var m = Regex.Match(e.Message.Content, @"discord(\.gg|app\.com\/invite)\/.+");
                 if (m.Success)
                 {
                     await e.Message.DeleteAsync("Discovered invite and deleted message");
                 }
-            }
+            }*/
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using ModCore.Entities;
 using Newtonsoft.Json;
 
@@ -9,7 +10,7 @@ namespace ModCore
     internal static class Program
     {
         public static Bot ModCore;
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             if (!File.Exists("settings.json"))
             {
@@ -24,7 +25,7 @@ namespace ModCore
             var cfg = JsonConvert.DeserializeObject<Settings>(input);
 
             ModCore = new Bot(cfg);
-            ModCore.RunAsync().GetAwaiter().GetResult();
+            await ModCore.RunAsync();
         }
     }
 }
