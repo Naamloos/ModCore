@@ -4,6 +4,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using ModCore.Entities;
 
 namespace ModCore.Commands
 {
@@ -18,9 +19,9 @@ namespace ModCore.Commands
         [Command("uptime"), Aliases("u")]
         public async Task UptimeAsync(CommandContext ctx)
         {
-            var b = ctx.Dependencies.GetDependency<Bot>();
-            var bup = DateTimeOffset.Now.Subtract(b.ProgramStart);
-            var sup = DateTimeOffset.Now.Subtract(b.SocketStart);
+            var st = ctx.Dependencies.GetDependency<StartTimes>();
+            var bup = DateTimeOffset.Now.Subtract(st.ProcessStartTime);
+            var sup = DateTimeOffset.Now.Subtract(st.SocketStartTime);
 
             // Needs improvement
             await ctx.RespondAsync($"Program uptime: {string.Format("{0} days, {1}", bup.ToString("dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
@@ -109,7 +110,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
-            var b = ctx.Dependencies.GetDependency<Bot>().Settings.MuteRoleId;
+            var b = ctx.Dependencies.GetDependency<ModCoreShard>().Settings.MuteRoleId;
             var mute = ctx.Guild.GetRole(b);
             await m.GrantRoleAsync(mute);
             await ctx.RespondAsync($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
@@ -123,7 +124,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
-            var b = ctx.Dependencies.GetDependency<Bot>().Settings.MuteRoleId;
+            var b = ctx.Dependencies.GetDependency<ModCoreShard>().Settings.MuteRoleId;
             var mute = ctx.Guild.GetRole(b);
             await m.RevokeRoleAsync(mute);
             await ctx.RespondAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
