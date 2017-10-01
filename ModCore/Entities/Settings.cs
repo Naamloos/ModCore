@@ -28,5 +28,14 @@ namespace ModCore.Entities
 
         [JsonProperty("message_cache_size")]
         public int MessageCacheSize = 50;
+ 
+        [JsonProperty("block_ip_loggers")]
+        public bool BlockIpLoggers = true;
+        
+        [JsonProperty("block_booters")]
+        public bool BlockBooters = true;
+        
+        [JsonProperty("block_url_shorteners")]
+        public bool BlockUrlShorteners = false;
     }
 }
