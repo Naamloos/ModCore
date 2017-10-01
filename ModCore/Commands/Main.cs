@@ -11,9 +11,9 @@ namespace ModCore.Commands
 {
     public class Main
     {
-        private DatabaseContext Database { get; }
+        private DatabaseContextBuilder Database { get; }
 
-        public Main(DatabaseContext db)
+        public Main(DatabaseContextBuilder db)
         {
             this.Database = db;
         }
@@ -143,8 +143,7 @@ namespace ModCore.Commands
                 return;
             }
 
-            var gcfg_db = this.Database.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
-            var gcfg = gcfg_db?.GetSettings();
+            var gcfg = ctx.GetGuildSettings();
             if (gcfg == null)
             {
                 await ctx.RespondAsync("Guild is not configured. Adjust this guild's configuration and re-run this command.");
@@ -174,8 +173,7 @@ namespace ModCore.Commands
                 return;
             }
 
-            var gcfg_db = this.Database.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
-            var gcfg = gcfg_db?.GetSettings();
+            var gcfg = ctx.GetGuildSettings();
             if (gcfg == null)
             {
                 await ctx.RespondAsync("Guild is not configured. Adjust this guild's configuration and re-run this command.");

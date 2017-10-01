@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using ModCore.Commands;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
@@ -20,7 +21,7 @@ namespace ModCore
         public DateTimeOffset SocketStart { get; private set; }
         public CancellationTokenSource CTS { get; }
         public Settings Settings { get; }
-        public DatabaseContext Database { get; }
+        public DatabaseContextBuilder Database { get; }
 
         public Bot(Settings settings)
         {
@@ -31,8 +32,8 @@ namespace ModCore
             ProgramStart = DateTimeOffset.Now;
             CTS = new CancellationTokenSource();
 
-            // create database connection
-            this.Database = new DatabaseContext(settings.Database.BuildConnectionString());
+            // create database
+            Database = Settings.Database.CreateContextBuilder();
 
             // create the client
             Client = new DiscordClient(new DiscordConfiguration
@@ -61,13 +62,12 @@ namespace ModCore
                 EnableDefaultHelp = true,
                 EnableDms = false,
                 EnableMentionPrefix = true,
-                StringPrefix = settings.DefaultPrefix,
+                CustomPrefixPredicate = this.GetPrefixPositionAsync,
                 Dependencies = deps
             });
 
             // register commands
-            Commands.RegisterCommands<Main>();
-            Commands.RegisterCommands<Owner>();
+            Commands.RegisterCommands(Assembly.GetExecutingAssembly());
 
             // register event handlers
             Client.SocketOpened += () =>
@@ -99,6 +99,15 @@ namespace ModCore
             await Client.DisconnectAsync();
             Client.Dispose();
             CTS.Dispose();
+        }
+
+        public Task<int> GetPrefixPositionAsync(DiscordMessage msg)
+        {
+            var cfg = msg.Channel.Guild.GetGuildSettings(Database.CreateContext());
+            if (cfg?.Prefix != null)
+                return Task.FromResult(msg.GetStringPrefixLength(cfg.Prefix));
+
+            return Task.FromResult(msg.GetStringPrefixLength(Settings.DefaultPrefix));
         }
     }
 }

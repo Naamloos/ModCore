@@ -51,7 +51,7 @@ namespace ModCore.Entities
         /// Gets or sets whether Invite Blocker should be enabled.
         /// </summary>
         [JsonProperty("enabled")]
-        public bool Enable { get; set; } = true;
+        public bool Enable { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the number of invites after which the user gets automatically banned for ads. Set to 0 to disable automatic bans.
@@ -111,7 +111,7 @@ namespace ModCore.Entities
         /// Gets or sets whether Role State should be enabled.
         /// </summary>
         [JsonProperty("enabled")]
-        public bool Enable { get; set; } = true;
+        public bool Enable { get; set; } = false;
 
         /// <summary>
         /// Gets the list of roles which are ignored by Role State. These roles won't be saved or restored.

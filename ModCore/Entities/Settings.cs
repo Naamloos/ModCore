@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using ModCore.Database;
+using Newtonsoft.Json;
 using Npgsql;
 
 namespace ModCore.Entities
@@ -45,11 +46,13 @@ namespace ModCore.Entities
                 SslMode = SslMode.Require,
                 TrustServerCertificate = true,
 
-                Pooling = true,
-                MaxPoolSize = 100
+                Pooling = false
             };
 
             return csb.ConnectionString;
         }
+
+        public DatabaseContextBuilder CreateContextBuilder() =>
+            new DatabaseContextBuilder(this.BuildConnectionString());
     }
 }

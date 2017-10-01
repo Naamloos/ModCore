@@ -76,7 +76,7 @@ alter sequence mcore_guild_config_id_seq owned by mcore_guild_config.id;
 --     "exempt_user_ids": [],
 --     "exempt_invite_guild_ids": []
 --   },
---   "invisi_cop": {
+--   "invisicop": {
 --     "enabled": true,
 --     "exempt_role_ids": [],
 --     "exempt_user_ids": []
