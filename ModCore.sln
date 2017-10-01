@@ -5,6 +5,18 @@ VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore", "ModCore\ModCore.csproj", "{1D3B8DD2-5E0C-4435-8965-3B84BB06EFBD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readmes", "Readmes", "{D29852CD-D686-4A35-A4B2-75FF668A73C0}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		PostgreSQL.md = PostgreSQL.md
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{0E482483-DAA8-43BC-BC9D-3E13CC99DF49}"
+	ProjectSection(SolutionItems) = preProject
+		db_schema.sql = db_schema.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
