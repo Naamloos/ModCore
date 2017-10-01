@@ -1,10 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity;
-using System.Threading;
 using ModCore.Entities;
+using System;
+using System.Threading.Tasks;
 
 namespace ModCore.Commands
 {

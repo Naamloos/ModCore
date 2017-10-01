@@ -92,7 +92,7 @@ namespace ModCore
 
         private Task Client_Ready(ReadyEventArgs e)
         {
-           Client.UpdateStatusAsync(new Game($"I'm on {this.Settings.ShardCount} shards! This is Shard {++this.ShardId}!"));
+           Client.UpdateStatusAsync(new Game($"I'm on {this.Settings.ShardCount} shard(s)!"));
            return Task.Delay(0);
         }
 

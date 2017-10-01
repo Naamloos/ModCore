@@ -1,7 +1,7 @@
-﻿using System;
+﻿using DSharpPlus;
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using DSharpPlus;
 
 namespace ModCore.Logic
 {
