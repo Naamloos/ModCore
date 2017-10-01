@@ -1,9 +1,9 @@
-﻿using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using ModCore.Logic;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace ModCore.Listeners
 {

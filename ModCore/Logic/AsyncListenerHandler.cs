@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DSharpPlus;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DSharpPlus;
 
 namespace ModCore.Logic
 {

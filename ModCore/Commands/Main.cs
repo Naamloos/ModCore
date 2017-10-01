@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using ModCore.Entities;
+using System;
+using System.Threading.Tasks;
 
 namespace ModCore.Commands
 {
