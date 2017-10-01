@@ -1,12 +1,12 @@
-﻿using ModCore.Entities;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ModCore.Entities;
+using Newtonsoft.Json;
 
 namespace ModCore
 {
@@ -17,7 +17,7 @@ namespace ModCore
         private List<ModCoreShard> Shards { get; set; }
         private CancellationTokenSource CTS { get; set; }
 
-        internal async Task Initialize()
+        internal async Task InitializeAsync()
         {
             if (!File.Exists("settings.json"))
             {
@@ -32,7 +32,6 @@ namespace ModCore
             Settings = JsonConvert.DeserializeObject<Settings>(input);
 
             Shards = new List<ModCoreShard>();
-
             InitializeSharedData();
 
             for (int i = 0; i < Settings.ShardCount; i++)

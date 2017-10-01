@@ -1,6 +1,7 @@
 {
     "token": "insert bot token here",
     "prefix": "?>",
+    "shard_count": 1,
     "database": 
     {
         "hostname": "localhost",

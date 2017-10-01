@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using ModCore.Database;
+using ModCore.Entities;
 
 namespace ModCore.Commands
 {
@@ -27,9 +27,9 @@ namespace ModCore.Commands
         [Command("uptime"), Aliases("u")]
         public async Task UptimeAsync(CommandContext ctx)
         {
-            var b = ctx.Dependencies.GetDependency<Bot>();
-            var bup = DateTimeOffset.Now.Subtract(b.ProgramStart);
-            var sup = DateTimeOffset.Now.Subtract(b.SocketStart);
+            var st = ctx.Dependencies.GetDependency<StartTimes>();
+            var bup = DateTimeOffset.Now.Subtract(st.ProcessStartTime);
+            var sup = DateTimeOffset.Now.Subtract(st.SocketStartTime);
 
             // Needs improvement
             await ctx.RespondAsync($"Program uptime: {string.Format("{0} days, {1}", bup.ToString("dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
