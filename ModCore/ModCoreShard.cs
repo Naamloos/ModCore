@@ -1,13 +1,14 @@
-﻿using DSharpPlus;
+﻿using System;
+using System.Reflection;
+using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
-using ModCore.Commands;
+using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
-using System;
-using System.Threading.Tasks;
 
 namespace ModCore
 {
@@ -23,15 +24,21 @@ namespace ModCore
         private SharedData ShardData { get; set; }
         internal Settings Settings { get; }
 
+        public DatabaseContextBuilder Database { get; }
 
         public ModCoreShard(Settings settings, int id, SharedData sharedData)
         {
             this.Settings = settings;
             this.ShardData = sharedData;
+            Database = settings.Database.CreateContextBuilder();
         }
 
         internal void Initialize()
         {
+            // Store the Start Times to use in DI
+            // SocketStartTime will be updated in the SocketOpened event,
+            // For now we just need to make sure its not null.
+            StartTimes = new StartTimes(ShardData.ProcessStartTime, ShardData.ProcessStartTime);
 
             // Initialize the DiscordClient
             this.Client = new DiscordClient(new DiscordConfiguration
@@ -49,32 +56,28 @@ namespace ModCore
 
             this.Interactivity = Client.UseInteractivity();
 
-
-            // Store the Start Times to use in DI
-            // SocketStartTime will be updated in the SocketOpened event,
-            // For now we just need to make sure its not null.
-            StartTimes = new StartTimes(ShardData.ProcessStartTime, ShardData.ProcessStartTime);
-
             // Add the instances we need to dependencies
             var deps = new DependencyCollectionBuilder()
                 .AddInstance(this.ShardData)
-                .AddInstance(this.Settings)
+                //.AddInstance(this.Settings)
                 .AddInstance(this.Interactivity)
                 .AddInstance(this.StartTimes)
+                .AddInstance(this.Database)
                 .Build();
 
+            // enable commandsnext
             this.Commands = Client.UseCommandsNext(new CommandsNextConfiguration
             {
                 CaseSensitive = false,
                 EnableDefaultHelp = true,
                 EnableDms = false,
                 EnableMentionPrefix = true,
-                StringPrefix = Settings.Prefix,
+                CustomPrefixPredicate = this.GetPrefixPositionAsync,
                 Dependencies = deps
             });
 
-            this.Commands.RegisterCommands<Main>();
-            this.Commands.RegisterCommands<Owner>();
+            // register commands
+            this.Commands.RegisterCommands(Assembly.GetExecutingAssembly());
 
             // Update the SocketStartTime
             this.Client.SocketOpened += async () =>
@@ -83,8 +86,8 @@ namespace ModCore
                 StartTimes.SocketStartTime = DateTime.Now;
             };
 
+            // register event handlers
             this.Client.Ready += Client_Ready;
-
             this.Commands.CommandErrored += Commands_CommandErrored;
 
             AsyncListenerHandler.InstallListeners(Client, this);
@@ -102,15 +105,22 @@ namespace ModCore
             return Task.Delay(0);
         }
 
-        public async Task RunAsync()
-        {
-            await this.Client.ConnectAsync();
-        }
+        public Task RunAsync() =>
+            this.Client.ConnectAsync();
 
         internal async Task DisconnectAndDispose()
         {
             await this.Client.DisconnectAsync();
             this.Client.Dispose();
+        }
+
+        public Task<int> GetPrefixPositionAsync(DiscordMessage msg)
+        {
+            var cfg = msg.Channel.Guild.GetGuildSettings(Database.CreateContext());
+            if (cfg?.Prefix != null)
+                return Task.FromResult(msg.GetStringPrefixLength(cfg.Prefix));
+
+            return Task.FromResult(msg.GetStringPrefixLength(Settings.DefaultPrefix));
         }
     }
 }

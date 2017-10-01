@@ -7,10 +7,13 @@ namespace ModCore.Entities
     public struct Settings
     {
         [JsonProperty("token")]
-        internal string Token { get; private set; }
+        public string Token { get; private set; }
 
         [JsonProperty("prefix")]
-        internal string DefaultPrefix { get; private set; }
+        public string DefaultPrefix { get; private set; }
+
+        [JsonProperty("shard_count")]
+        public int ShardCount { get; private set; }
 
         [JsonProperty("database")]
         public DatabaseSettings Database { get; private set; }

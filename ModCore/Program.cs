@@ -1,14 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using ModCore.Entities;
-using Newtonsoft.Json;
+﻿using System.Threading.Tasks;
 
 namespace ModCore
 {
     internal class Program
     {
-        private static void Main(string[] args) => new ModCore().Initialize().ConfigureAwait(false).GetAwaiter().GetResult();
+        private static Task Main(string[] args) =>
+            new ModCore().InitializeAsync();
     }
 }

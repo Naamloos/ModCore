@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using ModCore.Logic;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ModCore.Listeners
 {
@@ -16,7 +14,7 @@ namespace ModCore.Listeners
         public static ConcurrentDictionary<string, DiscordInvite> InviteCache { get; } = new ConcurrentDictionary<string, DiscordInvite>();
 
         [AsyncListener(EventTypes.MessageCreated)]
-        public static async Task RemoveInviteLinks(Bot bot, MessageCreateEventArgs e)
+        public static async Task RemoveInviteLinks(ModCoreShard bot, MessageCreateEventArgs e)
         {
             if (e.Channel.Guild == null)
                 return;
