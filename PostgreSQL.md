@@ -98,10 +98,10 @@ instructions:
    * Using Microsoft™ Windows™ and Command Prompt:
       * Drop into local environment (`setlocal`).
 	  * Set the PGPASSWORD variable, and its value to your `modcore` user's password 
-	    (`set PGPASSWORD="enter password here"`).
+	    (`set PGPASSWORD=enter password here`).
       * Install the schema (`psql -U modcore -d modcore -h localhost < db_schema.sql`).
    * Using Microsoft™ Windows™ and PowerShell:
-      * Set the environment variable (`$Env:PGPASSWORD=enter password here`).
+      * Set the environment variable (`$Env:PGPASSWORD="enter password here"`).
 	  * Install the schema (`Get-Content db_schema.sql | psql -U modcore -d modcore -h localhost`).
    * Using GNU/Linux and Bash:
       * Install the schema using temporary PGPASSWORD variable 
