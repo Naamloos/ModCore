@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DSharpPlus;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DSharpPlus;
 
 namespace ModCore.Logic
 {
@@ -10,7 +10,7 @@ namespace ModCore.Logic
     {
         public static IEnumerable<ListenerMethod> ListenerMethods { get; private set; }
         
-        public static void InstallListeners(DiscordClient client, Bot bot)
+        public static void InstallListeners(DiscordClient client, ModCoreShard bot)
         {
             // find all methods from ModCore with AsyncListener attr
             ListenerMethods =

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using DSharpPlus;
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using DSharpPlus;
 
 namespace ModCore.Logic
 {
@@ -15,7 +15,7 @@ namespace ModCore.Logic
             Target = targetType;
         }
 
-        public void Register(Bot bot, DiscordClient client, MethodInfo listener)
+        public void Register(ModCoreShard bot, DiscordClient client, MethodInfo listener)
         {
             // nope, there's no cleaner way to do this. sorry
             Task OnEventWithArgs(object e)
