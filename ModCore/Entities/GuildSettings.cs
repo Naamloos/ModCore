@@ -12,13 +12,13 @@ namespace ModCore.Entities
         /// Gets or sets the command prefix for the guild.
         /// </summary>
         [JsonProperty("prefix")]
-        public string Prefix { get; set; } = null;
+        public string Prefix { get; set; }
 
         /// <summary>
         /// Gets or sets the ID of the role used to mute users from chat. Setting this to 0 will disable muting.
         /// </summary>
         [JsonProperty("mute_role_id")]
-        public ulong MuteRoleId { get; set; } = 0;
+        public ulong MuteRoleId { get; set; }
 
         /// <summary>
         /// Gets the configuration of Invite Blocker. Invite Blocker will check each incoming message for any invites, 
@@ -51,7 +51,7 @@ namespace ModCore.Entities
         /// Gets or sets whether Invite Blocker should be enabled.
         /// </summary>
         [JsonProperty("enabled")]
-        public bool Enable { get; set; } = false;
+        public bool Enable { get; set; }
 
         /// <summary>
         /// Gets or sets the number of invites after which the user gets automatically banned for ads. Set to 0 to disable automatic bans.
@@ -87,7 +87,7 @@ namespace ModCore.Entities
         /// Gets or sets whether InvisiCop should be enabled.
         /// </summary>
         [JsonProperty("enabled")]
-        public bool Enable { get; set; } = false;
+        public bool Enable { get; set; }
 
         /// <summary>
         /// Gets the list of roles which are exempt from InvisiCop checks.
@@ -111,7 +111,7 @@ namespace ModCore.Entities
         /// Gets or sets whether Role State should be enabled.
         /// </summary>
         [JsonProperty("enabled")]
-        public bool Enable { get; set; } = false;
+        public bool Enable { get; set; }
 
         /// <summary>
         /// Gets the list of roles which are ignored by Role State. These roles won't be saved or restored.
