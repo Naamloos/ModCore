@@ -7,6 +7,7 @@ using DSharpPlus.Entities;
 using ModCore.Database;
 using ModCore.Entities;
 using System.Text;
+using System.Collections.Generic;
 
 namespace ModCore.Commands
 {
@@ -42,14 +43,16 @@ namespace ModCore.Commands
         {
             int i = 0;
             var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
+            var delet_this = new List<DiscordMessage>();
             foreach (var m in ms)
             {
                 if (User != null && m.Author.Id != User.Id) continue;
                 if (i < skip)
                     i++;
                 else
-                    await m.DeleteAsync();
+                    delet_this.Add(m);
             }
+            await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
             var resp = await ctx.RespondAsync($"Latest messages by {User.Mention} (ID:{User.Id}) deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
@@ -61,13 +64,33 @@ namespace ModCore.Commands
         {
             int i = 0;
             var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
+            var delet_this = new List<DiscordMessage>();
             foreach (var m in ms)
             {
                 if (i < skip)
                     i++;
                 else
-                    await m.DeleteAsync();
+                    delet_this.Add(m);
             }
+            await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
+            var resp = await ctx.RespondAsync($"Latest messages deleted.");
+            await Task.Delay(2000);
+            await resp.DeleteAsync("Purge command executed.");
+            await ctx.Message.DeleteAsync("Purge command executed.");
+        }
+
+        [Command("clean"), Aliases("c")]
+        public async Task CleanAsync(CommandContext ctx)
+        {
+            var prefix = ctx.GetGuildSettings().Prefix;
+            var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
+            var delet_this = new List<DiscordMessage>();
+            foreach (var m in ms)
+            {
+                if (m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix))
+                    delet_this.Add(m);
+            }
+            await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
             var resp = await ctx.RespondAsync($"Latest messages deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
