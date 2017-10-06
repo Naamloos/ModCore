@@ -6,6 +6,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using ModCore.Database;
 using ModCore.Entities;
+using System.Text;
 
 namespace ModCore.Commands
 {
@@ -208,19 +209,19 @@ namespace ModCore.Commands
                 $"Registered on     : {usr.CreationTimestamp.DateTime.ToString()}\n" +
                 $"Joined Guild on  : {usr.JoinedAt.DateTime.ToString()}";
 
-            var roles = new System.Text.StringBuilder();
+            var roles = new StringBuilder();
             foreach (var r in usr.Roles) roles.Append($"[{r.Name}] ");
             if (roles.Length == 0) roles.Append("*None*");
             embed.AddField("Roles", roles.ToString());
 
             var permsobj = usr.PermissionsIn(ctx.Channel);
             var perms = permsobj.ToPermissionString();
-            if (((Permissions.Administrator & permsobj) | (Permissions.AccessChannels & permsobj)) == 0)
+            if (((permsobj & Permissions.Administrator) | (permsobj & Permissions.AccessChannels)) == 0)
                 perms = "**[!] User can't see this channel!**\n" + perms;
             if (perms == String.Empty) perms = "*None*";
             embed.AddField("Permissions", perms);
 
-            embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now.ToString()}");
+            embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now}");
 
             await ctx.RespondAsync("", false, embed: embed);
         }
