@@ -4,6 +4,7 @@
     "shard_count": 1,
     "database": 
     {
+        "in_memory": false,
         "hostname": "localhost",
         "port": 5432,
         "database": "modcore",

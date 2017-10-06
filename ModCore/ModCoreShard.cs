@@ -54,7 +54,10 @@ namespace ModCore
                 ShardId = this.ShardId
             });
 
-            this.Interactivity = Client.UseInteractivity();
+            this.Interactivity = Client.UseInteractivity(new InteractivityConfiguration
+            {
+                // we want options here, maybe?
+            });
 
             // Add the instances we need to dependencies
             var deps = new DependencyCollectionBuilder()
@@ -95,7 +98,7 @@ namespace ModCore
 
         private Task Client_Ready(ReadyEventArgs e)
         {
-           Client.UpdateStatusAsync(new Game($"I'm on {this.Settings.ShardCount} shard(s)!"));
+           Client.UpdateStatusAsync(new DiscordGame($"I'm on {this.Settings.ShardCount} shard(s)!"));
            return Task.Delay(0);
         }
 
