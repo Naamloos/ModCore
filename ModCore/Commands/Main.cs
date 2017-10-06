@@ -8,6 +8,7 @@ using ModCore.Database;
 using ModCore.Entities;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ModCore.Commands
 {
@@ -52,7 +53,8 @@ namespace ModCore.Commands
                 else
                     delet_this.Add(m);
             }
-            await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
+            if (delet_this.Any())
+                await ctx.Channel.DeleteMessagesAsync(delet_this, $"Purged messages by {User.Username}#{User.Discriminator} (ID:{User.Id})");
             var resp = await ctx.RespondAsync($"Latest messages by {User.Mention} (ID:{User.Id}) deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
@@ -72,14 +74,15 @@ namespace ModCore.Commands
                 else
                     delet_this.Add(m);
             }
-            await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
+            if (delet_this.Any())
+                await ctx.Channel.DeleteMessagesAsync(delet_this, "Purged messages.");
             var resp = await ctx.RespondAsync($"Latest messages deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
             await ctx.Message.DeleteAsync("Purge command executed.");
         }
 
-        [Command("clean"), Aliases("c")]
+        [Command("clean"), Aliases("c"), RequirePermissions(Permissions.ManageMessages)]
         public async Task CleanAsync(CommandContext ctx)
         {
             var prefix = ctx.GetGuildSettings().Prefix;
@@ -90,7 +93,8 @@ namespace ModCore.Commands
                 if (m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix))
                     delet_this.Add(m);
             }
-            await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
+            if(delet_this.Any())
+                await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
             var resp = await ctx.RespondAsync($"Latest messages deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
