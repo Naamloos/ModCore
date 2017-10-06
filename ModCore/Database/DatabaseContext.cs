@@ -21,7 +21,11 @@ namespace ModCore.Database
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
+#if HANSEN
+                optionsBuilder.UseInMemoryDatabase("modcore");
+#else
                 optionsBuilder.UseNpgsql(this.ConnectionString);
+#endif
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
