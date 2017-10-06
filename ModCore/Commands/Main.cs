@@ -193,5 +193,34 @@ namespace ModCore.Commands
             await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
             await ctx.RespondAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
         }
+
+        [Command("userinfo"), Aliases("ui")]
+        public async Task UserInfoAsync(CommandContext ctx, DiscordMember usr)
+        {
+            var embed = new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.MidnightBlue)
+                .WithTitle($"@{usr.Username}#{usr.Discriminator} - ID: {usr.Id}");
+
+            if (usr.IsBot) embed.Title += " __[BOT]__ ";
+            if (usr.IsOwner) embed.Title += " __[OWNER]__ ";
+
+            embed.Description =
+                $"Registered on     : {usr.CreationTimestamp.DateTime.ToShortDateString()} {usr.CreationTimestamp.DateTime.ToShortTimeString()}\n" +
+                $"Joined Guild on  : {usr.JoinedAt.DateTime.ToShortDateString()} {usr.JoinedAt.DateTime.ToShortTimeString()}";
+
+            string roles = String.Empty;
+            foreach (var r in usr.Roles) roles += $"[{r.Name}] ";
+            if (roles == String.Empty) roles = "*None*";
+            embed.AddField($"Roles", roles);
+
+            string perms = usr.PermissionsIn(ctx.Channel).ToPermissionString();
+            if (!(perms.Contains("Read messages") || perms.Contains("Administrator"))) perms = "**[!] User can't see this channel!**\n" + perms;
+            if (perms == String.Empty) perms = "*None*";
+            embed.AddField($"Permissions", perms);
+
+            embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}");
+
+            await ctx.RespondAsync("", false, embed: embed);
+        }
     }
 }
