@@ -75,7 +75,7 @@ namespace ModCore.Commands
         }
 
         [Command("ban"), Aliases("b"), RequirePermissions(Permissions.BanMembers)]
-        public async Task BanAsync(CommandContext ctx, DiscordMember m, string reason = "")
+        public async Task BanAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -90,7 +90,7 @@ namespace ModCore.Commands
         }
 
         [Command("hackban"), Aliases("hb"), RequirePermissions(Permissions.BanMembers)]
-        public async Task HackBanAsync(CommandContext ctx, ulong id, string reason = "")
+        public async Task HackBanAsync(CommandContext ctx, ulong id, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == id)
             {
@@ -105,7 +105,7 @@ namespace ModCore.Commands
         }
 
         [Command("kick"), Aliases("k"), RequirePermissions(Permissions.KickMembers)]
-        public async Task KickAsync(CommandContext ctx, DiscordMember m, string reason = "")
+        public async Task KickAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -120,7 +120,7 @@ namespace ModCore.Commands
         }
 
         [Command("softban"), Aliases("s"), RequireUserPermissions(Permissions.KickMembers)]
-        public async Task SoftbanAsync(CommandContext ctx, DiscordMember m, string reason = "")
+        public async Task SoftbanAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -136,7 +136,7 @@ namespace ModCore.Commands
         }
 
         [Command("mute"), Aliases("m"), RequirePermissions(Permissions.MuteMembers)]
-        public async Task MuteAsync(CommandContext ctx, DiscordMember m, string reason = "")
+        public async Task MuteAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -166,7 +166,7 @@ namespace ModCore.Commands
         }
 
         [Command("unmute"), Aliases("um"), RequirePermissions(Permissions.MuteMembers)]
-        public async Task UnmuteAsync(CommandContext ctx, DiscordMember m, string reason = "")
+        public async Task UnmuteAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
