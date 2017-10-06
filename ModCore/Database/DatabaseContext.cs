@@ -21,7 +21,12 @@ namespace ModCore.Database
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseNpgsql(this.ConnectionString);
+            {
+                if (!string.IsNullOrWhiteSpace(this.ConnectionString))
+                    optionsBuilder.UseNpgsql(this.ConnectionString);
+                else
+                    optionsBuilder.UseInMemoryDatabase("modcore");
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -116,6 +121,9 @@ namespace ModCore.Database
                 entity.Property(e => e.MemberId).HasColumnName("member_id");
 
                 entity.Property(e => e.RoleIds).HasColumnName("role_ids");
+
+                if (string.IsNullOrWhiteSpace(this.ConnectionString))
+                    entity.Ignore(e => e.RoleIds);
             });
 
             modelBuilder.Entity<DatabaseWarning>(entity =>
