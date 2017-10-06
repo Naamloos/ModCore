@@ -205,20 +205,22 @@ namespace ModCore.Commands
             if (usr.IsOwner) embed.Title += " __[OWNER]__ ";
 
             embed.Description =
-                $"Registered on     : {usr.CreationTimestamp.DateTime.ToShortDateString()} {usr.CreationTimestamp.DateTime.ToShortTimeString()}\n" +
-                $"Joined Guild on  : {usr.JoinedAt.DateTime.ToShortDateString()} {usr.JoinedAt.DateTime.ToShortTimeString()}";
+                $"Registered on     : {usr.CreationTimestamp.DateTime.ToString()}\n" +
+                $"Joined Guild on  : {usr.JoinedAt.DateTime.ToString()}";
 
-            string roles = String.Empty;
-            foreach (var r in usr.Roles) roles += $"[{r.Name}] ";
-            if (roles == String.Empty) roles = "*None*";
-            embed.AddField($"Roles", roles);
+            var roles = new System.Text.StringBuilder();
+            foreach (var r in usr.Roles) roles.Append($"[{r.Name}] ");
+            if (roles.Length == 0) roles.Append("*None*");
+            embed.AddField("Roles", roles.ToString());
 
-            string perms = usr.PermissionsIn(ctx.Channel).ToPermissionString();
-            if (!(perms.Contains("Read messages") || perms.Contains("Administrator"))) perms = "**[!] User can't see this channel!**\n" + perms;
+            var permsobj = usr.PermissionsIn(ctx.Channel);
+            var perms = permsobj.ToPermissionString();
+            if (((Permissions.Administrator & permsobj) | (Permissions.AccessChannels & permsobj)) == 0)
+                perms = "**[!] User can't see this channel!**\n" + perms;
             if (perms == String.Empty) perms = "*None*";
-            embed.AddField($"Permissions", perms);
+            embed.AddField("Permissions", perms);
 
-            embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now.ToShortDateString()} {DateTime.Now.ToShortTimeString()}");
+            embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now.ToString()}");
 
             await ctx.RespondAsync("", false, embed: embed);
         }
