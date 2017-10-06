@@ -6,6 +6,9 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using ModCore.Database;
 using ModCore.Entities;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ModCore.Commands
 {
@@ -37,18 +40,21 @@ namespace ModCore.Commands
         }
 
         [Command("purgeuser"), Aliases("pu"), RequirePermissions(Permissions.ManageMessages)]
-        public async Task PurgeUserAsync(CommandContext ctx, DiscordUser User, int skip = 0)
+        public async Task PurgeUserAsync(CommandContext ctx, DiscordUser User, int limit, int skip = 0)
         {
             int i = 0;
-            var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
+            var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
+            var delet_this = new List<DiscordMessage>();
             foreach (var m in ms)
             {
                 if (User != null && m.Author.Id != User.Id) continue;
                 if (i < skip)
                     i++;
                 else
-                    await m.DeleteAsync();
+                    delet_this.Add(m);
             }
+            if (delet_this.Any())
+                await ctx.Channel.DeleteMessagesAsync(delet_this, $"Purged messages by {User.Username}#{User.Discriminator} (ID:{User.Id})");
             var resp = await ctx.RespondAsync($"Latest messages by {User.Mention} (ID:{User.Id}) deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
@@ -56,17 +62,39 @@ namespace ModCore.Commands
         }
 
         [Command("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages)]
-        public async Task PurgeUserAsync(CommandContext ctx, int skip = 0)
+        public async Task PurgeUserAsync(CommandContext ctx, int limit, int skip = 0)
         {
             int i = 0;
-            var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
+            var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
+            var delet_this = new List<DiscordMessage>();
             foreach (var m in ms)
             {
                 if (i < skip)
                     i++;
                 else
-                    await m.DeleteAsync();
+                    delet_this.Add(m);
             }
+            if (delet_this.Any())
+                await ctx.Channel.DeleteMessagesAsync(delet_this, "Purged messages.");
+            var resp = await ctx.RespondAsync($"Latest messages deleted.");
+            await Task.Delay(2000);
+            await resp.DeleteAsync("Purge command executed.");
+            await ctx.Message.DeleteAsync("Purge command executed.");
+        }
+
+        [Command("clean"), Aliases("c"), RequirePermissions(Permissions.ManageMessages)]
+        public async Task CleanAsync(CommandContext ctx)
+        {
+            var prefix = ctx.GetGuildSettings().Prefix;
+            var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
+            var delet_this = new List<DiscordMessage>();
+            foreach (var m in ms)
+            {
+                if (m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix))
+                    delet_this.Add(m);
+            }
+            if(delet_this.Any())
+                await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
             var resp = await ctx.RespondAsync($"Latest messages deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
@@ -74,7 +102,7 @@ namespace ModCore.Commands
         }
 
         [Command("ban"), Aliases("b"), RequirePermissions(Permissions.BanMembers)]
-        public async Task BanAsync(CommandContext ctx, DiscordMember m, string reason = "")
+        public async Task BanAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -89,7 +117,7 @@ namespace ModCore.Commands
         }
 
         [Command("hackban"), Aliases("hb"), RequirePermissions(Permissions.BanMembers)]
-        public async Task HackBanAsync(CommandContext ctx, ulong id, string reason = "")
+        public async Task HackBanAsync(CommandContext ctx, ulong id, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == id)
             {
@@ -104,7 +132,7 @@ namespace ModCore.Commands
         }
 
         [Command("kick"), Aliases("k"), RequirePermissions(Permissions.KickMembers)]
-        public async Task KickAsync(CommandContext ctx, DiscordMember m, string reason = "")
+        public async Task KickAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -119,7 +147,7 @@ namespace ModCore.Commands
         }
 
         [Command("softban"), Aliases("s"), RequireUserPermissions(Permissions.KickMembers)]
-        public async Task SoftbanAsync(CommandContext ctx, DiscordMember m, string reason = "")
+        public async Task SoftbanAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -135,7 +163,7 @@ namespace ModCore.Commands
         }
 
         [Command("mute"), Aliases("m"), RequirePermissions(Permissions.MuteMembers)]
-        public async Task MuteAsync(CommandContext ctx, DiscordMember m, string reason = "")
+        public async Task MuteAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -165,7 +193,7 @@ namespace ModCore.Commands
         }
 
         [Command("unmute"), Aliases("um"), RequirePermissions(Permissions.MuteMembers)]
-        public async Task UnmuteAsync(CommandContext ctx, DiscordMember m, string reason = "")
+        public async Task UnmuteAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -192,6 +220,37 @@ namespace ModCore.Commands
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
             await ctx.RespondAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
+        }
+
+        [Command("userinfo"), Aliases("ui")]
+        public async Task UserInfoAsync(CommandContext ctx, DiscordMember usr)
+        {
+            var embed = new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.MidnightBlue)
+                .WithTitle($"@{usr.Username}#{usr.Discriminator} - ID: {usr.Id}");
+
+            if (usr.IsBot) embed.Title += " __[BOT]__ ";
+            if (usr.IsOwner) embed.Title += " __[OWNER]__ ";
+
+            embed.Description =
+                $"Registered on     : {usr.CreationTimestamp.DateTime.ToString()}\n" +
+                $"Joined Guild on  : {usr.JoinedAt.DateTime.ToString()}";
+
+            var roles = new StringBuilder();
+            foreach (var r in usr.Roles) roles.Append($"[{r.Name}] ");
+            if (roles.Length == 0) roles.Append("*None*");
+            embed.AddField("Roles", roles.ToString());
+
+            var permsobj = usr.PermissionsIn(ctx.Channel);
+            var perms = permsobj.ToPermissionString();
+            if (((permsobj & Permissions.Administrator) | (permsobj & Permissions.AccessChannels)) == 0)
+                perms = "**[!] User can't see this channel!**\n" + perms;
+            if (perms == String.Empty) perms = "*None*";
+            embed.AddField("Permissions", perms);
+
+            embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now}");
+
+            await ctx.RespondAsync("", false, embed: embed);
         }
     }
 }
