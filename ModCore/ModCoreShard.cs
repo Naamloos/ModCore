@@ -54,9 +54,11 @@ namespace ModCore
                 ShardId = this.ShardId
             });
 
-            this.Interactivity = Client.UseInteractivity(new InteractivityConfiguration
+            this.Interactivity = Client.UseInteractivity(new InteractivityConfiguration()
             {
-                // we want options here, maybe?
+                PaginationBehaviour = TimeoutBehaviour.Delete,
+                PaginationTimeout = TimeSpan.FromSeconds(30),
+                Timeout = TimeSpan.FromSeconds(30)
             });
 
             // Add the instances we need to dependencies
