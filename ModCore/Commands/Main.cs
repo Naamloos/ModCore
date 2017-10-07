@@ -252,5 +252,29 @@ namespace ModCore.Commands
 
             await ctx.RespondAsync("", false, embed: embed);
         }
+
+        [Command("showbans")]
+        [Aliases("sb")]
+        public async Task ShowBansAsync(CommandContext ctx)
+        {
+            var bans = await ctx.Guild.GetBansAsync();
+
+            if (bans.Count == 0)
+            {
+                await ctx.RespondAsync("No user is banned.");
+                return;
+            }
+
+            var embed = new DiscordEmbedBuilder();
+            embed.WithTitle("Banned Users");
+            embed.WithDescription(string.Join("\n", bans.Select(FormatDiscordBan)));
+
+            await ctx.RespondAsync(embed: embed.Build());
+        }
+
+        private static string FormatDiscordBan(DiscordBan ban, int index)
+        {
+            return $"{index + 1}. **{ban.User.ToStringWithDiscriminator()}**, Reason: {ban.Reason}";
+        }
     }
 }
