@@ -61,8 +61,9 @@ namespace ModCore.Listeners
             if (roleids != null)
             {
                 var roles = roleids.RoleIds
+                    .Select(xid => (ulong)xid)
                     .Except(rs.IgnoredRoleIds)
-                    .Select(xid => gld.GetRole((ulong)xid))
+                    .Select(xid => gld.GetRole(xid))
                     .Where(xr => xr != null);
 
                 if (roles.Any())

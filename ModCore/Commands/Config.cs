@@ -316,6 +316,90 @@ namespace ModCore.Commands
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("Role State disabled.");
             }
+
+            [Group("role"), Aliases("r"), Description("Role exemption management commands.")]
+            public class Role
+            {
+                [Command("ignore"), Aliases("x"), Description("Exempts role from being saved by Role State.")]
+                public async Task ExemptAsync(CommandContext ctx, [RemainingText, Description("Role to exempt from being saved.")] DiscordRole rl)
+                {
+                    var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                    var ibx = cfg.RoleState.IgnoredRoleIds;
+                    if (!ibx.Contains(rl.Id))
+                        ibx.Add(rl.Id);
+                    await ctx.SetGuildSettingsAsync(cfg);
+                    await ctx.Message.CreateReactionAsync(CheckMark);
+                }
+
+                [Command("unignore"), Aliases("ux"), Description("Unexempts role from being saved by Role State.")]
+                public async Task UnexemptAsync(CommandContext ctx, [RemainingText, Description("Role to unexempt from being saved.")] DiscordRole rl)
+                {
+                    var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                    var ibx = cfg.RoleState.IgnoredRoleIds;
+                    if (ibx.Contains(rl.Id))
+                        ibx.Remove(rl.Id);
+                    await ctx.SetGuildSettingsAsync(cfg);
+                    await ctx.Message.CreateReactionAsync(CheckMark);
+                }
+            }
+
+            [Group("channel"), Aliases("c"), Description("Channel exemption management commands.")]
+            public class Channel
+            {
+                private DatabaseContextBuilder Database { get; }
+
+                public Channel(DatabaseContextBuilder db)
+                {
+                    this.Database = db;
+                }
+
+                [Command("ignore"), Aliases("x"), Description("Exempts channel from having its overrides saved by Role State.")]
+                public async Task ExemptAsync(CommandContext ctx, [RemainingText, Description("Channel to exempt from having its invites saved.")] DiscordChannel chn)
+                {
+                    var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                    var ibx = cfg.RoleState.IgnoredChannelIds;
+                    if (!ibx.Contains(chn.Id))
+                        ibx.Add(chn.Id);
+                    await ctx.SetGuildSettingsAsync(cfg);
+
+                    var db = this.Database.CreateContext();
+                    var chperms = db.RolestateOverrides.Where(xs => xs.ChannelId == (long)chn.Id && xs.GuildId == (long)chn.Guild.Id);
+                    if (chperms.Any())
+                    {
+                        db.RolestateOverrides.RemoveRange(chperms);
+                        await db.SaveChangesAsync();
+                    }
+
+                    await ctx.Message.CreateReactionAsync(CheckMark);
+                }
+
+                [Command("unignore"), Aliases("ux"), Description("Unexempts rchannel from having its overrides saved by Role State.")]
+                public async Task UnexemptAsync(CommandContext ctx, [RemainingText, Description("Channel to unexempt from having its invites  saved.")] DiscordChannel chn)
+                {
+                    var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                    var ibx = cfg.RoleState.IgnoredChannelIds;
+                    if (ibx.Contains(chn.Id))
+                        ibx.Remove(chn.Id);
+                    await ctx.SetGuildSettingsAsync(cfg);
+
+                    var os = chn.PermissionOverwrites.Where(xo => xo.Type == "member");
+                    var db = this.Database.CreateContext();
+                    if (os.Any())
+                    {
+                        await db.RolestateOverrides.AddRangeAsync(os.Select(xo => new DatabaseRolestateOverride
+                        {
+                            ChannelId = (long)chn.Id,
+                            GuildId = (long)chn.Guild.Id,
+                            MemberId = (long)xo.Id,
+                            PermsAllow = (long)xo.Allow,
+                            PermsDeny = (long)xo.Deny
+                        }));
+                        await db.SaveChangesAsync();
+                    }
+
+                    await ctx.Message.CreateReactionAsync(CheckMark);
+                }
+            }
         }
 
         [Group("invisicop"), Aliases("ic"), Description("InvisiCop configuration commands.")]
