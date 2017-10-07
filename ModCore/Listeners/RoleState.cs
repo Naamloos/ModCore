@@ -197,5 +197,82 @@ namespace ModCore.Listeners
             if (del.Any() || add.Any() || mod.Any())
                 await db.SaveChangesAsync();
         }
+
+        [AsyncListener(EventTypes.GuildAvailable)]
+        public static async Task OnGuildAvailable(ModCoreShard shard, GuildCreateEventArgs ea)
+        {
+            var db = shard.Database.CreateContext();
+            var cfg = ea.Guild.GetGuildSettings(db);
+            if (cfg == null || !cfg.RoleState.Enable)
+                return;
+            var rs = cfg.RoleState;
+
+            var chperms = db.RolestateOverrides.Where(xs => xs.GuildId == (long)ea.Guild.Id);
+            var prms = chperms.GroupBy(xs => xs.ChannelId).ToDictionary(xg => xg.Key, xg => xg.ToDictionary(xs => xs.MemberId, xs => xs));
+            var any = false;
+
+            foreach (var chn in ea.Guild.Channels)
+            {
+                if (rs.IgnoredChannelIds.Contains(chn.Id))
+                    continue;
+
+                if (!prms.ContainsKey((long)chn.Id))
+                {
+                    any = true;
+
+                    var os = chn.PermissionOverwrites.Where(xo => xo.Type == "member");
+                    if (!os.Any())
+                        continue;
+
+                    await db.RolestateOverrides.AddRangeAsync(os.Select(xo => new DatabaseRolestateOverride
+                    {
+                        ChannelId = (long)chn.Id,
+                        GuildId = (long)chn.Guild.Id,
+                        MemberId = (long)xo.Id,
+                        PermsAllow = (long)xo.Allow,
+                        PermsDeny = (long)xo.Deny
+                    }));
+                }
+                else
+                {
+                    var cps = prms[(long)chn.Id];
+                    var os = chn.PermissionOverwrites.Where(xo => xo.Type == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
+                    var osids = os.Keys.ToArray();
+
+                    var del = cps.Keys.Except(osids);
+                    var add = osids.Except(cps.Keys);
+                    var mod = osids.Intersect(cps.Keys);
+
+                    if (any |= del.Any())
+                        db.RolestateOverrides.RemoveRange(del.Select(xid => cps[xid]));
+
+                    if (any |= add.Any())
+                        await db.RolestateOverrides.AddRangeAsync(add.Select(xid => new DatabaseRolestateOverride
+                        {
+                            ChannelId = (long)chn.Id,
+                            GuildId = (long)ea.Guild.Id,
+                            MemberId = xid,
+                            PermsAllow = (long)os[xid].Allow,
+                            PermsDeny = (long)os[xid].Deny
+                        }));
+
+                    if (any |= mod.Any())
+                        foreach (var xid in mod)
+                        {
+                            cps[xid].PermsAllow = (long)os[xid].Allow;
+                            cps[xid].PermsDeny = (long)os[xid].Deny;
+
+                            db.RolestateOverrides.Update(cps[xid]);
+                        }
+                }
+            }
+
+            if (any)
+                await db.SaveChangesAsync();
+        }
+
+        [AsyncListener(EventTypes.GuildCreated)]
+        public static Task OnGuildCreated(ModCoreShard shard, GuildCreateEventArgs ea) =>
+            OnGuildAvailable(shard, ea);
     }
 }
