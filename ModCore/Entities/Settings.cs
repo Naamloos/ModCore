@@ -52,7 +52,7 @@ namespace ModCore.Entities
                 Username = this.Username,
                 Password = this.Password,
 
-                SslMode = SslMode.Require,
+                SslMode = SslMode.Prefer,
                 TrustServerCertificate = true,
 
                 Pooling = false

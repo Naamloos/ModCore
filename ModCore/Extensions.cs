@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using ModCore.Database;
 using ModCore.Entities;
+using System.Collections.Generic;
 
 namespace ModCore
 {
@@ -41,6 +42,30 @@ namespace ModCore
             }
 
             await db.SaveChangesAsync();
+        }
+
+        public static async Task LogAction(this CommandContext ctx, string additionalinfo = "")
+        {
+            var s = ctx.GetGuildSettings();
+            var a = s.ActionLog;
+            if (a.Enable)
+            {
+                var w = await ctx.Client.GetWebhookWithTokenAsync(a.WebhookId, a.WebhookToken);
+                var b = new DiscordEmbedBuilder();
+
+                b.WithTitle($"New Action executed by {ctx.Member.Username}#{ctx.Member.Discriminator}")
+                    .WithDescription($"Executed command: {ctx.Command.QualifiedName}\nWith arguments: {ctx.RawArgumentString}")
+                    .WithFooter($"Guild: {ctx.Guild.Name}", string.IsNullOrEmpty(ctx.Guild.IconHash) ? "" : ctx.Guild.IconUrl);
+                if (!string.IsNullOrEmpty(additionalinfo))
+                    b.AddField("Additional information", additionalinfo);
+
+                var e = new List<DiscordEmbed>()
+                {
+                    b.Build()
+                };
+
+                await w.ExecuteAsync(embeds: e);
+            }
         }
     }
 }

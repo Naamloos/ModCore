@@ -59,6 +59,8 @@ namespace ModCore.Commands
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
             await ctx.Message.DeleteAsync("Purge command executed.");
+
+            await ctx.LogAction($"Purged messages.\nUser: {User.Username}#{User.Discriminator} (ID:{User.Id})\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
         }
 
         [Command("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages)]
@@ -80,6 +82,8 @@ namespace ModCore.Commands
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
             await ctx.Message.DeleteAsync("Purge command executed.");
+
+            await ctx.LogAction($"Purged messages.\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
         }
 
         [Command("clean"), Aliases("c"), RequirePermissions(Permissions.ManageMessages)]
@@ -97,8 +101,10 @@ namespace ModCore.Commands
                 await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
             var resp = await ctx.RespondAsync($"Latest messages deleted.");
             await Task.Delay(2000);
-            await resp.DeleteAsync("Purge command executed.");
-            await ctx.Message.DeleteAsync("Purge command executed.");
+            await resp.DeleteAsync("Clean command executed.");
+            await ctx.Message.DeleteAsync("Clean command executed.");
+
+            await ctx.LogAction();
         }
 
         [Command("ban"), Aliases("b"), RequirePermissions(Permissions.BanMembers)]
@@ -114,6 +120,8 @@ namespace ModCore.Commands
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
             await ctx.RespondAsync($"Banned user {m.DisplayName} (ID:{m.Id})");
+
+            await ctx.LogAction($"Banned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
         [Command("hackban"), Aliases("hb"), RequirePermissions(Permissions.BanMembers)]
@@ -129,6 +137,8 @@ namespace ModCore.Commands
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await ctx.Guild.BanMemberAsync(id, 7, $"{ustr}{rstr}");
             await ctx.RespondAsync($"User hackbanned successfully.");
+
+            await ctx.LogAction($"Hackbanned ID: {id}\n{rstr}");
         }
 
         [Command("kick"), Aliases("k"), RequirePermissions(Permissions.KickMembers)]
@@ -144,6 +154,8 @@ namespace ModCore.Commands
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await m.RemoveAsync($"{ustr}{rstr}");
             await ctx.RespondAsync($"Kicked user {m.DisplayName} (ID:{m.Id})");
+
+            await ctx.LogAction($"Kicked user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
         [Command("softban"), Aliases("s"), RequireUserPermissions(Permissions.KickMembers)]
@@ -160,6 +172,8 @@ namespace ModCore.Commands
             await m.BanAsync(7, $"{ustr}{rstr} (softban)");
             await m.UnbanAsync(ctx.Guild, $"{ustr}{rstr}");
             await ctx.RespondAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})");
+
+            await ctx.LogAction($"Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
         [Command("mute"), Aliases("m"), RequirePermissions(Permissions.MuteMembers)]
@@ -190,6 +204,8 @@ namespace ModCore.Commands
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
             await ctx.RespondAsync($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
+
+            await ctx.LogAction($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
         }
 
         [Command("unmute"), Aliases("um"), RequirePermissions(Permissions.MuteMembers)]
@@ -220,6 +236,8 @@ namespace ModCore.Commands
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
             await ctx.RespondAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
+
+            await ctx.LogAction($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
         }
 
         [Command("userinfo"), Aliases("ui")]
