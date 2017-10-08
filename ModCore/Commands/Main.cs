@@ -9,6 +9,7 @@ using ModCore.Entities;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
+using DSharpPlus.Interactivity;
 
 namespace ModCore.Commands
 {
@@ -269,6 +270,24 @@ namespace ModCore.Commands
             embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now}");
 
             await ctx.RespondAsync("", false, embed: embed);
+        }
+
+        [Command("leave"), Description("Makes this bot leave the current server."), RequireUserPermissions(Permissions.Administrator)]
+        public async Task LeaveAsync(CommandContext ctx)
+        {
+            var interactivity = ctx.Dependencies.GetDependency<InteractivityModule>();
+            await ctx.RespondAsync("Are you sure you want to remove modcore from your guild?");
+            var m = await interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
+
+            if (m == null)
+                await ctx.RespondAsync("Timed out.");
+            else if (m.Message.Content == "yes")
+            {
+                await ctx.RespondAsync("Thanks for using ModCore. Leaving this guild.");
+                await ctx.Guild.LeaveAsync();
+            }
+            else
+                await ctx.RespondAsync("Operation canceled by user.");
         }
     }
 }
