@@ -25,7 +25,6 @@ namespace ModCore.Database
                 if (!string.IsNullOrWhiteSpace(this.ConnectionString))
                     optionsBuilder.UseNpgsql(this.ConnectionString);
                 else
-                    #warning PLEASE FIX THIS ERROR, METHOD DOES NOT SEEM TO EXIST!!
                     optionsBuilder.UseInMemoryDatabase("modcore");
             }
         }
