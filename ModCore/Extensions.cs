@@ -68,5 +68,22 @@ namespace ModCore
                 await w.ExecuteAsync(embeds: e);
             }
         }
+
+        public static async Task LogMessageAsync(this CommandContext ctx, string content, DiscordEmbed embed)
+        {
+            var s = ctx.GetGuildSettings();
+            var a = s.ActionLog;
+            if (a.Enable)
+            {
+                var w = await ctx.Client.GetWebhookWithTokenAsync(a.WebhookId, a.WebhookToken);
+                await w.ExecuteAsync(content, embeds: new List<DiscordEmbed>() { embed });
+            }
+            else
+            {
+                await ctx.RespondAsync("The action log isn't enable for this guild!");
+            }
+        }
+
+        public static Task LogMessageAsync(this CommandContext ctx, string context, DiscordEmbedBuilder embed) => LogMessageAsync(ctx, context, embed.Build());
     }
 }
