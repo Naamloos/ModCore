@@ -29,5 +29,12 @@ namespace ModCore.Commands
             else
                 await ctx.RespondAsync("Operation canceled by user.");
         }
+
+        [Command("throw"), Aliases("t"), Hidden]
+        public async Task ThrowAsync(CommandContext ctx)
+        {
+            await ctx.RespondAsync("Throwing exception for testing purposes");
+            throw new AccessViolationException("Did you just assume my gender?");
+        }
     }
 }
