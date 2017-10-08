@@ -438,5 +438,37 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("InvisiCop disabled.");
             }
         }
+
+        [Group("actionlog"), Aliases("al"), Description("ActionLog configuration commands.")]
+        public class ActionLog
+        {
+            [Command("enable"), Aliases("on"), Description("Enables actionlog for this guild.")]
+            public async Task EnableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.ActionLog.Enable = true;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"ActionLog enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config actionlog setwebhook`");
+            }
+
+            [Command("disable"), Aliases("off"), Description("Disables actionlog for this guild.")]
+            public async Task DisableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.ActionLog.Enable = false;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("ActionLog disabled.");
+            }
+
+            [Command("setwebhook"), Aliases("sethook"), Description("Sets the webhook ID and token for this guild's action log")]
+            public async Task SetWebhookAsync(CommandContext ctx, ulong ID, string token)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.ActionLog.WebhookId = ID;
+                cfg.ActionLog.WebhookToken = token;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("ActionLog webhook configured.");
+            }
+        }
     }
 }

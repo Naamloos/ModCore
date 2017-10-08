@@ -40,7 +40,37 @@ namespace ModCore.Entities
         /// leave the guild.
         /// </summary>
         [JsonProperty("role_state")]
-        public GuildRoleStateConfig RoleState { get; private set; } = new GuildRoleStateConfig();        
+        public GuildRoleStateConfig RoleState { get; private set; } = new GuildRoleStateConfig();
+
+        /// <summary>
+        /// Gets the configuration for the ActionLog. ActionLog logs actions by moderators to a webhook URL.
+        /// </summary>
+        [JsonProperty("actionlog")]
+        public GuildActionLogSettings ActionLog { get; private set; } = new GuildActionLogSettings();
+    }
+
+    /// <summary>
+    /// Represents configuration for the ActionLog.
+    /// </summary>
+    public class GuildActionLogSettings
+    {
+        /// <summary>
+        /// Gets or sets whether the ActionLog should be enabled.
+        /// </summary>
+        [JsonProperty("enabled")]
+        public bool Enable { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the ActionLog's webhook ID.
+        /// </summary>
+        [JsonProperty("webhook_id")]
+        public ulong WebhookId { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the ActionLog's webhook token.
+        /// </summary>
+        [JsonProperty("webhook_token")]
+        public string WebhookToken { get; set; } = "";
     }
 
     /// <summary>
