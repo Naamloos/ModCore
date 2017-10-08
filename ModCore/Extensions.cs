@@ -48,13 +48,14 @@ namespace ModCore
         {
             var s = ctx.GetGuildSettings();
             var a = s.ActionLog;
+            string commandArgs = (string.IsNullOrEmpty(ctx.RawArgumentString)) ? "None" : ctx.RawArgumentString;
             if (a.Enable)
             {
                 var w = await ctx.Client.GetWebhookWithTokenAsync(a.WebhookId, a.WebhookToken);
                 var b = new DiscordEmbedBuilder();
 
                 b.WithTitle($"New Action executed by {ctx.Member.Username}#{ctx.Member.Discriminator}")
-                    .WithDescription($"Executed command: {ctx.Command.QualifiedName}\nWith arguments: {ctx.RawArgumentString}")
+                    .WithDescription($"Executed command: {ctx.Command.QualifiedName}\nArguments: {commandArgs}")
                     .WithFooter($"Guild: {ctx.Guild.Name}", string.IsNullOrEmpty(ctx.Guild.IconHash) ? "" : ctx.Guild.IconUrl);
                 if (!string.IsNullOrEmpty(additionalinfo))
                     b.AddField("Additional information", additionalinfo);
