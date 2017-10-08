@@ -43,7 +43,7 @@ namespace ModCore.Commands
         [Command("purgeuser"), Aliases("pu"), RequirePermissions(Permissions.ManageMessages)]
         public async Task PurgeUserAsync(CommandContext ctx, DiscordUser User, int limit, int skip = 0)
         {
-            int i = 0;
+            var i = 0;
             var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
             var delet_this = new List<DiscordMessage>();
             foreach (var m in ms)
@@ -67,7 +67,7 @@ namespace ModCore.Commands
         [Command("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages)]
         public async Task PurgeUserAsync(CommandContext ctx, int limit, int skip = 0)
         {
-            int i = 0;
+            var i = 0;
             var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
             var delet_this = new List<DiscordMessage>();
             foreach (var m in ms)
