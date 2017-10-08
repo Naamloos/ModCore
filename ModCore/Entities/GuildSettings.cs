@@ -47,6 +47,28 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("actionlog")]
         public GuildActionLogSettings ActionLog { get; private set; } = new GuildActionLogSettings();
+
+        /// <summary>
+        /// Gets the configuration for AutoRole. AutoRole automatically grants a role to a member on join if there's no existing rolestate.
+        /// </summary>
+        [JsonProperty("autorole")]
+        public GuildAutoRoleSettings AutoRole { get; private set; } = new GuildAutoRoleSettings();
+    }
+
+    /// <summary>
+    /// Represents configuration for AutoRole.
+    /// </summary>
+    public class GuildAutoRoleSettings
+    {
+        /// <summary>
+        /// Gets or sets whether AutoRole should be enabled.
+        /// </summary>
+        public bool Enable { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the AutoRole role ID.
+        /// </summary>
+        public ulong RoleId { get; set; } = 0;
     }
 
     /// <summary>

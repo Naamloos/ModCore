@@ -544,7 +544,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("ActionLog disabled.");
             }
 
-            [Command("setwebhook"), Aliases("sethook"), Description("Sets the webhook ID and token for this guild's action log")]
+            [Command("setwebhook"), Aliases("swh"), Description("Sets the webhook ID and token for this guild's action log")]
             public async Task SetWebhookAsync(CommandContext ctx, ulong ID, string token)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
@@ -552,6 +552,37 @@ namespace ModCore.Commands
                 cfg.ActionLog.WebhookToken = token;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("ActionLog webhook configured.");
+            }
+        }
+
+        [Group("autorole"), Aliases("ar"), Description("AutoRole configuration commands.")]
+        public class AutoRole
+        {
+            [Command("enable"), Aliases("on"), Description("Enables AutoRole for this guild.")]
+            public async Task EnableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.AutoRole.Enable = true;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"AutoRole enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config autorole setrole`");
+            }
+
+            [Command("disable"), Aliases("off"), Description("Disables AutoRole for this guild.")]
+            public async Task DisableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.AutoRole.Enable = false;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("AutoRole disabled.");
+            }
+
+            [Command("setrole"), Aliases("sr"), Description("Sets the webhook ID and token for this guild's action log")]
+            public async Task SetRoleAsync(CommandContext ctx, DiscordRole Role)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.AutoRole.RoleId = Role.Id;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("AutoRole role configured.");
             }
         }
     }

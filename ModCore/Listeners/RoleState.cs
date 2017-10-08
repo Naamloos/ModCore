@@ -69,6 +69,16 @@ namespace ModCore.Listeners
                 if (roles.Any())
                     await ea.Member.ReplaceRolesAsync(roles, "Restoring role state.");
             }
+            else
+            {
+                var ar = cfg.AutoRole;
+
+                if (ar.Enable && ea.Guild.Roles.Count(x => x.Id == ar.RoleId) > 0)
+                {
+                    var role = ea.Guild.Roles.First(x => x.Id == ar.RoleId);
+                    await ea.Member.GrantRoleAsync(role, "AutoRole");
+                }
+            }
 
             if (chperms.Any())
             {
