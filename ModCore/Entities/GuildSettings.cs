@@ -6,7 +6,7 @@ namespace ModCore.Entities
     /// <summary>
     /// Represents a guild's configuration options.
     /// </summary>
-    public class GuildSettings
+    public partial class GuildSettings
     {
         /// <summary>
         /// Gets or sets the command prefix for the guild.
@@ -21,11 +21,12 @@ namespace ModCore.Entities
         public ulong MuteRoleId { get; set; } = 0;
 
         /// <summary>
-        /// Gets the configuration of Invite Blocker. Invite Blocker will check each incoming message for any invites, 
-        /// delete unwanted ads, and automatically ban users who spam invites.
+        /// Gets the configuration of Linkfilter™. The Linkfilter™ is the all-new system for Filtering Bad Links out of,
+        /// your guild. It'll do everything, from trashing invite links to ruthlessly annihilating IP loggers, URL shorteners
+        /// and other suspicious sites.
         /// </summary>
-        [JsonProperty("invite_blocker")]
-        public GuildInviteBlockerSettings InviteBlocker { get; private set; } = new GuildInviteBlockerSettings();
+        [JsonProperty("linkfilter")]
+        public GuildLinkfilterSettings Linkfilter { get; private set; } = new GuildLinkfilterSettings();
 
         /// <summary>
         /// Gets the configuration for InvisiCop. InvisiCop removes messages from users set to invisible, since they 
@@ -39,16 +40,16 @@ namespace ModCore.Entities
         /// leave the guild.
         /// </summary>
         [JsonProperty("role_state")]
-        public GuildRoleStateConfig RoleState { get; private set; } = new GuildRoleStateConfig();
+        public GuildRoleStateConfig RoleState { get; private set; } = new GuildRoleStateConfig();        
     }
 
     /// <summary>
-    /// Represents configuration for Invite Blocker.
+    /// Represents configuration for the Linkfilter™.
     /// </summary>
-    public class GuildInviteBlockerSettings
+    public class GuildLinkfilterSettings
     {
         /// <summary>
-        /// Gets or sets whether Invite Blocker should be enabled.
+        /// Gets or sets whether Linkfilter™ should be enabled.
         /// </summary>
         [JsonProperty("enabled")]
         public bool Enable { get; set; } = false;
@@ -76,6 +77,43 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("exempt_invite_guild_ids")]
         public List<ulong> ExemptInviteGuildIds { get; private set; } = new List<ulong>();
+        
+        /// <summary>
+        /// Gets the list of guilds which are exempt from being flagged for ads.
+        /// </summary>
+        [JsonProperty("custom_link_filters")]
+        public List<string> CustomLinkFilters { get; private set; } = new List<string>();
+        
+        /// <summary>
+        /// Toggles blocking invite links, unless posted by a member with 'Manage Messages' permission or equivalent.
+        /// </summary>
+        [JsonProperty("block_invite_links")]
+        public bool BlockInviteLinks = true;
+        
+        /// <summary>
+        /// Toggles blocking IP logging sites, unless posted by a member with 'Manage Messages' permission or equivalent.
+        /// </summary>
+        [JsonProperty("block_ip_loggers")]
+        public bool BlockIpLoggers = true;
+        
+        /// <summary>
+        /// Toggles blocking DDoS sites, unless posted by a member with 'Manage Messages' permission or equivalent.
+        /// </summary>
+        [JsonProperty("block_booters")]
+        public bool BlockBooters = true;
+        
+        /// <summary>
+        /// Toggles blocking URL shorteners, unless posted by a member with 'Manage Messages' permission or equivalent.
+        /// </summary>
+        [JsonProperty("block_url_shorteners")]
+        public bool BlockUrlShorteners = false;
+        
+        /// <summary>
+        /// Toggles blocking shock sites, screamers and gore sites, unless posted by a member with 'Manage Messages'
+        /// permission or equivalent.
+        /// </summary>
+        [JsonProperty("block_shock_sites")]
+        public bool BlockShockSites = true;
     }
 
     /// <summary>
