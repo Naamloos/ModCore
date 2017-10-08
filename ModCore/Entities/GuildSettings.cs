@@ -53,6 +53,9 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("autorole")]
         public GuildAutoRoleSettings AutoRole { get; private set; } = new GuildAutoRoleSettings();
+
+        [JsonProperty("commanderror")]
+        public GuildCommandErrorSettings CommandError { get; private set; } = new GuildCommandErrorSettings();
     }
 
     /// <summary>
@@ -93,6 +96,29 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("webhook_token")]
         public string WebhookToken { get; set; } = "";
+    }
+
+    public class GuildCommandErrorSettings
+    {
+        /// <summary>
+        /// Gets or sets the command error verbosity for chat
+        /// </summary>
+        [JsonProperty("chatverbosity")]
+        public CommandErrorVerbosity Chat { get; set; } = CommandErrorVerbosity.None;
+
+        /// <summary>
+        /// Gets or sets the command error verbosity for the action log (if enabled)
+        /// </summary>
+        [JsonProperty("chatverbosity")]
+        public CommandErrorVerbosity ActionLog { get; set; } = CommandErrorVerbosity.None;
+    }
+
+    public enum CommandErrorVerbosity
+    {
+        None,
+        Name,
+        NameDesc,
+        Exception
     }
 
     /// <summary>

@@ -594,5 +594,65 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("AutoRole role configured.");
             }
         }
+
+        [Group("error"), Aliases("e"), Description("Error verbosity configuration commands.")]
+        public class ErrorVerbosity
+        {
+            [Command("chat"), Aliases("c"), Description("Sets command error reporting for this guild (in chat).")]
+            public async Task ChatAsync(CommandContext ctx, string verbosity)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                var vb = CommandErrorVerbosity.None;
+                switch (verbosity)
+                {
+                    case "none":
+                        vb = CommandErrorVerbosity.None;
+                        break;
+                    case "name":
+                        vb = CommandErrorVerbosity.None;
+                        break;
+                    case "namedesc":
+                        vb = CommandErrorVerbosity.None;
+                        break;
+                    case "exception":
+                        vb = CommandErrorVerbosity.None;
+                        break;
+                    default:
+                        await ctx.RespondAsync("Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
+                        return;
+                }
+                cfg.CommandError.Chat = vb;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"Error reporting verbosity in chat set to `{verbosity}`.");
+            }
+
+            [Command("actionlog"), Aliases("a"), Description("Sets command error reporting for this guild (in action log).")]
+            public async Task ActionLogAsync(CommandContext ctx, string verbosity)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                var vb = CommandErrorVerbosity.None;
+                switch (verbosity)
+                {
+                    case "none":
+                        vb = CommandErrorVerbosity.None;
+                        break;
+                    case "name":
+                        vb = CommandErrorVerbosity.None;
+                        break;
+                    case "namedesc":
+                        vb = CommandErrorVerbosity.None;
+                        break;
+                    case "exception":
+                        vb = CommandErrorVerbosity.None;
+                        break;
+                    default:
+                        await ctx.RespondAsync("Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
+                        return;
+                }
+                cfg.CommandError.Chat = vb;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"Error reporting verbosity in action log set to `{verbosity}`.");
+            }
+        }
     }
 }
