@@ -592,10 +592,10 @@ namespace ModCore.Commands
                 cfg.AutoRole.RoleId = Role.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("AutoRole role configured.");
-            }
+            } 
         }
 
-        [Group("error"), Aliases("e"), Description("Error verbosity configuration commands.")]
+        [Group("error"), Aliases("er"), Description("Error verbosity configuration commands.")]
         public class ErrorVerbosity
         {
             [Command("chat"), Aliases("c"), Description("Sets command error reporting for this guild (in chat).")]
@@ -626,7 +626,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync($"Error reporting verbosity in chat set to `{verbosity}`.");
             }
 
-            [Command("actionlog"), Aliases("a"), Description("Sets command error reporting for this guild (in action log).")]
+            [Command("log"), Aliases("a"), Description("Sets command error reporting for this guild (in action log).")]
             public async Task ActionLogAsync(CommandContext ctx, string verbosity)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
