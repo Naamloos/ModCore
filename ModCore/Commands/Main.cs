@@ -10,16 +10,24 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using DSharpPlus.Interactivity;
+using System.Threading;
+using ModCore.Listeners;
+using Humanizer.Localisation;
+using Humanizer;
 
 namespace ModCore.Commands
 {
     public class Main
     {
-        private DatabaseContextBuilder Database { get; }
+        public SharedData Shared { get; }
+        public DatabaseContextBuilder Database { get; }
+        public InteractivityModule Interactivity { get; }
 
-        public Main(DatabaseContextBuilder db)
+        public Main(SharedData shared, DatabaseContextBuilder db, InteractivityModule interactive)
         {
             this.Database = db;
+            this.Shared = shared;
+            this.Interactivity = interactive;
         }
 
         [Command("ping")]
@@ -288,6 +296,195 @@ namespace ModCore.Commands
             }
             else
                 await ctx.RespondAsync("Operation canceled by user.");
+        }
+
+        [Command("tempban"), Aliases("tb"), Description("Temporarily bans a member."), RequirePermissions(Permissions.BanMembers)]
+        public async Task TempBanAsync(CommandContext ctx, DiscordMember m, TimeSpan ts, string reason = "")
+        {
+            if (ctx.Member.Id == m.Id)
+            {
+                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                return;
+            }
+
+            var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
+            var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
+            // Add timer
+            var now = DateTimeOffset.UtcNow;
+            var dispatch_at = now + ts;
+
+            // lock the timers
+            await this.Shared.TimerSempahore.WaitAsync();
+
+            var reminder = new DatabaseTimer
+            {
+                GuildId = (long)ctx.Guild.Id,
+                ChannelId = (long)ctx.Channel.Id,
+                UserId = (long)ctx.User.Id,
+                DispatchAt = dispatch_at.LocalDateTime,
+                ActionType = TimerActionType.Unban
+            };
+            reminder.SetData(new TimerUnbanData { Discriminator = m.Discriminator, DisplayName = m.Username, UserId = (long)m.Id });
+            var db = this.Database.CreateContext();
+            db.Timers.Add(reminder);
+            await db.SaveChangesAsync();
+
+            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
+            {
+                var tdata = this.Shared.TimerData;
+                tdata?.Cancel?.Cancel();
+
+                var cts = new CancellationTokenSource();
+                var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
+                tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts);
+                _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
+                this.Shared.TimerData = tdata;
+            }
+            this.Shared.TimerSempahore.Release();
+            // End of Timer adding
+            await ctx.RespondAsync($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+
+            await ctx.LogAction($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+        }
+
+        [Command("tempmute"), Aliases("tm"), Description("Temporarily mutes a member."), RequirePermissions(Permissions.MuteMembers)]
+        public async Task TempMuteAsync(CommandContext ctx, DiscordMember m, TimeSpan ts, string reason = "")
+        {
+            if (ctx.Member.Id == m.Id)
+            {
+                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                return;
+            }
+
+            var gcfg = ctx.GetGuildSettings();
+            if (gcfg == null)
+            {
+                await ctx.RespondAsync("Guild is not configured. Adjust this guild's configuration and re-run this command.");
+                return;
+            }
+
+            var b = gcfg.MuteRoleId;
+            var mute = ctx.Guild.GetRole(b);
+            if (b == 0 || mute == null)
+            {
+                await ctx.RespondAsync("Mute role is not configured or missing. Set a correct role and re-run this command.");
+                return;
+            }
+
+            var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
+            var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
+            // Add timer
+            var now = DateTimeOffset.UtcNow;
+            var dispatch_at = now + ts;
+
+            // lock the timers
+            await this.Shared.TimerSempahore.WaitAsync();
+
+            var reminder = new DatabaseTimer
+            {
+                GuildId = (long)ctx.Guild.Id,
+                ChannelId = (long)ctx.Channel.Id,
+                UserId = (long)ctx.User.Id,
+                DispatchAt = dispatch_at.LocalDateTime,
+                ActionType = TimerActionType.Unmute
+            };
+            reminder.SetData(new TimerUnmuteData { Discriminator = m.Discriminator, DisplayName = m.Username, UserId = (long)m.Id, MuteRoleId = (long)ctx.GetGuildSettings().MuteRoleId });
+            var db = this.Database.CreateContext();
+            db.Timers.Add(reminder);
+            await db.SaveChangesAsync();
+
+            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
+            {
+                var tdata = this.Shared.TimerData;
+                tdata?.Cancel?.Cancel();
+
+                var cts = new CancellationTokenSource();
+                var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
+                tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts);
+                _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
+                this.Shared.TimerData = tdata;
+            }
+            this.Shared.TimerSempahore.Release();
+            // End of Timer adding
+            await ctx.RespondAsync($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+
+            await ctx.LogAction($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+        }
+
+        [Command("temppin"), Aliases("tp"), Description("Temporarily pins a message."), RequirePermissions(Permissions.ManageMessages)]
+        public async Task TempPinAsync(CommandContext ctx, DiscordMessage message, TimeSpan pinuntil, TimeSpan? pinfrom = null)
+        {
+            var db = this.Database.CreateContext();
+            if (pinfrom != null)
+            {
+                var now = DateTimeOffset.UtcNow;
+                var dispatch_at = now + (TimeSpan)pinfrom;
+
+                // lock the timers
+                await this.Shared.TimerSempahore.WaitAsync();
+
+                var reminder = new DatabaseTimer
+                {
+                    GuildId = (long)ctx.Guild.Id,
+                    ChannelId = (long)ctx.Channel.Id,
+                    UserId = (long)ctx.User.Id,
+                    DispatchAt = dispatch_at.LocalDateTime,
+                    ActionType = TimerActionType.Pin
+                };
+                reminder.SetData(new TimerPinData { ChannelId = (long)ctx.Channel.Id, MessageId = (long)message.Id });
+                db.Timers.Add(reminder);
+                await db.SaveChangesAsync();
+
+                if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
+                {
+                    var tdata = this.Shared.TimerData;
+                    tdata?.Cancel?.Cancel();
+
+                    var cts = new CancellationTokenSource();
+                    var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
+                    tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts);
+                    _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
+                    this.Shared.TimerData = tdata;
+                }
+                this.Shared.TimerSempahore.Release();
+            }
+            else
+            {
+                await message.PinAsync();
+            }
+
+            var now2 = DateTimeOffset.UtcNow;
+            var dispatch_at2 = now2 + pinuntil;
+
+            // lock the timers
+            await this.Shared.TimerSempahore.WaitAsync();
+
+            var reminder2 = new DatabaseTimer
+            {
+                GuildId = (long)ctx.Guild.Id,
+                ChannelId = (long)ctx.Channel.Id,
+                UserId = (long)ctx.User.Id,
+                DispatchAt = dispatch_at2.LocalDateTime,
+                ActionType = TimerActionType.Unmute
+            };
+            reminder2.SetData(new TimerUnpinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
+            db.Timers.Add(reminder2);
+            await db.SaveChangesAsync();
+
+            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at2)
+            {
+                var tdata = this.Shared.TimerData;
+                tdata?.Cancel?.Cancel();
+
+                var cts = new CancellationTokenSource();
+                var t = Task.Delay(reminder2.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
+                tdata = new TimerData(t, reminder2, ctx.Client, this.Database, this.Shared, cts);
+                _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
+                this.Shared.TimerData = tdata;
+            }
+            this.Shared.TimerSempahore.Release();
         }
     }
 }
