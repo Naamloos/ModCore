@@ -25,20 +25,38 @@ namespace ModCore.Entities
     }
 
     /// <summary>
-    /// Represents ban data for a timer.
+    /// Represents unban data for a timer.
     /// </summary>
-    public class TimerBanData : ITimerData
+    public class TimerUnbanData : ITimerData
     {
 
     }
 
     /// <summary>
-    /// Represents mute data for a timer.
+    /// Represents unmute data for a timer.
     /// </summary>
-    public class TimerMuteData : ITimerData
+    public class TimerUnmuteData : ITimerData
     {
 
     }
+
+    /// <summary>
+    /// Represents pin data for a timer.
+    /// </summary>
+    public class TimerPinData : ITimerData
+    {
+
+    }
+
+    /// <summary>
+    /// Represents unpin data for a timer.
+    /// </summary>
+    public class TimerUnpinData : ITimerData
+    {
+
+    }
+
+
 
     /// <summary>
     /// Represents timer action type.
