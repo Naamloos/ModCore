@@ -45,6 +45,15 @@ namespace ModCore.Commands
                     var muted = gcfg.MuteRoleId != 0 ? ctx.Guild.GetRole(gcfg.MuteRoleId) : null;
                     embed.AddField("Muted Role", muted != null ? muted.Mention : "Not configured or missing", true);
 
+                    var actionlog = gcfg.ActionLog;
+                    embed.AddField("Action Log", actionlog.Enable? "Enabled" + (actionlog.WebhookId == 0? ", but not configured!" : "") : "Disabled");
+
+                    var autorole = gcfg.AutoRole;
+                    embed.AddField("Auto Role", autorole.Enable ? $"Enabled with Role ID {autorole.RoleId}." : "Disabled");
+
+                    var commanderror = gcfg.CommandError;
+                    embed.AddField("Command Error logging", $"Chat: {commanderror.Chat}, ActionLog: {commanderror.ActionLog}");
+
                     var linkfilterCfg = gcfg.Linkfilter;
                     embed.AddField("Linkfilter", linkfilterCfg.Enable ? "Enabled" : "Disabled", true);
                     if (linkfilterCfg.Enable)
