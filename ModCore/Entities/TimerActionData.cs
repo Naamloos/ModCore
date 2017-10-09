@@ -29,7 +29,17 @@ namespace ModCore.Entities
     /// </summary>
     public class TimerUnbanData : ITimerData
     {
+        /// <summary>
+        /// Gets or sets the unbanned user's Id.
+        /// </summary>
+        [JsonProperty("user_id")]
+        public long UserId { get; set; }
 
+        [JsonProperty("displayname")]
+        public string DisplayName { get; set; }
+
+        [JsonProperty("discriminator")]
+        public string Discriminator { get; set; }
     }
 
     /// <summary>
@@ -37,7 +47,20 @@ namespace ModCore.Entities
     /// </summary>
     public class TimerUnmuteData : ITimerData
     {
+        /// <summary>
+        /// Gets or sets the unbanned user's Id.
+        /// </summary>
+        [JsonProperty("user_id")]
+        public long UserId { get; set; }
 
+        [JsonProperty("displayname")]
+        public string DisplayName { get; set; }
+
+        [JsonProperty("discriminator")]
+        public string Discriminator { get; set; }
+
+        [JsonProperty("muterole_id")]
+        public long MuteRoleId { get; set; }
     }
 
     /// <summary>
@@ -45,7 +68,11 @@ namespace ModCore.Entities
     /// </summary>
     public class TimerPinData : ITimerData
     {
+        [JsonProperty("message_id")]
+        public long MessageId { get; set; }
 
+        [JsonProperty("channel_id")]
+        public long ChannelId { get; set; }
     }
 
     /// <summary>
@@ -53,7 +80,11 @@ namespace ModCore.Entities
     /// </summary>
     public class TimerUnpinData : ITimerData
     {
+        [JsonProperty("message_id")]
+        public long MessageId { get; set; }
 
+        [JsonProperty("channel_id")]
+        public long ChannelId { get; set; }
     }
 
 

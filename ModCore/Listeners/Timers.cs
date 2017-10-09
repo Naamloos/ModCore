@@ -120,13 +120,78 @@ namespace ModCore.Listeners
                 var msg = $"{emoji} <@!{(ulong)timer.UserId}>, you wanted to be reminded of the following:\n\n{data.ReminderText}";
                 await chn.SendMessageAsync(msg);
             }
-            else if (timer.ActionType == TimerActionType.Ban)
+            else if (timer.ActionType == TimerActionType.Unban)
             {
-                // TODO
+                var data = timer.GetData<TimerUnbanData>();
+                if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
+                {
+                    var db = tdata.Database.CreateContext();
+                    var Guild = client.Guilds[(ulong)timer.GuildId];
+                    try
+                    {
+                        await Guild.UnbanMemberAsync((ulong)data.UserId);
+                    }
+                    catch (Exception) { }
+
+                    var settings = Guild.GetGuildSettings(db);
+                    await client.ActionLogMessageAsync(Guild, db, $"Member unbanned: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
+                }
             }
-            else if (timer.ActionType == TimerActionType.Mute)
+            else if (timer.ActionType == TimerActionType.Unmute)
             {
-                // TODO
+                var data = timer.GetData<TimerUnmuteData>();
+                if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
+                {
+                    var db = tdata.Database.CreateContext();
+                    var Guild = client.Guilds[(ulong)timer.GuildId];
+                    var Member = await Guild.GetMemberAsync((ulong)data.UserId);
+                    var Role = (DiscordRole)null;
+                    try
+                    {
+                        Role = Guild.GetRole((ulong)data.MuteRoleId);
+                    }
+                    catch (Exception)
+                    {
+                        try
+                        {
+                            Role = Guild.GetRole(Guild.GetGuildSettings(db).MuteRoleId);
+                        }
+                        catch (Exception)
+                        {
+                            await client.ActionLogMessageAsync(Guild, db, $"**[IMPORTANT]**\nFailed to unmute member: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})\nMute role does not exist!");
+                            return;
+                        }
+                    }
+                    await Guild.RevokeRoleAsync(Member, Role, "");
+                    var settings = Guild.GetGuildSettings(db);
+                    await client.ActionLogMessageAsync(Guild, db, $"Member unmuted: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
+                }
+            }
+            else if(timer.ActionType == TimerActionType.Pin)
+            {
+                var data = timer.GetData<TimerPinData>();
+                if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
+                {
+                    var db = tdata.Database.CreateContext();
+                    var Guild = client.Guilds[(ulong)timer.GuildId];
+                    var Channel = Guild.GetChannel((ulong)data.ChannelId);
+                    var Message = await Channel.GetMessageAsync((ulong)data.MessageId);
+                    await Message.PinAsync();
+                    await client.ActionLogMessageAsync(Guild, db, $"Scheduled pin: Message with ID: {data.MessageId} in Channel #{Channel.Name} ({Channel.Id})");
+                }
+            }
+            else if (timer.ActionType == TimerActionType.Unpin)
+            {
+                var data = timer.GetData<TimerPinData>();
+                if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
+                {
+                    var db = tdata.Database.CreateContext();
+                    var Guild = client.Guilds[(ulong)timer.GuildId];
+                    var Channel = Guild.GetChannel((ulong)data.ChannelId);
+                    var Message = await Channel.GetMessageAsync((ulong)data.MessageId);
+                    await Message.UnpinAsync();
+                    await client.ActionLogMessageAsync(Guild, db, $"Scheduled unpin: Message with ID: {data.MessageId} in Channel #{Channel.Name} ({Channel.Id})");
+                }
             }
         }
     }

@@ -6,6 +6,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using ModCore.Database;
 using ModCore.Entities;
+using DSharpPlus;
 
 namespace ModCore
 {
@@ -205,6 +206,17 @@ namespace ModCore
             if (a.Enable)
             {
                 var w = await ctx.Client.GetWebhookWithTokenAsync(a.WebhookId, a.WebhookToken);
+                await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed>() { embed } : null);
+            }
+        }
+
+        public static async Task ActionLogMessageAsync(this DiscordClient clnt, DiscordGuild gld, DatabaseContext db, string content = "", DiscordEmbedBuilder embed = null)
+        {
+            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == gld.Id);
+            var s = cfg.GetSettings();
+            if (s.ActionLog.Enable)
+            {
+                var w = await clnt.GetWebhookWithTokenAsync(s.ActionLog.WebhookId, s.ActionLog.WebhookToken);
                 await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed>() { embed } : null);
             }
         }
