@@ -109,7 +109,7 @@ namespace ModCore.Entities
         /// <summary>
         /// Gets or sets the command error verbosity for the action log (if enabled)
         /// </summary>
-        [JsonProperty("chatverbosity")]
+        [JsonProperty("actionverbosity")]
         public CommandErrorVerbosity ActionLog { get; set; } = CommandErrorVerbosity.None;
     }
 
