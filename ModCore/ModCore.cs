@@ -34,7 +34,7 @@ namespace ModCore
             Shards = new List<ModCoreShard>();
             InitializeSharedData();
 
-            for (int i = 0; i < Settings.ShardCount; i++)
+            for (var i = 0; i < Settings.ShardCount; i++)
             {
                 var shard = new ModCoreShard(Settings, i, SharedData);
                 shard.Initialize();

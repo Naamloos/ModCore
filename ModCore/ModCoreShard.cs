@@ -9,6 +9,7 @@ using DSharpPlus.Interactivity;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
+using System.IO;
 
 namespace ModCore
 {
@@ -21,7 +22,7 @@ namespace ModCore
         public InteractivityModule Interactivity { get; private set; }
         public CommandsNextModule Commands { get; private set; }
 
-        private SharedData ShardData { get; set; }
+        public SharedData ShardData { get; set; }
         internal Settings Settings { get; }
 
         public DatabaseContextBuilder Database { get; }
@@ -106,8 +107,65 @@ namespace ModCore
 
         private Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
-            e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "Commands", e.Exception.ToString(), DateTime.Now);
-            return Task.Delay(0);
+            return Task.Run(async () =>
+            {
+                e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "Commands", e.Exception.ToString(), DateTime.Now);
+
+                if (e.Exception.GetType() == typeof(DSharpPlus.CommandsNext.Exceptions.CommandNotFoundException))
+                    return;
+
+                var cfg = e.Context.GetGuildSettings() ?? new GuildSettings();
+                var ce = cfg.CommandError;
+                var ctx = e.Context;
+
+                switch (ce.Chat)
+                {
+                    default:
+                    case CommandErrorVerbosity.None:
+                        break;
+
+                    case CommandErrorVerbosity.Name:
+                        await ctx.RespondAsync($"**Command {e.Command.QualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`");
+                        break;
+                    case CommandErrorVerbosity.NameDesc:
+                        await ctx.RespondAsync($"**Command {e.Command.QualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+                        break;
+                    case CommandErrorVerbosity.Exception:
+                        MemoryStream stream = new MemoryStream();
+                        StreamWriter writer = new StreamWriter(stream);
+                        writer.Write(e.Exception.ToString());
+                        writer.Flush();
+                        stream.Position = 0;
+                        await ctx.RespondWithFileAsync(stream, "exception.txt", $"**Command {e.Command.QualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+                        break;
+                }
+
+                if (cfg.ActionLog.Enable)
+                {
+                    switch (ce.ActionLog)
+                    {
+                        default:
+                        case CommandErrorVerbosity.None:
+                            break;
+
+                        case CommandErrorVerbosity.Name:
+                            await ctx.LogMessageAsync($"**Command {e.Command.QualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`");
+                            break;
+                        case CommandErrorVerbosity.NameDesc:
+                            await ctx.LogMessageAsync($"**Command {e.Command.QualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+                            break;
+                        case CommandErrorVerbosity.Exception:
+                            var st = e.Exception.StackTrace;
+
+                            st = st.Length > 1000 ? st.Substring(0, 1000) : st;
+                            var b = new DiscordEmbedBuilder().WithDescription(st);
+                            await ctx.LogMessageAsync($"**Command {e.Command.QualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}", b);
+                            break;
+                    }
+                }
+
+                return;
+            });
         }
 
         public Task RunAsync() =>

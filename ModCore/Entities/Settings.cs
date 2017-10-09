@@ -21,6 +21,9 @@ namespace ModCore.Entities
 
     public struct DatabaseSettings
     {
+        [JsonProperty("in_memory")]
+        public bool UseInMemoryProvider { get; private set; }
+
         [JsonProperty("hostname")]
         public string Hostname { get; private set; }
 
@@ -38,6 +41,9 @@ namespace ModCore.Entities
 
         public string BuildConnectionString()
         {
+            if (this.UseInMemoryProvider)
+                return null;
+
             var csb = new NpgsqlConnectionStringBuilder
             {
                 Host = this.Hostname,
@@ -46,7 +52,7 @@ namespace ModCore.Entities
                 Username = this.Username,
                 Password = this.Password,
 
-                SslMode = SslMode.Require,
+                SslMode = SslMode.Prefer,
                 TrustServerCertificate = true,
 
                 Pooling = false

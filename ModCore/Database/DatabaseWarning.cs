@@ -8,7 +8,7 @@ namespace ModCore.Database
         public long MemberId { get; set; }
         public long GuildId { get; set; }
         public long IssuerId { get; set; }
-        public DateTimeOffset IssuedAt { get; set; }
+        public DateTime IssuedAt { get; set; }
         public string WarningText { get; set; }
     }
 }
