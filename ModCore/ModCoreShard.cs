@@ -110,9 +110,14 @@ namespace ModCore
             return Task.Run(async () =>
             {
                 e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "Commands", e.Exception.ToString(), DateTime.Now);
+
+                if (e.Exception.GetType() == typeof(DSharpPlus.CommandsNext.Exceptions.CommandNotFoundException))
+                    return;
+
                 var cfg = e.Context.GetGuildSettings() ?? new GuildSettings();
                 var ce = cfg.CommandError;
                 var ctx = e.Context;
+
                 switch (ce.Chat)
                 {
                     default:
