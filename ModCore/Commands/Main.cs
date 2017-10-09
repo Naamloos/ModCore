@@ -253,9 +253,9 @@ namespace ModCore.Commands
             await ctx.RespondAsync("", false, embed: embed);
         }
 
-        [Command("showbans")]
-        [Aliases("sb")]
-        public async Task ShowBansAsync(CommandContext ctx)
+        [Command("listbans")]
+        [Aliases("lb")]
+        public async Task ListBansAsync(CommandContext ctx, int limit = 10, int skip = 0)
         {
             var bans = await ctx.Guild.GetBansAsync();
 
@@ -267,14 +267,17 @@ namespace ModCore.Commands
 
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle("Banned Users");
-            embed.WithDescription(string.Join("\n", bans.Select(FormatDiscordBan)));
+
+            var pagedBans = bans.Skip(skip).Take(limit);
+            var formattedBans = pagedBans.Select((ban, idx) => FormatDiscordBan(ban, idx + skip + 1));
+            embed.WithDescription(string.Join("\n", formattedBans));
 
             await ctx.RespondAsync(embed: embed.Build());
         }
 
-        private static string FormatDiscordBan(DiscordBan ban, int index)
+        private static string FormatDiscordBan(DiscordBan ban, int number)
         {
-            return $"{index + 1}. **{ban.User.ToStringWithDiscriminator()}**, Reason: {ban.Reason}";
+            return $"{number}. **{ban.User.ToDiscordTag()}**, Reason: {ban.Reason}";
         }
     }
 }

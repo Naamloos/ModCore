@@ -43,7 +43,7 @@ namespace ModCore
             await db.SaveChangesAsync();
         }
 
-        public static string ToStringWithDiscriminator(this DiscordUser user)
+        public static string ToDiscordTag(this DiscordUser user)
         {
             return $"{user.Username}#{user.Discriminator}";
         }
