@@ -45,10 +45,12 @@ namespace ModCore.Entities
     /// </summary>
     public enum TimerActionType : int
     {
-        Unknown = 0,
-        Reminder = 1,
-        Ban = 2,
-        Mute = 3
+        Unknown = 0, // Action type that is not known
+        Reminder = 1, // Reminders
+        Unban = 2, // Temp ban unban action
+        Unmute = 3, // Temp mute unmute action
+        Pin = 4, // Timed pin action
+        Unpin = 5 // Temporary pin unpin action
     }
 
     /// <summary>
