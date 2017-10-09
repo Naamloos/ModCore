@@ -496,7 +496,7 @@ namespace ModCore.Commands
 
         [Command("listbans")]
         [Aliases("lb")]
-        public async Task ListBansAsync(CommandContext ctx, int limit = 10, int skip = 0)
+        public async Task ListBansAsync(CommandContext ctx, int limit, int skip = 0)
         {
             var bans = await ctx.Guild.GetBansAsync();
 
@@ -512,6 +512,9 @@ namespace ModCore.Commands
             var pagedBans = bans.Skip(skip).Take(limit);
             var formattedBans = pagedBans.Select((ban, idx) => FormatDiscordBan(ban, idx + skip + 1));
             embed.WithDescription(string.Join("\n", formattedBans));
+
+            embed.WithFooter(
+                $"Total {bans.Count} banned users. Showing {skip + 1} - {Math.Min(skip + limit, bans.Count)}.");
 
             await ctx.RespondAsync(embed: embed.Build());
         }
