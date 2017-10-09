@@ -98,7 +98,8 @@ namespace ModCore.Commands
         [Command("clean"), Aliases("c"), RequirePermissions(Permissions.ManageMessages)]
         public async Task CleanAsync(CommandContext ctx)
         {
-            var prefix = ctx.GetGuildSettings().Prefix;
+            var gs = ctx.GetGuildSettings();
+            var prefix = gs != null? gs.Prefix : "?>";
             var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
             var delet_this = new List<DiscordMessage>();
             foreach (var m in ms)
