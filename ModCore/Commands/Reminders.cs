@@ -117,7 +117,7 @@ namespace ModCore.Commands
                 return;
             }
 
-            if (duration <= TimeSpan.FromSeconds(30))
+            if (duration < TimeSpan.FromSeconds(30))
             {
                 await ctx.RespondAsync("Minimum required time span to set a reminder is 30 seconds.");
                 return;
@@ -126,9 +126,7 @@ namespace ModCore.Commands
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + duration;
 
-            // lock the timers
-            await this.Shared.TimerSempahore.WaitAsync();
-
+            // create a new timer
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
@@ -142,21 +140,11 @@ namespace ModCore.Commands
             db.Timers.Add(reminder);
             await db.SaveChangesAsync();
 
-            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
-            {
-                var tdata = this.Shared.TimerData;
-                tdata?.Cancel?.Cancel();
-                
-                var cts = new CancellationTokenSource();
-                var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-                tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts); 
-                _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
-                this.Shared.TimerData = tdata;
-            }
+            // reschedule timers
+            Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
             var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
             await ctx.RespondAsync($"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text}");
-            this.Shared.TimerSempahore.Release();
         }
     }
 }

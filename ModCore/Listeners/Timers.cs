@@ -2,8 +2,10 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
 
@@ -27,35 +29,23 @@ namespace ModCore.Listeners
             await shard.ShardData.TimerSempahore.WaitAsync();
 
             var now = DateTimeOffset.UtcNow;
-            var past = timers.Where(xt => xt.DispatchAt <= now).ToArray();
+            var past = timers.Where(xt => xt.DispatchAt <= now.AddSeconds(30)).ToArray();
             if (past.Any())
             {
                 foreach (var xt in past)
                 {
                     // dispatch past timers
-                    await DispatchTimer(new TimerData(null, xt, shard.Client, shard.Database, shard.ShardData, null));
+                    _ = DispatchTimer(new TimerData(null, xt, shard.Client, shard.Database, shard.ShardData, null));
                 }
 
                 db.Timers.RemoveRange(past);
                 await db.SaveChangesAsync();
             }
 
-            var future = timers.Except(past).OrderBy(xt => xt.DispatchAt).ToArray();
-            if (!future.Any())
-            {
-                shard.ShardData.TimerSempahore.Release();
-                return;
-            }
-
-            var nearest = future.FirstOrDefault();
-            var cts = new CancellationTokenSource();
-            var t = Task.Delay(nearest.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-            var tdata = new TimerData(t, nearest, shard.Client, shard.Database, shard.ShardData, cts);
-            _ = t.ContinueWith(TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
-            shard.ShardData.TimerData = tdata;
-
-            // release the lock
+            // unlock the timers
             shard.ShardData.TimerSempahore.Release();
+
+            RescheduleTimers(shard.Client, shard.Database, shard.ShardData);
         }
 
         public static void TimerCallback(Task t, object state)
@@ -63,9 +53,6 @@ namespace ModCore.Listeners
             var tdata = state as TimerData;
             var shard = tdata.Context;
             var db = tdata.Database.CreateContext();
-
-            // lock the timers
-            tdata.Shared.TimerSempahore.Wait();
 
             // remove the timer
             db.Timers.Remove(tdata.DbTimer);
@@ -75,26 +62,8 @@ namespace ModCore.Listeners
             // dispatch it
             _ = Task.Run(LocalDispatch);
 
-            // set a new timer
-            var ids = shard.Guilds.Select(xg => (long)xg.Key).ToArray();
-            var timers = db.Timers.Where(xt => ids.Contains(xt.GuildId))
-                .OrderBy(xt => xt.DispatchAt)
-                .ToArray();
-            var nearest = timers.FirstOrDefault();
-            if (nearest == null)
-            {
-                tdata.Shared.TimerSempahore.Release();
-                return;
-            }
-
-            var cts = new CancellationTokenSource();
-            var newt = Task.Delay(nearest.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-            var newtdata = new TimerData(newt, nearest, shard, tdata.Database, tdata.Shared, cts);
-            _ = newt.ContinueWith(TimerCallback, newtdata, TaskContinuationOptions.OnlyOnRanToCompletion);
-            tdata.Shared.TimerData = newtdata;
-
-            // release the lock
-            tdata.Shared.TimerSempahore.Release();
+            // schedule new one
+            RescheduleTimers(shard, tdata.Database, tdata.Shared);
 
             Task LocalDispatch() =>
                 DispatchTimer(tdata);
@@ -193,6 +162,53 @@ namespace ModCore.Listeners
                     await client.ActionLogMessageAsync(Guild, db, $"Scheduled unpin: Message with ID: {data.MessageId} in Channel #{Channel.Name} ({Channel.Id})");
                 }
             }
+        }
+
+        public static TimerData RescheduleTimers(DiscordClient client, DatabaseContextBuilder database, SharedData shared)
+        {
+            // lock the timers
+            shared.TimerSempahore.Wait();
+
+            // set a new timer
+            var db = database.CreateContext();
+            var ids = client.Guilds.Select(xg => (long)xg.Key).ToArray();
+            var timers = db.Timers.Where(xt => ids.Contains(xt.GuildId))
+                .OrderBy(xt => xt.DispatchAt)
+                .ToArray();
+            var nearest = timers.FirstOrDefault();
+            if (nearest == null)
+            {
+                shared.TimerSempahore.Release();
+                return null;
+            }
+
+            var tdata = shared.TimerData;
+            if (CancelIfLaterThan(nearest.DispatchAt, shared))
+            {
+                var cts = new CancellationTokenSource();
+                var t = Task.Delay(nearest.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
+                tdata = new TimerData(t, nearest, client, database, shared, cts);
+                _ = t.ContinueWith(TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
+                shared.TimerData = tdata;
+            }
+
+            // release the lock
+            shared.TimerSempahore.Release();
+
+            return tdata;
+        }
+
+        private static bool CancelIfLaterThan(DateTimeOffset dto, SharedData shared)
+        {
+            // check if a timer is going
+            if (shared.TimerData == null || shared.TimerData.DispatchTime >= dto)
+            {
+                var xtdata = shared.TimerData;
+                xtdata?.Cancel?.Cancel();
+                return true;
+            }
+
+            return false;
         }
     }
 }
