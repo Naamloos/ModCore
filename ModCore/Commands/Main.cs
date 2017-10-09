@@ -106,7 +106,7 @@ namespace ModCore.Commands
                 if (m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix))
                     delet_this.Add(m);
             }
-            if(delet_this.Any())
+            if (delet_this.Any())
                 await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
             var resp = await ctx.RespondAsync($"Latest messages deleted.");
             await Task.Delay(2000);
@@ -374,7 +374,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
+            await ctx.Member.GrantRoleAsync(ctx.Guild.GetRole(ctx.GetGuildSettings().MuteRoleId), $"{ustr}{rstr}");
             // Add timer
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + ts;
@@ -408,83 +408,89 @@ namespace ModCore.Commands
             }
             this.Shared.TimerSempahore.Release();
             // End of Timer adding
-            await ctx.RespondAsync($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+            await ctx.RespondAsync($"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 
-            await ctx.LogAction($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+            await ctx.LogAction($"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
         }
 
-        [Command("temppin"), Aliases("tp"), Description("Temporarily pins a message."), RequirePermissions(Permissions.ManageMessages)]
-        public async Task TempPinAsync(CommandContext ctx, DiscordMessage message, TimeSpan pinuntil, TimeSpan? pinfrom = null)
+        [Command("schedulepin"), Aliases("sp"), Description("Schedules a pinned message."), RequirePermissions(Permissions.ManageMessages)]
+        public async Task SchedulePinAsync(CommandContext ctx, DiscordMessage message, TimeSpan pinfrom)
         {
-            var db = this.Database.CreateContext();
-            if (pinfrom != null)
-            {
-                var now = DateTimeOffset.UtcNow;
-                var dispatch_at = now + (TimeSpan)pinfrom;
-
-                // lock the timers
-                await this.Shared.TimerSempahore.WaitAsync();
-
-                var reminder = new DatabaseTimer
-                {
-                    GuildId = (long)ctx.Guild.Id,
-                    ChannelId = (long)ctx.Channel.Id,
-                    UserId = (long)ctx.User.Id,
-                    DispatchAt = dispatch_at.LocalDateTime,
-                    ActionType = TimerActionType.Pin
-                };
-                reminder.SetData(new TimerPinData { ChannelId = (long)ctx.Channel.Id, MessageId = (long)message.Id });
-                db.Timers.Add(reminder);
-                await db.SaveChangesAsync();
-
-                if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
-                {
-                    var tdata = this.Shared.TimerData;
-                    tdata?.Cancel?.Cancel();
-
-                    var cts = new CancellationTokenSource();
-                    var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-                    tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts);
-                    _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
-                    this.Shared.TimerData = tdata;
-                }
-                this.Shared.TimerSempahore.Release();
-            }
-            else
-            {
-                await message.PinAsync();
-            }
-
-            var now2 = DateTimeOffset.UtcNow;
-            var dispatch_at2 = now2 + pinuntil;
+            // Add timer
+            var now = DateTimeOffset.UtcNow;
+            var dispatch_at = now + pinfrom;
 
             // lock the timers
             await this.Shared.TimerSempahore.WaitAsync();
 
-            var reminder2 = new DatabaseTimer
+            var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
                 ChannelId = (long)ctx.Channel.Id,
                 UserId = (long)ctx.User.Id,
-                DispatchAt = dispatch_at2.LocalDateTime,
-                ActionType = TimerActionType.Unmute
+                DispatchAt = dispatch_at.LocalDateTime,
+                ActionType = TimerActionType.Pin
             };
-            reminder2.SetData(new TimerUnpinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
-            db.Timers.Add(reminder2);
+            reminder.SetData(new TimerPinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
+            var db = this.Database.CreateContext();
+            db.Timers.Add(reminder);
             await db.SaveChangesAsync();
 
-            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at2)
+            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
             {
                 var tdata = this.Shared.TimerData;
                 tdata?.Cancel?.Cancel();
 
                 var cts = new CancellationTokenSource();
-                var t = Task.Delay(reminder2.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-                tdata = new TimerData(t, reminder2, ctx.Client, this.Database, this.Shared, cts);
+                var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
+                tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts);
                 _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
                 this.Shared.TimerData = tdata;
             }
             this.Shared.TimerSempahore.Release();
+            // End of Timer adding
+            await ctx.RespondAsync($"During the following {pinfrom.Humanize(4, minUnit: TimeUnit.Second)} this message will be pinned");
+        }
+
+        [Command("scheduleunpin"), Aliases("sup"), Description("Schedules unpinning a pinned message."), RequirePermissions(Permissions.ManageMessages)]
+        public async Task ScheduleUnpinAsync(CommandContext ctx, DiscordMessage message, TimeSpan pinuntil)
+        {
+            if (!message.Pinned)
+                await message.PinAsync();
+            // Add timer
+            var now = DateTimeOffset.UtcNow;
+            var dispatch_at = now + pinuntil;
+
+            // lock the timers
+            await this.Shared.TimerSempahore.WaitAsync();
+
+            var reminder = new DatabaseTimer
+            {
+                GuildId = (long)ctx.Guild.Id,
+                ChannelId = (long)ctx.Channel.Id,
+                UserId = (long)ctx.User.Id,
+                DispatchAt = dispatch_at.LocalDateTime,
+                ActionType = TimerActionType.Unpin
+            };
+            reminder.SetData(new TimerUnpinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
+            var db = this.Database.CreateContext();
+            db.Timers.Add(reminder);
+            await db.SaveChangesAsync();
+
+            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
+            {
+                var tdata = this.Shared.TimerData;
+                tdata?.Cancel?.Cancel();
+
+                var cts = new CancellationTokenSource();
+                var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
+                tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts);
+                _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
+                this.Shared.TimerData = tdata;
+            }
+            this.Shared.TimerSempahore.Release();
+            // End of Timer adding
+            await ctx.RespondAsync($"In {pinuntil.Humanize(4, minUnit: TimeUnit.Second)} this message will be unpinned.");
         }
     }
 }
