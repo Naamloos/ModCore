@@ -14,7 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readmes", "Readmes", "{D298
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{0E482483-DAA8-43BC-BC9D-3E13CC99DF49}"
 	ProjectSection(SolutionItems) = preProject
-		db_schema.sql = db_schema.sql
+		db_schema_v1.sql = db_schema_v1.sql
+		db_schema_v1_to_v2.sql = db_schema_v1_to_v2.sql
 	EndProjectSection
 EndProject
 Global
