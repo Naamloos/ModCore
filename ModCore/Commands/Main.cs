@@ -450,7 +450,7 @@ namespace ModCore.Commands
             }
             this.Shared.TimerSempahore.Release();
             // End of Timer adding
-            await ctx.RespondAsync($"During the following {pinfrom.Humanize(4, minUnit: TimeUnit.Second)} this message will be pinned");
+            await ctx.RespondAsync($"After {pinfrom.Humanize(4, minUnit: TimeUnit.Second)} this message will be pinned");
         }
 
         [Command("scheduleunpin"), Aliases("sup"), Description("Schedules unpinning a pinned message."), RequirePermissions(Permissions.ManageMessages)]
