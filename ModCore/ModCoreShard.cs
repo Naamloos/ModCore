@@ -22,7 +22,7 @@ namespace ModCore
         public InteractivityModule Interactivity { get; private set; }
         public CommandsNextModule Commands { get; private set; }
 
-        private SharedData ShardData { get; set; }
+        public SharedData ShardData { get; set; }
         internal Settings Settings { get; }
 
         public DatabaseContextBuilder Database { get; }

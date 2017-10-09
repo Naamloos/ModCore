@@ -10,6 +10,7 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseRolestateOverride> RolestateOverrides { get; set; }
         public virtual DbSet<DatabaseRolestateRoles> RolestateRoles { get; set; }
         public virtual DbSet<DatabaseWarning> Warnings { get; set; }
+        public virtual DbSet<DatabaseTimer> Timers { get; set; }
 
         private string ConnectionString { get; }
 
@@ -145,6 +146,30 @@ namespace ModCore.Database
                 entity.Property(e => e.WarningText)
                     .IsRequired()
                     .HasColumnName("warning_text");
+            });
+
+            modelBuilder.Entity<DatabaseTimer>(entity =>
+            {
+                entity.ToTable("mcore_timers");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+
+                entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.Property(e => e.DispatchAt)
+                    .HasColumnName("dispatch_at")
+                    .HasColumnType("timestamptz");
+
+                entity.Property(e => e.ActionType).HasColumnName("action_type");
+
+                entity.Property(e => e.ActionData)
+                    .IsRequired()
+                    .HasColumnName("action_data")
+                    .HasColumnType("jsonb");
             });
         }
     }
