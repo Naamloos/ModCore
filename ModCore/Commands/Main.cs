@@ -48,6 +48,14 @@ namespace ModCore.Commands
                 $"Socket uptime: {string.Format("{0} days, {1}", sup.ToString("dd"), sup.ToString(@"hh\:mm\:ss"))}");
         }
 
+        [Command("invite"), Aliases("i")]
+        public async Task InviteAsync(CommandContext ctx)
+        {
+            //TODO replace with a link to a nice invite builder!
+            var app = ctx.Client.CurrentApplication;
+            await ctx.RespondAsync($"Add ModCore to your server: https://discordapp.com/oauth2/authorize?client_id=[CLIENT]{app.Id}&scope=bot");
+        }
+
         [Command("purgeuser"), Aliases("pu"), RequirePermissions(Permissions.ManageMessages)]
         public async Task PurgeUserAsync(CommandContext ctx, DiscordUser User, int limit, int skip = 0)
         {
