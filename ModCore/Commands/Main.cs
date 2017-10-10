@@ -168,7 +168,7 @@ namespace ModCore.Commands
             await ctx.LogAction($"Kicked user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
-        [Command("softban"), Aliases("s"), RequireUserPermissions(Permissions.KickMembers)]
+        [Command("softban"), Aliases("s"), RequireUserPermissions(Permissions.KickMembers), RequireBotPermissions(Permissions.BanMembers)]
         public async Task SoftbanAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
@@ -186,7 +186,7 @@ namespace ModCore.Commands
             await ctx.LogAction($"Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
-        [Command("mute"), Aliases("m"), RequirePermissions(Permissions.MuteMembers)]
+        [Command("mute"), Aliases("m"), RequirePermissions(Permissions.MuteMembers), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task MuteAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
@@ -218,7 +218,7 @@ namespace ModCore.Commands
             await ctx.LogAction($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
         }
 
-        [Command("unmute"), Aliases("um"), RequirePermissions(Permissions.MuteMembers)]
+        [Command("unmute"), Aliases("um"), RequirePermissions(Permissions.MuteMembers), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task UnmuteAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
         {
             if (ctx.Member.Id == m.Id)
