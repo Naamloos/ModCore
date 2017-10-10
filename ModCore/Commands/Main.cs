@@ -53,7 +53,7 @@ namespace ModCore.Commands
         {
             //TODO replace with a link to a nice invite builder!
             var app = ctx.Client.CurrentApplication;
-            await ctx.RespondAsync($"Add ModCore to your server:\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
+            await ctx.RespondAsync($"Add ModCore to your server!\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
         }
 
         [Command("purgeuser"), Aliases("pu"), RequirePermissions(Permissions.ManageMessages)]
