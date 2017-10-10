@@ -174,7 +174,7 @@ namespace ModCore
             await db.SaveChangesAsync();
         }
 
-        public static async Task LogAction(this CommandContext ctx, string additionalinfo = "")
+        public static async Task LogActionAsync(this CommandContext ctx, string additionalinfo = "")
         {
             var s = ctx.GetGuildSettings();
             var a = s.ActionLog;
@@ -207,6 +207,29 @@ namespace ModCore
             {
                 var w = await ctx.Client.GetWebhookWithTokenAsync(a.WebhookId, a.WebhookToken);
                 await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed>() { embed } : null);
+            }
+        }
+
+        public static async Task LogAutoActionAsync(this DiscordClient clnt, DiscordGuild gld, DatabaseContext db, string additionalinfo = "")
+        {
+            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == gld.Id);
+            var s = cfg.GetSettings();
+
+            if (s.ActionLog.Enable)
+            {
+                var w = await clnt.GetWebhookWithTokenAsync(s.ActionLog.WebhookId, s.ActionLog.WebhookToken);
+                var b = new DiscordEmbedBuilder();
+
+                b.WithTitle($"New Automated action executed")
+                    .WithDescription($"Executed action: {additionalinfo}")
+                    .WithFooter($"Guild: {gld.Name}", string.IsNullOrEmpty(gld.IconHash) ? "" : gld.IconUrl);
+
+                var e = new List<DiscordEmbed>()
+                {
+                    b.Build()
+                };
+
+                await w.ExecuteAsync(embeds: e);
             }
         }
 
