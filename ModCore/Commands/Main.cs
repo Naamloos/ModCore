@@ -493,5 +493,35 @@ namespace ModCore.Commands
             // End of Timer adding
             await ctx.RespondAsync($"In {pinuntil.Humanize(4, minUnit: TimeUnit.Second)} this message will be unpinned.");
         }
+
+        [Command("listbans")]
+        [Aliases("lb")]
+        public async Task ListBansAsync(CommandContext ctx, int limit, int skip = 0)
+        {
+            var bans = await ctx.Guild.GetBansAsync();
+
+            if (bans.Count == 0)
+            {
+                await ctx.RespondAsync("No user is banned.");
+                return;
+            }
+
+            var embed = new DiscordEmbedBuilder();
+            embed.WithTitle("Banned Users");
+
+            var pagedBans = bans.Skip(skip).Take(limit);
+            var formattedBans = pagedBans.Select((ban, idx) => FormatDiscordBan(ban, idx + skip + 1));
+            embed.WithDescription(string.Join("\n", formattedBans));
+
+            embed.WithFooter(
+                $"Total {bans.Count} banned users. Showing {skip + 1} - {Math.Min(skip + limit, bans.Count)}.");
+
+            await ctx.RespondAsync(embed: embed.Build());
+        }
+
+        private static string FormatDiscordBan(DiscordBan ban, int number)
+        {
+            return $"{number}. **{ban.User.ToDiscordTag()}**, Reason: {ban.Reason}";
+        }
     }
 }

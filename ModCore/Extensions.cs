@@ -220,5 +220,10 @@ namespace ModCore
                 await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed>() { embed } : null);
             }
         }
+
+        public static string ToDiscordTag(this DiscordUser user)
+        {
+            return $"{user.Username}#{user.Discriminator}";
+        }
     }
 }
