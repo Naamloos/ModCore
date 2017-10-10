@@ -69,7 +69,7 @@ namespace ModCore.Commands
             await resp.DeleteAsync("Purge command executed.");
             await ctx.Message.DeleteAsync("Purge command executed.");
 
-            await ctx.LogAction($"Purged messages.\nUser: {User.Username}#{User.Discriminator} (ID:{User.Id})\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
+            await ctx.LogActionAsync($"Purged messages.\nUser: {User.Username}#{User.Discriminator} (ID:{User.Id})\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
         }
 
         [Command("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages)]
@@ -92,7 +92,7 @@ namespace ModCore.Commands
             await resp.DeleteAsync("Purge command executed.");
             await ctx.Message.DeleteAsync("Purge command executed.");
 
-            await ctx.LogAction($"Purged messages.\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
+            await ctx.LogActionAsync($"Purged messages.\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
         }
 
         [Command("clean"), Aliases("c"), RequirePermissions(Permissions.ManageMessages)]
@@ -114,7 +114,7 @@ namespace ModCore.Commands
             await resp.DeleteAsync("Clean command executed.");
             await ctx.Message.DeleteAsync("Clean command executed.");
 
-            await ctx.LogAction();
+            await ctx.LogActionAsync();
         }
 
         [Command("ban"), Aliases("b"), RequirePermissions(Permissions.BanMembers)]
@@ -131,7 +131,7 @@ namespace ModCore.Commands
             await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
             await ctx.RespondAsync($"Banned user {m.DisplayName} (ID:{m.Id})");
 
-            await ctx.LogAction($"Banned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
+            await ctx.LogActionAsync($"Banned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
         [Command("hackban"), Aliases("hb"), RequirePermissions(Permissions.BanMembers)]
@@ -148,7 +148,7 @@ namespace ModCore.Commands
             await ctx.Guild.BanMemberAsync(id, 7, $"{ustr}{rstr}");
             await ctx.RespondAsync($"User hackbanned successfully.");
 
-            await ctx.LogAction($"Hackbanned ID: {id}\n{rstr}");
+            await ctx.LogActionAsync($"Hackbanned ID: {id}\n{rstr}");
         }
 
         [Command("kick"), Aliases("k"), RequirePermissions(Permissions.KickMembers)]
@@ -165,7 +165,7 @@ namespace ModCore.Commands
             await m.RemoveAsync($"{ustr}{rstr}");
             await ctx.RespondAsync($"Kicked user {m.DisplayName} (ID:{m.Id})");
 
-            await ctx.LogAction($"Kicked user {m.DisplayName} (ID:{m.Id})\n{rstr}");
+            await ctx.LogActionAsync($"Kicked user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
         [Command("softban"), Aliases("s"), RequireUserPermissions(Permissions.KickMembers), RequireBotPermissions(Permissions.BanMembers)]
@@ -183,7 +183,7 @@ namespace ModCore.Commands
             await m.UnbanAsync(ctx.Guild, $"{ustr}{rstr}");
             await ctx.RespondAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})");
 
-            await ctx.LogAction($"Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
+            await ctx.LogActionAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
         [Command("mute"), Aliases("m"), RequirePermissions(Permissions.MuteMembers), RequireBotPermissions(Permissions.ManageRoles)]
@@ -215,7 +215,7 @@ namespace ModCore.Commands
             await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
             await ctx.RespondAsync($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
 
-            await ctx.LogAction($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
+            await ctx.LogActionAsync($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
         }
 
         [Command("unmute"), Aliases("um"), RequirePermissions(Permissions.MuteMembers), RequireBotPermissions(Permissions.ManageRoles)]
@@ -247,7 +247,7 @@ namespace ModCore.Commands
             await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
             await ctx.RespondAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
 
-            await ctx.LogAction($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
+            await ctx.LogActionAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
         }
 
         [Command("userinfo"), Aliases("ui")]
@@ -346,7 +346,7 @@ namespace ModCore.Commands
             // End of Timer adding
             await ctx.RespondAsync($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 
-            await ctx.LogAction($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+            await ctx.LogActionAsync($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
         }
 
         [Command("tempmute"), Aliases("tm"), Description("Temporarily mutes a member."), RequirePermissions(Permissions.MuteMembers)]
@@ -411,7 +411,7 @@ namespace ModCore.Commands
             // End of Timer adding
             await ctx.RespondAsync($"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 
-            await ctx.LogAction($"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+            await ctx.LogActionAsync($"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
         }
 
         [Command("schedulepin"), Aliases("sp"), Description("Schedules a pinned message."), RequirePermissions(Permissions.ManageMessages)]
