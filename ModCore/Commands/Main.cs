@@ -48,7 +48,7 @@ namespace ModCore.Commands
                 $"Socket uptime: {string.Format("{0} days, {1}", sup.ToString("dd"), sup.ToString(@"hh\:mm\:ss"))}");
         }
 
-        [Command("invite"), Aliases("i")]
+        [Command("invite"), Aliases("inv")]
         public async Task InviteAsync(CommandContext ctx)
         {
             //TODO replace with a link to a nice invite builder!
@@ -259,37 +259,6 @@ namespace ModCore.Commands
             await ctx.RespondAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
 
             await ctx.LogActionAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
-        }
-
-        [Command("userinfo"), Aliases("ui")]
-        public async Task UserInfoAsync(CommandContext ctx, DiscordMember usr)
-        {
-            var embed = new DiscordEmbedBuilder()
-                .WithColor(DiscordColor.MidnightBlue)
-                .WithTitle($"@{usr.Username}#{usr.Discriminator} - ID: {usr.Id}");
-
-            if (usr.IsBot) embed.Title += " __[BOT]__ ";
-            if (usr.IsOwner) embed.Title += " __[OWNER]__ ";
-
-            embed.Description =
-                $"Registered on     : {usr.CreationTimestamp.DateTime.ToString()}\n" +
-                $"Joined Guild on  : {usr.JoinedAt.DateTime.ToString()}";
-
-            var roles = new StringBuilder();
-            foreach (var r in usr.Roles) roles.Append($"[{r.Name}] ");
-            if (roles.Length == 0) roles.Append("*None*");
-            embed.AddField("Roles", roles.ToString());
-
-            var permsobj = usr.PermissionsIn(ctx.Channel);
-            var perms = permsobj.ToPermissionString();
-            if (((permsobj & Permissions.Administrator) | (permsobj & Permissions.AccessChannels)) == 0)
-                perms = "**[!] User can't see this channel!**\n" + perms;
-            if (perms == String.Empty) perms = "*None*";
-            embed.AddField("Permissions", perms);
-
-            embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now}");
-
-            await ctx.RespondAsync("", false, embed: embed);
         }
 
         [Command("leave"), Description("Makes this bot leave the current server."), RequireUserPermissions(Permissions.Administrator)]
