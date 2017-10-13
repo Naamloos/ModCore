@@ -527,7 +527,7 @@ namespace ModCore.Commands
             #warning Add check whether bot can actually take this role.
             if (cfg.SelfRoles.Contains(Role.Id))
             {
-                if (ctx.Member.Roles.Any(x => x.Id == Role.Id))
+                if (!ctx.Member.Roles.Any(x => x.Id == Role.Id))
                 {
                     await ctx.RespondAsync("You don't have that role!");
                     return;
