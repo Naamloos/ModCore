@@ -16,7 +16,7 @@ namespace ModCore.Commands
             await ctx.RespondAsync("Are you sure you want to shut down the bot?");
 
             var cts = ctx.Dependencies.GetDependency<SharedData>().CTS;
-            var interactivity = ctx.Dependencies.GetDependency<InteractivityModule>();
+            var interactivity = ctx.Dependencies.GetDependency<InteractivityExtension>();
             var m = await interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
             if (m == null)

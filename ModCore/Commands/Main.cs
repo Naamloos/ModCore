@@ -21,9 +21,9 @@ namespace ModCore.Commands
     {
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
-        public InteractivityModule Interactivity { get; }
+        public InteractivityExtension Interactivity { get; }
 
-        public Main(SharedData shared, DatabaseContextBuilder db, InteractivityModule interactive)
+        public Main(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive)
         {
             this.Database = db;
             this.Shared = shared;
@@ -295,7 +295,7 @@ namespace ModCore.Commands
         [Command("leave"), Description("Makes this bot leave the current server."), RequireUserPermissions(Permissions.Administrator)]
         public async Task LeaveAsync(CommandContext ctx)
         {
-            var interactivity = ctx.Dependencies.GetDependency<InteractivityModule>();
+            var interactivity = ctx.Dependencies.GetDependency<InteractivityExtension>();
             await ctx.RespondAsync("Are you sure you want to remove modcore from your guild?");
             var m = await interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 

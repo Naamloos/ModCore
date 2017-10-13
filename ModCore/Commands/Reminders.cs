@@ -20,9 +20,9 @@ namespace ModCore.Commands
     {
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
-        public InteractivityModule Interactivity { get; }
+        public InteractivityExtension Interactivity { get; }
 
-        public Reminders(SharedData shared, DatabaseContextBuilder db, InteractivityModule interactive)
+        public Reminders(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive)
         {
             this.Shared = shared;
             this.Database = db;

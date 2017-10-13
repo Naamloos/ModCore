@@ -19,8 +19,8 @@ namespace ModCore
         public StartTimes StartTimes { get; private set; }
 
         public DiscordClient Client { get; private set; }
-        public InteractivityModule Interactivity { get; private set; }
-        public CommandsNextModule Commands { get; private set; }
+        public InteractivityExtension Interactivity { get; private set; }
+        public CommandsNextExtension Commands { get; private set; }
 
         public SharedData ShardData { get; set; }
         internal Settings Settings { get; }
