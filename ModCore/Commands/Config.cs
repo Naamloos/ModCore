@@ -598,7 +598,7 @@ namespace ModCore.Commands
             public async Task SetRoleAsync(CommandContext ctx, DiscordRole Role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                cfg.AutoRole.RoleId = Role.Id;
+                cfg.AutoRole.RoleId = (long)Role.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("AutoRole role configured.");
             } 
@@ -661,6 +661,37 @@ namespace ModCore.Commands
                 cfg.CommandError.Chat = vb;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync($"Error reporting verbosity in action log set to `{verbosity}`.");
+            }
+        }
+
+        [Group("joinlog"), Aliases("j"), Description("Join log configuration commands.")]
+        public class JoinLog
+        {
+            [Command("enable"), Aliases("on"), Description("Enables JoinLog for this guild.")]
+            public async Task EnableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.JoinLog.Enable = true;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"Joinlog enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config joinlog setchannel`");
+            }
+
+            [Command("disable"), Aliases("off"), Description("Disables JoinLog for this guild.")]
+            public async Task DisableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.JoinLog.Enable = false;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("JoinLog disabled.");
+            }
+
+            [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's join log.")]
+            public async Task SetRoleAsync(CommandContext ctx, DiscordChannel Channel)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.JoinLog.ChannelId = (long)Channel.Id;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("JoinLog channel configured.");
             }
         }
     }

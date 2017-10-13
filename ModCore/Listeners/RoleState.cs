@@ -73,9 +73,9 @@ namespace ModCore.Listeners
             {
                 var ar = cfg.AutoRole;
 
-                if (ar.Enable && ea.Guild.Roles.Count(x => x.Id == ar.RoleId) > 0)
+                if (ar.Enable && ea.Guild.Roles.Count(x => x.Id == (ulong)ar.RoleId) > 0)
                 {
-                    var role = ea.Guild.Roles.First(x => x.Id == ar.RoleId);
+                    var role = ea.Guild.Roles.First(x => x.Id == (ulong)ar.RoleId);
                     await ea.Member.GrantRoleAsync(role, "AutoRole");
                 }
             }

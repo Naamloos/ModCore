@@ -54,8 +54,35 @@ namespace ModCore.Entities
         [JsonProperty("autorole")]
         public GuildAutoRoleSettings AutoRole { get; private set; } = new GuildAutoRoleSettings();
 
+        /// <summary>
+        /// Gets the configuration for CommandError. CommandErrors logs command errors to chat or action log.
+        /// </summary>
         [JsonProperty("commanderror")]
         public GuildCommandErrorSettings CommandError { get; private set; } = new GuildCommandErrorSettings();
+
+        /// <summary>
+        /// Gets the configuration for JoinLog. JoinLog logs new memebrs to a channel.
+        /// </summary>
+        [JsonProperty("joinlog")]
+        public GuildJoinLogSettings JoinLog { get; private set; } = new GuildJoinLogSettings();
+    }
+
+    /// <summary>
+    /// Represents configuration for JoinLog
+    /// </summary>
+    public class GuildJoinLogSettings
+    {
+        /// <summary>
+        /// Gets or sets whether JoinLog should be enabled.
+        /// </summary>
+        [JsonProperty("enabled")]
+        public bool Enable { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the JoinLog channel ID.
+        /// </summary>
+        [JsonProperty("channel_id")]
+        public long ChannelId { get; set; } = 0;
     }
 
     /// <summary>
@@ -66,12 +93,14 @@ namespace ModCore.Entities
         /// <summary>
         /// Gets or sets whether AutoRole should be enabled.
         /// </summary>
+        [JsonProperty("enables")]
         public bool Enable { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the AutoRole role ID.
         /// </summary>
-        public ulong RoleId { get; set; } = 0;
+        [JsonProperty("role_id")]
+        public long RoleId { get; set; } = 0;
     }
 
     /// <summary>
