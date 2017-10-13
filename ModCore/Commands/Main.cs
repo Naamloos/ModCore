@@ -506,6 +506,11 @@ namespace ModCore.Commands
             #warning Add check whether bot can actually grant this role.
             if (cfg.SelfRoles.Contains(Role.Id))
             {
+                if(ctx.Member.Roles.Any(x => x.Id == Role.Id))
+                {
+                    await ctx.RespondAsync("You already have that role!");
+                    return;
+                }
                 await ctx.Member.GrantRoleAsync(Role, "AutoRole granted.");
                 await ctx.RespondAsync($"Granted you the role `{Role.Name}`.");
             }
@@ -520,8 +525,13 @@ namespace ModCore.Commands
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
             #warning Add check whether bot can actually take this role.
-            if (cfg.SelfRoles.Contains(Role.Id) && ctx.Member.Roles.Any(x => x.Id == Role.Id))
+            if (cfg.SelfRoles.Contains(Role.Id))
             {
+                if (ctx.Member.Roles.Any(x => x.Id == Role.Id))
+                {
+                    await ctx.RespondAsync("You don't have that role!");
+                    return;
+                }
                 await ctx.Member.RevokeRoleAsync(Role, "AutoRole revoke.");
                 await ctx.RespondAsync($"Revoked your role: `{Role.Name}`.");
             }
