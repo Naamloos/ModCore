@@ -22,7 +22,7 @@ namespace ModCore.Commands
             this.Interactivity = interactive;
         }
 
-        [Command("user"), Aliases("u")]
+        [Command("user"), Aliases("u"), Description("Returns information about a specific user")]
         public async Task UserInfoAsync(CommandContext ctx, DiscordMember usr)
         {
             var embed = new DiscordEmbedBuilder()
@@ -53,7 +53,7 @@ namespace ModCore.Commands
             await ctx.RespondAsync("", false, embed: embed);
         }
 
-        [Command("guild"), Aliases("g")]
+        [Command("guild"), Aliases("g"), Description("Returns information about this guild")]
         public async Task GuildInfoAsync(CommandContext ctx)
         {
             await ctx.RespondAsync("The following embed might flood this channel. Do you want to proceed?");
@@ -133,7 +133,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("role"), Aliases("r")]
+        [Command("role"), Aliases("r"), Description("Returns information about a specific role")]
         public async Task RoleInfoAsync(CommandContext ctx, DiscordRole role)
         {
             var embed = new DiscordEmbedBuilder();
@@ -146,7 +146,7 @@ namespace ModCore.Commands
             await ctx.RespondAsync(embed: embed);
         }
 
-        [Command("channel"), Aliases("c")]
+        [Command("channel"), Aliases("c"), Description("Returns information about a specific channel")]
         public async Task ChannelInfoAsync(CommandContext ctx, DiscordChannel channel)
         {
             var embed = new DiscordEmbedBuilder();
