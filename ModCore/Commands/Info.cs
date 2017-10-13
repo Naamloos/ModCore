@@ -132,5 +132,60 @@ namespace ModCore.Commands
                 #endregion
             }
         }
+
+        [Command("role"), Aliases("r")]
+        public async Task RoleInfoAsync(CommandContext ctx, DiscordRole role)
+        {
+            var embed = new DiscordEmbedBuilder();
+            embed.WithTitle($"{role.Name} ID: ({role.Id})")
+                .WithDescription($"Created at {role.CreationTimestamp.DateTime.ToString()}")
+                .AddField("Permissions", role.Permissions.ToPermissionString())
+                .AddField("Data", $"Mentionable: {(role.IsMentionable ? "yes" : "no")}.\nHoisted: {(role.IsHoisted ? "yes" : "no")}.\nManaged: {(role.IsManaged ? "yes" : "no")}.")
+                .WithColor(role.Color);
+
+            await ctx.RespondAsync(embed: embed);
+        }
+
+        [Command("channel"), Aliases("c")]
+        public async Task ChannelInfoAsync(CommandContext ctx, DiscordChannel channel)
+        {
+            var embed = new DiscordEmbedBuilder();
+            embed.WithTitle($"#{channel.Name} ID: ({channel.Id})")
+                .WithDescription($"Topic: {channel.Topic}\nCreated at: {channel.CreationTimestamp.DateTime.ToString()}" +
+                $"{(channel.ParentId != null ? $"\nChild of `{channel.Parent.Name.ToUpper()}` ID: ({channel.Parent.Id})" : "")}");
+            if (channel.IsCategory)
+            {
+                var cs = new StringBuilder();
+                #region channel list string builder
+                foreach (var c in channel.Children)
+                {
+                    switch (c.Type)
+                    {
+                        case ChannelType.Text:
+                            cs.Append($"[`#{c.Name} (💬)`]");
+                            break;
+                        case ChannelType.Voice:
+                            cs.Append($"`[{c.Name} (🔈)]`");
+                            break;
+                        case ChannelType.Category:
+                            cs.Append($"`[{c.Name.ToUpper()} (📁)]`");
+                            break;
+                        default:
+                            cs.Append($"`[{c.Name} (❓)]`");
+                            break;
+                    }
+                }
+                #endregion
+                embed.AddField("Children of category", cs.ToString());
+            }
+            if(channel.Type == ChannelType.Voice)
+            {
+                embed.AddField("Voice", $"Bit rate: {channel.Bitrate}\nUser limit: {(channel.UserLimit == 0? "Unlimited" : $"{channel.UserLimit}")}");
+            }
+            embed.AddField("Misc", $"NSFW: {(channel.IsNSFW ? "yes" : "no")}\n" +
+                $"{(channel.Type == ChannelType.Text ? $"Last message ID: {channel.LastMessageId}" : "")}");
+
+            await ctx.RespondAsync(embed: embed);
+        }
     }
 }
