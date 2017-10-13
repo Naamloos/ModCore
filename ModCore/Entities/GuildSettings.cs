@@ -65,6 +65,12 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("joinlog")]
         public GuildJoinLogSettings JoinLog { get; private set; } = new GuildJoinLogSettings();
+
+        /// <summary>
+        /// Gets the SelfRoles for this guild. SelfRoles are roles members can grant themselves.
+        /// </summary>
+        [JsonProperty("selfroles")]
+        public List<ulong> SelfRoles { get; private set; } = new List<ulong>();
     }
 
     /// <summary>

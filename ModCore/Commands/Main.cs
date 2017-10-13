@@ -499,6 +499,22 @@ namespace ModCore.Commands
             await ctx.RespondAsync(embed: embed.Build());
         }
 
+        [Command("gimme"), Aliases("giveme", "gm"), RequireBotPermissions(Permissions.ManageRoles)]
+        public async Task GimmeAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
+        {
+            var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
+            #warning Add check whether bot can actually grant this role.
+            if (cfg.SelfRoles.Contains(Role.Id))
+            {
+                await ctx.Member.GrantRoleAsync(Role, "AutoRole granted.");
+                await ctx.RespondAsync($"Granted you the role `{Role.Name}`.");
+            }
+            else
+            {
+                await ctx.RespondAsync("You can't grant yourself that role!");
+            }
+        }
+
         private static string FormatDiscordBan(DiscordBan ban, int number)
         {
             return $"{number}. **{ban.User.ToDiscordTag()}**, Reason: {ban.Reason}";

@@ -694,5 +694,43 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("JoinLog channel configured.");
             }
         }
+
+        [Group("selfrole"), Aliases("sr"), Description("SelfRole configuration commands.")]
+        public class SelfRole
+        {
+            [Command("add"), Aliases("a"), Description("Adds roles to selfrole list")]
+            public async Task AddSelfRoleAsync(CommandContext ctx, DiscordRole Role)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                if (!cfg.SelfRoles.Contains(Role.Id))
+                {
+                    cfg.SelfRoles.Add(Role.Id);
+                }
+                else
+                {
+                    await ctx.RespondAsync("This role has already been added!");
+                    return;
+                }
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"Added role `{Role.Name}` with ID `{Role.Id}` to SelfRoles.");
+            }
+
+            [Command("remove"), Aliases("r"), Description("Removes roles from selfrole list")]
+            public async Task RemoveSelfRoleAsync(CommandContext ctx, DiscordRole Role)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                if (cfg.SelfRoles.Contains(Role.Id))
+                {
+                    cfg.SelfRoles.Remove(Role.Id);
+                }
+                else
+                {
+                    await ctx.RespondAsync("This role isn't in SelfRoles!");
+                    return;
+                }
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"Removed role `{Role.Name}` with ID `{Role.Id}` from SelfRoles.");
+            }
+        }
     }
 }
