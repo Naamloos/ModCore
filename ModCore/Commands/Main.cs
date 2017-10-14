@@ -432,7 +432,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
+            await m.BanAsync(7, $"{ustr}{rstr}");
             // Add timer
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + ts;
@@ -497,7 +497,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await ctx.Member.GrantRoleAsync(ctx.Guild.GetRole(ctx.GetGuildSettings().MuteRoleId), $"{ustr}{rstr}");
+            await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
             // Add timer
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + ts;
