@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
@@ -249,6 +251,18 @@ namespace ModCore
         public static string ToDiscordTag(this DiscordUser user)
         {
             return $"{user.Username}#{user.Discriminator}";
+        }
+
+        public static bool IsNullOrWhitespace(this StringBuilder sb)
+        {
+            int l;
+            if (sb == null || (l = sb.Length) == 0) return true;
+
+            for (var i = 0; i < l; i++) {
+                if (!char.IsWhiteSpace(sb[i])) return false;
+            }
+
+            return true;
         }
     }
 }
