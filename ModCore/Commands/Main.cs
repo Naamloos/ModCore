@@ -659,7 +659,7 @@ namespace ModCore.Commands
                     await ctx.RespondAsync($"Granted you the role `{Role.Name}`.");
                 }
                 else
-                    await ctx.RespondAsync("Can't grant you this role because that role is above of my highest role!");
+                    await ctx.RespondAsync("Can't grant you this role because that role is above my highest role!");
             }
             else
             {
@@ -684,7 +684,7 @@ namespace ModCore.Commands
                     await ctx.RespondAsync($"Revoked your role: `{Role.Name}`.");
                 }
                 else
-                    await ctx.RespondAsync("Can't take this role because that role is above of my highest role!");
+                    await ctx.RespondAsync("Can't take this role because that role is above my highest role!");
             }
             else
             {
