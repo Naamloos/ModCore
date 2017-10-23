@@ -10,6 +10,9 @@ using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
 using System.IO;
+using System.Runtime.InteropServices;
+using DSharpPlus.CommandsNext.Exceptions;
+using DSharpPlus.Net.WebSocket;
 
 namespace ModCore
 {
@@ -26,7 +29,7 @@ namespace ModCore
         internal Settings Settings { get; }
 
         public DatabaseContextBuilder Database { get; }
-
+        
         public ModCoreShard(Settings settings, int id, SharedData sharedData)
         {
             this.Settings = settings;
@@ -54,6 +57,18 @@ namespace ModCore
                 ShardCount = this.Settings.ShardCount,
                 ShardId = this.ShardId
             });
+            #if ModCore_is_Windows7
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.OSVersion.Version <= new Version(6, 1, 7601, 65536))
+            {
+                // NT 6.1 (Win7 SP1)
+                Client.SetWebSocketClient<WebSocket4NetCoreClient>();
+            }
+            #endif
+
+            Client.ClientErrored += async args =>
+            {
+                Console.WriteLine(args.Exception);
+            };
 
             this.Interactivity = Client.UseInteractivity(new InteractivityConfiguration()
             {
@@ -105,13 +120,13 @@ namespace ModCore
            return Task.Delay(0);
         }
 
-        private Task Commands_CommandErrored(CommandErrorEventArgs e)
+        private static Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
             return Task.Run(async () =>
             {
                 e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "Commands", e.Exception.ToString(), DateTime.Now);
 
-                if (e.Exception.GetType() == typeof(DSharpPlus.CommandsNext.Exceptions.CommandNotFoundException))
+                if (e.Exception is CommandNotFoundException)
                     return;
 
                 var cfg = e.Context.GetGuildSettings() ?? new GuildSettings();

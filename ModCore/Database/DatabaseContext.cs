@@ -21,13 +21,11 @@ namespace ModCore.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (!optionsBuilder.IsConfigured)
-            {
-                if (!string.IsNullOrWhiteSpace(this.ConnectionString))
-                    optionsBuilder.UseNpgsql(this.ConnectionString);
-                else
-                    optionsBuilder.UseInMemoryDatabase("modcore");
-            }
+            if (optionsBuilder.IsConfigured) return;
+            if (!string.IsNullOrWhiteSpace(this.ConnectionString))
+                optionsBuilder.UseNpgsql(this.ConnectionString);
+            else
+                optionsBuilder.UseInMemoryDatabase("modcore");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

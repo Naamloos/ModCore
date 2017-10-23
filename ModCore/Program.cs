@@ -2,7 +2,7 @@
 
 namespace ModCore
 {
-    internal class Program
+    internal static class Program
     {
         private static Task Main(string[] args) =>
             new ModCore().InitializeAsync();

@@ -1,4 +1,7 @@
-﻿namespace ModCore.Database
+﻿using System;
+using System.ComponentModel;
+
+namespace ModCore.Database
 {
     public class DatabaseContextBuilder
     {
@@ -9,7 +12,18 @@
             this.ConnectionString = cstr;
         }
 
-        public DatabaseContext CreateContext() =>
-            new DatabaseContext(this.ConnectionString);
+        public DatabaseContext CreateContext()
+        {
+            try
+            {
+                return new DatabaseContext(this.ConnectionString);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error during database initialization:");
+                Console.WriteLine(e);
+                throw;
+            }
+        }
     }
 }
