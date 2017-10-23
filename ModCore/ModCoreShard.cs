@@ -101,8 +101,8 @@ namespace ModCore
 
         private Task Client_Ready(ReadyEventArgs e)
         {
-           Client.UpdateStatusAsync(new DiscordGame($"I'm on {this.Settings.ShardCount} shard(s)!"));
-           return Task.Delay(0);
+            Client.UpdateStatusAsync(new DiscordGame($"I'm on {this.Settings.ShardCount} shard(s)!"));
+            return Task.Delay(0);
         }
 
         private Task Commands_CommandErrored(CommandErrorEventArgs e)
