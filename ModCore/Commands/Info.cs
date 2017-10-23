@@ -51,6 +51,7 @@ namespace ModCore.Commands
             embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now}");
 
             await ctx.RespondAsync("", false, embed: embed);
+            await ctx.LogActionAsync();
         }
 
         [Command("guild"), Aliases("g"), Description("Returns information about this guild")]
@@ -131,6 +132,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("Okay, I'm not sending the embed.");
                 #endregion
             }
+            await ctx.LogActionAsync();
         }
 
         [Command("role"), Aliases("r"), Description("Returns information about a specific role")]
@@ -144,6 +146,7 @@ namespace ModCore.Commands
                 .WithColor(role.Color);
 
             await ctx.RespondAsync(embed: embed);
+            await ctx.LogActionAsync();
         }
 
         [Command("channel"), Aliases("c"), Description("Returns information about a specific channel")]
@@ -186,6 +189,7 @@ namespace ModCore.Commands
                 $"{(channel.Type == ChannelType.Text ? $"Last message ID: {channel.LastMessageId}" : "")}");
 
             await ctx.RespondAsync(embed: embed);
+            await ctx.LogActionAsync();
         }
     }
 }

@@ -415,6 +415,7 @@ namespace ModCore.Commands
             else if (m.Message.Content == "yes")
             {
                 await ctx.RespondAsync("Thanks for using ModCore. Leaving this guild.");
+                await ctx.LogActionAsync("Left your server. Thanks for using ModCore.");
                 await ctx.Guild.LeaveAsync();
             }
             else
@@ -645,7 +646,6 @@ namespace ModCore.Commands
         public async Task GimmeAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
-            #warning Add check whether bot can actually grant this role.
             if (cfg.SelfRoles.Contains(Role.Id))
             {
                 if(ctx.Member.Roles.Any(x => x.Id == Role.Id))
@@ -653,8 +653,13 @@ namespace ModCore.Commands
                     await ctx.RespondAsync("You already have that role!");
                     return;
                 }
-                await ctx.Member.GrantRoleAsync(Role, "AutoRole granted.");
-                await ctx.RespondAsync($"Granted you the role `{Role.Name}`.");
+                if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= Role.Position))
+                {
+                    await ctx.Member.GrantRoleAsync(Role, "AutoRole granted.");
+                    await ctx.RespondAsync($"Granted you the role `{Role.Name}`.");
+                }
+                else
+                    await ctx.RespondAsync("Can't grant you this role because that role is above of my highest role!");
             }
             else
             {
@@ -666,7 +671,6 @@ namespace ModCore.Commands
         public async Task RevokemeAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
-            #warning Add check whether bot can actually take this role.
             if (cfg.SelfRoles.Contains(Role.Id))
             {
                 if (!ctx.Member.Roles.Any(x => x.Id == Role.Id))
@@ -674,8 +678,13 @@ namespace ModCore.Commands
                     await ctx.RespondAsync("You don't have that role!");
                     return;
                 }
-                await ctx.Member.RevokeRoleAsync(Role, "AutoRole revoke.");
-                await ctx.RespondAsync($"Revoked your role: `{Role.Name}`.");
+                if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= Role.Position))
+                {
+                    await ctx.Member.RevokeRoleAsync(Role, "AutoRole revoke.");
+                    await ctx.RespondAsync($"Revoked your role: `{Role.Name}`.");
+                }
+                else
+                    await ctx.RespondAsync("Can't take this role because that role is above of my highest role!");
             }
             else
             {
