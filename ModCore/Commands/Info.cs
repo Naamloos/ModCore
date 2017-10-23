@@ -181,9 +181,9 @@ namespace ModCore.Commands
                 #endregion
                 embed.AddField("Children of category", cs.ToString());
             }
-            if(channel.Type == ChannelType.Voice)
+            if (channel.Type == ChannelType.Voice)
             {
-                embed.AddField("Voice", $"Bit rate: {channel.Bitrate}\nUser limit: {(channel.UserLimit == 0? "Unlimited" : $"{channel.UserLimit}")}");
+                embed.AddField("Voice", $"Bit rate: {channel.Bitrate}\nUser limit: {(channel.UserLimit == 0 ? "Unlimited" : $"{channel.UserLimit}")}");
             }
             embed.AddField("Misc", $"NSFW: {(channel.IsNSFW ? "yes" : "no")}\n" +
                 $"{(channel.Type == ChannelType.Text ? $"Last message ID: {channel.LastMessageId}" : "")}");

@@ -21,7 +21,7 @@ namespace ModCore.Commands
     public class Main
     {
         private static readonly Regex SpaceReplacer = new Regex(" {2,}");
-        
+
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
         public InteractivityExtension Interactivity { get; }
@@ -85,7 +85,7 @@ namespace ModCore.Commands
 
             await ctx.LogActionAsync($"Purged messages.\nUser: {user.Username}#{user.Discriminator} (ID:{user.Id})\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
         }
-        
+
         private static List<string> Tokenize(string value, char sep, char block)
         {
             var result = new List<string>();
@@ -127,7 +127,7 @@ namespace ModCore.Commands
             var regexOptions = RegexOptions.CultureInvariant;
             // kept here for displaying in the result
             var flags = "";
-            
+
             if (string.IsNullOrEmpty(regexp))
             {
                 await ctx.RespondAsync("RegExp is empty");
@@ -154,29 +154,35 @@ namespace ModCore.Commands
                         {
                             // remove the flags element
                             tokens.RemoveAt(1);
-                            
-                            if (flags.Contains('m')) {
+
+                            if (flags.Contains('m'))
+                            {
                                 regexOptions |= RegexOptions.Multiline;
                             }
-                            if (flags.Contains('i')) {
+                            if (flags.Contains('i'))
+                            {
                                 regexOptions |= RegexOptions.IgnoreCase;
                             }
-                            if (flags.Contains('s')) {
+                            if (flags.Contains('s'))
+                            {
                                 regexOptions |= RegexOptions.Singleline;
                             }
-                            if (flags.Contains('x')) {
+                            if (flags.Contains('x'))
+                            {
                                 regexOptions |= RegexOptions.ExplicitCapture;
                             }
-                            if (flags.Contains('r')) {
+                            if (flags.Contains('r'))
+                            {
                                 regexOptions |= RegexOptions.RightToLeft;
                             }
                             // for debugging only
-                            if (flags.Contains('c')) {
+                            if (flags.Contains('c'))
+                            {
                                 regexOptions |= RegexOptions.Compiled;
                             }
                         }
                     }
-                    
+
                     if (int.TryParse(tokens[1], out var result))
                     {
                         limit = result;
@@ -201,20 +207,20 @@ namespace ModCore.Commands
                 }
             }
             var regexCompiled = new Regex(regexp, regexOptions);
-            
+
             var i = 0;
             var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
             var deletThis = new List<DiscordMessage>();
             foreach (var m in ms)
             {
                 if (!regexCompiled.IsMatch(m.Content)) continue;
-                
+
                 if (i < skip)
                     i++;
                 else
                     deletThis.Add(m);
             }
-            var resultString = $"Purged {deletThis.Count} messages by /{regexp.Replace("/", @"\/").Replace(@"\",@"\\")}/{flags}";
+            var resultString = $"Purged {deletThis.Count} messages by /{regexp.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
             if (deletThis.Any())
                 await ctx.Channel.DeleteMessagesAsync(deletThis, resultString);
             var resp = await ctx.RespondAsync(resultString);
@@ -252,7 +258,7 @@ namespace ModCore.Commands
         public async Task CleanAsync(CommandContext ctx)
         {
             var gs = ctx.GetGuildSettings();
-            var prefix = gs != null? gs.Prefix : "?>";
+            var prefix = gs != null ? gs.Prefix : "?>";
             var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
             var delet_this = new List<DiscordMessage>();
             foreach (var m in ms)
@@ -648,7 +654,7 @@ namespace ModCore.Commands
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
             if (cfg.SelfRoles.Contains(Role.Id))
             {
-                if(ctx.Member.Roles.Any(x => x.Id == Role.Id))
+                if (ctx.Member.Roles.Any(x => x.Id == Role.Id))
                 {
                     await ctx.RespondAsync("You already have that role!");
                     return;
