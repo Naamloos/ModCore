@@ -115,7 +115,7 @@ namespace ModCore.Commands
 
                 embed.AddField("Voice", $"AFK Channel: {(g.AfkChannel != null ? $"#{g.AfkChannel.Name}" : "None.")}\n" +
                     $"AFK Timeout: {g.AfkTimeout}\n" +
-                    $"Region: {g.VoiceRegion.Name}");
+                    $"Region: {g.RegionId}");
 
                 embed.AddField("Misc", $"Large: {(g.IsLarge ? "yes" : "no")}.\n" +
                     $"Default Notifications: {g.DefaultMessageNotifications}.\n" +
