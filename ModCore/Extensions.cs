@@ -258,7 +258,8 @@ namespace ModCore
             int l;
             if (sb == null || (l = sb.Length) == 0) return true;
 
-            for (var i = 0; i < l; i++) {
+            for (var i = 0; i < l; i++)
+            {
                 if (!char.IsWhiteSpace(sb[i])) return false;
             }
 

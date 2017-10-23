@@ -21,7 +21,7 @@ namespace ModCore.Commands
     public class Main
     {
         private static readonly Regex SpaceReplacer = new Regex(" {2,}");
-        
+
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
         public InteractivityExtension Interactivity { get; }
@@ -85,7 +85,7 @@ namespace ModCore.Commands
 
             await ctx.LogActionAsync($"Purged messages.\nUser: {user.Username}#{user.Discriminator} (ID:{user.Id})\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
         }
-        
+
         private static List<string> Tokenize(string value, char sep, char block)
         {
             var result = new List<string>();
@@ -127,7 +127,7 @@ namespace ModCore.Commands
             var regexOptions = RegexOptions.CultureInvariant;
             // kept here for displaying in the result
             var flags = "";
-            
+
             if (string.IsNullOrEmpty(regexp))
             {
                 await ctx.RespondAsync("RegExp is empty");
@@ -154,29 +154,35 @@ namespace ModCore.Commands
                         {
                             // remove the flags element
                             tokens.RemoveAt(1);
-                            
-                            if (flags.Contains('m')) {
+
+                            if (flags.Contains('m'))
+                            {
                                 regexOptions |= RegexOptions.Multiline;
                             }
-                            if (flags.Contains('i')) {
+                            if (flags.Contains('i'))
+                            {
                                 regexOptions |= RegexOptions.IgnoreCase;
                             }
-                            if (flags.Contains('s')) {
+                            if (flags.Contains('s'))
+                            {
                                 regexOptions |= RegexOptions.Singleline;
                             }
-                            if (flags.Contains('x')) {
+                            if (flags.Contains('x'))
+                            {
                                 regexOptions |= RegexOptions.ExplicitCapture;
                             }
-                            if (flags.Contains('r')) {
+                            if (flags.Contains('r'))
+                            {
                                 regexOptions |= RegexOptions.RightToLeft;
                             }
                             // for debugging only
-                            if (flags.Contains('c')) {
+                            if (flags.Contains('c'))
+                            {
                                 regexOptions |= RegexOptions.Compiled;
                             }
                         }
                     }
-                    
+
                     if (int.TryParse(tokens[1], out var result))
                     {
                         limit = result;
@@ -201,20 +207,20 @@ namespace ModCore.Commands
                 }
             }
             var regexCompiled = new Regex(regexp, regexOptions);
-            
+
             var i = 0;
             var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
             var deletThis = new List<DiscordMessage>();
             foreach (var m in ms)
             {
                 if (!regexCompiled.IsMatch(m.Content)) continue;
-                
+
                 if (i < skip)
                     i++;
                 else
                     deletThis.Add(m);
             }
-            var resultString = $"Purged {deletThis.Count} messages by /{regexp.Replace("/", @"\/").Replace(@"\",@"\\")}/{flags}";
+            var resultString = $"Purged {deletThis.Count} messages by /{regexp.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
             if (deletThis.Any())
                 await ctx.Channel.DeleteMessagesAsync(deletThis, resultString);
             var resp = await ctx.RespondAsync(resultString);
@@ -252,7 +258,7 @@ namespace ModCore.Commands
         public async Task CleanAsync(CommandContext ctx)
         {
             var gs = ctx.GetGuildSettings();
-            var prefix = gs != null? gs.Prefix : "?>";
+            var prefix = gs != null ? gs.Prefix : "?>";
             var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
             var delet_this = new List<DiscordMessage>();
             foreach (var m in ms)
@@ -415,6 +421,7 @@ namespace ModCore.Commands
             else if (m.Message.Content == "yes")
             {
                 await ctx.RespondAsync("Thanks for using ModCore. Leaving this guild.");
+                await ctx.LogActionAsync("Left your server. Thanks for using ModCore.");
                 await ctx.Guild.LeaveAsync();
             }
             else
@@ -432,7 +439,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
+            await m.BanAsync(7, $"{ustr}{rstr}");
             // Add timer
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + ts;
@@ -497,7 +504,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await ctx.Member.GrantRoleAsync(ctx.Guild.GetRole(ctx.GetGuildSettings().MuteRoleId), $"{ustr}{rstr}");
+            await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
             // Add timer
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + ts;
@@ -645,16 +652,20 @@ namespace ModCore.Commands
         public async Task GimmeAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
-            #warning Add check whether bot can actually grant this role.
             if (cfg.SelfRoles.Contains(Role.Id))
             {
-                if(ctx.Member.Roles.Any(x => x.Id == Role.Id))
+                if (ctx.Member.Roles.Any(x => x.Id == Role.Id))
                 {
                     await ctx.RespondAsync("You already have that role!");
                     return;
                 }
-                await ctx.Member.GrantRoleAsync(Role, "AutoRole granted.");
-                await ctx.RespondAsync($"Granted you the role `{Role.Name}`.");
+                if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= Role.Position))
+                {
+                    await ctx.Member.GrantRoleAsync(Role, "AutoRole granted.");
+                    await ctx.RespondAsync($"Granted you the role `{Role.Name}`.");
+                }
+                else
+                    await ctx.RespondAsync("Can't grant you this role because that role is above my highest role!");
             }
             else
             {
@@ -666,7 +677,6 @@ namespace ModCore.Commands
         public async Task RevokemeAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
-            #warning Add check whether bot can actually take this role.
             if (cfg.SelfRoles.Contains(Role.Id))
             {
                 if (!ctx.Member.Roles.Any(x => x.Id == Role.Id))
@@ -674,8 +684,13 @@ namespace ModCore.Commands
                     await ctx.RespondAsync("You don't have that role!");
                     return;
                 }
-                await ctx.Member.RevokeRoleAsync(Role, "AutoRole revoke.");
-                await ctx.RespondAsync($"Revoked your role: `{Role.Name}`.");
+                if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= Role.Position))
+                {
+                    await ctx.Member.RevokeRoleAsync(Role, "AutoRole revoke.");
+                    await ctx.RespondAsync($"Revoked your role: `{Role.Name}`.");
+                }
+                else
+                    await ctx.RespondAsync("Can't take this role because that role is above my highest role!");
             }
             else
             {

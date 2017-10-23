@@ -51,6 +51,7 @@ namespace ModCore.Commands
             embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now}");
 
             await ctx.RespondAsync("", false, embed: embed);
+            await ctx.LogActionAsync();
         }
 
         [Command("guild"), Aliases("g"), Description("Returns information about this guild")]
@@ -114,7 +115,7 @@ namespace ModCore.Commands
 
                 embed.AddField("Voice", $"AFK Channel: {(g.AfkChannel != null ? $"#{g.AfkChannel.Name}" : "None.")}\n" +
                     $"AFK Timeout: {g.AfkTimeout}\n" +
-                    $"Region: {g.RegionId}");
+                    $"Region: {g.VoiceRegion.Name}");
 
                 embed.AddField("Misc", $"Large: {(g.IsLarge ? "yes" : "no")}.\n" +
                     $"Default Notifications: {g.DefaultMessageNotifications}.\n" +
@@ -131,6 +132,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("Okay, I'm not sending the embed.");
                 #endregion
             }
+            await ctx.LogActionAsync();
         }
 
         [Command("role"), Aliases("r"), Description("Returns information about a specific role")]
@@ -144,6 +146,7 @@ namespace ModCore.Commands
                 .WithColor(role.Color);
 
             await ctx.RespondAsync(embed: embed);
+            await ctx.LogActionAsync();
         }
 
         [Command("channel"), Aliases("c"), Description("Returns information about a specific channel")]
@@ -178,14 +181,15 @@ namespace ModCore.Commands
                 #endregion
                 embed.AddField("Children of category", cs.ToString());
             }
-            if(channel.Type == ChannelType.Voice)
+            if (channel.Type == ChannelType.Voice)
             {
-                embed.AddField("Voice", $"Bit rate: {channel.Bitrate}\nUser limit: {(channel.UserLimit == 0? "Unlimited" : $"{channel.UserLimit}")}");
+                embed.AddField("Voice", $"Bit rate: {channel.Bitrate}\nUser limit: {(channel.UserLimit == 0 ? "Unlimited" : $"{channel.UserLimit}")}");
             }
             embed.AddField("Misc", $"NSFW: {(channel.IsNSFW ? "yes" : "no")}\n" +
                 $"{(channel.Type == ChannelType.Text ? $"Last message ID: {channel.LastMessageId}" : "")}");
 
             await ctx.RespondAsync(embed: embed);
+            await ctx.LogActionAsync();
         }
     }
 }

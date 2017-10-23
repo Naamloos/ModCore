@@ -46,7 +46,7 @@ namespace ModCore.Commands
                     embed.AddField("Muted Role", muted != null ? muted.Mention : "Not configured or missing", true);
 
                     var actionlog = gcfg.ActionLog;
-                    embed.AddField("Action Log", actionlog.Enable? "Enabled" + (actionlog.WebhookId == 0? ", but not configured!" : "") : "Disabled");
+                    embed.AddField("Action Log", actionlog.Enable ? "Enabled" + (actionlog.WebhookId == 0 ? ", but not configured!" : "") : "Disabled");
 
                     var autorole = gcfg.AutoRole;
                     embed.AddField("Auto Role", autorole.Enable ? $"Enabled with Role ID {autorole.RoleId}." : "Disabled");
@@ -147,7 +147,7 @@ namespace ModCore.Commands
         public async Task ResetAsync(CommandContext ctx)
         {
             var db = this.Database.CreateContext();
-            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id);
+            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
             if (cfg == null)
             {
                 await ctx.RespondAsync("This guild is not configured.");
@@ -601,7 +601,7 @@ namespace ModCore.Commands
                 cfg.AutoRole.RoleId = (long)Role.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("AutoRole role configured.");
-            } 
+            }
         }
 
         [Group("error"), Aliases("er"), Description("Error verbosity configuration commands.")]
