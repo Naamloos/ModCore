@@ -648,7 +648,7 @@ namespace ModCore.Commands
             await ctx.RespondAsync(embed: embed.Build());
         }
 
-        [Command("giverole"), Aliases("give", "gr"), Dexcription("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
+        [Command("giverole"), Aliases("give", "gr"), Description("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task GiveRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
