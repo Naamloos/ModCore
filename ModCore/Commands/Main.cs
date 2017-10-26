@@ -648,8 +648,8 @@ namespace ModCore.Commands
             await ctx.RespondAsync(embed: embed.Build());
         }
 
-        [Command("gimme"), Aliases("giveme", "gm"), RequireBotPermissions(Permissions.ManageRoles)]
-        public async Task GimmeAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
+        [Command("giverole"), Aliases("give", "gr"), Dexcription("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
+        public async Task GiveRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
             if (cfg.SelfRoles.Contains(Role.Id))
@@ -673,8 +673,8 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("revokeme"), Aliases("rm"), RequireBotPermissions(Permissions.ManageRoles)]
-        public async Task RevokemeAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
+        [Command("takerole"), Aliases("take", "tr"), Description("Takes a specified role away from the user"), RequireBotPermissions(Permissions.ManageRoles)]
+        public async Task TakeRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
             if (cfg.SelfRoles.Contains(Role.Id))
