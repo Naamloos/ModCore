@@ -48,7 +48,7 @@ namespace ModCore
             this.Client = new DiscordClient(new DiscordConfiguration
             {
                 AutoReconnect = true,
-                EnableCompression = true,
+                GatewayCompressionLevel = GatewayCompressionLevel.Stream,
                 LargeThreshold = 250,
                 LogLevel = LogLevel.Debug,
                 Token = Settings.Token,
