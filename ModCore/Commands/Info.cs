@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -33,8 +34,8 @@ namespace ModCore.Commands
             if (usr.IsOwner) embed.Title += " __[OWNER]__ ";
 
             embed.Description =
-                $"Registered on     : {usr.CreationTimestamp.DateTime.ToString()}\n" +
-                $"Joined Guild on  : {usr.JoinedAt.DateTime.ToString()}";
+                $"Registered on     : {usr.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}\n" +
+                $"Joined Guild on  : {usr.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}";
 
             var roles = new StringBuilder();
             foreach (var r in usr.Roles) roles.Append($"[{r.Name}] ");
@@ -66,9 +67,9 @@ namespace ModCore.Commands
                 var embed = new DiscordEmbedBuilder()
                     .WithColor(DiscordColor.PhthaloBlue)
                     .WithTitle($"{g.Name} ID: ({g.Id})")
-                    .WithDescription($"Created on: {g.CreationTimestamp.DateTime.ToString()}\n" +
+                    .WithDescription($"Created on: {g.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}\n" +
                     $"Member count: {g.MemberCount}" +
-                    $"Joined at: {g.JoinedAt.DateTime.ToString()}");
+                    $"Joined at: {g.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}");
                 if (!string.IsNullOrEmpty(g.IconHash))
                     embed.WithThumbnailUrl(g.IconUrl);
                 embed.WithAuthor($"Owner: {g.Owner.Username}#{g.Owner.Discriminator}", icon_url: string.IsNullOrEmpty(g.Owner.AvatarHash) ? null : g.Owner.AvatarUrl);
@@ -140,7 +141,7 @@ namespace ModCore.Commands
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"{role.Name} ID: ({role.Id})")
-                .WithDescription($"Created at {role.CreationTimestamp.DateTime.ToString()}")
+                .WithDescription($"Created at {role.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}")
                 .AddField("Permissions", role.Permissions.ToPermissionString())
                 .AddField("Data", $"Mentionable: {(role.IsMentionable ? "yes" : "no")}.\nHoisted: {(role.IsHoisted ? "yes" : "no")}.\nManaged: {(role.IsManaged ? "yes" : "no")}.")
                 .WithColor(role.Color);
@@ -154,7 +155,7 @@ namespace ModCore.Commands
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"#{channel.Name} ID: ({channel.Id})")
-                .WithDescription($"Topic: {channel.Topic}\nCreated at: {channel.CreationTimestamp.DateTime.ToString()}" +
+                .WithDescription($"Topic: {channel.Topic}\nCreated at: {channel.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}" +
                 $"{(channel.ParentId != null ? $"\nChild of `{channel.Parent.Name.ToUpper()}` ID: ({channel.Parent.Id})" : "")}");
             if (channel.IsCategory)
             {
