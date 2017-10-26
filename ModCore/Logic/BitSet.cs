@@ -109,7 +109,8 @@ namespace ModCore.Logic
         {
             return new string(Bits.SelectMany(e => Convert.ToString(e, 2).PadLeft(8, '0')).ToArray());
         }
-
+        
+#if DEBUG
         public string SerializeToString()
         {
             var len = Bits.Length;
@@ -137,6 +138,7 @@ namespace ModCore.Logic
         {
             return new BitSet(str.Trim().Split(',').Select(e => e.Length == 0 ? (byte) 0 : byte.Parse(e)));
         }
+#endif
         
         IEnumerator IEnumerable.GetEnumerator()
         {
