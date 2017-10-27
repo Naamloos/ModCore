@@ -186,8 +186,8 @@ namespace ModCore.Commands
                 prefix = null;
 
             prefix = prefix?.TrimStart();
-            if (prefix?.Length > 10)
-                prefix = prefix.Substring(0, 10);
+            if (prefix?.Length > 13)
+                prefix = prefix.Substring(0, 13);
 
             await ctx.WithGuildSettings(cfg => { cfg.Prefix = prefix; });
 
