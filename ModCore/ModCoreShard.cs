@@ -67,6 +67,7 @@ namespace ModCore
 
             Client.ClientErrored += async args =>
             {
+                await Task.Yield();
                 Console.WriteLine(args.Exception);
             };
 
