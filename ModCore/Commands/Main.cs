@@ -648,7 +648,7 @@ namespace ModCore.Commands
             await ctx.RespondAsync(embed: embed.Build());
         }
 
-        [Command("giverole"), Aliases("give", "gr"), Description("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
+        [Command("giverole"), Aliases("give"), Description("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task GiveRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
@@ -662,18 +662,18 @@ namespace ModCore.Commands
                 if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= Role.Position))
                 {
                     await ctx.Member.GrantRoleAsync(Role, "AutoRole granted.");
-                    await ctx.RespondAsync($"Granted you the role `{Role.Name}`.");
+                    await ctx.RespondAsync($"Gave you the role `{Role.Name}`.");
                 }
                 else
-                    await ctx.RespondAsync("Can't grant you this role because that role is above my highest role!");
+                    await ctx.RespondAsync("I can't give you this role because that role is above my highest role!");
             }
             else
             {
-                await ctx.RespondAsync("You can't grant yourself that role!");
+                await ctx.RespondAsync("I can't give you that role!");
             }
         }
 
-        [Command("takerole"), Aliases("take", "tr"), Description("Takes a specified role away from the user"), RequireBotPermissions(Permissions.ManageRoles)]
+        [Command("takerole"), Aliases("take"), Description("Takes a specified role away from the user"), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task TakeRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
@@ -687,14 +687,14 @@ namespace ModCore.Commands
                 if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= Role.Position))
                 {
                     await ctx.Member.RevokeRoleAsync(Role, "AutoRole revoke.");
-                    await ctx.RespondAsync($"Revoked your role: `{Role.Name}`.");
+                    await ctx.RespondAsync($"Took your role: `{Role.Name}`.");
                 }
                 else
-                    await ctx.RespondAsync("Can't take this role because that role is above my highest role!");
+                    await ctx.RespondAsync("I can't take this role because that role is above my highest role!");
             }
             else
             {
-                await ctx.RespondAsync("You can't revoke that role!");
+                await ctx.RespondAsync("I can't take that role!");
             }
         }
 
