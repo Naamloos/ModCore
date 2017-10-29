@@ -29,7 +29,8 @@ namespace ModCore.Api
             };
             var Content = new StringContent(JObject.FromObject(RequestPayload).ToString(), Encoding.UTF8, "application/json");
 
-            var Response = await _httpclient.PostAsync("https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze", Content);
+            // pls don't blue thank you
+            var Response = await _httpclient.PostAsync("https://" + $"commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key={this._token}", Content);
 
 #warning TODO: Parse response to objects, https://github.com/conversationai/perspectiveapi/blob/master/api_reference.md#analyzecomment-response
         }
