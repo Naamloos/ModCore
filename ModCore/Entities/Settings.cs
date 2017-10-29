@@ -15,6 +15,12 @@ namespace ModCore.Entities
         [JsonProperty("shard_count")]
         public int ShardCount { get; private set; }
 
+        [JsonProperty("use_perspective")]
+        public bool UsePerspective { get; private set; }
+
+        [JsonProperty("perspective_token")]
+        public string PerspectiveToken { get; private set; }
+
         [JsonProperty("database")]
         public DatabaseSettings Database { get; private set; }
     }
