@@ -648,7 +648,7 @@ namespace ModCore.Commands
             await ctx.RespondAsync(embed: embed.Build());
         }
 
-        [Command("giverole"), Aliases("give", "reverseboonkrole", "reverseboonk"), Description("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
+        [Command("giverole"), Aliases("give"), Description("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task GiveRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
@@ -665,7 +665,7 @@ namespace ModCore.Commands
                     await ctx.RespondAsync($"Gave you the role `{Role.Name}`.");
                 }
                 else
-                    await ctx.RespondAsync("Can't give you this role because that role is above my highest role!");
+                    await ctx.RespondAsync("I can't give you this role because that role is above my highest role!");
             }
             else
             {
@@ -673,7 +673,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("takerole"), Aliases("take", "boonkrole", "boonk"), Description("Takes a specified role away from the user"), RequireBotPermissions(Permissions.ManageRoles)]
+        [Command("takerole"), Aliases("take"), Description("Takes a specified role away from the user"), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task TakeRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
@@ -687,10 +687,10 @@ namespace ModCore.Commands
                 if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= Role.Position))
                 {
                     await ctx.Member.RevokeRoleAsync(Role, "AutoRole revoke.");
-                    await ctx.RespondAsync($"Boonked your role: `{Role.Name}`.");
+                    await ctx.RespondAsync($"Took your role: `{Role.Name}`.");
                 }
                 else
-                    await ctx.RespondAsync("Can't take this role because that role is above my highest role!");
+                    await ctx.RespondAsync("I can't take this role because that role is above my highest role!");
             }
             else
             {
