@@ -648,7 +648,7 @@ namespace ModCore.Commands
             await ctx.RespondAsync(embed: embed.Build());
         }
 
-        [Command("giverole"), Aliases("give"), Description("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
+        [Command("giverole"), Aliases("give", "reverseboonkrole", "reverseboonk"), Description("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task GiveRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
@@ -673,7 +673,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("takerole"), Aliases("take", "boonk"), Description("Takes a specified role away from the user"), RequireBotPermissions(Permissions.ManageRoles)]
+        [Command("takerole"), Aliases("take", "boonkrole", "boonk"), Description("Takes a specified role away from the user"), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task TakeRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
             var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
