@@ -167,6 +167,12 @@ namespace ModCore.Logic
                 case EventTypes.Heartbeated:
                     client.Heartbeated += OnEventWithArgs;
                     break;
+                case EventTypes.CommandExecuted:
+                    bot.Commands.CommandErrored += OnEventWithArgs;
+                    break;
+                case EventTypes.CommandErrored:
+                    bot.Commands.CommandErrored += OnEventWithArgs;
+                    break;
             }
         }
     }
