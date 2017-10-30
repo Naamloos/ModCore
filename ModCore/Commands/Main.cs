@@ -401,6 +401,15 @@ namespace ModCore.Commands
                 return;
             }
 
+            using (var db = this.Database.CreateContext())
+            {
+                if (db.Timers.Any(x => x.ActionType == TimerActionType.Unmute && (ulong)x.UserId == m.Id))
+                {
+                    db.Timers.Remove(db.Timers.First(x => (ulong)x.UserId == m.Id && x.ActionType == TimerActionType.Unmute));
+                    await db.SaveChangesAsync();
+                }
+            }
+
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
@@ -489,6 +498,15 @@ namespace ModCore.Commands
             {
                 await ctx.RespondAsync("Mute role is not configured or missing. Set a correct role and re-run this command.");
                 return;
+            }
+
+            using (var db = this.Database.CreateContext())
+            {
+                if(db.Timers.Any(x => x.ActionType == TimerActionType.Unmute && (ulong)x.UserId == m.Id))
+                {
+                    await ctx.RespondAsync("This member was already muted! Please try to unmute them first!");
+                    return;
+                }
             }
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
