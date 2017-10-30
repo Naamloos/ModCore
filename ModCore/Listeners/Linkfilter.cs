@@ -28,9 +28,9 @@ namespace ModCore.Listeners
             if (e.Channel.Guild == null)
                 return;
 
-            var db = bot.Database.CreateContext();
-
-            var cfg = e.Guild.GetGuildSettings(db);
+            GuildSettings cfg = null;
+            using (var db = bot.Database.CreateContext())
+                cfg = e.Guild.GetGuildSettings(db);
             if (cfg == null)
                 return;
 

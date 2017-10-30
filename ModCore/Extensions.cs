@@ -145,8 +145,9 @@ namespace ModCore
         public static GuildSettings GetGuildSettings(this CommandContext ctx)
         {
             var dbb = ctx.Dependencies.GetDependency<DatabaseContextBuilder>();
-            var db = dbb.CreateContext();
-            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
+            DatabaseGuildConfig cfg = null;
+            using (var db = dbb.CreateContext())
+                cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
             return cfg?.GetSettings();
         }
 
@@ -159,21 +160,23 @@ namespace ModCore
         public static async Task SetGuildSettingsAsync(this CommandContext ctx, GuildSettings gcfg)
         {
             var dbb = ctx.Dependencies.GetDependency<DatabaseContextBuilder>();
-            var db = dbb.CreateContext();
-            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
-            if (cfg == null)
+            using (var db = dbb.CreateContext())
             {
-                cfg = new DatabaseGuildConfig { GuildId = (long)ctx.Guild.Id };
-                cfg.SetSettings(gcfg);
-                await db.GuildConfig.AddAsync(cfg);
-            }
-            else
-            {
-                cfg.SetSettings(gcfg);
-                db.GuildConfig.Update(cfg);
-            }
+                var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
+                if (cfg == null)
+                {
+                    cfg = new DatabaseGuildConfig { GuildId = (long)ctx.Guild.Id };
+                    cfg.SetSettings(gcfg);
+                    await db.GuildConfig.AddAsync(cfg);
+                }
+                else
+                {
+                    cfg.SetSettings(gcfg);
+                    db.GuildConfig.Update(cfg);
+                }
 
-            await db.SaveChangesAsync();
+                await db.SaveChangesAsync();
+            }
         }
 
         public static async Task LogActionAsync(this CommandContext ctx, string additionalinfo = "")

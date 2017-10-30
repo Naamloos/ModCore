@@ -444,9 +444,6 @@ namespace ModCore.Commands
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + ts;
 
-            // lock the timers
-            await this.Shared.TimerSempahore.WaitAsync();
-
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
@@ -456,22 +453,14 @@ namespace ModCore.Commands
                 ActionType = TimerActionType.Unban
             };
             reminder.SetData(new TimerUnbanData { Discriminator = m.Discriminator, DisplayName = m.Username, UserId = (long)m.Id });
-            var db = this.Database.CreateContext();
-            db.Timers.Add(reminder);
-            await db.SaveChangesAsync();
-
-            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
+            using (var db = this.Database.CreateContext())
             {
-                var tdata = this.Shared.TimerData;
-                tdata?.Cancel?.Cancel();
-
-                var cts = new CancellationTokenSource();
-                var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-                tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts);
-                _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
-                this.Shared.TimerData = tdata;
+                db.Timers.Add(reminder);
+                await db.SaveChangesAsync();
             }
-            this.Shared.TimerSempahore.Release();
+
+            Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+
             // End of Timer adding
             await ctx.RespondAsync($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 
@@ -509,9 +498,6 @@ namespace ModCore.Commands
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + ts;
 
-            // lock the timers
-            await this.Shared.TimerSempahore.WaitAsync();
-
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
@@ -521,22 +507,14 @@ namespace ModCore.Commands
                 ActionType = TimerActionType.Unmute
             };
             reminder.SetData(new TimerUnmuteData { Discriminator = m.Discriminator, DisplayName = m.Username, UserId = (long)m.Id, MuteRoleId = (long)ctx.GetGuildSettings().MuteRoleId });
-            var db = this.Database.CreateContext();
-            db.Timers.Add(reminder);
-            await db.SaveChangesAsync();
-
-            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
+            using (var db = this.Database.CreateContext())
             {
-                var tdata = this.Shared.TimerData;
-                tdata?.Cancel?.Cancel();
-
-                var cts = new CancellationTokenSource();
-                var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-                tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts);
-                _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
-                this.Shared.TimerData = tdata;
+                db.Timers.Add(reminder);
+                await db.SaveChangesAsync();
             }
-            this.Shared.TimerSempahore.Release();
+
+            Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+            
             // End of Timer adding
             await ctx.RespondAsync($"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 
@@ -550,9 +528,6 @@ namespace ModCore.Commands
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + pinfrom;
 
-            // lock the timers
-            await this.Shared.TimerSempahore.WaitAsync();
-
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
@@ -562,22 +537,14 @@ namespace ModCore.Commands
                 ActionType = TimerActionType.Pin
             };
             reminder.SetData(new TimerPinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
-            var db = this.Database.CreateContext();
-            db.Timers.Add(reminder);
-            await db.SaveChangesAsync();
-
-            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
+            using (var db = this.Database.CreateContext())
             {
-                var tdata = this.Shared.TimerData;
-                tdata?.Cancel?.Cancel();
-
-                var cts = new CancellationTokenSource();
-                var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-                tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts);
-                _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
-                this.Shared.TimerData = tdata;
+                db.Timers.Add(reminder);
+                await db.SaveChangesAsync();
             }
-            this.Shared.TimerSempahore.Release();
+
+            Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+
             // End of Timer adding
             await ctx.RespondAsync($"After {pinfrom.Humanize(4, minUnit: TimeUnit.Second)} this message will be pinned");
         }
@@ -591,9 +558,6 @@ namespace ModCore.Commands
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + pinuntil;
 
-            // lock the timers
-            await this.Shared.TimerSempahore.WaitAsync();
-
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
@@ -603,22 +567,14 @@ namespace ModCore.Commands
                 ActionType = TimerActionType.Unpin
             };
             reminder.SetData(new TimerUnpinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
-            var db = this.Database.CreateContext();
-            db.Timers.Add(reminder);
-            await db.SaveChangesAsync();
-
-            if (this.Shared.TimerData == null || this.Shared.TimerData.DispatchTime >= dispatch_at)
+            using (var db = this.Database.CreateContext())
             {
-                var tdata = this.Shared.TimerData;
-                tdata?.Cancel?.Cancel();
-
-                var cts = new CancellationTokenSource();
-                var t = Task.Delay(reminder.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-                tdata = new TimerData(t, reminder, ctx.Client, this.Database, this.Shared, cts);
-                _ = t.ContinueWith(Timers.TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
-                this.Shared.TimerData = tdata;
+                db.Timers.Add(reminder);
+                await db.SaveChangesAsync();
             }
-            this.Shared.TimerSempahore.Release();
+
+            Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+
             // End of Timer adding
             await ctx.RespondAsync($"In {pinuntil.Humanize(4, minUnit: TimeUnit.Second)} this message will be unpinned.");
         }
@@ -651,7 +607,9 @@ namespace ModCore.Commands
         [Command("giverole"), Aliases("give", "gr"), Description("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task GiveRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
-            var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
+            GuildSettings cfg = null;
+            using (var db = Database.CreateContext())
+                cfg = ctx.Guild.GetGuildSettings(db);
             if (cfg.SelfRoles.Contains(Role.Id))
             {
                 if (ctx.Member.Roles.Any(x => x.Id == Role.Id))
@@ -676,7 +634,9 @@ namespace ModCore.Commands
         [Command("takerole"), Aliases("take", "tr"), Description("Takes a specified role away from the user"), RequireBotPermissions(Permissions.ManageRoles)]
         public async Task TakeRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
         {
-            var cfg = ctx.Guild.GetGuildSettings(Database.CreateContext());
+            GuildSettings cfg = null;
+            using (var db = Database.CreateContext())
+                cfg = ctx.Guild.GetGuildSettings(db);
             if (cfg.SelfRoles.Contains(Role.Id))
             {
                 if (!ctx.Member.Roles.Any(x => x.Id == Role.Id))

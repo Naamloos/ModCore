@@ -146,33 +146,35 @@ namespace ModCore.Commands
         [Command("reset"), Description("Resets this guild's configuration to initial state. This cannot be reversed.")]
         public async Task ResetAsync(CommandContext ctx)
         {
-            var db = this.Database.CreateContext();
-            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
-            if (cfg == null)
+            using (var db = this.Database.CreateContext())
             {
-                await ctx.RespondAsync("This guild is not configured.");
-                return;
+                var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
+                if (cfg == null)
+                {
+                    await ctx.RespondAsync("This guild is not configured.");
+                    return;
+                }
+
+                var nums = new byte[8];
+                using (var rng = RandomNumberGenerator.Create())
+                    rng.GetBytes(nums);
+                var numss = string.Join(", ", nums);
+                var numst = string.Join(" ", nums.Reverse());
+
+                await ctx.RespondAsync(
+                    $"You are about to reset the configuration for this guild. To confirm, type these numbers in reverse order, using single space as separator: {numss}. You have 45 seconds.");
+                var iv = ctx.Client.GetInteractivityModule();
+                var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && xm.Content == numst,
+                    TimeSpan.FromSeconds(45));
+                if (msg == null)
+                {
+                    await ctx.RespondAsync("Operation aborted.");
+                    return;
+                }
+
+                db.GuildConfig.Remove(cfg);
+                await db.SaveChangesAsync();
             }
-
-            var nums = new byte[8];
-            using (var rng = RandomNumberGenerator.Create())
-                rng.GetBytes(nums);
-            var numss = string.Join(", ", nums);
-            var numst = string.Join(" ", nums.Reverse());
-
-            await ctx.RespondAsync(
-                $"You are about to reset the configuration for this guild. To confirm, type these numbers in reverse order, using single space as separator: {numss}. You have 45 seconds.");
-            var iv = ctx.Client.GetInteractivityModule();
-            var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && xm.Content == numst,
-                TimeSpan.FromSeconds(45));
-            if (msg == null)
-            {
-                await ctx.RespondAsync("Operation aborted.");
-                return;
-            }
-
-            db.GuildConfig.Remove(cfg);
-            await db.SaveChangesAsync();
 
             await ctx.RespondAsync("Configuration reset.");
         }
@@ -483,12 +485,14 @@ namespace ModCore.Commands
                         ibx.Add(chn.Id);
                     await ctx.SetGuildSettingsAsync(cfg);
 
-                    var db = this.Database.CreateContext();
-                    var chperms = db.RolestateOverrides.Where(xs => xs.ChannelId == (long)chn.Id && xs.GuildId == (long)chn.Guild.Id);
-                    if (chperms.Any())
+                    using (var db = this.Database.CreateContext())
                     {
-                        db.RolestateOverrides.RemoveRange(chperms);
-                        await db.SaveChangesAsync();
+                        var chperms = db.RolestateOverrides.Where(xs => xs.ChannelId == (long)chn.Id && xs.GuildId == (long)chn.Guild.Id);
+                        if (chperms.Any())
+                        {
+                            db.RolestateOverrides.RemoveRange(chperms);
+                            await db.SaveChangesAsync();
+                        }
                     }
 
                     await ctx.Message.CreateReactionAsync(CheckMark);
@@ -504,18 +508,20 @@ namespace ModCore.Commands
                     await ctx.SetGuildSettingsAsync(cfg);
 
                     var os = chn.PermissionOverwrites.Where(xo => xo.Type == "member");
-                    var db = this.Database.CreateContext();
-                    if (os.Any())
+                    using (var db = this.Database.CreateContext())
                     {
-                        await db.RolestateOverrides.AddRangeAsync(os.Select(xo => new DatabaseRolestateOverride
+                        if (os.Any())
                         {
-                            ChannelId = (long)chn.Id,
-                            GuildId = (long)chn.Guild.Id,
-                            MemberId = (long)xo.Id,
-                            PermsAllow = (long)xo.Allow,
-                            PermsDeny = (long)xo.Deny
-                        }));
-                        await db.SaveChangesAsync();
+                            await db.RolestateOverrides.AddRangeAsync(os.Select(xo => new DatabaseRolestateOverride
+                            {
+                                ChannelId = (long)chn.Id,
+                                GuildId = (long)chn.Guild.Id,
+                                MemberId = (long)xo.Id,
+                                PermsAllow = (long)xo.Allow,
+                                PermsDeny = (long)xo.Deny
+                            }));
+                            await db.SaveChangesAsync();
+                        }
                     }
 
                     await ctx.Message.CreateReactionAsync(CheckMark);

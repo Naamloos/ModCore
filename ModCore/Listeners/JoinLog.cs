@@ -19,7 +19,9 @@ namespace ModCore.Listeners
         [AsyncListener(EventTypes.GuildMemberAdded)]
         public static async Task LogNewMember(ModCoreShard bot, GuildMemberAddEventArgs e)
         {
-            var cfg = e.Guild.GetGuildSettings(bot.Database.CreateContext());
+            GuildSettings cfg = null;
+            using (var db = bot.Database.CreateContext())
+                cfg = e.Guild.GetGuildSettings(db);
             if (cfg.JoinLog.Enable)
             {
                 var m = e.Member;
@@ -46,7 +48,9 @@ namespace ModCore.Listeners
         [AsyncListener(EventTypes.GuildMemberRemoved)]
         public static async Task LogLeaveMember(ModCoreShard bot, GuildMemberRemoveEventArgs e)
         {
-            var cfg = e.Guild.GetGuildSettings(bot.Database.CreateContext());
+            GuildSettings cfg = null;
+            using (var db = bot.Database.CreateContext())
+                cfg = e.Guild.GetGuildSettings(db);
             if (cfg.JoinLog.Enable)
             {
                 var m = e.Member;
