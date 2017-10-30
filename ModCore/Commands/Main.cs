@@ -258,7 +258,7 @@ namespace ModCore.Commands
         public async Task CleanAsync(CommandContext ctx)
         {
             var gs = ctx.GetGuildSettings();
-            var prefix = gs != null ? gs.Prefix : "?>";
+            var prefix = gs?.Prefix ?? "?>";
             var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
             var delet_this = new List<DiscordMessage>();
             foreach (var m in ms)
@@ -401,14 +401,9 @@ namespace ModCore.Commands
                 return;
             }
 
-            using (var db = this.Database.CreateContext())
-            {
-                if (db.Timers.Any(x => x.ActionType == TimerActionType.Unmute && (ulong)x.UserId == m.Id))
-                {
-                    db.Timers.Remove(db.Timers.First(x => (ulong)x.UserId == m.Id && x.ActionType == TimerActionType.Unmute));
-                    await db.SaveChangesAsync();
-                }
-            }
+            var t = Timers.FindNearestTimer(TimerActionType.Unmute, m.Id, 0, ctx.Guild.Id, this.Database);
+            if (t != null)
+                await Timers.UnscheduleTimerAsync(t, ctx.Client, this.Database, this.Shared);
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
@@ -456,8 +451,8 @@ namespace ModCore.Commands
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
-                ChannelId = (long)ctx.Channel.Id,
-                UserId = (long)ctx.User.Id,
+                ChannelId = 0,
+                UserId = (long)m.Id,
                 DispatchAt = dispatch_at.LocalDateTime,
                 ActionType = TimerActionType.Unban
             };
@@ -500,13 +495,11 @@ namespace ModCore.Commands
                 return;
             }
 
-            using (var db = this.Database.CreateContext())
+            var timer = Timers.FindNearestTimer(TimerActionType.Unmute, m.Id, 0, ctx.Guild.Id, this.Database);
+            if (timer != null)
             {
-                if(db.Timers.Any(x => x.ActionType == TimerActionType.Unmute && (ulong)x.UserId == m.Id))
-                {
-                    await ctx.RespondAsync("This member was already muted! Please try to unmute them first!");
-                    return;
-                }
+                await ctx.RespondAsync("This member was already muted! Please try to unmute them first!");
+                return;
             }
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
@@ -519,8 +512,8 @@ namespace ModCore.Commands
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
-                ChannelId = (long)ctx.Channel.Id,
-                UserId = (long)ctx.User.Id,
+                ChannelId = 0,
+                UserId = (long)m.Id,
                 DispatchAt = dispatch_at.LocalDateTime,
                 ActionType = TimerActionType.Unmute
             };
@@ -532,7 +525,7 @@ namespace ModCore.Commands
             }
 
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
-            
+
             // End of Timer adding
             await ctx.RespondAsync($"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 

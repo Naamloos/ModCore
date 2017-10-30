@@ -14,14 +14,9 @@ namespace ModCore.Listeners
         [AsyncListener(EventTypes.GuildBanRemoved)]
         public static async Task CommandError(ModCoreShard bot, GuildBanRemoveEventArgs e)
         {
-            using (var db = bot.Database.CreateContext())
-            {
-                if (db.Timers.Any(x => x.ActionType == TimerActionType.Unmute && (ulong)x.UserId == e.Member.Id))
-                {
-                    db.Timers.Remove(db.Timers.First(x => (ulong)x.UserId == e.Member.Id && x.ActionType == TimerActionType.Unban));
-                    await db.SaveChangesAsync();
-                }
-            }
+            var t = Timers.FindNearestTimer(TimerActionType.Unban, e.Member.Id, 0, e.Guild.Id, bot.Database);
+            if (t != null)
+                await Timers.UnscheduleTimerAsync(t, bot.Client, bot.Database, bot.ShardData);
         }
     }
 }
