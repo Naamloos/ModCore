@@ -618,13 +618,13 @@ namespace ModCore.Commands
                         vb = CommandErrorVerbosity.None;
                         break;
                     case "name":
-                        vb = CommandErrorVerbosity.None;
+                        vb = CommandErrorVerbosity.Name;
                         break;
                     case "namedesc":
-                        vb = CommandErrorVerbosity.None;
+                        vb = CommandErrorVerbosity.NameDesc;
                         break;
                     case "exception":
-                        vb = CommandErrorVerbosity.None;
+                        vb = CommandErrorVerbosity.Exception;
                         break;
                     default:
                         await ctx.RespondAsync("Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
@@ -646,13 +646,13 @@ namespace ModCore.Commands
                         vb = CommandErrorVerbosity.None;
                         break;
                     case "name":
-                        vb = CommandErrorVerbosity.None;
+                        vb = CommandErrorVerbosity.Name;
                         break;
                     case "namedesc":
-                        vb = CommandErrorVerbosity.None;
+                        vb = CommandErrorVerbosity.NameDesc;
                         break;
                     case "exception":
-                        vb = CommandErrorVerbosity.None;
+                        vb = CommandErrorVerbosity.Exception;
                         break;
                     default:
                         await ctx.RespondAsync("Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
