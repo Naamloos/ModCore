@@ -664,7 +664,7 @@ namespace ModCore.Commands
                         await ctx.RespondAsync("Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
                         return;
                 }
-                cfg.CommandError.Chat = vb;
+                cfg.CommandError.ActionLog = vb;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync($"Error reporting verbosity in action log set to `{verbosity}`.");
             }
