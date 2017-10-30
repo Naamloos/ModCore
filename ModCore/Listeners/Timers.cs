@@ -234,7 +234,7 @@ namespace ModCore.Listeners
         public static async Task<TimerData> UnscheduleTimerAsync(DatabaseTimer timer, DiscordClient shard, DatabaseContextBuilder database, SharedData shared)
         {
             // lock the timers
-            shared.TimerSempahore.Wait();
+            await shared.TimerSempahore.WaitAsync();
 
             // remove the requested timer
             using (var db = database.CreateContext())
