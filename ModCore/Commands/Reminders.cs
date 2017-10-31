@@ -14,7 +14,7 @@ using ModCore.Listeners;
 
 namespace ModCore.Commands
 {
-    [Group("reminder"), Description("Commands for managing your reminders.")]
+    [Group("reminder"), Aliases("remindme"), Description("Commands for managing your reminders.")]
     public class Reminders
     {
         public SharedData Shared { get; }
@@ -32,7 +32,7 @@ namespace ModCore.Commands
         public async Task ListAsync(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
-            DatabaseTimer[] reminders = null;
+            DatabaseTimer[] reminders;
             using (var db = this.Database.CreateContext())
                 reminders = db.Timers.Where(xt => xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long)ctx.Guild.Id && xt.UserId == (long)ctx.User.Id).ToArray();
             if (!reminders.Any())
@@ -63,20 +63,18 @@ namespace ModCore.Commands
                 if (note.Contains('\n'))
                     note = string.Concat(note.Substring(0, note.IndexOf('\n')), "...");
 
-                cembed.AddField($"In {(DateTimeOffset.UtcNow - xr.DispatchAt).Humanize(4, minUnit: TimeUnit.Second)} (ID: #{xr.Id})", $"{note}", false);
-                if (cembed.Fields.Count >= 5)
+                cembed.AddField($"In {(DateTimeOffset.UtcNow - xr.DispatchAt).Humanize(4, minUnit: TimeUnit.Second)} (ID: #{xr.Id})", $"{note}");
+                if (cembed.Fields.Count < 5) continue;
+                cpnum++;
+                pages.Add(new Page { Embed = cembed.Build() });
+                cembed = new DiscordEmbedBuilder
                 {
-                    cpnum++;
-                    pages.Add(new Page { Embed = cembed.Build() });
-                    cembed = new DiscordEmbedBuilder
+                    Title = $"{emoji} Your currently set reminders:",
+                    Footer = new DiscordEmbedBuilder.EmbedFooter
                     {
-                        Title = $"{emoji} Your currently set reminders:",
-                        Footer = new DiscordEmbedBuilder.EmbedFooter
-                        {
-                            Text = $"Page {cpnum} of {tpnum}"
-                        }
-                    };
-                }
+                        Text = $"Page {cpnum} of {tpnum}"
+                    }
+                };
             }
             if (cembed.Fields.Count > 0)
                 pages.Add(new Page { Embed = cembed.Build() });
@@ -105,7 +103,7 @@ namespace ModCore.Commands
             }
 
             var now = DateTimeOffset.UtcNow;
-            var dispatch_at = now + duration;
+            var dispatchAt = now + duration;
 
             // create a new timer
             var reminder = new DatabaseTimer
@@ -113,7 +111,7 @@ namespace ModCore.Commands
                 GuildId = (long)ctx.Guild.Id,
                 ChannelId = (long)ctx.Channel.Id,
                 UserId = (long)ctx.User.Id,
-                DispatchAt = dispatch_at.LocalDateTime,
+                DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Reminder
             };
             reminder.SetData(new TimerReminderData { ReminderText = text });
@@ -131,15 +129,15 @@ namespace ModCore.Commands
         }
 
         [Command("stop"), Description("Stops and removes a timer.")]
-        public async Task UnsetAsync(CommandContext ctx, [Description("Which timer to stop.")] int timer_id)
+        public async Task UnsetAsync(CommandContext ctx, [Description("Which timer to stop.")] int timerId)
         {
             await ctx.TriggerTypingAsync();
 
             // find the timer
-            var reminder = Timers.FindTimer(timer_id, TimerActionType.Reminder, ctx.User.Id, this.Database);
+            var reminder = Timers.FindTimer(timerId, TimerActionType.Reminder, ctx.User.Id, this.Database);
             if (reminder == null)
             {
-                await ctx.RespondAsync($"Timer with specified ID (#{timer_id}) was not found.");
+                await ctx.RespondAsync($"Timer with specified ID (#{timerId}) was not found.");
                 return;
             }
 
