@@ -7,17 +7,7 @@ using System.Runtime.Serialization;
 namespace ModCore.Logic
 {
     public partial class BitSet : IList<byte>, IReadOnlyList<byte>
-    {   
-        IEnumerator<byte> IEnumerable<byte>.GetEnumerator()
-        {
-            return Sequence.GetEnumerator();
-        }
-
-        public IEnumerator<byte> GetByteEnumerator()
-        {
-            return Sequence.GetEnumerator();
-        }
-
+    {
         public void Add(byte item) => throw new NotSupportedException();
 
         void ICollection<byte>.Clear() => ClearAll();

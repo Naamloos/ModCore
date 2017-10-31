@@ -6,17 +6,6 @@ namespace ModCore.Logic
 {
     public partial class BitSet : IList<bool>, IReadOnlyList<bool>
     {
-        
-        IEnumerator<bool> IEnumerable<bool>.GetEnumerator()
-        {
-            return new BoolEnumerator(this);
-        }
-        
-        public IEnumerator<bool> GetBoolEnumerator()
-        {
-            return new BoolEnumerator(this);
-        }
-
         public void Add(bool item) => throw new NotSupportedException();
 
         void ICollection<bool>.Clear() => ClearAll();
@@ -81,34 +70,5 @@ namespace ModCore.Logic
         int IReadOnlyCollection<bool>.Count => Bits.Length * 4;
 
         bool IReadOnlyList<bool>.this[int index] => IsSet(index);
-    }
-    
-    internal class BoolEnumerator : IEnumerator<bool>
-    {
-        private readonly BitSet _bitset;
-        private int _pos;
-
-        public BoolEnumerator(BitSet bitset) => _bitset = bitset;
-
-        public bool Current => _bitset.IsSet(_pos);
-
-        public bool MoveNext()
-        {
-            if (_pos >= _bitset.Bits.Length * 8) return false;
-            _pos++;
-            return true;
-        }
-
-        public void Reset()
-        {
-            _pos = 0;
-        }
-
-        object IEnumerator.Current => Current;
-
-        public void Dispose()
-        {
-            
-        }
     }
 }
