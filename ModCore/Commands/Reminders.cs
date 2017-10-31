@@ -28,13 +28,23 @@ namespace ModCore.Commands
             this.Interactivity = interactive;
         }
 
+        [Description("Sets a new reminder.")]
+        public async Task ExecuteGroupAsync(CommandContext ctx,
+            [Description("After how much time to set the timer off.")] TimeSpan duration,
+            [RemainingText, Description("Reminder text.")] string text)
+        {
+            await SetAsync(ctx, duration, text);
+        }
+
         [Command("list"), Description("Lists your active reminders.")]
         public async Task ListAsync(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
             DatabaseTimer[] reminders;
             using (var db = this.Database.CreateContext())
-                reminders = db.Timers.Where(xt => xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long)ctx.Guild.Id && xt.UserId == (long)ctx.User.Id).ToArray();
+                reminders = db.Timers.Where(xt =>
+                    xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long) ctx.Guild.Id &&
+                    xt.UserId == (long) ctx.User.Id).ToArray();
             if (!reminders.Any())
             {
                 await ctx.RespondAsync("You have no reminders set.");
@@ -63,10 +73,12 @@ namespace ModCore.Commands
                 if (note.Contains('\n'))
                     note = string.Concat(note.Substring(0, note.IndexOf('\n')), "...");
 
-                cembed.AddField($"In {(DateTimeOffset.UtcNow - xr.DispatchAt).Humanize(4, minUnit: TimeUnit.Second)} (ID: #{xr.Id})", $"{note}");
+                cembed.AddField(
+                    $"In {(DateTimeOffset.UtcNow - xr.DispatchAt).Humanize(4, minUnit: TimeUnit.Second)} (ID: #{xr.Id})",
+                    $"{note}");
                 if (cembed.Fields.Count < 5) continue;
                 cpnum++;
-                pages.Add(new Page { Embed = cembed.Build() });
+                pages.Add(new Page {Embed = cembed.Build()});
                 cembed = new DiscordEmbedBuilder
                 {
                     Title = $"{emoji} Your currently set reminders:",
@@ -77,7 +89,7 @@ namespace ModCore.Commands
                 };
             }
             if (cembed.Fields.Count > 0)
-                pages.Add(new Page { Embed = cembed.Build() });
+                pages.Add(new Page {Embed = cembed.Build()});
 
             if (pages.Count > 1)
                 await interactivity.SendPaginatedMessage(ctx.Channel, ctx.User, pages);
@@ -86,13 +98,16 @@ namespace ModCore.Commands
         }
 
         [Command("set"), Description("Sets a new reminder.")]
-        public async Task SetAsync(CommandContext ctx, [Description("After how much time to set the timer off.")] TimeSpan duration, [RemainingText, Description("Reminder text.")] string text)
+        public async Task SetAsync(CommandContext ctx,
+            [Description("After how much time to set the timer off.")] TimeSpan duration,
+            [RemainingText, Description("Reminder text.")] string text)
         {
             await ctx.TriggerTypingAsync();
 
             if (string.IsNullOrWhiteSpace(text) || text.Length > 128)
             {
-                await ctx.RespondAsync("Reminder text needs to be no longer than 128 characters, cannot be null, empty, or whitespace-only.");
+                await ctx.RespondAsync(
+                    "Reminder text needs to be no longer than 128 characters, cannot be null, empty, or whitespace-only.");
                 return;
             }
 
@@ -108,13 +123,13 @@ namespace ModCore.Commands
             // create a new timer
             var reminder = new DatabaseTimer
             {
-                GuildId = (long)ctx.Guild.Id,
-                ChannelId = (long)ctx.Channel.Id,
-                UserId = (long)ctx.User.Id,
+                GuildId = (long) ctx.Guild.Id,
+                ChannelId = (long) ctx.Channel.Id,
+                UserId = (long) ctx.User.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Reminder
             };
-            reminder.SetData(new TimerReminderData { ReminderText = text });
+            reminder.SetData(new TimerReminderData {ReminderText = text});
             using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
@@ -125,7 +140,8 @@ namespace ModCore.Commands
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
             var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
-            await ctx.RespondAsync($"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text}");
+            await ctx.RespondAsync(
+                $"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text}");
         }
 
         [Command("stop"), Description("Stops and removes a timer.")]
@@ -147,7 +163,8 @@ namespace ModCore.Commands
             var duration = reminder.DispatchAt - DateTimeOffset.Now;
             var data = reminder.GetData<TimerReminderData>();
             var emoji = DiscordEmoji.FromName(ctx.Client, ":ballot_box_with_check:");
-            await ctx.RespondAsync($"{emoji} Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText}");
+            await ctx.RespondAsync(
+                $"{emoji} Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText}");
         }
     }
 }
