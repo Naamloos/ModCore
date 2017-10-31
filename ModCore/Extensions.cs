@@ -9,6 +9,7 @@ using DSharpPlus.Entities;
 using ModCore.Database;
 using ModCore.Entities;
 using DSharpPlus;
+using ModCore.Logic;
 
 namespace ModCore
 {
@@ -22,7 +23,8 @@ namespace ModCore
         /// <param name="ctx">This object</param>
         /// <param name="exec">The function to call</param>
         /// <returns>Asynchronous task resolving to the CommandContext, if you wish to reuse it.</returns>
-        public static async Task<CommandContext> WithGuildSettings(this CommandContext ctx, Func<GuildSettings, Task> exec)
+        public static async Task<CommandContext> WithGuildSettings(this CommandContext ctx,
+            Func<GuildSettings, Task> exec)
         {
             var cfg = GetGuildSettings(ctx) ?? new GuildSettings();
             await exec(cfg);
@@ -55,7 +57,8 @@ namespace ModCore
         /// <param name="there">The function to call if the guild is configured</param>
         /// <param name="notThere">The function to call if the guild is not configured</param>
         /// <returns>Asynchronous task resolving to the CommandContext, if you wish to reuse it.</returns>
-        public static async Task<CommandContext> IfGuildSettings(this CommandContext ctx, Func<GuildSettings, Task> there, Func<Task> notThere)
+        public static async Task<CommandContext> IfGuildSettings(this CommandContext ctx,
+            Func<GuildSettings, Task> there, Func<Task> notThere)
         {
             var cfg = GetGuildSettings(ctx);
             if (cfg == null)
@@ -79,7 +82,8 @@ namespace ModCore
         /// <param name="there">The function to call if the guild is configured</param>
         /// <param name="notThere">The function to call if the guild is not configured</param>
         /// <returns>Asynchronous task resolving to the CommandContext, if you wish to reuse it.</returns>
-        public static async Task<CommandContext> IfGuildSettings(this CommandContext ctx, Action<GuildSettings> there, Action notThere)
+        public static async Task<CommandContext> IfGuildSettings(this CommandContext ctx, Action<GuildSettings> there,
+            Action notThere)
         {
             var cfg = GetGuildSettings(ctx);
             if (cfg == null)
@@ -103,7 +107,8 @@ namespace ModCore
         /// <param name="there">The function to call if the guild is configured</param>
         /// <param name="notThere">The function to call if the guild is not configured</param>
         /// <returns>Asynchronous task resolving to the CommandContext, if you wish to reuse it.</returns>
-        public static async Task<CommandContext> IfGuildSettings(this CommandContext ctx, Func<Task> notThere, Func<GuildSettings, Task> there)
+        public static async Task<CommandContext> IfGuildSettings(this CommandContext ctx, Func<Task> notThere,
+            Func<GuildSettings, Task> there)
         {
             var cfg = GetGuildSettings(ctx);
             if (cfg == null)
@@ -127,7 +132,8 @@ namespace ModCore
         /// <param name="there">The function to call if the guild is configured</param>
         /// <param name="notThere">The function to call if the guild is not configured</param>
         /// <returns>Asynchronous task resolving to the CommandContext, if you wish to reuse it.</returns>
-        public static async Task<CommandContext> IfGuildSettings(this CommandContext ctx, Action notThere, Action<GuildSettings> there)
+        public static async Task<CommandContext> IfGuildSettings(this CommandContext ctx, Action notThere,
+            Action<GuildSettings> there)
         {
             var cfg = GetGuildSettings(ctx);
             if (cfg == null)
@@ -147,13 +153,13 @@ namespace ModCore
             var dbb = ctx.Dependencies.GetDependency<DatabaseContextBuilder>();
             DatabaseGuildConfig cfg = null;
             using (var db = dbb.CreateContext())
-                cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
+                cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id);
             return cfg?.GetSettings();
         }
 
         public static GuildSettings GetGuildSettings(this DiscordGuild gld, DatabaseContext db)
         {
-            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == gld.Id);
+            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == gld.Id);
             return cfg?.GetSettings();
         }
 
@@ -162,10 +168,10 @@ namespace ModCore
             var dbb = ctx.Dependencies.GetDependency<DatabaseContextBuilder>();
             using (var db = dbb.CreateContext())
             {
-                var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
+                var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id);
                 if (cfg == null)
                 {
-                    cfg = new DatabaseGuildConfig { GuildId = (long)ctx.Guild.Id };
+                    cfg = new DatabaseGuildConfig {GuildId = (long) ctx.Guild.Id};
                     cfg.SetSettings(gcfg);
                     await db.GuildConfig.AddAsync(cfg);
                 }
@@ -193,7 +199,8 @@ namespace ModCore
 
                 b.WithTitle($"New Action executed by {ctx.Member.Username}#{ctx.Member.Discriminator}")
                     .WithDescription($"Executed command: {ctx.Command.QualifiedName}\nArguments: {commandArgs}")
-                    .WithFooter($"Guild: {ctx.Guild.Name}", string.IsNullOrEmpty(ctx.Guild.IconHash) ? "" : ctx.Guild.IconUrl);
+                    .WithFooter($"Guild: {ctx.Guild.Name}",
+                        string.IsNullOrEmpty(ctx.Guild.IconHash) ? "" : ctx.Guild.IconUrl);
                 if (!string.IsNullOrEmpty(additionalinfo))
                     b.AddField("Additional information", additionalinfo);
 
@@ -206,20 +213,22 @@ namespace ModCore
             }
         }
 
-        public static async Task LogMessageAsync(this CommandContext ctx, string content = "", DiscordEmbedBuilder embed = null)
+        public static async Task LogMessageAsync(this CommandContext ctx, string content = "",
+            DiscordEmbedBuilder embed = null)
         {
             var s = ctx.GetGuildSettings();
             var a = s.ActionLog;
             if (a.Enable)
             {
                 var w = await ctx.Client.GetWebhookWithTokenAsync(a.WebhookId, a.WebhookToken);
-                await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed>() { embed } : null);
+                await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed>() {embed} : null);
             }
         }
 
-        public static async Task LogAutoActionAsync(this DiscordClient clnt, DiscordGuild gld, DatabaseContext db, string additionalinfo = "")
+        public static async Task LogAutoActionAsync(this DiscordClient clnt, DiscordGuild gld, DatabaseContext db,
+            string additionalinfo = "")
         {
-            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == gld.Id);
+            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == gld.Id);
             var s = cfg.GetSettings();
 
             if (s.ActionLog.Enable)
@@ -240,14 +249,15 @@ namespace ModCore
             }
         }
 
-        public static async Task ActionLogMessageAsync(this DiscordClient clnt, DiscordGuild gld, DatabaseContext db, string content = "", DiscordEmbedBuilder embed = null)
+        public static async Task ActionLogMessageAsync(this DiscordClient clnt, DiscordGuild gld, DatabaseContext db,
+            string content = "", DiscordEmbedBuilder embed = null)
         {
-            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == gld.Id);
+            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == gld.Id);
             var s = cfg.GetSettings();
             if (s.ActionLog.Enable)
             {
                 var w = await clnt.GetWebhookWithTokenAsync(s.ActionLog.WebhookId, s.ActionLog.WebhookToken);
-                await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed>() { embed } : null);
+                await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed>() {embed} : null);
             }
         }
 
@@ -267,6 +277,18 @@ namespace ModCore
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Gets permission overwrites for this channel as <see cref="Overwrite"/> objects.
+        /// </summary>
+        /// <param name="channel">the channel to get the overwrites from</param>
+        /// <returns>a <see cref="FillingList{Overwrite}"/> object mapping the overwrites</returns>
+        public static IReadOnlyList<Overwrite> GetPermissionOverwrites(this DiscordChannel channel)
+        {
+            return new FillingList<Overwrite>(
+                channel.PermissionOverwrites.Select(overwrite => new Overwrite(overwrite, channel.Guild)),
+                channel.PermissionOverwrites.Count);
         }
     }
 }
