@@ -290,5 +290,15 @@ namespace ModCore
                 channel.PermissionOverwrites.Select(overwrite => new Overwrite(overwrite, channel.Guild)),
                 channel.PermissionOverwrites.Count);
         }
+
+        public static bool EqualsIgnoreCase(this string a, string b)
+        {
+            return a.Equals(b, StringComparison.OrdinalIgnoreCase);
+        }
+        
+        public static int IndexOfInvariant(this string a, string b)
+        {
+            return a.IndexOf(b, StringComparison.Ordinal);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace ModCore.Commands
         public static DiscordEmoji CheckMark { get; } = DiscordEmoji.FromUnicode("✅");
 
         public DatabaseContextBuilder Database { get; }
-
+        
         public Config(DatabaseContextBuilder db)
         {
             this.Database = db;
@@ -29,7 +30,66 @@ namespace ModCore.Commands
 
         public async Task ExecuteGroupAsync(CommandContext ctx)
         {
-            await ctx.IfGuildSettings(async () => await ctx.RespondAsync("This guild is not configured."),
+            await ctx.IfGuildSettings(async () =>
+                {
+                    var interactivity = ctx.Dependencies.GetDependency<InteractivityExtension>();
+                    var t0 = await ctx.RespondAsync("Welcome to ModCore! Looks like you haven't configured your guild yet." +
+                                           "Would you like to go through a quick setup? (Y/N)");
+
+                    var message = await interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
+                        TimeSpan.FromSeconds(40));
+                    if (!message.Message.Content.EqualsIgnoreCase("y") &&
+                        !message.Message.Content.EqualsIgnoreCase("yes"))
+                    {
+                        await ctx.RespondAsync(
+                            "OK, I won't bother you anymore. Just execute this command again if you need help configuring.");
+                        await t0.DeleteAsync("modcore cleanup after itself: welcome message");
+                        await message.Message.DeleteAsync("modcore cleanup after itself: user response to welcome message");
+                        return;
+                    }
+
+                    DiscordChannel channel;
+                    try
+                    {
+                        channel = 
+                            ctx.Guild.Channels.FirstOrDefault(e => e.Name == "modcore-setup") ?? await ctx.Guild.CreateChannelAsync("modcore-setup", ChannelType.Text, null, null, null, null, "modcore setup channel creation");
+                    }
+                    catch
+                    {
+                        await ctx.RespondAsync("Unfortunately, I wasn't able to create the modcore setup channel.\n" +
+                                               "Could you kindly create a channel called `modcore-setup` and re-run the command?\n" +
+                                               "I'll set up the rest for you. This will help keep the setup process away from prying eyes.");
+                        return;
+                    }
+                    await channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None, Permissions.AccessChannels, "modcore overwrites for setup channel");
+                    await channel.AddOverwriteAsync(ctx.Member, Permissions.AccessChannels, Permissions.None,
+                        "modcore overwrites for setup channel");
+
+                    await channel.SendMessageAsync("OK, now, can you create a webhook for ModCore and give me its URL?\n" +
+                                           "If you don't know what that is, simply say no and I'll make one for you.");
+
+                    var message2 = await interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
+                        TimeSpan.FromSeconds(40));
+                    var mContent = message2.Message.Content;
+                    if (!mContent.Contains("discordapp.com/api/webhooks/"))
+                    {
+                        await channel.SendMessageAsync("Alright, I'll make a webhook for you then. Sit tight...");
+                        await channel.SendMessageAsync(
+                            "Gee, it looks like the developer hasn't implemented this part yet.\n" +
+                            "What a silly boy!");
+                    }
+                    else
+                    {
+                        var tokens = mContent.Substring(mContent.IndexOfInvariant("/api/webhooks/") + "/api/webhooks/".Length).Split('/');
+                        
+                        var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                        cfg.ActionLog.WebhookId = ulong.Parse(tokens[0]);
+                        cfg.ActionLog.WebhookToken = tokens[1];
+                        await ctx.SetGuildSettingsAsync(cfg);
+                        await ctx.RespondAsync("Webhook configured. Looks like you're all set! ModCore has been set up.");
+                    }
+                    //https://canary.discordapp.com/api/webhooks/id/token
+                },
                 async gcfg =>
                 {
                     var embed = new DiscordEmbedBuilder
