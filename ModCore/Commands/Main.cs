@@ -15,6 +15,7 @@ using System.Threading;
 using ModCore.Listeners;
 using Humanizer.Localisation;
 using Humanizer;
+using ModCore.Logic.Utils;
 
 namespace ModCore.Commands
 {
@@ -55,6 +56,7 @@ namespace ModCore.Commands
         public async Task InviteAsync(CommandContext ctx)
         {
             //TODO replace with a link to a nice invite builder!
+            // what the hell is an invite builder? - chris
             var app = ctx.Client.CurrentApplication;
             if (app.IsPublic != null && (bool)app.IsPublic)
                 await ctx.RespondAsync($"Add ModCore to your server!\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
@@ -354,19 +356,22 @@ namespace ModCore.Commands
                 return;
             }
 
-            var gcfg = ctx.GetGuildSettings();
-            if (gcfg == null)
+            var guildSettings = ctx.GetGuildSettings();
+            if (guildSettings == null)
             {
-                await ctx.RespondAsync("Guild is not configured. Adjust this guild's configuration and re-run this command.");
+                await ctx.RespondAsync("Guild is not configured, please configure and rerun");
                 return;
             }
 
-            var b = gcfg.MuteRoleId;
+            var b = guildSettings.MuteRoleId;
             var mute = ctx.Guild.GetRole(b);
             if (b == 0 || mute == null)
             {
-                await ctx.RespondAsync("Mute role is not configured or missing. Set a correct role and re-run this command.");
-                return;
+                var setupStatus = await Utils.SetupMuteRole(ctx.Guild);
+                mute = setupStatus.Role;
+                guildSettings.MuteRoleId = b = setupStatus.Role.Id;
+                await ctx.RespondAsync("Mute role is not configured or missing, " + setupStatus.Message);
+                await ctx.SetGuildSettingsAsync(guildSettings);
             }
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
