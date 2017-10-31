@@ -23,6 +23,9 @@ namespace ModCore.Listeners
             e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "Commands", e.Exception.ToString() 
                 + $"\nError verbosity: chat.{ce.Chat} actionlog.{ce.ActionLog}", DateTime.Now);
 
+            if (e.Exception.GetType == typeof(CommandNotFoundException))
+                return;
+
             switch (ce.Chat)
             {
                 default:
