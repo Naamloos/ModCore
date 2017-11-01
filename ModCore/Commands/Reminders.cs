@@ -11,6 +11,7 @@ using Humanizer.Localisation;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Listeners;
+using ModCore.Logic;
 
 namespace ModCore.Commands
 {
@@ -29,11 +30,9 @@ namespace ModCore.Commands
         }
 
         [Description("Sets a new reminder.")]
-        public async Task ExecuteGroupAsync(CommandContext ctx,
-            [Description("After how much time to set the timer off.")] TimeSpan duration,
-            [RemainingText, Description("Reminder text.")] string text)
+        public async Task ExecuteGroupAsync(CommandContext ctx, [RemainingText] string dataToParse)
         {
-            await SetAsync(ctx, duration, text);
+            await SetAsync(ctx, dataToParse);
         }
 
         [Command("list"), Description("Lists your active reminders.")]
@@ -98,16 +97,22 @@ namespace ModCore.Commands
         }
 
         [Command("set"), Description("Sets a new reminder.")]
-        public async Task SetAsync(CommandContext ctx,
-            [Description("After how much time to set the timer off.")] TimeSpan duration,
-            [RemainingText, Description("Reminder text.")] string text)
+        public async Task SetAsync(CommandContext ctx, [RemainingText] string dataToParse)
         {
             await ctx.TriggerTypingAsync();
+
+            var (duration, text) = await Dates.ParseTime(dataToParse);
+            if (duration == TimeSpan.MinValue)
+            {
+                await ctx.RespondAsync(
+                    $"Sorry, there was an error parsing your reminder.\nIf you see a developer, this info might help them: {text}");
+                return;
+            }
 
             if (string.IsNullOrWhiteSpace(text) || text.Length > 128)
             {
                 await ctx.RespondAsync(
-                    "Reminder text needs to be no longer than 128 characters, cannot be null, empty, or whitespace-only.");
+                    "Reminder text must to be no longer than 128 characters, not empty and not whitespace.");
                 return;
             }
 
@@ -166,5 +171,6 @@ namespace ModCore.Commands
             await ctx.RespondAsync(
                 $"{emoji} Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText}");
         }
+
     }
 }
