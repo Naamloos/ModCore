@@ -186,7 +186,7 @@ namespace ModCore.Listeners
                 if (rs.IgnoredChannelIds.Contains(ea.ChannelAfter.Id))
                     return;
 
-                var os = ea.ChannelAfter.PermissionOverwrites.Where(xo => xo.Type == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
+                var os = ea.ChannelAfter.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
                 var osids = os.Select(xo => xo.Key).ToArray();
 
                 var chperms = db.RolestateOverrides.Where(xs => xs.GuildId == (long)ea.Guild.Id && xs.ChannelId == (long)ea.ChannelAfter.Id)
@@ -247,7 +247,7 @@ namespace ModCore.Listeners
                     {
                         any = true;
 
-                        var os = chn.PermissionOverwrites.Where(xo => xo.Type == "member");
+                        var os = chn.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member");
                         if (!os.Any())
                             continue;
 
@@ -263,7 +263,7 @@ namespace ModCore.Listeners
                     else
                     {
                         var cps = prms[(long)chn.Id];
-                        var os = chn.PermissionOverwrites.Where(xo => xo.Type == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
+                        var os = chn.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
                         var osids = os.Keys.ToArray();
 
                         var del = cps.Keys.Except(osids);

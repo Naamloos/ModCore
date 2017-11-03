@@ -73,7 +73,7 @@ namespace ModCore
 
             this.Interactivity = Client.UseInteractivity(new InteractivityConfiguration()
             {
-                PaginationBehaviour = TimeoutBehaviour.Delete,
+                PaginationBehaviour = TimeoutBehaviour.DeleteReactions,
                 PaginationTimeout = TimeSpan.FromSeconds(30),
                 Timeout = TimeSpan.FromSeconds(30)
             });

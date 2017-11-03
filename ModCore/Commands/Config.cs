@@ -507,7 +507,7 @@ namespace ModCore.Commands
                         ibx.Remove(chn.Id);
                     await ctx.SetGuildSettingsAsync(cfg);
 
-                    var os = chn.PermissionOverwrites.Where(xo => xo.Type == "member");
+                    var os = chn.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member");
                     using (var db = this.Database.CreateContext())
                     {
                         if (os.Any())
