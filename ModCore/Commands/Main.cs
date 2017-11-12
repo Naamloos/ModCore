@@ -25,8 +25,9 @@ namespace ModCore.Commands
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
         public InteractivityExtension Interactivity { get; }
+        public StartTimes StartTimes { get; }
 
-        public Main(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive)
+        public Main(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive, StartTimes starttimes)
         {
             this.Database = db;
             this.Shared = shared;
@@ -42,7 +43,7 @@ namespace ModCore.Commands
         [Command("uptime"), Aliases("u")]
         public async Task UptimeAsync(CommandContext ctx)
         {
-            var st = ctx.Services.GetService<StartTimes>();
+            var st = this.StartTimes;
             var bup = DateTimeOffset.Now.Subtract(st.ProcessStartTime);
             var sup = DateTimeOffset.Now.Subtract(st.SocketStartTime);
 
@@ -416,7 +417,7 @@ namespace ModCore.Commands
         [Command("leave"), Description("Makes this bot leave the current server."), RequireUserPermissions(Permissions.Administrator)]
         public async Task LeaveAsync(CommandContext ctx)
         {
-            var interactivity = ctx.Services.GetService<InteractivityExtension>();
+            var interactivity = this.Interactivity;
             await ctx.RespondAsync("Are you sure you want to remove modcore from your guild?");
             var m = await interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
