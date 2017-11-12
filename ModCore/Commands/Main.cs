@@ -670,6 +670,25 @@ namespace ModCore.Commands
             }
         }
 
+        [Command("announce"), Description("Announces a message to a channel, using a role.")]
+        [RequireBotPermissions(Permissions.ManageRoles), RequireUserPermissions(Permissions.MentionEveryone)]
+        public async Task AnnounceAsync(CommandContext ctx, DiscordRole role, DiscordChannel channel, [RemainingText]string message)
+        {
+            if (!role.IsMentionable)
+            {
+                await role.UpdateAsync(mentionable: true);
+                await channel.SendMessageAsync($"{role.Mention} {message}");
+                await role.UpdateAsync(mentionable: false);
+                await ctx.Message.DeleteAsync();
+                await ctx.LogActionAsync($"Announced {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
+            }
+            else
+            {
+                await ctx.Channel.SendMessageAsync("You can't announce to that role because it is mentionable!");
+                await ctx.LogActionAsync($"Failed announcement\nMessage: {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
+            }
+        }
+
         private static string FormatDiscordBan(DiscordBan ban, int number)
         {
             return $"{number}. **{ban.User.ToDiscordTag()}**, Reason: {ban.Reason}";
