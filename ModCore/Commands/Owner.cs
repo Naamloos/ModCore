@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity;
+using Microsoft.Extensions.DependencyInjection;
 using ModCore.Entities;
 
 namespace ModCore.Commands
@@ -15,8 +16,8 @@ namespace ModCore.Commands
         {
             await ctx.RespondAsync("Are you sure you want to shut down the bot?");
 
-            var cts = ctx.Dependencies.GetDependency<SharedData>().CTS;
-            var interactivity = ctx.Dependencies.GetDependency<InteractivityExtension>();
+            var cts = ctx.Services.GetService<SharedData>().CTS;
+            var interactivity = ctx.Services.GetService<InteractivityExtension>();
             var m = await interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
             if (m == null)

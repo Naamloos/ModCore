@@ -1,20 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
+using Humanizer;
+using Humanizer.Localisation;
+using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using DSharpPlus.Interactivity;
-using System.Threading;
 using ModCore.Listeners;
-using Humanizer.Localisation;
-using Humanizer;
 
 namespace ModCore.Commands
 {
@@ -42,7 +42,7 @@ namespace ModCore.Commands
         [Command("uptime"), Aliases("u")]
         public async Task UptimeAsync(CommandContext ctx)
         {
-            var st = ctx.Dependencies.GetDependency<StartTimes>();
+            var st = ctx.Services.GetService<StartTimes>();
             var bup = DateTimeOffset.Now.Subtract(st.ProcessStartTime);
             var sup = DateTimeOffset.Now.Subtract(st.SocketStartTime);
 
@@ -416,7 +416,7 @@ namespace ModCore.Commands
         [Command("leave"), Description("Makes this bot leave the current server."), RequireUserPermissions(Permissions.Administrator)]
         public async Task LeaveAsync(CommandContext ctx)
         {
-            var interactivity = ctx.Dependencies.GetDependency<InteractivityExtension>();
+            var interactivity = ctx.Services.GetService<InteractivityExtension>();
             await ctx.RespondAsync("Are you sure you want to remove modcore from your guild?");
             var m = await interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
