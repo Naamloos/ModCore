@@ -163,7 +163,7 @@ namespace ModCore.Commands
 
                 await ctx.RespondAsync(
                     $"You are about to reset the configuration for this guild. To confirm, type these numbers in reverse order, using single space as separator: {numss}. You have 45 seconds.");
-                var iv = ctx.Client.GetInteractivityModule();
+                var iv = ctx.Client.GetInteractivity();
                 var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && xm.Content == numst,
                     TimeSpan.FromSeconds(45));
                 if (msg == null)
