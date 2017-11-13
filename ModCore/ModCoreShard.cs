@@ -13,6 +13,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Net.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ModCore
 {
@@ -71,19 +72,19 @@ namespace ModCore
 
             this.Interactivity = Client.UseInteractivity(new InteractivityConfiguration()
             {
-                PaginationBehaviour = TimeoutBehaviour.Delete,
+                PaginationBehaviour = TimeoutBehaviour.DeleteReactions,
                 PaginationTimeout = TimeSpan.FromSeconds(30),
                 Timeout = TimeSpan.FromSeconds(30)
             });
 
             // Add the instances we need to dependencies
-            var deps = new DependencyCollectionBuilder()
-                .AddInstance(this.ShardData)
+            var deps = new ServiceCollection()
+                .AddSingleton(this.ShardData)
                 //.AddInstance(this.Settings)
-                .AddInstance(this.Interactivity)
-                .AddInstance(this.StartTimes)
-                .AddInstance(this.Database)
-                .Build();
+                .AddSingleton(this.Interactivity)
+                .AddSingleton(this.StartTimes)
+                .AddSingleton(this.Database)
+                .BuildServiceProvider();
 
             // enable commandsnext
             this.Commands = Client.UseCommandsNext(new CommandsNextConfiguration
@@ -93,7 +94,7 @@ namespace ModCore
                 EnableDms = false,
                 EnableMentionPrefix = true,
                 CustomPrefixPredicate = this.GetPrefixPositionAsync,
-                Dependencies = deps
+                Services = deps
             });
 
             // register commands
@@ -114,7 +115,7 @@ namespace ModCore
 
         private Task Client_Ready(ReadyEventArgs e)
         {
-            Client.UpdateStatusAsync(new DiscordGame($"I'm on {this.Settings.ShardCount} shard(s)!"));
+            Client.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "s"), ActivityType.Watching));
             return Task.Delay(0);
         }
 

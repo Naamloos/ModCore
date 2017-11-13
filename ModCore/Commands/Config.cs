@@ -163,7 +163,7 @@ namespace ModCore.Commands
 
                 await ctx.RespondAsync(
                     $"You are about to reset the configuration for this guild. To confirm, type these numbers in reverse order, using single space as separator: {numss}. You have 45 seconds.");
-                var iv = ctx.Client.GetInteractivityModule();
+                var iv = ctx.Client.GetInteractivity();
                 var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && xm.Content == numst,
                     TimeSpan.FromSeconds(45));
                 if (msg == null)
@@ -507,7 +507,7 @@ namespace ModCore.Commands
                         ibx.Remove(chn.Id);
                     await ctx.SetGuildSettingsAsync(cfg);
 
-                    var os = chn.PermissionOverwrites.Where(xo => xo.Type == "member");
+                    var os = chn.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member");
                     using (var db = this.Database.CreateContext())
                     {
                         if (os.Any())
@@ -664,7 +664,7 @@ namespace ModCore.Commands
                         await ctx.RespondAsync("Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
                         return;
                 }
-                cfg.CommandError.Chat = vb;
+                cfg.CommandError.ActionLog = vb;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync($"Error reporting verbosity in action log set to `{verbosity}`.");
             }

@@ -23,6 +23,9 @@ namespace ModCore.Listeners
             e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "Commands", e.Exception.ToString() 
                 + $"\nError verbosity: chat.{ce.Chat} actionlog.{ce.ActionLog}", DateTime.Now);
 
+            if (e.Exception.GetType() == typeof(CommandNotFoundException))
+                return;
+
             switch (ce.Chat)
             {
                 default:
@@ -30,10 +33,10 @@ namespace ModCore.Listeners
                     break;
 
                 case CommandErrorVerbosity.Name:
-                    await ctx.RespondAsync($"**Command {e.Command.QualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`");
+                    await ctx.RespondAsync($"**Command {e.Command.QualifiedName} Errored!**\n`{e.Exception.GetType()}`");
                     break;
                 case CommandErrorVerbosity.NameDesc:
-                    await ctx.RespondAsync($"**Command {e.Command.QualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+                    await ctx.RespondAsync($"**Command {e.Command.QualifiedName} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
                     break;
                 case CommandErrorVerbosity.Exception:
                     MemoryStream stream = new MemoryStream();
@@ -41,7 +44,7 @@ namespace ModCore.Listeners
                     writer.Write(e.Exception.ToString());
                     writer.Flush();
                     stream.Position = 0;
-                    await ctx.RespondWithFileAsync(stream, "exception.txt", $"**Command `{e.Command.QualifiedName} {e.Command.Arguments}` Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+                    await ctx.RespondWithFileAsync("exception.txt", stream, $"**Command `{e.Command.QualifiedName} {e.Command.Arguments}` Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
                     break;
             }
 
@@ -54,10 +57,10 @@ namespace ModCore.Listeners
                         break;
 
                     case CommandErrorVerbosity.Name:
-                        await ctx.LogMessageAsync($"**Command {e.Command.QualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`");
+                        await ctx.LogMessageAsync($"**Command {e.Command.QualifiedName} Errored!**\n`{e.Exception.GetType()}`");
                         break;
                     case CommandErrorVerbosity.NameDesc:
-                        await ctx.LogMessageAsync($"**Command {e.Command.QualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+                        await ctx.LogMessageAsync($"**Command {e.Command.QualifiedName} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
                         break;
                     case CommandErrorVerbosity.Exception:
                         var st = e.Exception.StackTrace;

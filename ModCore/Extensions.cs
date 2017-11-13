@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
+using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
 using DSharpPlus;
@@ -150,7 +151,7 @@ namespace ModCore
 
         public static GuildSettings GetGuildSettings(this CommandContext ctx)
         {
-            var dbb = ctx.Dependencies.GetDependency<DatabaseContextBuilder>();
+            var dbb = ctx.Services.GetService<DatabaseContextBuilder>();
             DatabaseGuildConfig cfg = null;
             using (var db = dbb.CreateContext())
                 cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id);
@@ -165,7 +166,7 @@ namespace ModCore
 
         public static async Task SetGuildSettingsAsync(this CommandContext ctx, GuildSettings gcfg)
         {
-            var dbb = ctx.Dependencies.GetDependency<DatabaseContextBuilder>();
+            var dbb = ctx.Services.GetService<DatabaseContextBuilder>();
             using (var db = dbb.CreateContext())
             {
                 var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id);
