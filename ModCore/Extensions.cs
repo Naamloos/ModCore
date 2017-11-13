@@ -9,7 +9,6 @@ using DSharpPlus.Entities;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
-using DSharpPlus;
 using ModCore.Logic;
 
 namespace ModCore

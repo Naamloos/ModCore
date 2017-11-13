@@ -11,17 +11,9 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using Humanizer;
 using Humanizer.Localisation;
-using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using DSharpPlus.Interactivity;
 using ModCore.Listeners;
-using Humanizer.Localisation;
-using Humanizer;
 using ModCore.Logic.Utils;
 
 namespace ModCore.Commands

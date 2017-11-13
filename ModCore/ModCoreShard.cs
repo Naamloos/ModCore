@@ -9,9 +9,7 @@ using DSharpPlus.Interactivity;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
-using System.IO;
 using System.Runtime.InteropServices;
-using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Net.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 

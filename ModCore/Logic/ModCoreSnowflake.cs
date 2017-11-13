@@ -1,6 +1,5 @@
 ﻿using System;
 using DSharpPlus;
-using Newtonsoft.Json;
 
 namespace ModCore.Logic
 {

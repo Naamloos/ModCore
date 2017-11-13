@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using DSharpPlus.CommandsNext;
 using ModCore.Logic;
 using System.Threading.Tasks;

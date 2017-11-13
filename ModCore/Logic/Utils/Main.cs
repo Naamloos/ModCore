@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
-using ModCore.Entities;
 
 namespace ModCore.Logic.Utils
 {
