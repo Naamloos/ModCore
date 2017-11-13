@@ -490,20 +490,24 @@ namespace ModCore.Commands
                 return;
             }
 
-            var gcfg = ctx.GetGuildSettings();
-            if (gcfg == null)
+            var guildSettings = ctx.GetGuildSettings();
+            if (guildSettings == null)
             {
                 await ctx.RespondAsync("Guild is not configured. Adjust this guild's configuration and re-run this command.");
                 return;
             }
 
-            var b = gcfg.MuteRoleId;
+            var b = guildSettings.MuteRoleId;
             var mute = ctx.Guild.GetRole(b);
             if (b == 0 || mute == null)
             {
-                await ctx.RespondAsync("Mute role is not configured or missing. Set a correct role and re-run this command.");
-                return;
+                var setupStatus = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
+                mute = setupStatus.Role;
+                guildSettings.MuteRoleId = setupStatus.Role.Id;
+                await ctx.RespondAsync("Mute role is not configured or missing, " + setupStatus.Message);
+                await ctx.SetGuildSettingsAsync(guildSettings);
             }
+            await Utils.GuaranteeMuteRoleDeniedEverywhere(ctx.Guild, mute);
 
             var timer = Timers.FindNearestTimer(TimerActionType.Unmute, m.Id, 0, ctx.Guild.Id, this.Database);
             if (timer != null)
