@@ -167,6 +167,7 @@ namespace ModCore.Logic
                 {
                     case "a":
                     case "an":
+                    case "one":
                         return "1";
                     case "two":
                         return "2";
