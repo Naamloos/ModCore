@@ -621,7 +621,7 @@ namespace ModCore.Commands
                         ibx.Remove(chn.Id);
                     await ctx.SetGuildSettingsAsync(cfg);
 
-                    var os = chn.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member");
+                    var os = chn.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToArray();
                     using (var db = this.Database.CreateContext())
                     {
                         if (os.Any())
