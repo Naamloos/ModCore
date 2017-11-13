@@ -29,16 +29,11 @@ namespace ModCore.Logic
 
         public Overwrite(DiscordOverwrite ov, DiscordGuild guild)
         {
-            this.Type = ov.Type == "Role" ? OverwriteType.Role : ov.Type == "Member" ? OverwriteType.Member : OverwriteType.Undefined;
+            this.Type = ov.Type;
             this.Allow = ov.Allow;
             this.Deny = ov.Deny;
             this.Id = ov.Id;
             _guild = guild;
         }
-    }
-
-    public enum OverwriteType : byte
-    {
-        Role, Member, Undefined
     }
 }

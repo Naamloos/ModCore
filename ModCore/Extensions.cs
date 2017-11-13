@@ -108,7 +108,7 @@ namespace ModCore
         /// <param name="there">The function to call if the guild is configured</param>
         /// <param name="notThere">The function to call if the guild is not configured</param>
         /// <returns>Asynchronous task resolving to the CommandContext, if you wish to reuse it.</returns>
-        public static async Task<CommandContext> IfGuildSettings(this CommandContext ctx, Func<Task> notThere,
+        public static async Task<CommandContext> IfGuildSettingsAsync(this CommandContext ctx, Func<Task> notThere,
             Func<GuildSettings, Task> there)
         {
             var cfg = GetGuildSettings(ctx);
