@@ -145,7 +145,7 @@ namespace ModCore.Listeners
                                 return;
                             }
                         }
-                        await Guild.RevokeRoleAsync(Member, Role, "");
+                        await Member.RevokeRoleAsync(Role, "");
                         await client.LogAutoActionAsync(Guild, db, $"Member unmuted: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
                     }
                 }
