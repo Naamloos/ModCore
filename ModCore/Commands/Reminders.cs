@@ -104,6 +104,12 @@ namespace ModCore.Commands
                 return;
             }
 
+            if (duration > TimeSpan.FromDays(365)) // 1 year is the maximum
+            {
+                await ctx.RespondAsync("Maximum allowed time span to set a reminder is 1 year.");
+                return;
+            }
+
             var now = DateTimeOffset.UtcNow;
             var dispatch_at = now + duration;
 
