@@ -32,6 +32,7 @@ namespace ModCore.Commands
             this.Database = db;
             this.Shared = shared;
             this.Interactivity = interactive;
+            this.StartTimes = starttimes;
         }
 
         [Command("ping")]
