@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define HANSEN
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ using ModCore.Logic;
 
 namespace ModCore.Commands
 {
-    [Group("reminder"), Aliases("remindme"), Description("Commands for managing your reminders.")]
+    [Group("reminder", CanInvokeWithoutSubcommand = true), Aliases("remindme"), Description("Commands for managing your reminders.")]
     public class Reminders
     {
         public SharedData Shared { get; }
@@ -102,7 +103,7 @@ namespace ModCore.Commands
             await ctx.TriggerTypingAsync();
 
             var (duration, text) = await Dates.ParseTime(dataToParse);
-            if (duration == TimeSpan.MinValue)
+            if (duration == Dates.ParsingError)
             {
                 await ctx.RespondAsync(
                     $"Sorry, there was an error parsing your reminder.\nIf you see a developer, this info might help them: {text}");
@@ -115,12 +116,13 @@ namespace ModCore.Commands
                     "Reminder text must to be no longer than 128 characters, not empty and not whitespace.");
                 return;
             }
-
+#if !HANSEN
             if (duration < TimeSpan.FromSeconds(30))
             {
                 await ctx.RespondAsync("Minimum required time span to set a reminder is 30 seconds.");
                 return;
             }
+#endif
 
             var now = DateTimeOffset.UtcNow;
             var dispatchAt = now + duration;
