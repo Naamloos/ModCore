@@ -371,12 +371,13 @@ namespace ModCore.Commands
             var mute = ctx.Guild.GetRole(b);
             if (b == 0 || mute == null)
             {
-                var setupStatus = await Utils.SetupMuteRole(ctx.Guild);
+                var setupStatus = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
                 mute = setupStatus.Role;
                 guildSettings.MuteRoleId = setupStatus.Role.Id;
                 await ctx.RespondAsync("Mute role is not configured or missing, " + setupStatus.Message);
                 await ctx.SetGuildSettingsAsync(guildSettings);
             }
+            await Utils.GuaranteeMuteRoleDeniedEverywhere(mute);
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
