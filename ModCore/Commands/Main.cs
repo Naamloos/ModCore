@@ -20,7 +20,7 @@ namespace ModCore.Commands
 {
     public class Main
     {
-        private static readonly Regex SpaceReplacer = new Regex(" {2,}");
+        private static readonly Regex SpaceReplacer = new Regex(" {2,}", RegexOptions.Compiled);
 
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
