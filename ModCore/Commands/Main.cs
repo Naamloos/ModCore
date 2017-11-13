@@ -14,7 +14,15 @@ using Humanizer.Localisation;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
+using System.Text;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using DSharpPlus.Interactivity;
 using ModCore.Listeners;
+using Humanizer.Localisation;
+using Humanizer;
+using ModCore.Logic.Utils;
 
 namespace ModCore.Commands
 {
@@ -57,6 +65,7 @@ namespace ModCore.Commands
         public async Task InviteAsync(CommandContext ctx)
         {
             //TODO replace with a link to a nice invite builder!
+            // what the hell is an invite builder? - chris
             var app = ctx.Client.CurrentApplication;
             if (app.IsPublic != null && (bool)app.IsPublic)
                 await ctx.RespondAsync($"Add ModCore to your server!\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
@@ -79,13 +88,13 @@ namespace ModCore.Commands
                     deletThis.Add(m);
             }
             if (deletThis.Any())
-                await ctx.Channel.DeleteMessagesAsync(deletThis, $"Purged messages by {user.Username}#{user.Discriminator} (ID:{user.Id})");
-            var resp = await ctx.RespondAsync($"Latest messages by {user.Mention} (ID:{user.Id}) deleted.");
+                await ctx.Channel.DeleteMessagesAsync(deletThis, $"Purged messages by {user?.Username}#{user?.Discriminator} (ID:{user?.Id})");
+            var resp = await ctx.RespondAsync($"Latest messages by {user?.Mention} (ID:{user?.Id}) deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
             await ctx.Message.DeleteAsync("Purge command executed.");
 
-            await ctx.LogActionAsync($"Purged messages.\nUser: {user.Username}#{user.Discriminator} (ID:{user.Id})\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
+            await ctx.LogActionAsync($"Purged messages.\nUser: {user?.Username}#{user?.Discriminator} (ID:{user?.Id})\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
         }
 
         private static List<string> Tokenize(string value, char sep, char block)
@@ -248,7 +257,7 @@ namespace ModCore.Commands
             }
             if (deletThis.Any())
                 await ctx.Channel.DeleteMessagesAsync(deletThis, "Purged messages.");
-            var resp = await ctx.RespondAsync($"Latest messages deleted.");
+            var resp = await ctx.RespondAsync("Latest messages deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
             await ctx.Message.DeleteAsync("Purge command executed.");
@@ -262,15 +271,10 @@ namespace ModCore.Commands
             var gs = ctx.GetGuildSettings();
             var prefix = gs?.Prefix ?? "?>";
             var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
-            var delet_this = new List<DiscordMessage>();
-            foreach (var m in ms)
-            {
-                if (m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix))
-                    delet_this.Add(m);
-            }
-            if (delet_this.Any())
-                await ctx.Channel.DeleteMessagesAsync(delet_this, "Cleaned up commands");
-            var resp = await ctx.RespondAsync($"Latest messages deleted.");
+            var deletThis = ms.Where(m => m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix)).ToList();
+            if (deletThis.Any())
+                await ctx.Channel.DeleteMessagesAsync(deletThis, "Cleaned up commands");
+            var resp = await ctx.RespondAsync("Latest messages deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Clean command executed.");
             await ctx.Message.DeleteAsync("Clean command executed.");
@@ -307,7 +311,7 @@ namespace ModCore.Commands
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await ctx.Guild.BanMemberAsync(id, 7, $"{ustr}{rstr}");
-            await ctx.RespondAsync($"User hackbanned successfully.");
+            await ctx.RespondAsync("User hackbanned successfully.");
 
             await ctx.LogActionAsync($"Hackbanned ID: {id}\n{rstr}");
         }
@@ -356,19 +360,22 @@ namespace ModCore.Commands
                 return;
             }
 
-            var gcfg = ctx.GetGuildSettings();
-            if (gcfg == null)
+            var guildSettings = ctx.GetGuildSettings();
+            if (guildSettings == null)
             {
-                await ctx.RespondAsync("Guild is not configured. Adjust this guild's configuration and re-run this command.");
+                await ctx.RespondAsync("Guild is not configured, please configure and rerun");
                 return;
             }
 
-            var b = gcfg.MuteRoleId;
+            var b = guildSettings.MuteRoleId;
             var mute = ctx.Guild.GetRole(b);
             if (b == 0 || mute == null)
             {
-                await ctx.RespondAsync("Mute role is not configured or missing. Set a correct role and re-run this command.");
-                return;
+                var setupStatus = await Utils.SetupMuteRole(ctx.Guild);
+                mute = setupStatus.Role;
+                guildSettings.MuteRoleId = setupStatus.Role.Id;
+                await ctx.RespondAsync("Mute role is not configured or missing, " + setupStatus.Message);
+                await ctx.SetGuildSettingsAsync(guildSettings);
             }
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
@@ -448,14 +455,14 @@ namespace ModCore.Commands
             await m.BanAsync(7, $"{ustr}{rstr}");
             // Add timer
             var now = DateTimeOffset.UtcNow;
-            var dispatch_at = now + ts;
+            var dispatchAt = now + ts;
 
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
                 ChannelId = 0,
                 UserId = (long)m.Id,
-                DispatchAt = dispatch_at.LocalDateTime,
+                DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unban
             };
             reminder.SetData(new TimerUnbanData { Discriminator = m.Discriminator, DisplayName = m.Username, UserId = (long)m.Id });
@@ -509,14 +516,14 @@ namespace ModCore.Commands
             await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
             // Add timer
             var now = DateTimeOffset.UtcNow;
-            var dispatch_at = now + ts;
+            var dispatchAt = now + ts;
 
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
                 ChannelId = 0,
                 UserId = (long)m.Id,
-                DispatchAt = dispatch_at.LocalDateTime,
+                DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unmute
             };
             reminder.SetData(new TimerUnmuteData { Discriminator = m.Discriminator, DisplayName = m.Username, UserId = (long)m.Id, MuteRoleId = (long)ctx.GetGuildSettings().MuteRoleId });
@@ -539,14 +546,14 @@ namespace ModCore.Commands
         {
             // Add timer
             var now = DateTimeOffset.UtcNow;
-            var dispatch_at = now + pinfrom;
+            var dispatchAt = now + pinfrom;
 
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
                 ChannelId = (long)ctx.Channel.Id,
                 UserId = (long)ctx.User.Id,
-                DispatchAt = dispatch_at.LocalDateTime,
+                DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Pin
             };
             reminder.SetData(new TimerPinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
@@ -569,14 +576,14 @@ namespace ModCore.Commands
                 await message.PinAsync();
             // Add timer
             var now = DateTimeOffset.UtcNow;
-            var dispatch_at = now + pinuntil;
+            var dispatchAt = now + pinuntil;
 
             var reminder = new DatabaseTimer
             {
                 GuildId = (long)ctx.Guild.Id,
                 ChannelId = (long)ctx.Channel.Id,
                 UserId = (long)ctx.User.Id,
-                DispatchAt = dispatch_at.LocalDateTime,
+                DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unpin
             };
             reminder.SetData(new TimerUnpinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
@@ -618,22 +625,22 @@ namespace ModCore.Commands
         }
 
         [Command("giverole"), Aliases("give", "gr"), Description("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
-        public async Task GiveRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
+        public async Task GiveRoleAsync(CommandContext ctx, [RemainingText]DiscordRole role)
         {
-            GuildSettings cfg = null;
+            GuildSettings cfg;
             using (var db = Database.CreateContext())
                 cfg = ctx.Guild.GetGuildSettings(db);
-            if (cfg.SelfRoles.Contains(Role.Id))
+            if (cfg.SelfRoles.Contains(role.Id))
             {
-                if (ctx.Member.Roles.Any(x => x.Id == Role.Id))
+                if (ctx.Member.Roles.Any(x => x.Id == role.Id))
                 {
                     await ctx.RespondAsync("You already have that role!");
                     return;
                 }
-                if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= Role.Position))
+                if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
                 {
-                    await ctx.Member.GrantRoleAsync(Role, "AutoRole granted.");
-                    await ctx.RespondAsync($"Granted you the role `{Role.Name}`.");
+                    await ctx.Member.GrantRoleAsync(role, "AutoRole granted.");
+                    await ctx.RespondAsync($"Granted you the role `{role.Name}`.");
                 }
                 else
                     await ctx.RespondAsync("Can't grant you this role because that role is above my highest role!");
@@ -645,22 +652,22 @@ namespace ModCore.Commands
         }
 
         [Command("takerole"), Aliases("take", "tr"), Description("Takes a specified role away from the user"), RequireBotPermissions(Permissions.ManageRoles)]
-        public async Task TakeRoleAsync(CommandContext ctx, [RemainingText]DiscordRole Role)
+        public async Task TakeRoleAsync(CommandContext ctx, [RemainingText]DiscordRole role)
         {
-            GuildSettings cfg = null;
+            GuildSettings cfg;
             using (var db = Database.CreateContext())
                 cfg = ctx.Guild.GetGuildSettings(db);
-            if (cfg.SelfRoles.Contains(Role.Id))
+            if (cfg.SelfRoles.Contains(role.Id))
             {
-                if (!ctx.Member.Roles.Any(x => x.Id == Role.Id))
+                if (ctx.Member.Roles.All(x => x.Id != role.Id))
                 {
                     await ctx.RespondAsync("You don't have that role!");
                     return;
                 }
-                if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= Role.Position))
+                if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
                 {
-                    await ctx.Member.RevokeRoleAsync(Role, "AutoRole revoke.");
-                    await ctx.RespondAsync($"Revoked your role: `{Role.Name}`.");
+                    await ctx.Member.RevokeRoleAsync(role, "AutoRole revoke.");
+                    await ctx.RespondAsync($"Revoked your role: `{role.Name}`.");
                 }
                 else
                     await ctx.RespondAsync("Can't take this role because that role is above my highest role!");

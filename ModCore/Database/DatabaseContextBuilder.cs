@@ -1,14 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
+using ModCore.Entities;
 
 namespace ModCore.Database
 {
     public class DatabaseContextBuilder
     {
         private string ConnectionString { get; }
+        private DatabaseProvider Provider { get; }
 
-        public DatabaseContextBuilder(string cstr)
+        public DatabaseContextBuilder(DatabaseProvider provider, string cstr)
         {
+            this.Provider = provider;
             this.ConnectionString = cstr;
         }
 
@@ -16,7 +19,7 @@ namespace ModCore.Database
         {
             try
             {
-                return new DatabaseContext(this.ConnectionString);
+                return new DatabaseContext(this.Provider, this.ConnectionString);
             }
             catch (Exception e)
             {

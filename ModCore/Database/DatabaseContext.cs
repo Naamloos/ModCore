@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ModCore.Entities;
 
 namespace ModCore.Database
 {
@@ -12,20 +13,31 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseWarning> Warnings { get; set; }
         public virtual DbSet<DatabaseTimer> Timers { get; set; }
 
+        private DatabaseProvider Provider { get; }
         private string ConnectionString { get; }
 
-        public DatabaseContext(string cstring)
+        public DatabaseContext(DatabaseProvider provider, string cstring)
         {
+            this.Provider = provider;
             this.ConnectionString = cstring;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
-            if (!string.IsNullOrWhiteSpace(this.ConnectionString))
-                optionsBuilder.UseNpgsql(this.ConnectionString);
-            else
-                optionsBuilder.UseInMemoryDatabase("modcore");
+
+            switch (this.Provider)
+            {
+                case DatabaseProvider.PostgreSql:
+                    optionsBuilder.UseNpgsql(this.ConnectionString);
+                    break;
+                case DatabaseProvider.Sqlite:
+                    optionsBuilder.UseSqlite(this.ConnectionString);
+                    break;
+                case DatabaseProvider.InMemory:
+                    optionsBuilder.UseInMemoryDatabase("modcore");
+                    break;
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -121,7 +133,7 @@ namespace ModCore.Database
 
                 entity.Property(e => e.RoleIds).HasColumnName("role_ids");
 
-                if (string.IsNullOrWhiteSpace(this.ConnectionString))
+                if (this.Provider != DatabaseProvider.PostgreSql)
                     entity.Ignore(e => e.RoleIds);
             });
 

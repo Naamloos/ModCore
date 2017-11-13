@@ -56,7 +56,7 @@ namespace ModCore.Logic
             var b = bit / 8;
             if (b >= Bits.Length)
             {
-                Array.Resize(ref Bits, b + 1);
+                Resize(b + 1);
             }
             var bitIndex = bit % 8;
             Bits[b] |= (byte) (1 << bitIndex);
@@ -67,12 +67,23 @@ namespace ModCore.Logic
             var b = bit / 8;
             if (b >= Bits.Length)
             {
-                Array.Resize(ref Bits, b + 1);
+                Resize(b + 1);
                 return; // do nothing, will already be cleared
             }
 
             var bitIndex = bit % 8;
             Bits[b] &= (byte) ~(1 << bitIndex);
+        }
+
+        private void Resize(int size)
+        {
+#if EMZI
+            var result = new byte[size];
+            Array.Copy(Bits, result, Bits.Length);
+            Bits = result;
+#else
+            Array.Resize(ref Bits, size);
+#endif
         }
 
         public bool IsSet(int bit)
@@ -139,15 +150,5 @@ namespace ModCore.Logic
             return new BitSet(str.Trim().Split(',').Select(e => e.Length == 0 ? (byte) 0 : byte.Parse(e)));
         }
 #endif
-        
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return new BoolEnumerator(this);
-        }
-
-        public IEnumerator<bool> GetEnumerator()
-        {
-            return (this as IEnumerable<bool>).GetEnumerator();
-        }
     }
 }

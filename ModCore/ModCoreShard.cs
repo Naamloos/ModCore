@@ -58,13 +58,11 @@ namespace ModCore
                 ShardCount = this.Settings.ShardCount,
                 ShardId = this.ShardId
             });
-            #if ModCore_is_Windows7
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.OSVersion.Version <= new Version(6, 1, 7601, 65536))
             {
                 // NT 6.1 (Win7 SP1)
                 Client.SetWebSocketClient<WebSocket4NetCoreClient>();
             }
-            #endif
 
             Client.ClientErrored += async args =>
             {

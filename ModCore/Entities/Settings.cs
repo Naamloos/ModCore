@@ -1,4 +1,5 @@
-﻿using ModCore.Database;
+﻿using System;
+using ModCore.Database;
 using Newtonsoft.Json;
 using Npgsql;
 
@@ -27,8 +28,19 @@ namespace ModCore.Entities
 
     public struct DatabaseSettings
     {
+        [JsonProperty("provider")]
+        public DatabaseProvider Provider { get; private set; }
+
+        /// <summary>
+        /// Allows deserializing obsolete UseInMemoryProvider setting, but not serialization.
+        /// </summary>
         [JsonProperty("in_memory")]
-        public bool UseInMemoryProvider { get; private set; }
+        [Obsolete("Use " + nameof(Provider) + " instead!")]
+        public bool UseInMemoryProvider
+        {
+            // no getter!
+            set { if (value) Provider = DatabaseProvider.InMemory; }
+        }
 
         [JsonProperty("hostname")]
         public string Hostname { get; private set; }
@@ -44,30 +56,44 @@ namespace ModCore.Entities
 
         [JsonProperty("password")]
         public string Password { get; private set; }
+        
+        [JsonProperty("data_source")]
+        public string DataSource { get; private set; }
 
         public string BuildConnectionString()
         {
-            if (this.UseInMemoryProvider)
-                return null;
-
-            var csb = new NpgsqlConnectionStringBuilder
+            switch (this.Provider)
             {
-                Host = this.Hostname,
-                Port = this.Port,
-                Database = this.Database,
-                Username = this.Username,
-                Password = this.Password,
+                case DatabaseProvider.InMemory:
+                    return null;
+                case DatabaseProvider.Sqlite:
+                    return "Data Source=" + this.DataSource;
+                default:
+                    return new NpgsqlConnectionStringBuilder
+                    {
+                        Host = this.Hostname,
+                        Port = this.Port,
+                        Database = this.Database,
+                        Username = this.Username,
+                        Password = this.Password,
 
-                SslMode = SslMode.Prefer,
-                TrustServerCertificate = true,
+                        SslMode = SslMode.Prefer,
+                        TrustServerCertificate = true,
 
-                Pooling = false
-            };
+                        Pooling = false
+                    }.ConnectionString;
+            }
 
-            return csb.ConnectionString;
         }
 
         public DatabaseContextBuilder CreateContextBuilder() =>
-            new DatabaseContextBuilder(this.BuildConnectionString());
+            new DatabaseContextBuilder(this.Provider, this.BuildConnectionString());
+    }
+
+    public enum DatabaseProvider : byte
+    {
+        PostgreSql,
+        InMemory,
+        Sqlite,
     }
 }

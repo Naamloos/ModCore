@@ -5,7 +5,7 @@
   "use_perspective": true,
   "perspective_token": "insert perspective API token here",
   "database": {
-    "in_memory": false,
+    "provider": "PostgreSql",
     "hostname": "localhost",
     "port": 5432,
     "database": "modcore",
