@@ -18,6 +18,7 @@ namespace ModCore.Logic
         public static async Task<(TimeSpan duration, string text)> ParseTime(string dataToParse)
         {
             (TimeSpan duration, string text) times;
+            Exception originalException = null;
             try
             {
                  times = await _parseTime(dataToParse);
@@ -25,10 +26,11 @@ namespace ModCore.Logic
             catch (Exception e)
             {
                 DebugWriteLine($"{e}\n{e.StackTrace}");
-                return (ParsingError, $"parsing errored with {e}");
+                originalException = e;
+                times = default;
             }
 
-            if (times.duration.TotalMilliseconds >= 0 && Math.Abs(times.duration.TotalMilliseconds) > double.Epsilon)
+            if (!times.Equals(default) && times.duration.TotalMilliseconds >= 0 && Math.Abs(times.duration.TotalMilliseconds) > double.Epsilon)
             {
                 return times;
             }
@@ -45,10 +47,16 @@ namespace ModCore.Logic
             catch (Exception e)
             {
                 DebugWriteLine($"{e}\n{e.StackTrace}");
+#if DEBUG
                 return (ParsingError, $"parsing (second pass) errored with {e}");
+#else
+                throw;
+#endif
             }
             
-            var originalError = times.duration.TotalMilliseconds < 0 
+            var originalError = originalException != null 
+                ? $"threw `{originalException.GetType().Name}`: {originalException.Message}" 
+                : times.duration.TotalMilliseconds < 0 
                 ? $@"returned a time value ""{times.duration.TotalMilliseconds}"" less than 0" 
                 : $@"returned a time value 0 or absurdly close ({times.duration.TotalMilliseconds})";
             
@@ -130,7 +138,7 @@ namespace ModCore.Logic
             }
             // sometimes people type invalid timespans like 2m5s in the old syntax. we can parse these as well.
             var aggMatches = NumWordAggressive.Matches(firstToken);
-            if (aggMatches.Count >= 2) // we want to chech for >= or else this can breaks all other parsing. TODO will it actually break other parsing?
+            if (aggMatches.Count > 0)
             {
                 DebugWriteLine($"Splitting by invalid timespan match (aggressive) from {firstToken}: {Join(';', aggMatches.Select(e => Join(',', e.Groups)))}");
                 // call ParseTimeSpan in aggressive so it'll split, for example, 2m5s into 2 m 5 s. in non aggressive it
