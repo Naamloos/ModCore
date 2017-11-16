@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ModCore.Entities;
 using Newtonsoft.Json;
+using ModCore.Api;
 
 namespace ModCore
 {
@@ -16,6 +17,7 @@ namespace ModCore
         internal SharedData SharedData { get; private set; }
         private List<ModCoreShard> Shards { get; set; }
         private CancellationTokenSource CTS { get; set; }
+        private Perspective PerspectiveApi { get; set; }
 
         internal async Task InitializeAsync()
         {
@@ -30,6 +32,7 @@ namespace ModCore
 
             var input = File.ReadAllText("settings.json", new UTF8Encoding(false));
             Settings = JsonConvert.DeserializeObject<Settings>(input);
+            PerspectiveApi = new Perspective(Settings.PerspectiveToken);
 
             Shards = new List<ModCoreShard>();
             InitializeSharedData();
@@ -54,7 +57,7 @@ namespace ModCore
         {
             CTS = new CancellationTokenSource();
             var pst = Process.GetCurrentProcess().StartTime;
-            SharedData = new SharedData(CTS, pst);
+            SharedData = new SharedData(CTS, pst, PerspectiveApi);
         }
 
         public async Task WaitForCancellation()

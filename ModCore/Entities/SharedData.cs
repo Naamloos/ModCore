@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModCore.Api;
+using System;
 using System.Threading;
 
 namespace ModCore.Entities
@@ -9,12 +10,14 @@ namespace ModCore.Entities
         public DateTime ProcessStartTime { get; private set; }
         public SemaphoreSlim TimerSempahore { get; private set; }
         public TimerData TimerData { get; set; }
+        public Perspective Perspective { get; private set; }
 
-        public SharedData(CancellationTokenSource cts, DateTime processStartTime)
+        public SharedData(CancellationTokenSource cts, DateTime processStartTime, Perspective psp)
         {
-            CTS = cts;
-            ProcessStartTime = processStartTime;
+            this.CTS = cts;
+            this.ProcessStartTime = processStartTime;
             this.TimerSempahore = new SemaphoreSlim(1, 1);
+            this.Perspective = psp;
         }
     }
 }
