@@ -21,9 +21,9 @@ dotnet_csproj:
 install:
 - cmd: appveyor downloadfile https://dist.nuget.org/win-x86-commandline/v4.3.0/nuget.exe
 
-configuration:
-  - Debug
-  - Release
+#configuration:
+#  - Debug
+#  - Release
 
 environment:
   lf_webhook:
@@ -43,10 +43,12 @@ artifacts:
     name: ModCore Release Build
     type: zip
 
-notifications:
-- provider: Slack
-  incoming_webhook: '{lf_webhook}'
-  channel: modcore
-  on_build_success: true
-  on_build_failure: true
-  on_build_status_changed: false
+# i dont think i need this cuz it just read from the appveyor settings menu
+#notifications:
+#- provider: Slack
+#  incoming_webhook: '{lf_webhook}'
+#  channel: modcore
+#  on_build_success: true
+#  on_build_failure: true
+#  on_build_status_changed: false
+#
