@@ -5,12 +5,21 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Entities;
+using System.IO;
+using System.Diagnostics;
 
 namespace ModCore.Commands
 {
     [Group("owner"), Aliases("o"), RequireOwner]
     public class Owner
     {
+        public SharedData Shared { get; }
+
+        public Owner(SharedData shared)
+        {
+            this.Shared = shared;
+        }
+
         [Command("exit"), Aliases("e")]
         public async Task ExitAsync(CommandContext ctx)
         {
@@ -36,6 +45,37 @@ namespace ModCore.Commands
         {
             await ctx.RespondAsync("Throwing exception for testing purposes");
             throw new AccessViolationException("Did you just assume my gender?");
+        }
+
+        [Command("update"), Aliases("u")]
+        public async Task UpdateAsync(CommandContext ctx)
+        {
+            string file = "update";
+            if (File.Exists("update.sh"))
+                file += ".sh";
+            else if (File.Exists("update.bat"))
+                file += ".bat";
+            else
+            {
+                await ctx.RespondAsync("**‼ Your update script has not been found. ‼**\n\nPlease place `update.sh` (Linux) or `update.bat` (Windows) in your ModCore directory.");
+                return;
+            }
+
+            var m = await ctx.RespondAsync($"Running `{file}`...");
+            Process proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = file,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                }
+            };
+            proc.Start();
+            proc.WaitForExit();
+            await m.ModifyAsync($"Updated ModCore using `{file}`. Restarting..");
+            this.Shared.CTS.Cancel();
         }
     }
 }
