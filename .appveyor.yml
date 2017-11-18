@@ -1,0 +1,38 @@
+version: '{build}'
+pull_requests:
+  do_not_increment_build_number: true
+branches:
+  only:
+  - master
+image: Visual Studio 2017
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
+  informational_version: '{version}'
+
+install:
+- cmd: appveyor downloadfile https://dist.nuget.org/win-x86-commandline/v4.3.0/nuget.exe
+
+environment:
+  lf_webhook:
+    secure: 4lwb0Sro3Im5GqSJhMnoQJplQgveO/X4mOqzY11VUZ1g5s5CBD652iwX4LU2s4+6oNeE3H9Ha1hfVOE47uYavGj7d6P+BMEr0A9tw4DyYAcYVnZbQeoI6zbsWIfJnLcDXthKPbuq94u9djSOmVLXkVwR5LBcs365C1CUoi7exFlnbFGLxk233rktzcWkrxyu
+
+before_build:
+- cmd: >-
+    nuget sources add -Name dsp-myget -Source https://www.myget.org/F/dsharpplus-nightly/api/v3/index.json
+
+    nuget restore
+build:
+  project: ModCore.sln
+  verbosity: detailed
+notifications:
+- provider: Slack
+  incoming_webhook: '{lf_webhook}'
+  channel: modcore
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: false
