@@ -32,15 +32,16 @@ environment:
 before_build:
 - cmd: nuget sources add -Name dsp-myget -Source https://www.myget.org/F/dsharpplus-nightly/api/v3/index.json
 - cmd: nuget restore
-    
+
+build: off
+
+build_script:
+- cmd: dotnet build ModCore.sln -v Minimal -c Release
+
 artifacts:
   - path: 'ModCore\bin\Release\netcoreapp2.0'
     name: ModCore Release Build
     type: zip
-
-build:
-  project: ModCore.sln
-  verbosity: detailed
 
 notifications:
 - provider: Slack
