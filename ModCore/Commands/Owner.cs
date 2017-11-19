@@ -44,7 +44,7 @@ namespace ModCore.Commands
         [Command("testupdate"), Aliases("t"), Hidden]
         public async Task ThrowAsync(CommandContext ctx)
         {
-            await ctx.RespondAsync("Test: 69");
+            await ctx.RespondAsync("Test: 420");
         }
 
         [Command("update"), Aliases("u")]
