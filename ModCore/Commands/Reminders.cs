@@ -188,7 +188,7 @@ If in doubt, just try it! You can always clear the reminders later.
                 $"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text}");
         }
 
-        [Command("stop"), Description("Stops and removes a timer.")]
+        [Command("stop"), Aliases("unset", "remove"), Description("Stops and removes a reminder.")]
         public async Task UnsetAsync(CommandContext ctx, [Description("Which timer to stop. To get a Timer ID, use " +
                                                                       "the `reminder list` command.")] int timerId)
         {
@@ -212,5 +212,39 @@ If in doubt, just try it! You can always clear the reminders later.
                 $"{emoji} Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText}");
         }
 
+        [Command("clear"), Description("Clears all active reminders.")]
+        public async Task ClearAsync(CommandContext ctx)
+        {
+            await ctx.TriggerTypingAsync();
+
+            await ctx.RespondAsync("Are you sure you want to clear all your active reminders? This action cannot be undone!");
+
+            var m = await this.Interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
+
+            if (m == null)
+            {
+                await ctx.RespondAsync("Timed out.");
+            }
+            else if (InteractivityUtil.Confirm(m))
+            {
+                await ctx.RespondAsync("Brace for impact!");
+                await ctx.TriggerTypingAsync();
+                using (var db = this.Database.CreateContext())
+                {
+                    var timers = db.Timers
+                        .Where(xt => xt.ActionType == TimerActionType.Reminder && xt.UserId == (long) ctx.User.Id)
+                        .ToArray();
+                    var count = timers.Length;
+                    db.Timers.RemoveRange(timers);
+
+                    await ctx.RespondAsync("Alright, cleared " + count + " timers.");
+                }
+
+            }
+            else
+            {
+                await ctx.RespondAsync("Nevermind then, maybe next time.");
+            }
+        }
     }
 }
