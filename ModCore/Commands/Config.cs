@@ -29,6 +29,7 @@ namespace ModCore.Commands
             this.Interactivity = interactive;
         }
 
+        [Description("Starts the ModCore configuration wizard. You probably want to do this first!")]
         public async Task ExecuteGroupAsync(CommandContext ctx)
         {
             await ctx.IfGuildSettingsAsync(async () =>
@@ -40,7 +41,10 @@ namespace ModCore.Commands
                     var message = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
                         TimeSpan.FromSeconds(40));
                     if (!message.Message.Content.EqualsIgnoreCase("y") &&
-                        !message.Message.Content.EqualsIgnoreCase("yes"))
+                        !message.Message.Content.EqualsIgnoreCase("yes") &&
+                        !message.Message.Content.EqualsIgnoreCase("ya") &&
+                        !message.Message.Content.EqualsIgnoreCase("ja") &&
+                        !message.Message.Content.EqualsIgnoreCase("da"))
                     {
                         await ctx.RespondAsync(
                             "OK, I won't bother you anymore. Just execute this command again if you need help configuring.");
@@ -684,10 +688,10 @@ namespace ModCore.Commands
 
             [Command("setwebhook"), Aliases("swh"),
              Description("Sets the webhook ID and token for this guild's action log")]
-            public async Task SetWebhookAsync(CommandContext ctx, ulong ID, string token)
+            public async Task SetWebhookAsync(CommandContext ctx, ulong id, string token)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                cfg.ActionLog.WebhookId = ID;
+                cfg.ActionLog.WebhookId = id;
                 cfg.ActionLog.WebhookToken = token;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("ActionLog webhook configured.");
@@ -718,10 +722,10 @@ namespace ModCore.Commands
 
             [Command("setrole"), Aliases("sr"),
              Description("Sets the webhook ID and token for this guild's action log")]
-            public async Task SetRoleAsync(CommandContext ctx, DiscordRole Role)
+            public async Task SetRoleAsync(CommandContext ctx, DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                cfg.AutoRole.RoleId = (long) Role.Id;
+                cfg.AutoRole.RoleId = (long) role.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("AutoRole role configured.");
             }
@@ -812,10 +816,10 @@ namespace ModCore.Commands
             }
 
             [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's join log.")]
-            public async Task SetRoleAsync(CommandContext ctx, DiscordChannel Channel)
+            public async Task SetRoleAsync(CommandContext ctx, DiscordChannel channel)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                cfg.JoinLog.ChannelId = (long) Channel.Id;
+                cfg.JoinLog.ChannelId = (long) channel.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("JoinLog channel configured.");
             }
@@ -825,12 +829,12 @@ namespace ModCore.Commands
         public class SelfRole
         {
             [Command("add"), Aliases("a"), Description("Adds roles to selfrole list")]
-            public async Task AddSelfRoleAsync(CommandContext ctx, DiscordRole Role)
+            public async Task AddSelfRoleAsync(CommandContext ctx, DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                if (!cfg.SelfRoles.Contains(Role.Id))
+                if (!cfg.SelfRoles.Contains(role.Id))
                 {
-                    cfg.SelfRoles.Add(Role.Id);
+                    cfg.SelfRoles.Add(role.Id);
                 }
                 else
                 {
@@ -838,16 +842,16 @@ namespace ModCore.Commands
                     return;
                 }
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync($"Added role `{Role.Name}` with ID `{Role.Id}` to SelfRoles.");
+                await ctx.RespondAsync($"Added role `{role.Name}` with ID `{role.Id}` to SelfRoles.");
             }
 
             [Command("remove"), Aliases("r"), Description("Removes roles from selfrole list")]
-            public async Task RemoveSelfRoleAsync(CommandContext ctx, DiscordRole Role)
+            public async Task RemoveSelfRoleAsync(CommandContext ctx, DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                if (cfg.SelfRoles.Contains(Role.Id))
+                if (cfg.SelfRoles.Contains(role.Id))
                 {
-                    cfg.SelfRoles.Remove(Role.Id);
+                    cfg.SelfRoles.Remove(role.Id);
                 }
                 else
                 {
@@ -855,7 +859,7 @@ namespace ModCore.Commands
                     return;
                 }
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync($"Removed role `{Role.Name}` with ID `{Role.Id}` from SelfRoles.");
+                await ctx.RespondAsync($"Removed role `{role.Name}` with ID `{role.Id}` from SelfRoles.");
             }
         }
     }

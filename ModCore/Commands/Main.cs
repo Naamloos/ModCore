@@ -27,7 +27,8 @@ namespace ModCore.Commands
         public InteractivityExtension Interactivity { get; }
         public StartTimes StartTimes { get; }
 
-        public Main(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive, StartTimes starttimes)
+        public Main(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive,
+            StartTimes starttimes)
         {
             this.Database = db;
             this.Shared = shared;
@@ -35,13 +36,13 @@ namespace ModCore.Commands
             this.StartTimes = starttimes;
         }
 
-        [Command("ping")]
+        [Command("ping"), Description("Check ModCore's API connection status.")]
         public async Task PingAsync(CommandContext ctx)
         {
             await ctx.RespondAsync($"Pong: ({ctx.Client.Ping}) ms.");
         }
 
-        [Command("uptime"), Aliases("u")]
+        [Command("uptime"), Description("Check ModCore's uptime."), Aliases("u")]
         public async Task UptimeAsync(CommandContext ctx)
         {
             var st = this.StartTimes;
@@ -49,23 +50,26 @@ namespace ModCore.Commands
             var sup = DateTimeOffset.Now.Subtract(st.SocketStartTime);
 
             // Needs improvement
-            await ctx.RespondAsync($"Program uptime: {string.Format("{0} days, {1}", bup.ToString("dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
+            await ctx.RespondAsync(
+                $"Program uptime: {string.Format("{0} days, {1}", bup.ToString("dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
                 $"Socket uptime: {string.Format("{0} days, {1}", sup.ToString("dd"), sup.ToString(@"hh\:mm\:ss"))}");
         }
 
-        [Command("invite"), Aliases("inv")]
+        [Command("invite"), Description("Get an invite to this ModCore instance. Sharing is caring!"), Aliases("inv")]
         public async Task InviteAsync(CommandContext ctx)
         {
             //TODO replace with a link to a nice invite builder!
             // what the hell is an invite builder? - chris
             var app = ctx.Client.CurrentApplication;
-            if (app.IsPublic != null && (bool)app.IsPublic)
-                await ctx.RespondAsync($"Add ModCore to your server!\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
+            if (app.IsPublic != null && (bool) app.IsPublic)
+                await ctx.RespondAsync(
+                    $"Add ModCore to your server!\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
             else
                 await ctx.RespondAsync("I'm sorry Mario, but this instance of ModCore has been set to private!");
         }
 
-        [Command("purgeuser"), Aliases("pu"), RequirePermissions(Permissions.ManageMessages)]
+        [Command("purgeuser"), Description("Delete an amount of messages by an user."), Aliases("pu"),
+         RequirePermissions(Permissions.ManageMessages)]
         public async Task PurgeUserAsync(CommandContext ctx, DiscordUser user, int limit, int skip = 0)
         {
             var i = 0;
@@ -80,13 +84,15 @@ namespace ModCore.Commands
                     deletThis.Add(m);
             }
             if (deletThis.Any())
-                await ctx.Channel.DeleteMessagesAsync(deletThis, $"Purged messages by {user?.Username}#{user?.Discriminator} (ID:{user?.Id})");
+                await ctx.Channel.DeleteMessagesAsync(deletThis,
+                    $"Purged messages by {user?.Username}#{user?.Discriminator} (ID:{user?.Id})");
             var resp = await ctx.RespondAsync($"Latest messages by {user?.Mention} (ID:{user?.Id}) deleted.");
             await Task.Delay(2000);
             await resp.DeleteAsync("Purge command executed.");
             await ctx.Message.DeleteAsync("Purge command executed.");
 
-            await ctx.LogActionAsync($"Purged messages.\nUser: {user?.Username}#{user?.Discriminator} (ID:{user?.Id})\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
+            await ctx.LogActionAsync(
+                $"Purged messages.\nUser: {user?.Username}#{user?.Discriminator} (ID:{user?.Id})\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
         }
 
         private static List<string> Tokenize(string value, char sep, char block)
@@ -123,8 +129,12 @@ namespace ModCore.Commands
             return result;
         }
 
-        [Command("purgeregexp"), Aliases("purgeregex", "pr"), RequirePermissions(Permissions.ManageMessages)]
-        public async Task PurgeRegexpAsync(CommandContext ctx, [RemainingText] string regexp, int limit = 50, int skip = 0)
+        [Command("purgeregexp"), Description(
+             "For power users! Delete messages from the current channel by regular expression match. " +
+             "Pass a Regexp in ECMAScript ( /expression/flags ) format, or simply a regex string " +
+             "in quotes."), Aliases("purgeregex", "pr"), RequirePermissions(Permissions.ManageMessages)]
+        public async Task PurgeRegexpAsync(CommandContext ctx, [RemainingText] string regexp, int limit = 50,
+            int skip = 0)
         {
             // TODO add a flag to disable CultureInvariant.
             var regexOptions = RegexOptions.CultureInvariant;
@@ -223,7 +233,8 @@ namespace ModCore.Commands
                 else
                     deletThis.Add(m);
             }
-            var resultString = $"Purged {deletThis.Count} messages by /{regexp.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
+            var resultString =
+                $"Purged {deletThis.Count} messages by /{regexp.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
             if (deletThis.Any())
                 await ctx.Channel.DeleteMessagesAsync(deletThis, resultString);
             var resp = await ctx.RespondAsync(resultString);
@@ -231,10 +242,12 @@ namespace ModCore.Commands
             await resp.DeleteAsync("Purge command executed.");
             await ctx.Message.DeleteAsync("Purge command executed.");
 
-            await ctx.LogActionAsync($"Purged {deletThis.Count} messages.\nRegex: ```\n{regexp}```\nFlags: {flags}\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
+            await ctx.LogActionAsync(
+                $"Purged {deletThis.Count} messages.\nRegex: ```\n{regexp}```\nFlags: {flags}\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
         }
 
-        [Command("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages)]
+        [Command("purge"), Description("Delete an amount of messages from the current channel."), Aliases("p"),
+         RequirePermissions(Permissions.ManageMessages)]
         public async Task PurgeAsync(CommandContext ctx, int limit, int skip = 0)
         {
             var i = 0;
@@ -257,13 +270,15 @@ namespace ModCore.Commands
             await ctx.LogActionAsync($"Purged messages.\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
         }
 
-        [Command("clean"), Aliases("c"), RequirePermissions(Permissions.ManageMessages)]
+        [Command("clean"), Description("Purge ModCore's messages."), Aliases("c"),
+         RequirePermissions(Permissions.ManageMessages)]
         public async Task CleanAsync(CommandContext ctx)
         {
             var gs = ctx.GetGuildSettings();
             var prefix = gs?.Prefix ?? "?>";
             var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
-            var deletThis = ms.Where(m => m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix)).ToList();
+            var deletThis = ms.Where(m => m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix))
+                .ToList();
             if (deletThis.Any())
                 await ctx.Channel.DeleteMessagesAsync(deletThis, "Cleaned up commands");
             var resp = await ctx.RespondAsync("Latest messages deleted.");
@@ -274,8 +289,8 @@ namespace ModCore.Commands
             await ctx.LogActionAsync();
         }
 
-        [Command("ban"), Aliases("b"), RequirePermissions(Permissions.BanMembers)]
-        public async Task BanAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
+        [Command("ban"), Description("Bans a member."), Aliases("b"), RequirePermissions(Permissions.BanMembers)]
+        public async Task BanAsync(CommandContext ctx, DiscordMember m, [RemainingText] string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -291,8 +306,9 @@ namespace ModCore.Commands
             await ctx.LogActionAsync($"Banned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
-        [Command("hackban"), Aliases("hb"), RequirePermissions(Permissions.BanMembers)]
-        public async Task HackBanAsync(CommandContext ctx, ulong id, [RemainingText]string reason = "")
+        [Command("hackban"), Description("Ban an user by their ID. The user does not need to be in the guild."),
+         Aliases("hb"), RequirePermissions(Permissions.BanMembers)]
+        public async Task HackBanAsync(CommandContext ctx, ulong id, [RemainingText] string reason = "")
         {
             if (ctx.Member.Id == id)
             {
@@ -308,8 +324,9 @@ namespace ModCore.Commands
             await ctx.LogActionAsync($"Hackbanned ID: {id}\n{rstr}");
         }
 
-        [Command("kick"), Aliases("k"), RequirePermissions(Permissions.KickMembers)]
-        public async Task KickAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
+        [Command("kick"), Description("Kicks a member from the guild. Can optionally provide a reason for kick."),
+         Aliases("k"), RequirePermissions(Permissions.KickMembers)]
+        public async Task KickAsync(CommandContext ctx, DiscordMember m, [RemainingText] string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -325,8 +342,11 @@ namespace ModCore.Commands
             await ctx.LogActionAsync($"Kicked user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
-        [Command("softban"), Aliases("s"), RequireUserPermissions(Permissions.KickMembers), RequireBotPermissions(Permissions.BanMembers)]
-        public async Task SoftbanAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
+        [Command("softban"),
+         Description("Bans then unbans an user from the guild. " +
+                     "This will delete their recent messages, but they can join back."), Aliases("s"),
+         RequireUserPermissions(Permissions.KickMembers), RequireBotPermissions(Permissions.BanMembers)]
+        public async Task SoftbanAsync(CommandContext ctx, DiscordMember m, [RemainingText] string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -343,8 +363,11 @@ namespace ModCore.Commands
             await ctx.LogActionAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
-        [Command("mute"), Aliases("m"), RequirePermissions(Permissions.MuteMembers), RequireBotPermissions(Permissions.ManageRoles)]
-        public async Task MuteAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
+        [Command("mute"), Description("Mutes an user indefinitely. This will prevent them from speaking in chat. " +
+                                      "You might need to set up a mute role, but most of the time ModCore can do it " +
+                                      "for you."), Aliases("m"), RequirePermissions(Permissions.MuteMembers),
+         RequireBotPermissions(Permissions.ManageRoles)]
+        public async Task MuteAsync(CommandContext ctx, DiscordMember m, [RemainingText] string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -374,13 +397,17 @@ namespace ModCore.Commands
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
-            await ctx.RespondAsync($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
+            await ctx.RespondAsync(
+                $"Muted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
 
-            await ctx.LogActionAsync($"Muted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
+            await ctx.LogActionAsync(
+                $"Muted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
         }
 
-        [Command("unmute"), Aliases("um"), RequirePermissions(Permissions.MuteMembers), RequireBotPermissions(Permissions.ManageRoles)]
-        public async Task UnmuteAsync(CommandContext ctx, DiscordMember m, [RemainingText]string reason = "")
+        [Command("unmute"), Description("Unmutes an user previously muted with the mute command. Let them speak!"),
+         Aliases("um"), RequirePermissions(Permissions.MuteMembers),
+         RequireBotPermissions(Permissions.ManageRoles)]
+        public async Task UnmuteAsync(CommandContext ctx, DiscordMember m, [RemainingText] string reason = "")
         {
             if (ctx.Member.Id == m.Id)
             {
@@ -391,7 +418,8 @@ namespace ModCore.Commands
             var gcfg = ctx.GetGuildSettings();
             if (gcfg == null)
             {
-                await ctx.RespondAsync("Guild is not configured. Adjust this guild's configuration and re-run this command.");
+                await ctx.RespondAsync(
+                    "Guild is not configured. Adjust this guild's configuration and re-run this command.");
                 return;
             }
 
@@ -399,7 +427,8 @@ namespace ModCore.Commands
             var mute = ctx.Guild.GetRole(b);
             if (b == 0 || mute == null)
             {
-                await ctx.RespondAsync("Mute role is not configured or missing. Set a correct role and re-run this command.");
+                await ctx.RespondAsync(
+                    "Mute role is not configured or missing. Set a correct role and re-run this command.");
                 return;
             }
 
@@ -410,17 +439,21 @@ namespace ModCore.Commands
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
-            await ctx.RespondAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
+            await ctx.RespondAsync(
+                $"Unmuted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
 
-            await ctx.LogActionAsync($"Unmuted user {m.DisplayName} (ID:{m.Id}) { (reason != "" ? "With reason: " + reason : "")}");
+            await ctx.LogActionAsync(
+                $"Unmuted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
         }
 
-        [Command("leave"), Description("Makes this bot leave the current server."), RequireUserPermissions(Permissions.Administrator)]
+        [Command("leave"), Description("Makes this bot leave the current server. Goodbye moonmen."),
+         RequireUserPermissions(Permissions.Administrator)]
         public async Task LeaveAsync(CommandContext ctx)
         {
             var interactivity = this.Interactivity;
             await ctx.RespondAsync("Are you sure you want to remove modcore from your guild?");
-            var m = await interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
+            var m = await interactivity.WaitForMessageAsync(
+                x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
             if (m == null)
                 await ctx.RespondAsync("Timed out.");
@@ -434,7 +467,10 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("Operation canceled by user.");
         }
 
-        [Command("tempban"), Aliases("tb"), Description("Temporarily bans a member."), RequirePermissions(Permissions.BanMembers)]
+        [Command("tempban"), Aliases("tb"), Description(
+             "Temporarily bans a member. They will be automatically unbanned " +
+             "after a set amount of time."),
+         RequirePermissions(Permissions.BanMembers)]
         public async Task TempBanAsync(CommandContext ctx, DiscordMember m, TimeSpan ts, string reason = "")
         {
             if (ctx.Member.Id == m.Id)
@@ -452,13 +488,18 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long)ctx.Guild.Id,
+                GuildId = (long) ctx.Guild.Id,
                 ChannelId = 0,
-                UserId = (long)m.Id,
+                UserId = (long) m.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unban
             };
-            reminder.SetData(new TimerUnbanData { Discriminator = m.Discriminator, DisplayName = m.Username, UserId = (long)m.Id });
+            reminder.SetData(new TimerUnbanData
+            {
+                Discriminator = m.Discriminator,
+                DisplayName = m.Username,
+                UserId = (long) m.Id
+            });
             using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
@@ -468,12 +509,18 @@ namespace ModCore.Commands
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
             // End of Timer adding
-            await ctx.RespondAsync($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+            await ctx.RespondAsync(
+                $"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 
-            await ctx.LogActionAsync($"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+            await ctx.LogActionAsync(
+                $"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
         }
 
-        [Command("tempmute"), Aliases("tm"), Description("Temporarily mutes a member."), RequirePermissions(Permissions.MuteMembers)]
+        [Command("tempmute"), Aliases("tm"), Description("Temporarily mutes a member. They will be automatically " +
+                                                         "unmuted after a set amount of time. This will prevent them " +
+                                                         "from speaking in chat. You might need to set up a mute role, " +
+                                                         "but most of the time ModCore can do it for you."),
+         RequirePermissions(Permissions.MuteMembers)]
         public async Task TempMuteAsync(CommandContext ctx, DiscordMember m, TimeSpan ts, string reason = "")
         {
             if (ctx.Member.Id == m.Id)
@@ -485,7 +532,8 @@ namespace ModCore.Commands
             var guildSettings = ctx.GetGuildSettings();
             if (guildSettings == null)
             {
-                await ctx.RespondAsync("Guild is not configured. Adjust this guild's configuration and re-run this command.");
+                await ctx.RespondAsync(
+                    "Guild is not configured. Adjust this guild's configuration and re-run this command.");
                 return;
             }
 
@@ -517,13 +565,19 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long)ctx.Guild.Id,
+                GuildId = (long) ctx.Guild.Id,
                 ChannelId = 0,
-                UserId = (long)m.Id,
+                UserId = (long) m.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unmute
             };
-            reminder.SetData(new TimerUnmuteData { Discriminator = m.Discriminator, DisplayName = m.Username, UserId = (long)m.Id, MuteRoleId = (long)ctx.GetGuildSettings().MuteRoleId });
+            reminder.SetData(new TimerUnmuteData
+            {
+                Discriminator = m.Discriminator,
+                DisplayName = m.Username,
+                UserId = (long) m.Id,
+                MuteRoleId = (long) ctx.GetGuildSettings().MuteRoleId
+            });
             using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
@@ -533,12 +587,16 @@ namespace ModCore.Commands
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
             // End of Timer adding
-            await ctx.RespondAsync($"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+            await ctx.RespondAsync(
+                $"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 
-            await ctx.LogActionAsync($"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+            await ctx.LogActionAsync(
+                $"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
         }
 
-        [Command("schedulepin"), Aliases("sp"), Description("Schedules a pinned message."), RequirePermissions(Permissions.ManageMessages)]
+        [Command("schedulepin"), Aliases("sp"), Description("Schedules a pinned message. _I really don't know why " +
+                                                            "you'd want to do this._"),
+         RequirePermissions(Permissions.ManageMessages)]
         public async Task SchedulePinAsync(CommandContext ctx, DiscordMessage message, TimeSpan pinfrom)
         {
             // Add timer
@@ -547,13 +605,13 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long)ctx.Guild.Id,
-                ChannelId = (long)ctx.Channel.Id,
-                UserId = (long)ctx.User.Id,
+                GuildId = (long) ctx.Guild.Id,
+                ChannelId = (long) ctx.Channel.Id,
+                UserId = (long) ctx.User.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Pin
             };
-            reminder.SetData(new TimerPinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
+            reminder.SetData(new TimerPinData {MessageId = (long) message.Id, ChannelId = (long) ctx.Channel.Id});
             using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
@@ -563,10 +621,13 @@ namespace ModCore.Commands
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
             // End of Timer adding
-            await ctx.RespondAsync($"After {pinfrom.Humanize(4, minUnit: TimeUnit.Second)} this message will be pinned");
+            await ctx.RespondAsync(
+                $"After {pinfrom.Humanize(4, minUnit: TimeUnit.Second)} this message will be pinned");
         }
 
-        [Command("scheduleunpin"), Aliases("sup"), Description("Schedules unpinning a pinned message."), RequirePermissions(Permissions.ManageMessages)]
+        [Command("scheduleunpin"), Aliases("sup"), Description("Schedules unpinning a pinned message. This command " +
+                                                               "really is useless, isn't it?"),
+         RequirePermissions(Permissions.ManageMessages)]
         public async Task ScheduleUnpinAsync(CommandContext ctx, DiscordMessage message, TimeSpan pinuntil)
         {
             if (!message.Pinned)
@@ -577,13 +638,13 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long)ctx.Guild.Id,
-                ChannelId = (long)ctx.Channel.Id,
-                UserId = (long)ctx.User.Id,
+                GuildId = (long) ctx.Guild.Id,
+                ChannelId = (long) ctx.Channel.Id,
+                UserId = (long) ctx.User.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unpin
             };
-            reminder.SetData(new TimerUnpinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
+            reminder.SetData(new TimerUnpinData {MessageId = (long) message.Id, ChannelId = (long) ctx.Channel.Id});
             using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
@@ -593,11 +654,11 @@ namespace ModCore.Commands
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
             // End of Timer adding
-            await ctx.RespondAsync($"In {pinuntil.Humanize(4, minUnit: TimeUnit.Second)} this message will be unpinned.");
+            await ctx.RespondAsync(
+                $"In {pinuntil.Humanize(4, minUnit: TimeUnit.Second)} this message will be unpinned.");
         }
 
-        [Command("listbans")]
-        [Aliases("lb")]
+        [Command("listbans"), Aliases("lb"), Description("Lists banned users. Real complex stuff.")]
         public async Task ListBansAsync(CommandContext ctx, int limit, int skip = 0)
         {
             var bans = await ctx.Guild.GetBansAsync();
@@ -621,8 +682,10 @@ namespace ModCore.Commands
             await ctx.RespondAsync(embed: embed.Build());
         }
 
-        [Command("giverole"), Aliases("give", "gr"), Description("Gives the user a specified role"), RequireBotPermissions(Permissions.ManageRoles)]
-        public async Task GiveRoleAsync(CommandContext ctx, [RemainingText]DiscordRole role)
+        [Command("giverole"), Aliases("give", "gr"), Description("Gives the command callee a specified role, if " +
+                                                                 "ModCore has been configured to allow so."),
+         RequireBotPermissions(Permissions.ManageRoles)]
+        public async Task GiveRoleAsync(CommandContext ctx, [RemainingText] DiscordRole role)
         {
             GuildSettings cfg;
             using (var db = Database.CreateContext())
@@ -648,8 +711,10 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("takerole"), Aliases("take", "tr"), Description("Takes a specified role away from the user"), RequireBotPermissions(Permissions.ManageRoles)]
-        public async Task TakeRoleAsync(CommandContext ctx, [RemainingText]DiscordRole role)
+        [Command("takerole"), Aliases("take", "tr"), Description("Removes a specified role from the command callee, if " +
+                                                                 "ModCore has been configured to allow so."),
+         RequireBotPermissions(Permissions.ManageRoles)]
+        public async Task TakeRoleAsync(CommandContext ctx, [RemainingText] DiscordRole role)
         {
             GuildSettings cfg;
             using (var db = Database.CreateContext())
@@ -675,9 +740,10 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("announce"), Description("Announces a message to a channel, using a role.")]
+        [Command("announce"), Description("Announces a message to a channel, additionally mentioning a role.")]
         [RequireBotPermissions(Permissions.ManageRoles), RequireUserPermissions(Permissions.MentionEveryone)]
-        public async Task AnnounceAsync(CommandContext ctx, DiscordRole role, DiscordChannel channel, [RemainingText]string message)
+        public async Task AnnounceAsync(CommandContext ctx, DiscordRole role, DiscordChannel channel,
+            [RemainingText] string message)
         {
             if (!role.IsMentionable)
             {
@@ -690,7 +756,8 @@ namespace ModCore.Commands
             else
             {
                 await ctx.Channel.SendMessageAsync("You can't announce to that role because it is mentionable!");
-                await ctx.LogActionAsync($"Failed announcement\nMessage: {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
+                await ctx.LogActionAsync(
+                    $"Failed announcement\nMessage: {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
             }
         }
 

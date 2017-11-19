@@ -21,7 +21,7 @@ namespace ModCore.Commands
             this.Shared = shared;
         }
 
-        [Command("exit"), Aliases("e")]
+        [Command("exit"), Aliases("e"), Hidden]
         public async Task ExitAsync(CommandContext ctx)
         {
             await ctx.RespondAsync("Are you sure you want to shut down the bot?");
@@ -38,7 +38,7 @@ namespace ModCore.Commands
                 cts.Cancel(false);
             }
             else
-                await ctx.RespondAsync("Operation canceled by user.");
+                await ctx.RespondAsync("Operation cancelled by user.");
         }
 
         [Command("testupdate"), Aliases("t"), Hidden]
@@ -47,31 +47,32 @@ namespace ModCore.Commands
             await ctx.RespondAsync("Test: 420");
         }
 
-        [Command("update"), Aliases("u")]
+        [Command("update"), Aliases("u"), Hidden]
         public async Task UpdateAsync(CommandContext ctx)
         {
             var m = await ctx.RespondAsync($"Running update script...");
-            string file = "update";
+            const string fn = "update";
             if (File.Exists("update.sh"))
             {
-                file += ".sh";
-                Process proc = new Process
+                const string file = fn + ".sh";
+                var proc = new Process
                 {
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = "nohup",
-                        Arguments = "bash update.sh " + Process.GetCurrentProcess().Id,
+                        Arguments = $"bash {file} {Process.GetCurrentProcess().Id}",
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         CreateNoWindow = true
                     }
                 };
                 proc.Start();
+                await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
             }
             else if (File.Exists("update.bat"))
             {
-                file += ".bat";
-                Process proc = new Process
+                const string file = fn + ".bat";
+                var proc = new Process
                 {
                     StartInfo = new ProcessStartInfo
                     {
@@ -82,13 +83,13 @@ namespace ModCore.Commands
                     }
                 };
                 proc.Start();
+                await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
             }
             else
             {
                 await m.ModifyAsync("**‼ Your update script has not been found. ‼**\n\nPlease place `update.sh` (Linux) or `update.bat` (Windows) in your ModCore directory.");
                 return;
             }
-            await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
             this.Shared.CTS.Cancel();
         }
     }

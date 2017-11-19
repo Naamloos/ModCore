@@ -1,5 +1,4 @@
-﻿#define HANSEN
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,6 +18,38 @@ namespace ModCore.Commands
     [Group("reminder", CanInvokeWithoutSubcommand = true), Aliases("remindme"), Description("Commands for managing your reminders.")]
     public class Reminders
     {
+        private const string ReminderTut = @"
+Sets a new reminder. The time span parser is fluent and will understand many different formats of reminders:
+
+<Time span>, <Message>
+[in] <Time span> to <Message>
+<Short time span> <Message> 
+
+Where ""Time span"" represents a time period or a relative date (optionally with time of day specified), such as
+\* Tomorrow at 2:00 PM Chicago time
+\* Next fortnight
+\* 8 hours 20 minutes
+
+A ""Short time span"" represents a time span represented in a single word (we call this a token), such as
+\* 2h
+\* 4m5s
+\* 15min
+\* 30min55sec
+
+See these examples:
+
+```
++remindme next week to walk the dog
++remindme tomorrow, fix socket
++remindme 2h5m watch new stranger things episode
++remindme 8 hours wake up
++remindme in an hour to eat something
++remindme in nine months to have a baby
+```
+
+Note that even if your arguments don't fit the grammar denoted above, they might still be parsed fine.
+If in doubt, just try it! You can always clear the reminders later. 
+";
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
         public InteractivityExtension Interactivity { get; }
@@ -30,7 +61,7 @@ namespace ModCore.Commands
             this.Interactivity = interactive;
         }
 
-        [Description("Sets a new reminder.")]
+        [Description(ReminderTut)]
         public async Task ExecuteGroupAsync(CommandContext ctx, [RemainingText] string dataToParse)
         {
             await SetAsync(ctx, dataToParse);
@@ -55,15 +86,15 @@ namespace ModCore.Commands
             var interactivity = this.Interactivity;
             var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
 
-            var cpnum = 1;
-            var tpnum = rms.Length / 5 + (rms.Length % 5 == 0 ? 0 : 1);
+            var page = 1;
+            var total = rms.Length / 5 + (rms.Length % 5 == 0 ? 0 : 1);
             var pages = new List<Page>();
             var cembed = new DiscordEmbedBuilder
             {
                 Title = $"{emoji} Your currently set reminders:",
                 Footer = new DiscordEmbedBuilder.EmbedFooter
                 {
-                    Text = $"Page {cpnum} of {tpnum}"
+                    Text = $"Page {page} of {total}"
                 }
             };
             foreach (var xr in rms)
@@ -77,14 +108,14 @@ namespace ModCore.Commands
                     $"In {(DateTimeOffset.UtcNow - xr.DispatchAt).Humanize(4, minUnit: TimeUnit.Second)} (ID: #{xr.Id})",
                     $"{note}");
                 if (cembed.Fields.Count < 5) continue;
-                cpnum++;
+                page++;
                 pages.Add(new Page {Embed = cembed.Build()});
                 cembed = new DiscordEmbedBuilder
                 {
                     Title = $"{emoji} Your currently set reminders:",
                     Footer = new DiscordEmbedBuilder.EmbedFooter
                     {
-                        Text = $"Page {cpnum} of {tpnum}"
+                        Text = $"Page {page} of {total}"
                     }
                 };
             }
@@ -97,7 +128,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync(embed: pages.First().Embed);
         }
 
-        [Command("set"), Description("Sets a new reminder.")]
+        [Command("set"), Description(ReminderTut)]
         public async Task SetAsync(CommandContext ctx, [RemainingText] string dataToParse)
         {
             await ctx.TriggerTypingAsync();
@@ -116,7 +147,7 @@ namespace ModCore.Commands
                     "Reminder text must to be no longer than 128 characters, not empty and not whitespace.");
                 return;
             }
-#if !HANSEN
+#if !DEBUG
             if (duration < TimeSpan.FromSeconds(30))
             {
                 await ctx.RespondAsync("Minimum required time span to set a reminder is 30 seconds.");
@@ -158,7 +189,8 @@ namespace ModCore.Commands
         }
 
         [Command("stop"), Description("Stops and removes a timer.")]
-        public async Task UnsetAsync(CommandContext ctx, [Description("Which timer to stop.")] int timerId)
+        public async Task UnsetAsync(CommandContext ctx, [Description("Which timer to stop. To get a Timer ID, use " +
+                                                                      "the `reminder list` command.")] int timerId)
         {
             await ctx.TriggerTypingAsync();
 
