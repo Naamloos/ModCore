@@ -300,6 +300,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
             await ctx.RespondAsync($"Banned user {m.DisplayName} (ID:{m.Id})");
 
@@ -336,6 +337,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.RemoveAsync($"{ustr}{rstr}");
             await ctx.RespondAsync($"Kicked user {m.DisplayName} (ID:{m.Id})");
 
@@ -356,6 +358,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.BanAsync(7, $"{ustr}{rstr} (softban)");
             await m.UnbanAsync(ctx.Guild, $"{ustr}{rstr}");
             await ctx.RespondAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})");
@@ -396,6 +399,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
             await ctx.RespondAsync(
                 $"Muted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
@@ -438,6 +442,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been unmuted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
             await ctx.RespondAsync(
                 $"Unmuted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
@@ -481,6 +486,8 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been temporarily banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+                $"\nYou can rejoin after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
             await m.BanAsync(7, $"{ustr}{rstr}");
             // Add timer
             var now = DateTimeOffset.UtcNow;
@@ -558,6 +565,8 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been temporarily muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+                $"\nYou can talk again after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
             await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
             // Add timer
             var now = DateTimeOffset.UtcNow;
