@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ModCore.Entities;
 using System.IO;
 using System.Diagnostics;
+using DSharpPlus.Entities;
 
 namespace ModCore.Commands
 {
@@ -40,41 +41,54 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("Operation canceled by user.");
         }
 
-        [Command("throw"), Aliases("t"), Hidden]
+        [Command("testupdate"), Aliases("t"), Hidden]
         public async Task ThrowAsync(CommandContext ctx)
         {
-            await ctx.RespondAsync("Throwing exception for testing purposes");
-            throw new AccessViolationException("Did you just assume my gender?");
+            await ctx.RespondAsync("Test: 69");
         }
 
         [Command("update"), Aliases("u")]
         public async Task UpdateAsync(CommandContext ctx)
         {
+            var m = await ctx.RespondAsync($"Running update script...");
             string file = "update";
             if (File.Exists("update.sh"))
+            {
                 file += ".sh";
+                Process proc = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "nohup",
+                        Arguments = "bash update.sh " + Process.GetCurrentProcess().Id,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true
+                    }
+                };
+                proc.Start();
+            }
             else if (File.Exists("update.bat"))
+            {
                 file += ".bat";
+                Process proc = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = file,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        CreateNoWindow = true
+                    }
+                };
+                proc.Start();
+            }
             else
             {
-                await ctx.RespondAsync("**‼ Your update script has not been found. ‼**\n\nPlease place `update.sh` (Linux) or `update.bat` (Windows) in your ModCore directory.");
+                await m.ModifyAsync("**‼ Your update script has not been found. ‼**\n\nPlease place `update.sh` (Linux) or `update.bat` (Windows) in your ModCore directory.");
                 return;
             }
-
-            var m = await ctx.RespondAsync($"Running `{file}`...");
-            Process proc = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = file,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                }
-            };
-            proc.Start();
-            proc.WaitForExit();
-            await m.ModifyAsync($"Updated ModCore using `{file}`. Restarting..");
+            await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
             this.Shared.CTS.Cancel();
         }
     }
