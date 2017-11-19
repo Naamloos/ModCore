@@ -8,6 +8,7 @@ using ModCore.Entities;
 using System.IO;
 using System.Diagnostics;
 using DSharpPlus.Entities;
+using ModCore.Logic;
 
 namespace ModCore.Commands
 {
@@ -31,14 +32,18 @@ namespace ModCore.Commands
             var m = await interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
             if (m == null)
+            {
                 await ctx.RespondAsync("Timed out.");
-            else if (m.Message.Content == "yes")
+            }
+            else if (InteractivityUtil.Confirm(m))
             {
                 await ctx.RespondAsync("Shutting down.");
                 cts.Cancel(false);
             }
             else
+            {
                 await ctx.RespondAsync("Operation cancelled by user.");
+            }
         }
 
         [Command("testupdate"), Aliases("t"), Hidden]
