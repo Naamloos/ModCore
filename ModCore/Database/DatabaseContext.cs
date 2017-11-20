@@ -188,7 +188,7 @@ namespace ModCore.Database
                 entity.ToTable("mcore_stars");
 
                 entity.HasIndex(e => new { e.MessageId, e.ChannelId, e.StargazerId })
-                    .HasName("mcore_modnotes_member_id_guild_id_key")
+                    .HasName("mcore_stars_member_id_guild_id_key")
                     .IsUnique();
 
                 entity.Property(e => e.Id).HasColumnName("id");
