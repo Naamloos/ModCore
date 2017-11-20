@@ -71,6 +71,42 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("selfroles")]
         public List<ulong> SelfRoles { get; private set; } = new List<ulong>();
+
+        /// <summary>
+        /// Gets the Starboard settings for this guild. Starboard lets users star messages they like.
+        /// </summary>
+        [JsonProperty]
+        public GuildStarboardSettings Starboard { get; private set; } = new GuildStarboardSettings();
+    }
+
+    public class GuildStarboardSettings
+    {
+        /// <summary>
+        /// Gets or sets the JoinLog channel ID.
+        /// </summary>
+        [JsonProperty("channel_id")]
+        public long ChannelId { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the starboard emoji.
+        /// </summary>
+        [JsonProperty("emoji")]
+        public GuildStarboardEmoji Emoji { get; set; } = new GuildStarboardEmoji();
+
+        /// <summary>
+        /// Gets or sets whether starboard should be enabled.
+        /// </summary>
+        [JsonProperty("enabled")]
+        public bool Enable { get; set; } = false;
+    }
+
+    public class GuildStarboardEmoji
+    {
+        [JsonProperty("id")]
+        public long EmojiId { get; set; } = 0;
+
+        [JsonProperty("name")]
+        public string EmojiName { get; set; } = "⭐";
     }
 
     /// <summary>

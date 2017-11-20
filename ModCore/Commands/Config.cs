@@ -816,7 +816,7 @@ namespace ModCore.Commands
             }
 
             [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's join log.")]
-            public async Task SetRoleAsync(CommandContext ctx, DiscordChannel channel)
+            public async Task SetChannelAsync(CommandContext ctx, DiscordChannel channel)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.JoinLog.ChannelId = (long) channel.Id;
@@ -860,6 +860,47 @@ namespace ModCore.Commands
                 }
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync($"Removed role `{role.Name}` with ID `{role.Id}` from SelfRoles.");
+            }
+        }
+
+        [Group("starboard"), Aliases("star"), Description("Starboard configutration commands.")]
+        public class Starboard
+        {
+            [Command("enable"), Aliases("on"), Description("Enables Starboard for this guild.")]
+            public async Task EnableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.Starboard.Enable = true;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync(
+                    $"Starboard enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config starboard setchannel`");
+            }
+
+            [Command("disable"), Aliases("off"), Description("Disables Starboard for this guild.")]
+            public async Task DisableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.Starboard.Enable = false;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("Starboard disabled.");
+            }
+
+            [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's Starboard.")]
+            public async Task SetChannelAsync(CommandContext ctx, DiscordChannel channel)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.Starboard.ChannelId = (long)channel.Id;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("Starboard channel configured.");
+            }
+
+            [Command("setemoji"), Aliases("se"), Description("Sets the Starboard emoji for this guild.")]
+            public async Task SetEmojiAsync(CommandContext ctx, DiscordEmoji emoji)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.Starboard.Emoji = new GuildStarboardEmoji() { EmojiId = (long)emoji.Id, EmojiName = emoji.Name };
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"Starboard emoji set to {emoji.ToString()}.");
             }
         }
     }
