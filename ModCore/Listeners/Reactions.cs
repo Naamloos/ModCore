@@ -28,7 +28,7 @@ namespace ModCore.Listeners
                 if (emoji.EmojiId != 0)
                     em = DiscordEmoji.FromGuildEmote(e.Client, (ulong)emoji.EmojiId);
                 else
-                    em = DiscordEmoji.FromName(e.Client, emoji.EmojiName);
+                    em = DiscordEmoji.FromUnicode(e.Client, emoji.EmojiName);
 
                 if (cfg.Starboard.Enable && e.Emoji == em)
                 {
