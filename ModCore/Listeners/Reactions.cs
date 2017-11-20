@@ -46,15 +46,16 @@ namespace ModCore.Listeners
                         var d = await c.SendMessageAsync($"{e.Emoji.ToString()}: 1 ({e.Message.Id})", embed: BuildMessageEmbed(e.Message));
                         sbmid = (long)d.Id;
                     }
-                    db.StarDatas.Add(new DatabaseStarData()
+                    await db.StarDatas.AddAsync(new DatabaseStarData()
                     {
                         ChannelId = (long)e.Channel.Id,
                         GuildId = (long)e.Channel.Guild.Id,
                         MessageId = (long)e.Message.Id,
                         StarboardMessageId = sbmid,
-                        StargazerId = (long)e.User.Id
+                        StargazerId = (long)e.User.Id,
+
                     });
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                 }
             }
         }
@@ -71,15 +72,15 @@ namespace ModCore.Listeners
 
                 var emoji = cfg.Starboard.Emoji;
                 DiscordEmoji em = null;
-                if (emoji.EmojiId > 0)
+                if (emoji.EmojiId != 0)
                     em = DiscordEmoji.FromGuildEmote(e.Client, (ulong)emoji.EmojiId);
                 else
-                    em = DiscordEmoji.FromName(e.Client, emoji.EmojiName);
+                    em = DiscordEmoji.FromUnicode(e.Client, emoji.EmojiName);
 
                 if (cfg.Starboard.Enable && e.Emoji == em)
                 {
                     var c = e.Channel.Guild.Channels.First(x => x.Id == (ulong)cfg.Starboard.ChannelId);
-                    if (db.StarDatas.Any(x => (ulong)x.MessageId == e.Message.Id))
+                    if (db.StarDatas.Any(x => (ulong)x.MessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id))
                     {
                         var star = db.StarDatas.First(x => (ulong)x.MessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id);
                         var count = db.StarDatas.Count(x => (ulong)x.MessageId == e.Message.Id);
@@ -89,7 +90,7 @@ namespace ModCore.Listeners
                         else
                             await m.DeleteAsync();
                         db.StarDatas.Remove(star);
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                     }
                 }
             }
@@ -110,7 +111,7 @@ namespace ModCore.Listeners
                 if (emoji.EmojiId != 0)
                     em = DiscordEmoji.FromGuildEmote(e.Client, (ulong)emoji.EmojiId);
                 else
-                    em = DiscordEmoji.FromName(e.Client, emoji.EmojiName);
+                    em = DiscordEmoji.FromUnicode(e.Client, emoji.EmojiName);
 
                 if (cfg.Starboard.Enable)
                 {
@@ -119,7 +120,7 @@ namespace ModCore.Listeners
                     {
                         await (await c.GetMessageAsync((ulong)db.StarDatas.First(x => (ulong)x.MessageId == e.Message.Id).StarboardMessageId)).DeleteAsync();
                         db.StarDatas.RemoveRange(db.StarDatas.Where(x => (ulong)x.MessageId == e.Message.Id));
-                        db.SaveChanges();
+                        await db.SaveChangesAsync();
                     }
                 }
             }
