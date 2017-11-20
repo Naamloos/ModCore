@@ -23,6 +23,7 @@ namespace ModCore.Commands
         {
             this.Shared = shared;
             this.Interactivity = interactive;
+            this.Database = db;
         }
 
         [Command("debug"), Aliases("d"), Description("Returns information about a specific user")]

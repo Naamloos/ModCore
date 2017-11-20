@@ -84,10 +84,10 @@ namespace ModCore.Listeners
                         var star = db.StarDatas.First(x => (ulong)x.MessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id);
                         var count = db.StarDatas.Count(x => (ulong)x.MessageId == e.Message.Id);
                         var m = await c.GetMessageAsync((ulong)star.StarboardMessageId);
-                        if (count - 1 < 1)
-                            await m.DeleteAsync();
-                        else
+                        if (count - 1 > 0)
                             await m.ModifyAsync($"{e.Emoji.ToString()}: {count - 1} ({e.Message.Id})", embed: BuildMessageEmbed(e.Message));
+                        else
+                            await m.DeleteAsync();
                         db.StarDatas.Remove(star);
                         db.SaveChanges();
                     }
