@@ -30,6 +30,9 @@ namespace ModCore.Listeners
                 else
                     em = DiscordEmoji.FromUnicode(e.Client, emoji.EmojiName);
 
+                if (!cfg.Starboard.AllowNSFW && e.Channel.IsNSFW)
+                    return;
+
                 if (cfg.Starboard.Enable && e.Emoji == em)
                 {
                     long sbmid = 0;

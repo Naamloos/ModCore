@@ -98,6 +98,12 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("enabled")]
         public bool Enable { get; set; } = false;
+
+        [JsonProperty("minimum")]
+        public int Minimum { get; set; } = 3;
+
+        [JsonProperty("allow_nsfw")]
+        public bool AllowNSFW { get; set; } = false;
     }
 
     public class GuildStarboardEmoji

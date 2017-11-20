@@ -887,6 +887,15 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("Starboard disabled.");
             }
 
+            [Command("allownsfw"), Aliases("nsfw"), Description("Disables Starboard for this guild.")]
+            public async Task AllowNsfwAsync(CommandContext ctx, bool allow)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.Starboard.AllowNSFW = allow;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"Set allow NSFW to: {allow}.");
+            }
+
             [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's Starboard.")]
             public async Task SetChannelAsync(CommandContext ctx, DiscordChannel channel)
             {
