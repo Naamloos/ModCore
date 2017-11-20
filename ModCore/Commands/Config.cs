@@ -216,6 +216,8 @@ namespace ModCore.Commands
                             embed.AddField("InvisiCop-exempt users", string.Join(", ", users), true);
                         }
                     }
+                    embed.AddField("Starboard", 
+                        gcfg.Starboard.Enable ? $"Enabled\nChannel: <#{gcfg.Starboard.ChannelId}>\nEmoji: {gcfg.Starboard.Emoji.EmojiName}" : "Disabled", true);
 
                     await ctx.RespondAsync(embed: embed.Build());
                 });
