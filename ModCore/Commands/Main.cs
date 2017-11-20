@@ -346,7 +346,7 @@ namespace ModCore.Commands
 
         [Command("softban"),
          Description("Bans then unbans an user from the guild. " +
-                     "This will delete their recent messages, but they can join back."), Aliases("s"),
+                     "This will delete their recent messages, but they can join back."), Aliases("sb"),
          RequireUserPermissions(Permissions.KickMembers), RequireBotPermissions(Permissions.BanMembers)]
         public async Task SoftbanAsync(CommandContext ctx, DiscordMember m, [RemainingText] string reason = "")
         {
