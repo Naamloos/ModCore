@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.16
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore", "ModCore\ModCore.csproj", "{1D3B8DD2-5E0C-4435-8965-3B84BB06EFBD}"
 EndProject
@@ -16,6 +16,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{0E
 	ProjectSection(SolutionItems) = preProject
 		db_schema_v1.sql = db_schema_v1.sql
 		db_schema_v1_to_v2.sql = db_schema_v1_to_v2.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Update Scripts", "Update Scripts", "{7C345330-F8B6-47AF-AB01-6F6BFAB00AA5}"
+	ProjectSection(SolutionItems) = preProject
+		Update Scripts\download.ps1 = Update Scripts\download.ps1
+		Update Scripts\update.bat = Update Scripts\update.bat
+		Update Scripts\update.sh = Update Scripts\update.sh
 	EndProjectSection
 EndProject
 Global
