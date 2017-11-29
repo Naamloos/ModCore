@@ -366,6 +366,94 @@ namespace ModCore.Commands
             await ctx.LogActionAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
 
+        [Command("globalwarn"), Description("Adds the specified user to a global watchlist.")]
+        public async Task GlobalWarnAsync(CommandContext ctx, DiscordMember m, [RemainingText] string reason = "")
+        {
+            bool issuedBefore = false;
+            using (var db = this.Database.CreateContext())
+                issuedBefore = db.Bans.Any(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id);
+            if (issuedBefore)
+            {
+                await ctx.RespondAsync("You have already warned about this user! Stop picking on them...");
+                return;
+            }
+            if (ctx.Member.Id == m.Id)
+            {
+                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                return;
+            }
+
+            var ban = new DatabaseBan
+            {
+                GuildId = (long)ctx.Guild.Id,
+                UserId = (long)m.Id,
+                IssuedAt = DateTime.Now,
+                BanReason = reason
+            };
+            using (var db = this.Database.CreateContext())
+            {
+                db.Bans.Add(ban);
+                await db.SaveChangesAsync();
+            }
+
+            var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
+            var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}");
+            await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
+            await ctx.RespondAsync($"Banned and issued global warn about user {m.DisplayName} (ID:{m.Id})");
+
+            await ctx.LogActionAsync($"Banned and issued global warn about user {m.DisplayName} (ID:{m.Id})\n{rstr}\n");
+            await GlobalWarnUpdateAsync(ctx, m);
+        }
+
+        private async Task GlobalWarnUpdateAsync(CommandContext ctx, DiscordMember m)
+        {
+            DatabaseBan[] bans;
+            using (var db = this.Database.CreateContext())
+            {
+                bans = db.Bans.Where(x => x.UserId == (long)m.Id).ToArray();
+
+               var guilds = ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
+
+
+                foreach (DiscordGuild g in guilds)
+                {
+                    try
+                    {
+                        var settings = g.GetGuildSettings(db) ?? new GuildSettings();
+                        DiscordMember guildmember = await g.GetMemberAsync(m.Id);
+
+                        if (guildmember != null && g.Id != ctx.Guild.Id && settings.GlobalWarn.Enable)
+                        {
+                            if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Warn)
+                            {
+                                var embed = new DiscordEmbedBuilder()
+                                .WithColor(DiscordColor.MidnightBlue)
+                                .WithTitle($"WARNING: @{m.Username}#{m.Discriminator} - ID: {m.Id}");
+
+                                var banString = new StringBuilder();
+                                foreach (DatabaseBan ban in bans) banString.Append($"[{ban.GuildId} - {ban.BanReason}] ");
+                                embed.AddField("Bans", banString.ToString());
+
+                                await g.Owner.SendMessageAsync("", embed: embed);
+                            }
+
+                            else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Ban)
+                            {
+                                await g.BanMemberAsync(guildmember, reason: "ModCore GlobalWarn previously recorded for this user, and GlobalWarnLevel set to **Ban**");
+
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // TODO: Make SSG Proud
+                    }
+                }
+            }
+            
+        }
+
         [Command("mute"), Description("Mutes an user indefinitely. This will prevent them from speaking in chat. " +
                                       "You might need to set up a mute role, but most of the time ModCore can do it " +
                                       "for you."), Aliases("m"), RequirePermissions(Permissions.MuteMembers),
@@ -492,7 +580,7 @@ namespace ModCore.Commands
             // Add timer
             var now = DateTimeOffset.UtcNow;
             var dispatchAt = now + ts;
-
+            
             var reminder = new DatabaseTimer
             {
                 GuildId = (long) ctx.Guild.Id,

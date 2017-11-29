@@ -914,5 +914,62 @@ namespace ModCore.Commands
                 await ctx.RespondAsync($"Starboard emoji set to {emoji.ToString()}.");
             }
         }
+
+        [Group("globalwarn"), Aliases("gw"), Description("GlobalWarn configuration commands.")]
+        public class GlobalWarn
+        {
+            [Command("enable"), Aliases("on"), Description("Enables GlobalWarn for this guild.")]
+            public async Task EnableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.GlobalWarn.Enable = true;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("GlobalWarn enabled.");
+            }
+
+            [Command("disable"), Aliases("off"), Description("Disables GlobalWarn for this guild.")]
+            public async Task DisableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.GlobalWarn.Enable = false;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("GlobalWarn disabled.");
+            }
+
+            [Command("changemode"), Aliases("cm"),
+             Description("Sets the GlobalWarn mode.")]
+            public async Task SetRoleAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                await ctx.RespondAsync("__**Available GlobalWarn modes:**__\n1. None\n2. Warn (Warns the Server Owner if someone on the GlobalWarn list joins the server)\n3. Ban (Automatically bans any user on the GlobalWarn list if they join the server)\n\nType an option.");
+                var iv = ctx.Client.GetInteractivity();
+
+                var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && 
+                (xm.Content.ToLower() == "none" || xm.Content.ToLower() == "warn" || xm.Content.ToLower() == "ban" || xm.Content == "1" || xm.Content == "2" || xm.Content == "3"), 
+                TimeSpan.FromSeconds(45));
+                if (msg == null)
+                {
+                    await ctx.RespondAsync("Operation aborted.");
+                    return;
+                }
+                switch (msg.Message.Content)
+                {
+                    case "none":
+                    case "1":
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.None;
+                        break;
+                    case "warn":
+                    case "2":
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.Warn;
+                        break;
+                    case "ban":
+                    case "3":
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.Ban;
+                        break;
+                }
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("GlobalWarn mode configured to " + cfg.GlobalWarn.WarnLevel.ToString());
+            }
+        }
     }
 }

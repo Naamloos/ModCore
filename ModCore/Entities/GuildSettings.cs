@@ -77,6 +77,13 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty]
         public GuildStarboardSettings Starboard { get; private set; } = new GuildStarboardSettings();
+
+        /// <summary>
+        /// Gets the GlobalWarn settings for this guild. GlobalWarn notifies the server owner when a previously 
+        /// banned user joins, or alternatively bans said user.
+        /// </summary>
+        [JsonProperty]
+        public GuildGlobalWarnSettings GlobalWarn { get; private set; } = new GuildGlobalWarnSettings();
     }
 
     public class GuildStarboardSettings
@@ -318,5 +325,27 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("ignored_channel_ids")]
         public List<ulong> IgnoredChannelIds { get; private set; } = new List<ulong>();
+    }
+
+    public class GuildGlobalWarnSettings
+    {
+        /// <summary>
+        /// Gets or sets whether GlobalWarn should be enabled.
+        /// </summary>
+        [JsonProperty("enabled")]
+        public bool Enable { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the GlobalWarn 
+        /// </summary>
+        [JsonProperty("warnlevel")]
+        public GlobalWarnLevel WarnLevel { get; set; } = GlobalWarnLevel.None;
+    }
+
+    public enum GlobalWarnLevel
+    {
+        None,
+        Warn,
+        Ban
     }
 }
