@@ -7,6 +7,7 @@ using System;
 using ModCore.Database;
 using System.Linq;
 using System.Text;
+using System.Collections.Generic;
 
 namespace ModCore.Listeners
 {
@@ -27,7 +28,18 @@ namespace ModCore.Listeners
                 settings = e.Guild.GetGuildSettings(db) ?? new GuildSettings();
             }
 
-            if (settings.GlobalWarn.Enable)
+            var prevowns = new List<ulong>();
+            int count = 0;
+            foreach (var b in bans)
+            {
+                var g = await e.Client.GetGuildAsync((ulong)b.GuildId);
+                if (prevowns.Contains(g.Owner.Id))
+                    continue;
+                count++;
+                prevowns.Add(g.Owner.Id);
+            }
+
+            if (settings.GlobalWarn.Enable && count > 2)
             {
                 if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Warn)
                 {
