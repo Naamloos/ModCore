@@ -13,6 +13,7 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseWarning> Warnings { get; set; }
         public virtual DbSet<DatabaseTimer> Timers { get; set; }
         public virtual DbSet<DatabaseStarData> StarDatas { get; set; }
+        public virtual DbSet<DatabaseBan> Bans { get; set; }
 
         private DatabaseProvider Provider { get; }
         private string ConnectionString { get; }
@@ -202,6 +203,23 @@ namespace ModCore.Database
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
 
                 entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+            });
+
+            modelBuilder.Entity<DatabaseBan>(entity =>
+            {
+                entity.ToTable("mcore_bans");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.Property(e => e.IssuedAt)
+                .HasColumnName("issued_at")
+                .HasColumnType("timestamptz");
+
+                entity.Property(e => e.BanReason).HasColumnName("ban_reason");
             });
         }
     }

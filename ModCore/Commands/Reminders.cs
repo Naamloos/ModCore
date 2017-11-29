@@ -74,8 +74,8 @@ If in doubt, just try it! You can always clear the reminders later.
             DatabaseTimer[] reminders;
             using (var db = this.Database.CreateContext())
                 reminders = db.Timers.Where(xt =>
-                    xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long) ctx.Guild.Id &&
-                    xt.UserId == (long) ctx.User.Id).ToArray();
+                    xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long)ctx.Guild.Id &&
+                    xt.UserId == (long)ctx.User.Id).ToArray();
             if (!reminders.Any())
             {
                 await ctx.RespondAsync("You have no reminders set.");

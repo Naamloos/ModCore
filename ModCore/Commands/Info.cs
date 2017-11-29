@@ -26,6 +26,7 @@ namespace ModCore.Commands
         [Command("user"), Aliases("u"), Description("Returns information about a specific user")]
         public async Task UserInfoAsync(CommandContext ctx, DiscordMember usr)
         {
+
             var embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.MidnightBlue)
                 .WithTitle($"@{usr.Username}#{usr.Discriminator} - ID: {usr.Id}");
