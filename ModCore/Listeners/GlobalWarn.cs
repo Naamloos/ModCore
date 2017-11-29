@@ -29,7 +29,7 @@ namespace ModCore.Listeners
 
             if (settings.GlobalWarn.Enable)
             {
-                if (settings.GlobalWarn.WarnLevel == GLobalWarnLevel.Warn)
+                if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Warn)
                 {
                     var embed = new DiscordEmbedBuilder()
                     .WithColor(DiscordColor.MidnightBlue)
@@ -41,7 +41,7 @@ namespace ModCore.Listeners
 
                     await e.Guild.Owner.SendMessageAsync("", embed: embed);
                 }
-                else if (settings.GlobalWarn.WarnLevel == GLobalWarnLevel.Ban)
+                else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Ban)
                 {
                     await e.Guild.BanMemberAsync(e.Member, reason: "ModCore GlobalWarn previously recorded for this user, and GlobalWarnLevel set to **Ban**");
                 }

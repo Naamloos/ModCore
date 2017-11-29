@@ -956,15 +956,15 @@ namespace ModCore.Commands
                 {
                     case "none":
                     case "1":
-                        cfg.GlobalWarn.WarnLevel = GLobalWarnLevel.None;
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.None;
                         break;
                     case "warn":
                     case "2":
-                        cfg.GlobalWarn.WarnLevel = GLobalWarnLevel.Warn;
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.Warn;
                         break;
                     case "ban":
                     case "3":
-                        cfg.GlobalWarn.WarnLevel = GLobalWarnLevel.Ban;
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.Ban;
                         break;
                 }
                 await ctx.SetGuildSettingsAsync(cfg);

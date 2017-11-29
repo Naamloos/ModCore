@@ -369,10 +369,10 @@ namespace ModCore.Commands
         [Command("globalwarn"), Description("Adds the specified user to a global watchlist.")]
         public async Task GlobalWarnAsync(CommandContext ctx, DiscordMember m, [RemainingText] string reason = "")
         {
-            bool IssuedBefore = false;
+            bool issuedBefore = false;
             using (var db = this.Database.CreateContext())
-                IssuedBefore = db.Bans.Any(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id);
-            if (IssuedBefore)
+                issuedBefore = db.Bans.Any(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id);
+            if (issuedBefore)
             {
                 await ctx.RespondAsync("You have already warned about this user! Stop picking on them...");
                 return;
@@ -412,42 +412,43 @@ namespace ModCore.Commands
             using (var db = this.Database.CreateContext())
             {
                 bans = db.Bans.Where(x => x.UserId == (long)m.Id).ToArray();
-                List<DiscordGuild> Guilds = ModCore.Shards.Select(x => x.Client).SelectMany(x => x.Guilds.Values).ToList();
 
-                foreach (DiscordGuild g in Guilds)
+               var guilds = ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
+
+
+                foreach (DiscordGuild g in guilds)
                 {
                     try
                     {
-                        Console.WriteLine(g.Name);
                         var settings = g.GetGuildSettings(db) ?? new GuildSettings();
                         DiscordMember guildmember = await g.GetMemberAsync(m.Id);
-                        Console.WriteLine(guildmember.DisplayName);
 
                         if (guildmember != null && g.Id != ctx.Guild.Id && settings.GlobalWarn.Enable)
                         {
-                            if (settings.GlobalWarn.WarnLevel == GLobalWarnLevel.Warn)
+                            if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Warn)
                             {
                                 var embed = new DiscordEmbedBuilder()
                                 .WithColor(DiscordColor.MidnightBlue)
                                 .WithTitle($"WARNING: @{m.Username}#{m.Discriminator} - ID: {m.Id}");
 
-                                var BanString = new StringBuilder();
-                                foreach (DatabaseBan ban in bans) BanString.Append($"[{ban.GuildId} - {ban.BanReason}] ");
-                                embed.AddField("Bans", BanString.ToString());
+                                var banString = new StringBuilder();
+                                foreach (DatabaseBan ban in bans) banString.Append($"[{ban.GuildId} - {ban.BanReason}] ");
+                                embed.AddField("Bans", banString.ToString());
 
                                 await g.Owner.SendMessageAsync("", embed: embed);
                             }
 
-                            else if (settings.GlobalWarn.WarnLevel == GLobalWarnLevel.Ban)
+                            else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Ban)
                             {
-                                Console.WriteLine("yeet");
                                 await g.BanMemberAsync(guildmember, reason: "ModCore GlobalWarn previously recorded for this user, and GlobalWarnLevel set to **Ban**");
-                                Console.WriteLine("yeet x2");
 
                             }
                         }
                     }
-                    catch { }
+                    catch
+                    {
+                        // TODO: Make SSG Proud
+                    }
                 }
             }
             

@@ -339,10 +339,10 @@ namespace ModCore.Entities
         /// Gets or sets the GlobalWarn 
         /// </summary>
         [JsonProperty("warnlevel")]
-        public GLobalWarnLevel WarnLevel { get; set; } = GLobalWarnLevel.None;
+        public GlobalWarnLevel WarnLevel { get; set; } = GlobalWarnLevel.None;
     }
 
-    public enum GLobalWarnLevel
+    public enum GlobalWarnLevel
     {
         None,
         Warn,
