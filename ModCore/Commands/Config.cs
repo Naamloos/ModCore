@@ -941,11 +941,11 @@ namespace ModCore.Commands
             public async Task SetRoleAsync(CommandContext ctx)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                await ctx.RespondAsync("__**Available GlobalWarn modes:**__\n1. None\n2. Warn (Warns the Server Owner if someone on the GlobalWarn list joins the server)\n3. Ban (Automatically bans any user on the GlobalWarn list if they join the server)\n\nType an option.");
+                await ctx.RespondAsync("__**Available GlobalWarn modes:**__\n1. None\n2. Owner (Warns the Server Owner if someone on the GlobalWarn list joins the server)\n3. Joinlog (Sends the warning to the JoinLog channel)\n\nType an option.");
                 var iv = ctx.Client.GetInteractivity();
 
                 var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && 
-                (xm.Content.ToLower() == "none" || xm.Content.ToLower() == "warn" || xm.Content.ToLower() == "ban" || xm.Content == "1" || xm.Content == "2" || xm.Content == "3"), 
+                (xm.Content.ToLower() == "none" || xm.Content.ToLower() == "owner" || xm.Content.ToLower() == "joinlog" || xm.Content == "1" || xm.Content == "2" || xm.Content == "3"), 
                 TimeSpan.FromSeconds(45));
                 if (msg == null)
                 {
@@ -958,13 +958,13 @@ namespace ModCore.Commands
                     case "1":
                         cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.None;
                         break;
-                    case "warn":
+                    case "owner":
                     case "2":
-                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.Warn;
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.Owner;
                         break;
-                    case "ban":
+                    case "joinlog":
                     case "3":
-                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.Ban;
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.JoinLog;
                         break;
                 }
                 await ctx.SetGuildSettingsAsync(cfg);
