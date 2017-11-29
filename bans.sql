@@ -44,10 +44,11 @@ update mcore_database_info set meta_value=2 where meta_key='schema_version';
 -- mcore_timers
 -- All the timed actions that ModCore should take. This is used for timed actions, such as reminders, bans, or mutes.
 create sequence if not exists mcore_bans_id_seq;
-create table if not exists mcore_bans(
+create table mcore_bans(
 	id integer primary key default nextval('mcore_bans_id_seq'),
 	guild_id bigint not null,
 	user_id bigint not null,
-	issued_at timestamp with time zone not null
+	issued_at timestamp with time zone not null,
+	ban_reason text not null
 );
 alter sequence mcore_bans_id_seq owned by mcore_bans.id;
