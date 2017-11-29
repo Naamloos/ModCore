@@ -30,9 +30,10 @@ namespace ModCore.Listeners
 
             var prevowns = new List<ulong>();
             int count = 0;
+            var guilds = ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
             foreach (var b in bans)
             {
-                var g = await e.Client.GetGuildAsync((ulong)b.GuildId);
+                var g = guilds.First(x => x.Id == (ulong)b.GuildId);
                 if (prevowns.Contains(g.Owner.Id))
                     continue;
                 count++;
@@ -41,21 +42,21 @@ namespace ModCore.Listeners
 
             if (settings.GlobalWarn.Enable && count > 2)
             {
-                if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Warn)
-                {
-                    var embed = new DiscordEmbedBuilder()
+                var embed = new DiscordEmbedBuilder()
                     .WithColor(DiscordColor.MidnightBlue)
                     .WithTitle($"@{e.Member.Username}#{e.Member.Discriminator} - ID: {e.Member.Id}");
 
-                    var BanString = new StringBuilder();
-                    foreach (DatabaseBan ban in bans) BanString.Append($"[{ban.GuildId} - {ban.BanReason}] ");
-                    embed.AddField("Bans", BanString.ToString());
+                var BanString = new StringBuilder();
+                foreach (DatabaseBan ban in bans) BanString.Append($"[{ban.GuildId} - {ban.BanReason}] ");
+                embed.AddField("Bans", BanString.ToString());
 
+                if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Owner)
+                {
                     await e.Guild.Owner.SendMessageAsync("", embed: embed);
                 }
-                else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Ban)
+                else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
                 {
-                    await e.Guild.BanMemberAsync(e.Member, reason: "ModCore GlobalWarn previously recorded for this user, and GlobalWarnLevel set to **Ban**");
+                    await e.Guild.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).SendMessageAsync(embed: embed);
                 }
             }
         }

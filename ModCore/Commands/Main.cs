@@ -61,7 +61,7 @@ namespace ModCore.Commands
             //TODO replace with a link to a nice invite builder!
             // what the hell is an invite builder? - chris
             var app = ctx.Client.CurrentApplication;
-            if (app.IsPublic != null && (bool) app.IsPublic)
+            if (app.IsPublic != null && (bool)app.IsPublic)
                 await ctx.RespondAsync(
                     $"Add ModCore to your server!\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
             else
@@ -413,45 +413,54 @@ namespace ModCore.Commands
             {
                 bans = db.Bans.Where(x => x.UserId == (long)m.Id).ToArray();
 
-               var guilds = ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
-
-
-                foreach (DiscordGuild g in guilds)
+                var prevowns = new List<ulong>();
+                int count = 0;
+                var guilds = ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
+                foreach (var b in bans)
                 {
-                    try
-                    {
-                        var settings = g.GetGuildSettings(db) ?? new GuildSettings();
-                        DiscordMember guildmember = await g.GetMemberAsync(m.Id);
+                    var g = guilds.First(x => x.Id == (ulong)b.GuildId);
+                    if (prevowns.Contains(g.Owner.Id))
+                        continue;
+                    count++;
+                    prevowns.Add(g.Owner.Id);
+                }
 
-                        if (guildmember != null && g.Id != ctx.Guild.Id && settings.GlobalWarn.Enable)
+                if (count > 2)
+                {
+                    foreach (DiscordGuild g in guilds)
+                    {
+                        try
                         {
-                            if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Warn)
+                            var settings = g.GetGuildSettings(db) ?? new GuildSettings();
+                            DiscordMember guildmember = await g.GetMemberAsync(m.Id);
+
+                            if (guildmember != null && g.Id != ctx.Guild.Id && settings.GlobalWarn.Enable)
                             {
                                 var embed = new DiscordEmbedBuilder()
-                                .WithColor(DiscordColor.MidnightBlue)
-                                .WithTitle($"WARNING: @{m.Username}#{m.Discriminator} - ID: {m.Id}");
+                                    .WithColor(DiscordColor.MidnightBlue)
+                                    .WithTitle($"WARNING: @{m.Username}#{m.Discriminator} - ID: {m.Id}");
 
                                 var banString = new StringBuilder();
                                 foreach (DatabaseBan ban in bans) banString.Append($"[{ban.GuildId} - {ban.BanReason}] ");
                                 embed.AddField("Bans", banString.ToString());
 
-                                await g.Owner.SendMessageAsync("", embed: embed);
-                            }
-
-                            else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Ban)
-                            {
-                                await g.BanMemberAsync(guildmember, reason: "ModCore GlobalWarn previously recorded for this user, and GlobalWarnLevel set to **Ban**");
-
+                                if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Owner)
+                                {
+                                    await g.Owner.SendMessageAsync("", embed: embed);
+                                }
+                                else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
+                                {
+                                    await g.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).SendMessageAsync(embed: embed);
+                                }
                             }
                         }
-                    }
-                    catch
-                    {
-                        // TODO: Make SSG Proud
+                        catch
+                        {
+                            // TODO: Make SSG Proud
+                        }
                     }
                 }
             }
-            
         }
 
         [Command("mute"), Description("Mutes an user indefinitely. This will prevent them from speaking in chat. " +
@@ -580,12 +589,12 @@ namespace ModCore.Commands
             // Add timer
             var now = DateTimeOffset.UtcNow;
             var dispatchAt = now + ts;
-            
+
             var reminder = new DatabaseTimer
             {
-                GuildId = (long) ctx.Guild.Id,
+                GuildId = (long)ctx.Guild.Id,
                 ChannelId = 0,
-                UserId = (long) m.Id,
+                UserId = (long)m.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unban
             };
@@ -593,7 +602,7 @@ namespace ModCore.Commands
             {
                 Discriminator = m.Discriminator,
                 DisplayName = m.Username,
-                UserId = (long) m.Id
+                UserId = (long)m.Id
             });
             using (var db = this.Database.CreateContext())
             {
@@ -662,9 +671,9 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long) ctx.Guild.Id,
+                GuildId = (long)ctx.Guild.Id,
                 ChannelId = 0,
-                UserId = (long) m.Id,
+                UserId = (long)m.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unmute
             };
@@ -672,8 +681,8 @@ namespace ModCore.Commands
             {
                 Discriminator = m.Discriminator,
                 DisplayName = m.Username,
-                UserId = (long) m.Id,
-                MuteRoleId = (long) ctx.GetGuildSettings().MuteRoleId
+                UserId = (long)m.Id,
+                MuteRoleId = (long)ctx.GetGuildSettings().MuteRoleId
             });
             using (var db = this.Database.CreateContext())
             {
@@ -702,13 +711,13 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long) ctx.Guild.Id,
-                ChannelId = (long) ctx.Channel.Id,
-                UserId = (long) ctx.User.Id,
+                GuildId = (long)ctx.Guild.Id,
+                ChannelId = (long)ctx.Channel.Id,
+                UserId = (long)ctx.User.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Pin
             };
-            reminder.SetData(new TimerPinData {MessageId = (long) message.Id, ChannelId = (long) ctx.Channel.Id});
+            reminder.SetData(new TimerPinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
             using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
@@ -735,13 +744,13 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long) ctx.Guild.Id,
-                ChannelId = (long) ctx.Channel.Id,
-                UserId = (long) ctx.User.Id,
+                GuildId = (long)ctx.Guild.Id,
+                ChannelId = (long)ctx.Channel.Id,
+                UserId = (long)ctx.User.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unpin
             };
-            reminder.SetData(new TimerUnpinData {MessageId = (long) message.Id, ChannelId = (long) ctx.Channel.Id});
+            reminder.SetData(new TimerUnpinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
             using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);

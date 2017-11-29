@@ -345,7 +345,7 @@ namespace ModCore.Entities
     public enum GlobalWarnLevel
     {
         None,
-        Warn,
-        Ban
+        Owner,
+        JoinLog
     }
 }
