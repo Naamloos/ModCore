@@ -251,7 +251,7 @@ namespace ModCore.Listeners
             return RescheduleTimers(shard, database, shared);
         }
 
-        public static async Task<List<TimerData>> UnscheduleTimersAsync(List<DatabaseTimer> timers, DiscordClient shard, DatabaseContextBuilder database, SharedData shared)
+        public static async Task<TimerData> UnscheduleTimersAsync(List<DatabaseTimer> timers, DiscordClient shard, DatabaseContextBuilder database, SharedData shared)
         {
             // lock the timers
             await shared.TimerSempahore.WaitAsync();
