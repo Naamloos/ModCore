@@ -8,6 +8,7 @@ using DSharpPlus.EventArgs;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
+using System.Collections.Generic;
 
 namespace ModCore.Listeners
 {
@@ -240,6 +241,25 @@ namespace ModCore.Listeners
             using (var db = database.CreateContext())
             {
                 db.Timers.Remove(timer);
+                await db.SaveChangesAsync();
+            }
+
+            // release the lock
+            shared.TimerSempahore.Release();
+
+            // trigger a reschedule
+            return RescheduleTimers(shard, database, shared);
+        }
+
+        public static async Task<List<TimerData>> UnscheduleTimersAsync(List<DatabaseTimer> timers, DiscordClient shard, DatabaseContextBuilder database, SharedData shared)
+        {
+            // lock the timers
+            await shared.TimerSempahore.WaitAsync();
+
+            // remove the requested timers
+            using (var db = database.CreateContext())
+            {
+                db.Timers.RemoveRange(timers);
                 await db.SaveChangesAsync();
             }
 
