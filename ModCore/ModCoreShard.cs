@@ -95,6 +95,9 @@ namespace ModCore
                 Services = deps
             });
 
+            // set the converters
+            CommandsNextUtilities.RegisterConverter(new AugmentedBoolConverter());
+
             // register commands
             this.Commands.RegisterCommands(Assembly.GetExecutingAssembly());
 

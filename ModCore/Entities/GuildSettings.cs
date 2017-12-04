@@ -71,6 +71,55 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("selfroles")]
         public List<ulong> SelfRoles { get; private set; } = new List<ulong>();
+
+        /// <summary>
+        /// Gets the Starboard settings for this guild. Starboard lets users star messages they like.
+        /// </summary>
+        [JsonProperty]
+        public GuildStarboardSettings Starboard { get; private set; } = new GuildStarboardSettings();
+
+        /// <summary>
+        /// Gets the GlobalWarn settings for this guild. GlobalWarn notifies the server owner when a previously 
+        /// banned user joins, or alternatively bans said user.
+        /// </summary>
+        [JsonProperty]
+        public GuildGlobalWarnSettings GlobalWarn { get; private set; } = new GuildGlobalWarnSettings();
+    }
+
+    public class GuildStarboardSettings
+    {
+        /// <summary>
+        /// Gets or sets the JoinLog channel ID.
+        /// </summary>
+        [JsonProperty("channel_id")]
+        public long ChannelId { get; set; } = 0;
+
+        /// <summary>
+        /// Gets or sets the starboard emoji.
+        /// </summary>
+        [JsonProperty("emoji")]
+        public GuildStarboardEmoji Emoji { get; set; } = new GuildStarboardEmoji();
+
+        /// <summary>
+        /// Gets or sets whether starboard should be enabled.
+        /// </summary>
+        [JsonProperty("enabled")]
+        public bool Enable { get; set; } = false;
+
+        [JsonProperty("minimum")]
+        public int Minimum { get; set; } = 3;
+
+        [JsonProperty("allow_nsfw")]
+        public bool AllowNSFW { get; set; } = false;
+    }
+
+    public class GuildStarboardEmoji
+    {
+        [JsonProperty("id")]
+        public long EmojiId { get; set; } = 0;
+
+        [JsonProperty("name")]
+        public string EmojiName { get; set; } = "⭐";
     }
 
     /// <summary>
@@ -276,5 +325,27 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("ignored_channel_ids")]
         public List<ulong> IgnoredChannelIds { get; private set; } = new List<ulong>();
+    }
+
+    public class GuildGlobalWarnSettings
+    {
+        /// <summary>
+        /// Gets or sets whether GlobalWarn should be enabled.
+        /// </summary>
+        [JsonProperty("enabled")]
+        public bool Enable { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the GlobalWarn 
+        /// </summary>
+        [JsonProperty("warnlevel")]
+        public GlobalWarnLevel WarnLevel { get; set; } = GlobalWarnLevel.None;
+    }
+
+    public enum GlobalWarnLevel
+    {
+        None,
+        Owner,
+        JoinLog
     }
 }

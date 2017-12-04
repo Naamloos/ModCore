@@ -15,7 +15,7 @@ namespace ModCore
     {
         internal Settings Settings { get; private set; }
         internal SharedData SharedData { get; private set; }
-        private List<ModCoreShard> Shards { get; set; }
+        public static List<ModCoreShard> Shards { get; set; }
         private CancellationTokenSource CTS { get; set; }
         private Perspective PerspectiveApi { get; set; }
 

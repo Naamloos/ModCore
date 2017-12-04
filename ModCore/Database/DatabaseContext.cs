@@ -12,6 +12,8 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseRolestateRoles> RolestateRoles { get; set; }
         public virtual DbSet<DatabaseWarning> Warnings { get; set; }
         public virtual DbSet<DatabaseTimer> Timers { get; set; }
+        public virtual DbSet<DatabaseStarData> StarDatas { get; set; }
+        public virtual DbSet<DatabaseBan> Bans { get; set; }
 
         private DatabaseProvider Provider { get; }
         private string ConnectionString { get; }
@@ -180,6 +182,44 @@ namespace ModCore.Database
                     .IsRequired()
                     .HasColumnName("action_data")
                     .HasColumnType("jsonb");
+            });
+
+            modelBuilder.Entity<DatabaseStarData>(entity =>
+            {
+                entity.ToTable("mcore_stars");
+
+                entity.HasIndex(e => new { e.MessageId, e.ChannelId, e.StargazerId })
+                    .HasName("mcore_stars_member_id_guild_id_key")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.StargazerId).HasColumnName("stargazer_id");
+
+                entity.Property(e => e.StarboardMessageId).HasColumnName("starboard_entry_id");
+
+                entity.Property(e => e.MessageId).HasColumnName("message_id");
+
+                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+
+                entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+            });
+
+            modelBuilder.Entity<DatabaseBan>(entity =>
+            {
+                entity.ToTable("mcore_bans");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+
+                entity.Property(e => e.UserId).HasColumnName("user_id");
+
+                entity.Property(e => e.IssuedAt)
+                .HasColumnName("issued_at")
+                .HasColumnType("timestamptz");
+
+                entity.Property(e => e.BanReason).HasColumnName("ban_reason");
             });
         }
     }

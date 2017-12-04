@@ -74,8 +74,8 @@ If in doubt, just try it! You can always clear the reminders later.
             DatabaseTimer[] reminders;
             using (var db = this.Database.CreateContext())
                 reminders = db.Timers.Where(xt =>
-                    xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long) ctx.Guild.Id &&
-                    xt.UserId == (long) ctx.User.Id).ToArray();
+                    xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long)ctx.Guild.Id &&
+                    xt.UserId == (long)ctx.User.Id).ToArray();
             if (!reminders.Any())
             {
                 await ctx.RespondAsync("You have no reminders set.");
@@ -137,7 +137,7 @@ If in doubt, just try it! You can always clear the reminders later.
             if (duration == Dates.ParsingError)
             {
                 await ctx.RespondAsync(
-                    $"Sorry, there was an error parsing your reminder.\nIf you see a developer, this info might help them: {text}");
+                    $"Sorry, there was an error parsing your reminder.\nIf you see a developer, this info might help them: \n```\n{text}```");
                 return;
             }
 
@@ -231,11 +231,11 @@ If in doubt, just try it! You can always clear the reminders later.
                 await ctx.TriggerTypingAsync();
                 using (var db = this.Database.CreateContext())
                 {
-                    var timers = db.Timers
-                        .Where(xt => xt.ActionType == TimerActionType.Reminder && xt.UserId == (long) ctx.User.Id)
-                        .ToArray();
-                    var count = timers.Length;
-                    db.Timers.RemoveRange(timers);
+                    List<DatabaseTimer> timers = db.Timers.Where(xt => xt.ActionType == TimerActionType.Reminder && xt.UserId == (long)ctx.User.Id).ToList();
+
+                    var count = timers.Count;
+                    await Timers.UnscheduleTimersAsync(timers, ctx.Client, this.Database, this.Shared);
+
 
                     await ctx.RespondAsync("Alright, cleared " + count + " timers.");
                 }
@@ -243,7 +243,7 @@ If in doubt, just try it! You can always clear the reminders later.
             }
             else
             {
-                await ctx.RespondAsync("Nevermind then, maybe next time.");
+                await ctx.RespondAsync("Never mind then, maybe next time.");
             }
         }
     }

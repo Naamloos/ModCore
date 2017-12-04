@@ -216,6 +216,8 @@ namespace ModCore.Commands
                             embed.AddField("InvisiCop-exempt users", string.Join(", ", users), true);
                         }
                     }
+                    embed.AddField("Starboard", 
+                        gcfg.Starboard.Enable ? $"Enabled\nChannel: <#{gcfg.Starboard.ChannelId}>\nEmoji: {gcfg.Starboard.Emoji.EmojiName}" : "Disabled", true);
 
                     await ctx.RespondAsync(embed: embed.Build());
                 });
@@ -816,7 +818,7 @@ namespace ModCore.Commands
             }
 
             [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's join log.")]
-            public async Task SetRoleAsync(CommandContext ctx, DiscordChannel channel)
+            public async Task SetChannelAsync(CommandContext ctx, DiscordChannel channel)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.JoinLog.ChannelId = (long) channel.Id;
@@ -860,6 +862,113 @@ namespace ModCore.Commands
                 }
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync($"Removed role `{role.Name}` with ID `{role.Id}` from SelfRoles.");
+            }
+        }
+
+        [Group("starboard"), Aliases("star"), Description("Starboard configutration commands.")]
+        public class Starboard
+        {
+            [Command("enable"), Aliases("on"), Description("Enables Starboard for this guild.")]
+            public async Task EnableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.Starboard.Enable = true;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync(
+                    $"Starboard enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config starboard setchannel`");
+            }
+
+            [Command("disable"), Aliases("off"), Description("Disables Starboard for this guild.")]
+            public async Task DisableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.Starboard.Enable = false;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("Starboard disabled.");
+            }
+
+            [Command("allownsfw"), Aliases("nsfw"), Description("Disables Starboard for this guild.")]
+            public async Task AllowNsfwAsync(CommandContext ctx, bool allow)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.Starboard.AllowNSFW = allow;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"Set allow NSFW to: {allow}.");
+            }
+
+            [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's Starboard.")]
+            public async Task SetChannelAsync(CommandContext ctx, DiscordChannel channel)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.Starboard.ChannelId = (long)channel.Id;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("Starboard channel configured.");
+            }
+
+            [Command("setemoji"), Aliases("se"), Description("Sets the Starboard emoji for this guild.")]
+            public async Task SetEmojiAsync(CommandContext ctx, DiscordEmoji emoji)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.Starboard.Emoji = new GuildStarboardEmoji() { EmojiId = (long)emoji.Id, EmojiName = emoji.Name };
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync($"Starboard emoji set to {emoji.ToString()}.");
+            }
+        }
+
+        [Group("globalwarn"), Aliases("gw"), Description("GlobalWarn configuration commands.")]
+        public class GlobalWarn
+        {
+            [Command("enable"), Aliases("on"), Description("Enables GlobalWarn for this guild.")]
+            public async Task EnableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.GlobalWarn.Enable = true;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("GlobalWarn enabled.");
+            }
+
+            [Command("disable"), Aliases("off"), Description("Disables GlobalWarn for this guild.")]
+            public async Task DisableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.GlobalWarn.Enable = false;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("GlobalWarn disabled.");
+            }
+
+            [Command("changemode"), Aliases("cm"),
+             Description("Sets the GlobalWarn mode.")]
+            public async Task SetRoleAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                await ctx.RespondAsync("__**Available GlobalWarn modes:**__\n1. None\n2. Owner (Warns the Server Owner if someone on the GlobalWarn list joins the server)\n3. Joinlog (Sends the warning to the JoinLog channel)\n\nType an option.");
+                var iv = ctx.Client.GetInteractivity();
+
+                var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && 
+                (xm.Content.ToLower() == "none" || xm.Content.ToLower() == "owner" || xm.Content.ToLower() == "joinlog" || xm.Content == "1" || xm.Content == "2" || xm.Content == "3"), 
+                TimeSpan.FromSeconds(45));
+                if (msg == null)
+                {
+                    await ctx.RespondAsync("Operation aborted.");
+                    return;
+                }
+                switch (msg.Message.Content)
+                {
+                    case "none":
+                    case "1":
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.None;
+                        break;
+                    case "owner":
+                    case "2":
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.Owner;
+                        break;
+                    case "joinlog":
+                    case "3":
+                        cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.JoinLog;
+                        break;
+                }
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("GlobalWarn mode configured to " + cfg.GlobalWarn.WarnLevel.ToString());
             }
         }
     }

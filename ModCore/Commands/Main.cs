@@ -61,7 +61,7 @@ namespace ModCore.Commands
             //TODO replace with a link to a nice invite builder!
             // what the hell is an invite builder? - chris
             var app = ctx.Client.CurrentApplication;
-            if (app.IsPublic != null && (bool) app.IsPublic)
+            if (app.IsPublic != null && (bool)app.IsPublic)
                 await ctx.RespondAsync(
                     $"Add ModCore to your server!\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
             else
@@ -300,6 +300,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
             await ctx.RespondAsync($"Banned user {m.DisplayName} (ID:{m.Id})");
 
@@ -336,6 +337,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.RemoveAsync($"{ustr}{rstr}");
             await ctx.RespondAsync($"Kicked user {m.DisplayName} (ID:{m.Id})");
 
@@ -344,7 +346,7 @@ namespace ModCore.Commands
 
         [Command("softban"),
          Description("Bans then unbans an user from the guild. " +
-                     "This will delete their recent messages, but they can join back."), Aliases("s"),
+                     "This will delete their recent messages, but they can join back."), Aliases("sb"),
          RequireUserPermissions(Permissions.KickMembers), RequireBotPermissions(Permissions.BanMembers)]
         public async Task SoftbanAsync(CommandContext ctx, DiscordMember m, [RemainingText] string reason = "")
         {
@@ -356,11 +358,109 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.BanAsync(7, $"{ustr}{rstr} (softban)");
             await m.UnbanAsync(ctx.Guild, $"{ustr}{rstr}");
             await ctx.RespondAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})");
 
             await ctx.LogActionAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
+        }
+
+        [Command("globalwarn"), Description("Adds the specified user to a global watchlist.")]
+        public async Task GlobalWarnAsync(CommandContext ctx, DiscordMember m, [RemainingText] string reason = "")
+        {
+            bool issuedBefore = false;
+            using (var db = this.Database.CreateContext())
+                issuedBefore = db.Bans.Any(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id);
+            if (issuedBefore)
+            {
+                await ctx.RespondAsync("You have already warned about this user! Stop picking on them...");
+                return;
+            }
+            if (ctx.Member.Id == m.Id)
+            {
+                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                return;
+            }
+
+            var ban = new DatabaseBan
+            {
+                GuildId = (long)ctx.Guild.Id,
+                UserId = (long)m.Id,
+                IssuedAt = DateTime.Now,
+                BanReason = reason
+            };
+            using (var db = this.Database.CreateContext())
+            {
+                db.Bans.Add(ban);
+                await db.SaveChangesAsync();
+            }
+
+            var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
+            var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}");
+            await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
+            await ctx.RespondAsync($"Banned and issued global warn about user {m.DisplayName} (ID:{m.Id})");
+
+            await ctx.LogActionAsync($"Banned and issued global warn about user {m.DisplayName} (ID:{m.Id})\n{rstr}\n");
+            await GlobalWarnUpdateAsync(ctx, m);
+        }
+
+        private async Task GlobalWarnUpdateAsync(CommandContext ctx, DiscordMember m)
+        {
+            DatabaseBan[] bans;
+            using (var db = this.Database.CreateContext())
+            {
+                bans = db.Bans.Where(x => x.UserId == (long)m.Id).ToArray();
+
+                var prevowns = new List<ulong>();
+                int count = 0;
+                var guilds = ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
+                foreach (var b in bans)
+                {
+                    var g = guilds.First(x => x.Id == (ulong)b.GuildId);
+                    if (prevowns.Contains(g.Owner.Id))
+                        continue;
+                    count++;
+                    prevowns.Add(g.Owner.Id);
+                }
+
+                if (count > 2)
+                {
+                    foreach (DiscordGuild g in guilds)
+                    {
+                        try
+                        {
+                            var settings = g.GetGuildSettings(db) ?? new GuildSettings();
+                            DiscordMember guildmember = await g.GetMemberAsync(m.Id);
+
+                            if (guildmember != null && g.Id != ctx.Guild.Id && settings.GlobalWarn.Enable)
+                            {
+                                var embed = new DiscordEmbedBuilder()
+                                    .WithColor(DiscordColor.MidnightBlue)
+                                    .WithTitle($"WARNING: @{m.Username}#{m.Discriminator} - ID: {m.Id}");
+
+                                var banString = new StringBuilder();
+                                foreach (DatabaseBan ban in bans) banString.Append($"[{ban.GuildId} - {ban.BanReason}] ");
+                                embed.AddField("Bans", banString.ToString());
+
+                                if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Owner)
+                                {
+                                    await g.Owner.SendMessageAsync("", embed: embed);
+                                }
+                                else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
+                                {
+                                    await g.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).SendMessageAsync(embed: embed);
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // TODO: Make SSG Proud
+                        }
+                    }
+                }
+            }
         }
 
         [Command("mute"), Description("Mutes an user indefinitely. This will prevent them from speaking in chat. " +
@@ -396,6 +496,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
             await ctx.RespondAsync(
                 $"Muted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
@@ -438,6 +539,7 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been unmuted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
             await ctx.RespondAsync(
                 $"Unmuted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
@@ -481,6 +583,8 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been temporarily banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+                $"\nYou can rejoin after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
             await m.BanAsync(7, $"{ustr}{rstr}");
             // Add timer
             var now = DateTimeOffset.UtcNow;
@@ -488,9 +592,9 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long) ctx.Guild.Id,
+                GuildId = (long)ctx.Guild.Id,
                 ChannelId = 0,
-                UserId = (long) m.Id,
+                UserId = (long)m.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unban
             };
@@ -498,7 +602,7 @@ namespace ModCore.Commands
             {
                 Discriminator = m.Discriminator,
                 DisplayName = m.Username,
-                UserId = (long) m.Id
+                UserId = (long)m.Id
             });
             using (var db = this.Database.CreateContext())
             {
@@ -558,6 +662,8 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            await m.SendMessageAsync($"You've been temporarily muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+                $"\nYou can talk again after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
             await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
             // Add timer
             var now = DateTimeOffset.UtcNow;
@@ -565,9 +671,9 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long) ctx.Guild.Id,
+                GuildId = (long)ctx.Guild.Id,
                 ChannelId = 0,
-                UserId = (long) m.Id,
+                UserId = (long)m.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unmute
             };
@@ -575,8 +681,8 @@ namespace ModCore.Commands
             {
                 Discriminator = m.Discriminator,
                 DisplayName = m.Username,
-                UserId = (long) m.Id,
-                MuteRoleId = (long) ctx.GetGuildSettings().MuteRoleId
+                UserId = (long)m.Id,
+                MuteRoleId = (long)ctx.GetGuildSettings().MuteRoleId
             });
             using (var db = this.Database.CreateContext())
             {
@@ -605,13 +711,13 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long) ctx.Guild.Id,
-                ChannelId = (long) ctx.Channel.Id,
-                UserId = (long) ctx.User.Id,
+                GuildId = (long)ctx.Guild.Id,
+                ChannelId = (long)ctx.Channel.Id,
+                UserId = (long)ctx.User.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Pin
             };
-            reminder.SetData(new TimerPinData {MessageId = (long) message.Id, ChannelId = (long) ctx.Channel.Id});
+            reminder.SetData(new TimerPinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
             using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
@@ -638,13 +744,13 @@ namespace ModCore.Commands
 
             var reminder = new DatabaseTimer
             {
-                GuildId = (long) ctx.Guild.Id,
-                ChannelId = (long) ctx.Channel.Id,
-                UserId = (long) ctx.User.Id,
+                GuildId = (long)ctx.Guild.Id,
+                ChannelId = (long)ctx.Channel.Id,
+                UserId = (long)ctx.User.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Unpin
             };
-            reminder.SetData(new TimerUnpinData {MessageId = (long) message.Id, ChannelId = (long) ctx.Channel.Id});
+            reminder.SetData(new TimerUnpinData { MessageId = (long)message.Id, ChannelId = (long)ctx.Channel.Id });
             using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
