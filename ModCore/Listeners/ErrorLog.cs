@@ -31,10 +31,10 @@ namespace ModCore.Listeners
                     break;
 
                 case CommandErrorVerbosity.Name:
-                    await ctx.RespondAsync($"**Command {e.Command.QualifiedName} Errored!**\n`{e.Exception.GetType()}`");
+                    await ctx.RespondAsync($"**Command {e.Command.QualifiedName} Errored!**");
                     break;
                 case CommandErrorVerbosity.NameDesc:
-                    await ctx.RespondAsync($"**Command {e.Command.QualifiedName} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+                    await ctx.RespondAsync($"**Command {e.Command.QualifiedName} Errored!**\n{e.Exception.Message}");
                     break;
                 case CommandErrorVerbosity.Exception:
                     MemoryStream stream = new MemoryStream();
@@ -42,7 +42,7 @@ namespace ModCore.Listeners
                     writer.Write(e.Exception.ToString());
                     writer.Flush();
                     stream.Position = 0;
-                    await ctx.RespondWithFileAsync("exception.txt", stream, $"**Command `{e.Command.QualifiedName} {e.Command.Arguments}` Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+                    await ctx.RespondWithFileAsync("exception.txt", stream, $"**Command `{e.Command.QualifiedName}` Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
                     break;
             }
 
