@@ -28,7 +28,7 @@ namespace ModCore.Listeners
             if (e.Channel.Guild == null)
                 return;
 
-            GuildSettings cfg = null;
+            GuildSettings cfg;
             using (var db = bot.Database.CreateContext())
                 cfg = e.Guild.GetGuildSettings(db);
             if (cfg == null)
@@ -52,21 +52,36 @@ namespace ModCore.Listeners
             {
                 var match = LinkRemoverMatchers.IpLogger.Check(e.Message);
                 if (match.Success)
+                {
                     await e.Message.DeleteAsync($"Discovered IP logger site <{match.Matched}> and deleted message");
+                    await (e.Author as DiscordMember).SendMessageAsync(
+                        $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
+                        $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to an IP logger website: **`{match.Matched}`**");
+                }
             }
 
             if (lfSettings.BlockBooters)
             {
                 var match = LinkRemoverMatchers.BooterRegex.Check(e.Message);
                 if (match.Success)
+                {
                     await e.Message.DeleteAsync($"Discovered Booter/DDoS site <{match.Matched}> and deleted message");
+                    await (e.Author as DiscordMember).SendMessageAsync(
+                        $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
+                        $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to a DDoS/booter website: **`{match.Matched}`**");
+                }
             }
 
             if (lfSettings.BlockShockSites)
             {
                 var match = LinkRemoverMatchers.ShockSiteRegex.Check(e.Message);
                 if (match.Success)
+                {
                     await e.Message.DeleteAsync($"Discovered shock site <{match.Matched}> and deleted message");
+                    await (e.Author as DiscordMember).SendMessageAsync(
+                        $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
+                        $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to a shock/gore site: **`{match.Matched}`**");
+                }
             }
 
             // separate method to avoid loading the url shortener class (and all the strings inside) if not necessary.
@@ -94,7 +109,6 @@ namespace ModCore.Listeners
                 if (ib.ExemptInviteGuildIds.Contains(inv.Guild.Id))
                     continue;
 
-#warning INCREMENT BAN THRESHOLD
                 await e.Message.DeleteAsync($"Discovered invite <{inv.Code}> and deleted message");
                 break;
             }
@@ -105,8 +119,13 @@ namespace ModCore.Listeners
             var match = UrlShortenerConstants.UrlShortenerRegex.Check(e.Message);
             if (match.Success)
             {
+                var origin = UrlShortenerConstants.UrlShorteners[match.Matched];
                 await e.Message.DeleteAsync(
-                    $"Discovered URL shortener <{match.Matched}> and deleted message. Info: <{UrlShortenerConstants.UrlShorteners[match.Matched]}>");
+                    $"Discovered URL shortener <{match.Matched}> and deleted message. Info: <{origin}>");
+                await (e.Author as DiscordMember).SendMessageAsync(
+                    $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
+                    $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to an URL shortener: **`{match.Matched}`**\n" +
+                    $"This URL shortener seems to have originated from the following domain: **`{origin}`**");
             }
         }
     }
@@ -1079,7 +1098,7 @@ namespace ModCore.Listeners
             ["yhoo.it"] = "http://longurl.org/services",
             ["yi.pe"] = "N/A",
             ["yiyd.com"] = "http://longurl.org/services",
-            ["youtu.be"] = "http://longurl.org/services",
+            //["youtu.be"] = "http://longurl.org/services",
             ["yuarel.com"] = "http://longurl.org/services",
             ["yvy.me"] = "http://yvy.me/",
             ["z.pe"] = "http://urlshortener.org/one_character_url_shorteners/",
