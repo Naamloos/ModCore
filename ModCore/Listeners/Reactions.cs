@@ -47,6 +47,10 @@ namespace ModCore.Listeners
                             {
                                 var chn = await e.Client.GetChannelAsync((ulong)other.ChannelId);
                                 var msg = await chn.GetMessageAsync((ulong)other.MessageId);
+
+                                if (msg.Author.Id == e.User.Id || e.User.IsBot)
+                                    return;
+
                                 var d = await (await c.GetMessageAsync((ulong)other.StarboardMessageId)).ModifyAsync($"{e.Emoji.ToString()}: {count + 1} ({msg.Id})", embed: BuildMessageEmbed(msg));
                                 sbmid = (long)d.Id;
                                 await db.StarDatas.AddAsync(new DatabaseStarData()
