@@ -52,6 +52,18 @@ namespace ModCore.Commands
             await ctx.RespondAsync("Test: 420");
         }
 
+        [Command("sudo"), Aliases("s"), Hidden]
+        public async Task SudoAsync(CommandContext ctx, DiscordMember m, [RemainingText]string command)
+        {
+            await ctx.CommandsNext.SudoAsync(m, ctx.Channel, command);
+        }
+
+        [Command("sudoowner"), Aliases("so"), Hidden]
+        public async Task SudoOwnerAsync(CommandContext ctx, string command)
+        {
+            await ctx.CommandsNext.SudoAsync(ctx.Guild.Owner, ctx.Channel, command);
+        }
+
         [Command("update"), Aliases("u"), Hidden]
         public async Task UpdateAsync(CommandContext ctx)
         {
