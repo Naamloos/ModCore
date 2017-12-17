@@ -59,10 +59,12 @@ namespace ModCore.Listeners
                 var embed = new DiscordEmbedBuilder()
                     .WithTitle("Member left")
                     .WithDescription($"ID: ({m.Id})")
-                    .WithAuthor($"{m.Username}#{m.Discriminator}", icon_url: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
-                    .AddField("Join Date", $"{m.JoinedAt.DateTime.ToString()}")
-                    .AddField("Register Date", $"{m.CreationTimestamp.DateTime.ToString()}")
-                    .WithColor(DiscordColor.Red);
+                    .WithAuthor($"{m.Username}#{m.Discriminator}", icon_url: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl);
+                if (m.JoinedAt.DateTime == DateTime.MinValue)
+                    embed.AddField("Join Date", $"{m.JoinedAt.DateTime.ToString()}");
+                embed.AddField("Leave Date", $"{DateTime.Now.ToString()}")
+                .AddField("Register Date", $"{m.CreationTimestamp.DateTime.ToString()}")
+                .WithColor(DiscordColor.Red);
                 await c.SendMessageAsync(embed: embed);
             }
         }
