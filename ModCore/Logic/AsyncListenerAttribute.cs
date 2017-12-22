@@ -20,13 +20,35 @@ namespace ModCore.Logic
             // nope, there's no cleaner way to do this. sorry
             Task OnEventWithArgs(object e)
             {
-                _ = Task.Run(async () => await (Task) listener.Invoke(null, new[] { bot, e }));
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await (Task) listener.Invoke(null, new[] {bot, e});
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"<AsyncListener> Uncaught exception in listener thread: {ex}");
+                        Console.WriteLine(ex.StackTrace);
+                    }
+                });
                 return Task.CompletedTask;
             }
 
             Task OnEventVoid()
             {
-                Task.Run(async () => await (Task) listener.Invoke(null, new object[] { bot }));
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await (Task) listener.Invoke(null, new object[] {bot});
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"<AsyncListener> Uncaught exception in listener thread: {ex}");
+                        Console.WriteLine(ex.StackTrace);
+                    }
+                });
                 return Task.CompletedTask;
             }
 
