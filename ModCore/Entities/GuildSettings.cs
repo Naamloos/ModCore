@@ -85,6 +85,9 @@ namespace ModCore.Entities
         [JsonProperty]
         public GuildGlobalWarnSettings GlobalWarn { get; private set; } = new GuildGlobalWarnSettings();
 
+        /// <summary>
+        /// Gets whether spelling helper is enabled or disabled for this guild.
+        /// </summary>
         [JsonProperty("spellhelp")]
         public bool SpellingHelperEnabled { get; set; }
     }
