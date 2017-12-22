@@ -278,6 +278,15 @@ namespace ModCore.Commands
                 : $"Prefix changed to: \"{prefix}\".");
         }
 
+        [Command("suggestions"), Aliases("suggestion", "sugg", "sug", "s"), 
+         Description("Enable or disable command suggestions.")]
+        public async Task SetSpellingHelperEnabled(CommandContext ctx, bool b)
+        {
+            await ctx.WithGuildSettings(cfg => cfg.SpellingHelperEnabled = b);
+            
+            await ctx.RespondAsync(b ? "Enabled command suggestions" : "Disabled command suggestions");
+        }
+
         [Command("muterole"), Aliases("mr"),
          Description("Sets the role used to mute users. Invoking with no arguments will reset this setting.")]
         public async Task MuteRole(CommandContext ctx,

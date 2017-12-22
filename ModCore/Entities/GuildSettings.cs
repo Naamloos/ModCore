@@ -84,6 +84,9 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty]
         public GuildGlobalWarnSettings GlobalWarn { get; private set; } = new GuildGlobalWarnSettings();
+
+        [JsonProperty("spellhelp")]
+        public bool SpellingHelperEnabled { get; set; }
     }
 
     public class GuildStarboardSettings
