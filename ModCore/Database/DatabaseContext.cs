@@ -14,6 +14,7 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseTimer> Timers { get; set; }
         public virtual DbSet<DatabaseStarData> StarDatas { get; set; }
         public virtual DbSet<DatabaseBan> Bans { get; set; }
+        public virtual DbSet<DatabaseTag> Tags { get; set; }
 
         private DatabaseProvider Provider { get; }
         private string ConnectionString { get; }
@@ -220,6 +221,28 @@ namespace ModCore.Database
                 .HasColumnType("timestamptz");
 
                 entity.Property(e => e.BanReason).HasColumnName("ban_reason");
+            });
+
+            modelBuilder.Entity<DatabaseTag>(entity =>
+            {
+                entity.HasIndex(e => new { e.ChannelId, e.Name })
+                    .HasName("mcore_tags_channel_id_tag_name_key")
+                    .IsUnique();
+
+                entity.ToTable("mcore_tags");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+
+                entity.Property(e => e.OwnerId).HasColumnName("owner_id");
+
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at")
+                .HasColumnType("timestamptz");
+
+                entity.Property(e => e.Name).HasColumnName("tagname");
+
+                entity.Property(e => e.Contents).HasColumnName("contents");
             });
         }
     }
