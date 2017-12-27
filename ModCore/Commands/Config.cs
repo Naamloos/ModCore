@@ -33,76 +33,95 @@ namespace ModCore.Commands
         public async Task ExecuteGroupAsync(CommandContext ctx)
         {
             await ctx.IfGuildSettingsAsync(async () =>
+            {
+                var t0 = await ctx.RespondAsync(
+                    "Welcome to ModCore! Looks like you haven't configured your guild yet." +
+                    "Would you like to go through a quick setup? (Y/N)");
+
+                var message = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
+                    TimeSpan.FromSeconds(40));
+                if (!message.Message.Content.EqualsIgnoreCase("y") &&
+                    !message.Message.Content.EqualsIgnoreCase("yes") &&
+                    !message.Message.Content.EqualsIgnoreCase("ya") &&
+                    !message.Message.Content.EqualsIgnoreCase("ja") &&
+                    !message.Message.Content.EqualsIgnoreCase("da"))
                 {
-                    var t0 = await ctx.RespondAsync(
-                        "Welcome to ModCore! Looks like you haven't configured your guild yet." +
-                        "Would you like to go through a quick setup? (Y/N)");
+                    await ctx.RespondAsync(
+                        "OK, I won't bother you anymore. Just execute this command again if you need help configuring.");
+                    await t0.DeleteAsync("modcore cleanup after itself: welcome message");
+                    await message.Message.DeleteAsync(
+                        "modcore cleanup after itself: user response to welcome message");
+                    return;
+                }
 
-                    var message = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
-                        TimeSpan.FromSeconds(40));
-                    if (!message.Message.Content.EqualsIgnoreCase("y") &&
-                        !message.Message.Content.EqualsIgnoreCase("yes") &&
-                        !message.Message.Content.EqualsIgnoreCase("ya") &&
-                        !message.Message.Content.EqualsIgnoreCase("ja") &&
-                        !message.Message.Content.EqualsIgnoreCase("da"))
-                    {
-                        await ctx.RespondAsync(
-                            "OK, I won't bother you anymore. Just execute this command again if you need help configuring.");
-                        await t0.DeleteAsync("modcore cleanup after itself: welcome message");
-                        await message.Message.DeleteAsync(
-                            "modcore cleanup after itself: user response to welcome message");
-                        return;
-                    }
+                DiscordChannel channel;
+                try
+                {
+                    channel =
+                        ctx.Guild.Channels.FirstOrDefault(e => e.Name == "modcore-setup") ??
+                        await ctx.Guild.CreateChannelAsync("modcore-setup", ChannelType.Text, null, null, null,
+                            null, null, "modcore setup channel creation");
+                }
+                catch
+                {
+                    await ctx.RespondAsync("Unfortunately, I wasn't able to create the modcore setup channel.\n" +
+                                           "Could you kindly create a channel called `modcore-setup` and re-run the command?\n" +
+                                           "I'll set up the rest for you. This will help keep the setup process away from prying eyes.");
+                    return;
+                }
+                await channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None,
+                    Permissions.AccessChannels, "modcore overwrites for setup channel");
+                await channel.AddOverwriteAsync(ctx.Member, Permissions.AccessChannels, Permissions.None,
+                    "modcore overwrites for setup channel");
 
-                    DiscordChannel channel;
+                await channel.SendMessageAsync(
+                    "OK, now, can you create a webhook for ModCore and give me its URL?\n" +
+                    "If you don't know what that is, simply say no and I'll make one for you.");
+
+                var message2 = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
+                    TimeSpan.FromSeconds(40));
+                var mContent = message2.Message.Content;
+                if (!mContent.Contains("discordapp.com/api/webhooks/"))
+                {
+                    await channel.SendMessageAsync("Alright, I'll make a webhook for you then. Sit tight...");
+                    DiscordChannel logChannel;
                     try
                     {
-                        channel =
-                            ctx.Guild.Channels.FirstOrDefault(e => e.Name == "modcore-setup") ??
-                            await ctx.Guild.CreateChannelAsync("modcore-setup", ChannelType.Text, null, null, null,
-                                null, null, "modcore setup channel creation");
+                        logChannel =
+                            ctx.Guild.Channels.FirstOrDefault(e => e.Name == "modlog") ??
+                            await ctx.Guild.CreateChannelAsync("modlog", ChannelType.Text, null, null, null,
+                                null, null, "ModCore Logging channel.");
                     }
                     catch
                     {
-                        await ctx.RespondAsync("Unfortunately, I wasn't able to create the modcore setup channel.\n" +
-                                               "Could you kindly create a channel called `modcore-setup` and re-run the command?\n" +
-                                               "I'll set up the rest for you. This will help keep the setup process away from prying eyes.");
+                        await ctx.RespondAsync("Unfortunately, I wasn't able to create the modcore logging channel.\n" +
+                                               "Could you kindly create a channel called `modlog` and re-run the command?\n" +
+                                               "I'll set up the rest for you. This is to setup a channel for the actionlog to post into.");
                         return;
                     }
-                    await channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None,
-                        Permissions.AccessChannels, "modcore overwrites for setup channel");
-                    await channel.AddOverwriteAsync(ctx.Member, Permissions.AccessChannels, Permissions.None,
-                        "modcore overwrites for setup channel");
 
-                    await channel.SendMessageAsync(
-                        "OK, now, can you create a webhook for ModCore and give me its URL?\n" +
-                        "If you don't know what that is, simply say no and I'll make one for you.");
+                    DiscordWebhook webhook = await logChannel.CreateWebhookAsync("ModCore Logging", null, "Created webhook to post log messages");
 
-                    var message2 = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
-                        TimeSpan.FromSeconds(40));
-                    var mContent = message2.Message.Content;
-                    if (!mContent.Contains("discordapp.com/api/webhooks/"))
-                    {
-                        await channel.SendMessageAsync("Alright, I'll make a webhook for you then. Sit tight...");
-                        await channel.SendMessageAsync(
-                            "Gee, it looks like the developer hasn't implemented this part yet.\n" +
-                            "What a silly boy!");
-                    }
-                    else
-                    {
-                        var tokens = mContent
-                            .Substring(mContent.IndexOfInvariant("/api/webhooks/") + "/api/webhooks/".Length)
-                            .Split('/');
+                    var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                    cfg.ActionLog.WebhookId = webhook.Id;
+                    cfg.ActionLog.WebhookToken = webhook.Token;
+                    await ctx.SetGuildSettingsAsync(cfg);
+                }
+                else
+                {
+                    var tokens = mContent
+                        .Substring(mContent.IndexOfInvariant("/api/webhooks/") + "/api/webhooks/".Length)
+                        .Split('/');
 
-                        var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                        cfg.ActionLog.WebhookId = ulong.Parse(tokens[0]);
-                        cfg.ActionLog.WebhookToken = tokens[1];
-                        await ctx.SetGuildSettingsAsync(cfg);
-                        await ctx.RespondAsync(
-                            "Webhook configured. Looks like you're all set! ModCore has been set up.");
-                    }
-                    //https://canary.discordapp.com/api/webhooks/id/token
-                },
+                    var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                    cfg.ActionLog.WebhookId = ulong.Parse(tokens[0]);
+                    cfg.ActionLog.WebhookToken = tokens[1];
+                    await ctx.SetGuildSettingsAsync(cfg);
+                }
+                await ctx.RespondAsync(
+                        "Webhook configured. Looks like you're all set! ModCore has been set up.");
+
+            },
                 async gcfg =>
                 {
                     var embed = new DiscordEmbedBuilder
@@ -216,8 +235,34 @@ namespace ModCore.Commands
                             embed.AddField("InvisiCop-exempt users", string.Join(", ", users), true);
                         }
                     }
-                    embed.AddField("Starboard", 
+                    embed.AddField("Starboard",
                         gcfg.Starboard.Enable ? $"Enabled\nChannel: <#{gcfg.Starboard.ChannelId}>\nEmoji: {gcfg.Starboard.Emoji.EmojiName}" : "Disabled", true);
+
+                    var suggestions = gcfg.SpellingHelperEnabled;
+                    embed.AddField("Command Suggestions",
+                        suggestions ? $"Enabled" : "Disabled", true);
+
+                    var joinlog = gcfg.JoinLog;
+                    embed.AddField("Join Logging",
+                        joinlog.Enable
+                            ? "Enabled" + (joinlog.ChannelId == 0 ? ", but no channel configured!" : "")
+                            : "Disabled", true);
+
+                    if (gcfg.SelfRoles.Any())
+                    {
+                        var roles = gcfg.SelfRoles
+                            .Select(ctx.Guild.GetRole)
+                            .Where(xr => xr != null)
+                            .Select(xr => xr.Mention);
+
+                        embed.AddField("Available Selfroles", string.Join(", ", roles), true);
+                    }
+
+                    var globalwarn = gcfg.GlobalWarn;
+                    embed.AddField("GlobalWarn",
+                        globalwarn.Enable
+                            ? "Enabled\nMode: " + globalwarn.WarnLevel
+                            : "Disabled", true);
 
                     await ctx.RespondAsync(embed: embed.Build());
                 });
@@ -228,7 +273,7 @@ namespace ModCore.Commands
         {
             using (var db = this.Database.CreateContext())
             {
-                var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id);
+                var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
                 if (cfg == null)
                 {
                     await ctx.RespondAsync("This guild is not configured.");
@@ -278,13 +323,26 @@ namespace ModCore.Commands
                 : $"Prefix changed to: \"{prefix}\".");
         }
 
-        [Command("suggestions"), Aliases("suggestion", "sugg", "sug", "s"), 
-         Description("Enable or disable command suggestions.")]
-        public async Task SetSpellingHelperEnabled(CommandContext ctx, bool b)
+        [Group("suggestions"), Aliases("suggestion", "sugg", "sug", "s"), Description("Suggestions configuration commands.")]
+        public class Suggestions
         {
-            await ctx.WithGuildSettings(cfg => cfg.SpellingHelperEnabled = b);
-            
-            await ctx.RespondAsync(b ? "Enabled command suggestions" : "Disabled command suggestions");
+            [Command("enable"), Aliases("on"), Description("Enables Suggestions for this guild.")]
+            public async Task EnableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.SpellingHelperEnabled = true;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("Enabled command suggestions.");
+            }
+
+            [Command("disable"), Aliases("off"), Description("Disables Suggestions for this guild.")]
+            public async Task DisableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.SpellingHelperEnabled = true;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("Disabled command suggestions.");
+            }
         }
 
         [Command("muterole"), Aliases("mr"),
@@ -296,6 +354,7 @@ namespace ModCore.Commands
 
             await ctx.RespondAsync(role == null ? "Muting disabled." : $"Mute role set to {role.Mention}.");
         }
+
 
         [Group("linkfilter"), Aliases("inviteblocker", "invite", "ib", "filter", "lf"),
          Description("Linkfilter configuration commands.")]
@@ -612,7 +671,7 @@ namespace ModCore.Commands
                     using (var db = this.Database.CreateContext())
                     {
                         var chperms = db.RolestateOverrides.Where(xs =>
-                            xs.ChannelId == (long) chn.Id && xs.GuildId == (long) chn.Guild.Id);
+                            xs.ChannelId == (long)chn.Id && xs.GuildId == (long)chn.Guild.Id);
                         if (chperms.Any())
                         {
                             db.RolestateOverrides.RemoveRange(chperms);
@@ -642,11 +701,11 @@ namespace ModCore.Commands
                         {
                             await db.RolestateOverrides.AddRangeAsync(os.Select(xo => new DatabaseRolestateOverride
                             {
-                                ChannelId = (long) chn.Id,
-                                GuildId = (long) chn.Guild.Id,
-                                MemberId = (long) xo.Id,
-                                PermsAllow = (long) xo.Allow,
-                                PermsDeny = (long) xo.Deny
+                                ChannelId = (long)chn.Id,
+                                GuildId = (long)chn.Guild.Id,
+                                MemberId = (long)xo.Id,
+                                PermsAllow = (long)xo.Allow,
+                                PermsDeny = (long)xo.Deny
                             }));
                             await db.SaveChangesAsync();
                         }
@@ -736,7 +795,7 @@ namespace ModCore.Commands
             public async Task SetRoleAsync(CommandContext ctx, DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                cfg.AutoRole.RoleId = (long) role.Id;
+                cfg.AutoRole.RoleId = (long)role.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("AutoRole role configured.");
             }
@@ -830,7 +889,7 @@ namespace ModCore.Commands
             public async Task SetChannelAsync(CommandContext ctx, DiscordChannel channel)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                cfg.JoinLog.ChannelId = (long) channel.Id;
+                cfg.JoinLog.ChannelId = (long)channel.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("JoinLog channel configured.");
             }
@@ -874,7 +933,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Group("starboard"), Aliases("star"), Description("Starboard configutration commands.")]
+        [Group("starboard"), Aliases("star"), Description("Starboard configuration commands.")]
         public class Starboard
         {
             [Command("enable"), Aliases("on"), Description("Enables Starboard for this guild.")]
@@ -953,8 +1012,8 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("__**Available GlobalWarn modes:**__\n1. None\n2. Owner (Warns the Server Owner if someone on the GlobalWarn list joins the server)\n3. Joinlog (Sends the warning to the JoinLog channel)\n\nType an option.");
                 var iv = ctx.Client.GetInteractivity();
 
-                var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && 
-                (xm.Content.ToLower() == "none" || xm.Content.ToLower() == "owner" || xm.Content.ToLower() == "joinlog" || xm.Content == "1" || xm.Content == "2" || xm.Content == "3"), 
+                var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id &&
+                (xm.Content.ToLower() == "none" || xm.Content.ToLower() == "owner" || xm.Content.ToLower() == "joinlog" || xm.Content == "1" || xm.Content == "2" || xm.Content == "3"),
                 TimeSpan.FromSeconds(45));
                 if (msg == null)
                 {
