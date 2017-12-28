@@ -797,7 +797,7 @@ namespace ModCore.Commands
                 this.Database = db;
             }
 
-            [Command("give"), Aliases("give", "g"), Description("Gives the command callee a specified role, if " +
+            [Command("give"), Aliases("g"), Description("Gives the command callee a specified role, if " +
                                                                      "ModCore has been configured to allow so."),
              RequireBotPermissions(Permissions.ManageRoles)]
             public async Task GiveAsync(CommandContext ctx, [RemainingText] DiscordRole role)
@@ -826,7 +826,7 @@ namespace ModCore.Commands
                 }
             }
 
-            [Command("take"), Aliases("take", "t"), Description("Removes a specified role from the command callee, if " +
+            [Command("take"), Aliases("t"), Description("Removes a specified role from the command callee, if " +
                                                                      "ModCore has been configured to allow so."),
              RequireBotPermissions(Permissions.ManageRoles)]
             public async Task TakeAsync(CommandContext ctx, [RemainingText] DiscordRole role)
