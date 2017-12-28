@@ -850,11 +850,16 @@ namespace ModCore.Commands
                         vb = CommandErrorVerbosity.NameDesc;
                         break;
                     case "exception":
-                        vb = CommandErrorVerbosity.Exception;
+                        if (ctx.Client.CurrentApplication.Owner.Id == ctx.Member.Id)
+                            vb = CommandErrorVerbosity.Exception;
+                        else
+                            await ctx.RespondAsync(
+                                "Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
                         break;
                     default:
                         await ctx.RespondAsync(
-                            "Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
+                            "Unsupported verbosity level.\nSupported levels: `none`, `name`" 
+                            + ((ctx.Client.CurrentApplication.Owner.Id == ctx.Member.Id)? ", `namedesc` or `exception`" : "or`namedesc`"));
                         return;
                 }
                 cfg.CommandError.ActionLog = vb;

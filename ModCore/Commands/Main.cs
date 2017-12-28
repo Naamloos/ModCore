@@ -42,6 +42,13 @@ namespace ModCore.Commands
             await ctx.RespondAsync($"Pong: ({ctx.Client.Ping}) ms.");
         }
 
+        [Command("help"), Aliases("h", "?", "wtf")]
+        [Description("Displays information about commands.")]
+        public async Task HelpAsync(CommandContext ctx, [Description("Command to provide information for")]params string[] command)
+        {
+            await ctx.CommandsNext.DefaultHelpAsync(ctx, command);
+        }
+
         [Command("uptime"), Description("Check ModCore's uptime."), Aliases("u")]
         public async Task UptimeAsync(CommandContext ctx)
         {
