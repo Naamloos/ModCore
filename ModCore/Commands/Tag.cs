@@ -109,13 +109,16 @@ namespace ModCore.Commands
                 if (db.Tags.Any(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id))
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id);
-                    if (tag.OwnerId != (long)ctx.Member.Id)
-                        await ctx.RespondAsync("You don't own that tag!");
-                    else
+
+                    if ((ctx.Member.PermissionsIn(ctx.Channel) & DSharpPlus.Permissions.ManageMessages) == 0 || tag.OwnerId == (long)ctx.Member.Id)
                     {
                         db.Tags.Remove(tag);
                         await db.SaveChangesAsync();
                         await ctx.RespondAsync($"Tag `{name}` successfully removed!");
+                    }
+                    else
+                    {
+                        await ctx.RespondAsync("You don't own that tag!");
                     }
                 }
                 else
