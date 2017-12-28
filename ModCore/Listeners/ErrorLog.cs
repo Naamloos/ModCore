@@ -101,7 +101,7 @@ namespace ModCore.Listeners
                 case CommandErrorVerbosity.Exception:
                     var stream = new MemoryStream();
                     var writer = new StreamWriter(stream);
-                    writer.Write(e.Exception.ToString());
+                    writer.Write(e.Exception.StackTrace);
                     writer.Flush();
                     stream.Position = 0;
                     await ctx.RespondWithFileAsync("exception.txt", stream,
@@ -118,11 +118,11 @@ namespace ModCore.Listeners
                         break;
 
                     case CommandErrorVerbosity.Name:
-                        await ctx.LogMessageAsync($"**Command {qualifiedName} Errored!**\n`{e.Exception.GetType()}`");
+                        await ctx.LogMessageAsync($"**Command {qualifiedName} errored!**\n`{e.Exception.GetType()}`");
                         break;
                     case CommandErrorVerbosity.NameDesc:
                         await ctx.LogMessageAsync(
-                            $"**Command {qualifiedName} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+                            $"**Command {qualifiedName} errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
                         break;
                     case CommandErrorVerbosity.Exception:
                         var st = e.Exception.StackTrace;
@@ -130,7 +130,7 @@ namespace ModCore.Listeners
                         st = st.Length > 1000 ? st.Substring(0, 1000) : st;
                         var b = new DiscordEmbedBuilder().WithDescription(st);
                         await ctx.LogMessageAsync(
-                            $"**Command {qualifiedName} {e.Command.Arguments} Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}",
+                            $"**Command {qualifiedName} {e.Command.Arguments} errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}",
                             b);
                         break;
                 }

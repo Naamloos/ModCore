@@ -23,13 +23,13 @@ namespace ModCore.Commands
             this.Interactivity = interactive;
         }
 
-        public async Task ExecuteGroupAsync(CommandContext ctx)
+        public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Member to get information about")]DiscordMember usr)
         {
-            await UserInfoAsync(ctx, ctx.Member);
+            await UserInfoAsync(ctx, usr);
         }
 
         [Command("user"), Aliases("u"), Description("Returns information about a specific user")]
-        public async Task UserInfoAsync(CommandContext ctx, DiscordMember usr)
+        public async Task UserInfoAsync(CommandContext ctx, [Description("Member to get information about")]DiscordMember usr)
         {
 
             var embed = new DiscordEmbedBuilder()
@@ -143,7 +143,7 @@ namespace ModCore.Commands
         }
 
         [Command("role"), Aliases("r"), Description("Returns information about a specific role")]
-        public async Task RoleInfoAsync(CommandContext ctx, DiscordRole role)
+        public async Task RoleInfoAsync(CommandContext ctx, [Description("Role to get information about")]DiscordRole role)
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"{role.Name} ID: ({role.Id})")
@@ -157,7 +157,7 @@ namespace ModCore.Commands
         }
 
         [Command("channel"), Aliases("c"), Description("Returns information about a specific channel")]
-        public async Task ChannelInfoAsync(CommandContext ctx, DiscordChannel channel)
+        public async Task ChannelInfoAsync(CommandContext ctx, [Description("Channel to get information about")]DiscordChannel channel)
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"#{channel.Name} ID: ({channel.Id})")

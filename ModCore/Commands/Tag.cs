@@ -32,7 +32,8 @@ namespace ModCore.Commands
             this.StartTimes = starttimes;
         }
 
-        public async Task ExecuteGroupAsync(CommandContext ctx, [RemainingText] string args)
+        public async Task ExecuteGroupAsync(CommandContext ctx, 
+            [RemainingText, Description("Tag to get information about. Prefix with a channel to get it from a different channel.")] string args)
         {
             List<string> s = (args.Split(' ')).ToList();
             try
@@ -67,7 +68,7 @@ namespace ModCore.Commands
 
         [Command("set")]
         [Description("Sets a new tag for this channel, or modifies one if you own it.")]
-        public async Task SetAsync(CommandContext ctx, string name, [RemainingText]string contents)
+        public async Task SetAsync(CommandContext ctx, [Description("Tag to create")]string name, [Description("Contents of tag"), RemainingText]string contents)
         {
             using (var db = this.Database.CreateContext())
             {
@@ -102,7 +103,7 @@ namespace ModCore.Commands
 
         [Command("remove")]
         [Description("Removes a tag for this channel, if it exists and you own it")]
-        public async Task RemoveAsync(CommandContext ctx, [RemainingText]string name)
+        public async Task RemoveAsync(CommandContext ctx, [Description("Tag to remove"), RemainingText]string name)
         {
             using (var db = this.Database.CreateContext())
             {
@@ -129,8 +130,9 @@ namespace ModCore.Commands
         }
 
         [Command("copy")]
-        [Description("copies a tag from channel A to channel B")]
-        public async Task RemoveAsync(CommandContext ctx, DiscordChannel origin, [RemainingText]string name)
+        [Description("copies a tag from a channel to this channel.")]
+        public async Task RemoveAsync(CommandContext ctx, [Description("Channel the tag originated from")]DiscordChannel origin, 
+            [Description("Name of tag to copy"), RemainingText]string name)
         {
             using (var db = this.Database.CreateContext())
             {
@@ -165,7 +167,7 @@ namespace ModCore.Commands
 
         [Command("info")]
         [Description("shows info about a tag")]
-        public async Task InfoAsync(CommandContext ctx, [RemainingText] string args)
+        public async Task InfoAsync(CommandContext ctx, [Description("Tag to show information about"), RemainingText] string args)
         {
             List<string> s = (args.Split(' ')).ToList();
             try
@@ -232,7 +234,8 @@ namespace ModCore.Commands
 
         [Command("transfer")]
         [Description("transfers ownership of a tag")]
-        public async Task TransferAsync(CommandContext ctx, DiscordMember newowner, [RemainingText]string name)
+        public async Task TransferAsync(CommandContext ctx, [Description("New owner of this tag")]DiscordMember newowner, 
+            [Description("Name of tag to transfer"), RemainingText]string name)
         {
             using (var db = this.Database.CreateContext())
             {

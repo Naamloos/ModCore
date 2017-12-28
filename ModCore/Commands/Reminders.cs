@@ -62,7 +62,7 @@ If in doubt, just try it! You can always clear the reminders later.
         }
 
         [Description(ReminderTut)]
-        public async Task ExecuteGroupAsync(CommandContext ctx, [RemainingText] string dataToParse)
+        public async Task ExecuteGroupAsync(CommandContext ctx, [RemainingText, Description("When the reminder is to be sent.")] string dataToParse)
         {
             await SetAsync(ctx, dataToParse);
         }
@@ -129,7 +129,7 @@ If in doubt, just try it! You can always clear the reminders later.
         }
 
         [Command("set"), Description(ReminderTut)]
-        public async Task SetAsync(CommandContext ctx, [RemainingText] string dataToParse)
+        public async Task SetAsync(CommandContext ctx, [Description("When the reminder is to be sent"), RemainingText] string dataToParse)
         {
             await ctx.TriggerTypingAsync();
 
