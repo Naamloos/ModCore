@@ -787,62 +787,99 @@ namespace ModCore.Commands
 
             await ctx.RespondAsync(embed: embed.Build());
         }
-
-        [Command("giverole"), Aliases("give", "gr"), Description("Gives the command callee a specified role, if " +
-                                                                 "ModCore has been configured to allow so."),
-         RequireBotPermissions(Permissions.ManageRoles)]
-        public async Task GiveRoleAsync(CommandContext ctx, [RemainingText] DiscordRole role)
+        [Group("selfrole"), Description("Commands to give or take selfroles."), RequireBotPermissions(Permissions.ManageRoles)]
+        public class SelfRole
         {
-            GuildSettings cfg;
-            using (var db = Database.CreateContext())
-                cfg = ctx.Guild.GetGuildSettings(db);
-            if (cfg.SelfRoles.Contains(role.Id))
+            private DatabaseContextBuilder Database { get; }
+
+            public SelfRole(DatabaseContextBuilder db)
             {
-                if (ctx.Member.Roles.Any(x => x.Id == role.Id))
+                this.Database = db;
+            }
+
+            [Command("give"), Aliases("give", "g"), Description("Gives the command callee a specified role, if " +
+                                                                     "ModCore has been configured to allow so."),
+             RequireBotPermissions(Permissions.ManageRoles)]
+            public async Task GiveAsync(CommandContext ctx, [RemainingText] DiscordRole role)
+            {
+                GuildSettings cfg;
+                using (var db = this.Database.CreateContext())
+                    cfg = ctx.Guild.GetGuildSettings(db);
+                if (cfg.SelfRoles.Contains(role.Id))
                 {
-                    await ctx.RespondAsync("You already have that role!");
-                    return;
-                }
-                if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
-                {
-                    await ctx.Member.GrantRoleAsync(role, "AutoRole granted.");
-                    await ctx.RespondAsync($"Granted you the role `{role.Name}`.");
+                    if (ctx.Member.Roles.Any(x => x.Id == role.Id))
+                    {
+                        await ctx.RespondAsync("You already have that role!");
+                        return;
+                    }
+                    if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
+                    {
+                        await ctx.Member.GrantRoleAsync(role, "AutoRole granted.");
+                        await ctx.RespondAsync($"Granted you the role `{role.Name}`.");
+                    }
+                    else
+                        await ctx.RespondAsync("Can't grant you this role because that role is above my highest role!");
                 }
                 else
-                    await ctx.RespondAsync("Can't grant you this role because that role is above my highest role!");
-            }
-            else
-            {
-                await ctx.RespondAsync("You can't grant yourself that role!");
-            }
-        }
-
-        [Command("takerole"), Aliases("take", "tr"), Description("Removes a specified role from the command callee, if " +
-                                                                 "ModCore has been configured to allow so."),
-         RequireBotPermissions(Permissions.ManageRoles)]
-        public async Task TakeRoleAsync(CommandContext ctx, [RemainingText] DiscordRole role)
-        {
-            GuildSettings cfg;
-            using (var db = Database.CreateContext())
-                cfg = ctx.Guild.GetGuildSettings(db);
-            if (cfg.SelfRoles.Contains(role.Id))
-            {
-                if (ctx.Member.Roles.All(x => x.Id != role.Id))
                 {
-                    await ctx.RespondAsync("You don't have that role!");
-                    return;
+                    await ctx.RespondAsync("You can't grant yourself that role!");
                 }
-                if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
+            }
+
+            [Command("take"), Aliases("take", "t"), Description("Removes a specified role from the command callee, if " +
+                                                                     "ModCore has been configured to allow so."),
+             RequireBotPermissions(Permissions.ManageRoles)]
+            public async Task TakeAsync(CommandContext ctx, [RemainingText] DiscordRole role)
+            {
+                GuildSettings cfg;
+                using (var db = Database.CreateContext())
+                    cfg = ctx.Guild.GetGuildSettings(db);
+                if (cfg.SelfRoles.Contains(role.Id))
                 {
-                    await ctx.Member.RevokeRoleAsync(role, "AutoRole revoke.");
-                    await ctx.RespondAsync($"Revoked your role: `{role.Name}`.");
+                    if (ctx.Member.Roles.All(x => x.Id != role.Id))
+                    {
+                        await ctx.RespondAsync("You don't have that role!");
+                        return;
+                    }
+                    if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
+                    {
+                        await ctx.Member.RevokeRoleAsync(role, "AutoRole revoke.");
+                        await ctx.RespondAsync($"Revoked your role: `{role.Name}`.");
+                    }
+                    else
+                        await ctx.RespondAsync("Can't take this role because that role is above my highest role!");
                 }
                 else
-                    await ctx.RespondAsync("Can't take this role because that role is above my highest role!");
+                {
+                    await ctx.RespondAsync("You can't revoke that role!");
+                }
             }
-            else
+
+            [Command("list"), Aliases("l"), Description("Lists all available selfroles, if any."), RequireBotPermissions(Permissions.ManageRoles)]
+            public async Task ListAsync(CommandContext ctx)
             {
-                await ctx.RespondAsync("You can't revoke that role!");
+                GuildSettings cfg;
+                using (var db = Database.CreateContext())
+                    cfg = ctx.Guild.GetGuildSettings(db);
+                if (cfg.SelfRoles.Any())
+                {
+                    var embed = new DiscordEmbedBuilder
+                    {
+                        Title = ctx.Guild.Name,
+                        ThumbnailUrl = ctx.Guild.IconUrl,
+                        Description = "Available SelfRoles:"
+                    };
+                    var roles = cfg.SelfRoles
+                        .Select(ctx.Guild.GetRole)
+                        .Where(x => x != null)
+                        .Select(x => x.Mention);
+
+                    embed.AddField("Available SelfRoles", string.Join(", ", roles), true);
+                }
+                else
+                {
+                    await ctx.RespondAsync("No available selfroles.");
+                }
             }
         }
 
