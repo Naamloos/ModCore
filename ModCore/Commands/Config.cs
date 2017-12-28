@@ -758,7 +758,7 @@ namespace ModCore.Commands
 
             [Command("setwebhook"), Aliases("swh"),
              Description("Sets the webhook ID and token for this guild's action log")]
-            public async Task SetWebhookAsync(CommandContext ctx, ulong id, string token)
+            public async Task SetWebhookAsync(CommandContext ctx, [Description("Webhook ID")]ulong id, [Description("Webhook token")]string token)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.ActionLog.WebhookId = id;
@@ -791,8 +791,8 @@ namespace ModCore.Commands
             }
 
             [Command("setrole"), Aliases("sr"),
-             Description("Sets the webhook ID and token for this guild's action log")]
-            public async Task SetRoleAsync(CommandContext ctx, DiscordRole role)
+             Description("Sets a role to grant to new members.")]
+            public async Task SetRoleAsync(CommandContext ctx, [Description("Role to grant to new members")]DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.AutoRole.RoleId = (long)role.Id;
@@ -805,7 +805,7 @@ namespace ModCore.Commands
         public class ErrorVerbosity
         {
             [Command("chat"), Aliases("c"), Description("Sets command error reporting for this guild (in chat).")]
-            public async Task ChatAsync(CommandContext ctx, string verbosity)
+            public async Task ChatAsync(CommandContext ctx, [Description("New error verbosity")]string verbosity)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 var vb = CommandErrorVerbosity.None;
@@ -834,7 +834,7 @@ namespace ModCore.Commands
             }
 
             [Command("log"), Aliases("a"), Description("Sets command error reporting for this guild (in action log).")]
-            public async Task ActionLogAsync(CommandContext ctx, string verbosity)
+            public async Task ActionLogAsync(CommandContext ctx, [Description("New error verbosity")]string verbosity)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 var vb = CommandErrorVerbosity.None;
@@ -891,7 +891,7 @@ namespace ModCore.Commands
             }
 
             [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's join log.")]
-            public async Task SetChannelAsync(CommandContext ctx, DiscordChannel channel)
+            public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to send the joinlogs to")]DiscordChannel channel)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.JoinLog.ChannelId = (long)channel.Id;
@@ -904,7 +904,7 @@ namespace ModCore.Commands
         public class SelfRole
         {
             [Command("add"), Aliases("a"), Description("Adds roles to selfrole list")]
-            public async Task AddSelfRoleAsync(CommandContext ctx, DiscordRole role)
+            public async Task AddSelfRoleAsync(CommandContext ctx, [Description("Role to allow for self-granting")]DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 if (!cfg.SelfRoles.Contains(role.Id))
@@ -921,7 +921,7 @@ namespace ModCore.Commands
             }
 
             [Command("remove"), Aliases("r"), Description("Removes roles from selfrole list")]
-            public async Task RemoveSelfRoleAsync(CommandContext ctx, DiscordRole role)
+            public async Task RemoveSelfRoleAsync(CommandContext ctx, [Description("Role to disallow from self-granting")]DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 if (cfg.SelfRoles.Contains(role.Id))
@@ -961,7 +961,7 @@ namespace ModCore.Commands
             }
 
             [Command("allownsfw"), Aliases("nsfw"), Description("Disables Starboard for this guild.")]
-            public async Task AllowNsfwAsync(CommandContext ctx, bool allow)
+            public async Task AllowNsfwAsync(CommandContext ctx, [Description("Whether NSFW stars should be allowed")]bool allow)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.Starboard.AllowNSFW = allow;
@@ -970,7 +970,7 @@ namespace ModCore.Commands
             }
 
             [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's Starboard.")]
-            public async Task SetChannelAsync(CommandContext ctx, DiscordChannel channel)
+            public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to log stars to")]DiscordChannel channel)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.Starboard.ChannelId = (long)channel.Id;
@@ -979,7 +979,7 @@ namespace ModCore.Commands
             }
 
             [Command("setemoji"), Aliases("se"), Description("Sets the Starboard emoji for this guild.")]
-            public async Task SetEmojiAsync(CommandContext ctx, DiscordEmoji emoji)
+            public async Task SetEmojiAsync(CommandContext ctx, [Description("Starboard emoji")]DiscordEmoji emoji)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.Starboard.Emoji = new GuildStarboardEmoji() { EmojiId = (long)emoji.Id, EmojiName = emoji.Name };

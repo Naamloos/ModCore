@@ -30,7 +30,8 @@ namespace ModCore.Commands
 
         [Command("analyze"), Description("Analyze a member's toxicity level from a channel's message history. Note " +
                                          "that this feature is still in heavy development and subject to change!")]
-        public async Task AnalyzeAsync(CommandContext ctx, DiscordMember member, DiscordChannel channel)
+        public async Task AnalyzeAsync(CommandContext ctx, [Description("Member to calculate toxicity from")]DiscordMember member, 
+            [Description("Channel to calculate in")]DiscordChannel channel)
         {
             var msg = await channel.GetMessagesAsync(100, channel.LastMessageId);
             var msgstr = msg.Where(x => x.Author.Id == member.Id).Select(x => x.Content);

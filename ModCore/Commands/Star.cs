@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Commands
 {
+#warning TODO: add star info commands, such as amount of stars a user has given or received. Might require a new db table. We'll see.
     [Group("star"), Aliases("s"), Description("star commands")]
     public class Star
     {
@@ -26,7 +27,7 @@ namespace ModCore.Commands
             this.Database = db;
         }
 
-        [Command("debug"), Aliases("d"), Description("Returns information about a specific user")]
+        [Command("debug"), Aliases("d"), Description("Returns amount of stars in database")]
         public async Task DebugAsync(CommandContext ctx)
         {
             using(var db = Database.CreateContext())
