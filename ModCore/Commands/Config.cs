@@ -326,7 +326,7 @@ namespace ModCore.Commands
         [Group("suggestions"), Aliases("suggestion", "sugg", "sug", "s"), Description("Suggestions configuration commands.")]
         public class Suggestions
         {
-            [Command("enable"), Aliases("on"), Description("Enables Suggestions for this guild.")]
+            [Command("enable"), Aliases("on"), Description("Enables command suggestions for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
@@ -335,7 +335,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("Enabled command suggestions.");
             }
 
-            [Command("disable"), Aliases("off"), Description("Disables Suggestions for this guild.")]
+            [Command("disable"), Aliases("off"), Description("Disables command suggestions for this guild.")]
             public async Task DisableAsync(CommandContext ctx)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
