@@ -44,5 +44,6 @@ update mcore_database_info set meta_value=2 where meta_key='schema_version';
 -- mcore_botmanager
 create sequence mcore_botmanager_id_seq;
 create table mcore_botmanager(
-	user_id bigint primary key default nextval('mcore_botmanager_id_seq')
+	id int primary key default nextval('mcore_botmanager_id_seq'),
+	user_id bigint not null
 );
