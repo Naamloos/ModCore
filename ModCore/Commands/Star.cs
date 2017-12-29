@@ -12,8 +12,6 @@ using System.Threading.Tasks;
 
 namespace ModCore.Commands
 {
-#warning TODO: fix jcryer's terrible star info commands - amount of stars a user has given or received. 
-
     [Group("star"), Aliases("s"), Description("Star commands.")]
     public class Star
     {
@@ -51,17 +49,17 @@ namespace ModCore.Commands
                 var gotStars = guildStars.Where(x => (ulong)x.AuthorId == m.Id);
 
                 embed.Description =
-                    $"You have given **{givenStars.Count()}** to other users.\n" +
-                    $"You have been given **{gotStars.Count()}** by **{gotStars.Select(x => x.MessageId).Distinct().Count()} different users.**";
+                    $"You have given **{givenStars.Count()}** stars to other users.\n" +
+                    $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different users.";
 
                 var memberNames = new Dictionary<string, int>();
                 foreach (DatabaseStarData star in gotStars)
                 {
-                    string memberName = "unknown_user";
+                    string memberName = "Unknown User";
                     try 
                     {
-                        DiscordMember member = await ctx.Guild.GetMemberAsync((ulong)star.StargazerId);
-                        memberName = member.DisplayName;
+                        var member = await ctx.Client.GetUserAsync((ulong)star.StargazerId);
+                        memberName = $"{member.Username}#{member.Discriminator}";
                         if (memberNames.ContainsKey(memberName))
                         {
                             memberNames[memberName] += 1;
@@ -83,7 +81,12 @@ namespace ModCore.Commands
                         }
                     }
                 }
-                embed.AddField("Users who gave you stars", string.Join(", ", memberNames.Select(x => x.Key + " - " + x.Value)), true);
+                var ordered = memberNames.OrderBy(x => x.Value);
+
+                var memberLists = memberNames.Select(x => x.Key + " - " + x.Value);
+                embed.AddField("Users who gave you stars", string.Join("\n", memberLists.Take(10)), false);
+                if (memberLists.Count() > 10)
+                    embed.Fields.Last().Value += $"\n and {memberLists.Count() - 10} more...";
 
                 await ctx.RespondAsync(embed: embed);
             }
