@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Humanizer;
 
 namespace ModCore.Listeners
 {
@@ -194,7 +195,7 @@ namespace ModCore.Listeners
             var e = new DiscordEmbedBuilder()
                 .WithAuthor($"{m.Author.Username}#{m.Author.Discriminator}",
                 icon_url: (string.IsNullOrEmpty(m.Author.AvatarHash) ? m.Author.DefaultAvatarUrl : m.Author.AvatarUrl))
-                .WithDescription(m.Content);
+                .WithDescription(m.Content.Truncate(1000));
 
             // This is shit code kek
             if (m.Attachments.Any(x => x.Url.ToLower().EndsWith(".jpg") || x.Url.ToLower().EndsWith(".png")
