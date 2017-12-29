@@ -18,9 +18,11 @@ namespace ModCore
         public static List<ModCoreShard> Shards { get; set; }
         private CancellationTokenSource CTS { get; set; }
         private Perspective PerspectiveApi { get; set; }
+        public static string[] Args { get; private set; }
 
-        internal async Task InitializeAsync()
+        internal async Task InitializeAsync(string[] args)
         {
+            this.Args = args;
             if (!File.Exists("settings.json"))
             {
                 var json = JsonConvert.SerializeObject(new Settings(), Formatting.Indented);
