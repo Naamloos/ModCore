@@ -252,6 +252,10 @@ namespace ModCore.Database
             {
                 entity.ToTable("mcore_botmanager");
 
+                entity.HasIndex(e => new { e.UserId})
+                    .HasName("mcore_botmanager_user_id_key")
+                    .IsUnique();
+
                 entity.Property(e => e.UserId).HasColumnName("user_id");
             });
         }
