@@ -54,7 +54,7 @@ namespace ModCore.Commands
             {
                 foreach (DatabaseStarData star in db.StarDatas)
                 {
-                    if (star.AuthorId == 0)
+                    if (star.AuthorId == 1)
                     {
                         var message = await ctx.Client.Guilds.First(x => x.Key == (ulong)star.GuildId).Value.GetChannel((ulong)star.ChannelId).GetMessageAsync((ulong)star.MessageId);
                         star.AuthorId = (long)message.Author.Id;
