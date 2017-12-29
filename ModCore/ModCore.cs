@@ -64,9 +64,10 @@ namespace ModCore
             var args = Environment.GetCommandLineArgs();
             // first argument is the exeuctable file name.
             // https://msdn.microsoft.com/en-us/library/system.environment.getcommandlineargs(v=vs.110).aspx
-            if (args.Length == 3) {
+            SharedData.StartNotify = (146044397861994496, 366601285669224458);
+           /* if (args.Length == 3) {
                 SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
-            }
+            }*/
         }
 
         public async Task WaitForCancellation()
