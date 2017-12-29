@@ -37,35 +37,38 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("listgiven"), Aliases("listgive", "lgive", "listgi"), Description("Returns amount of stars the user has ever given.")]
+        [Command("info"), Aliases("i", "data", "d", "information"), Description("Returns stardata for a specified user.")]
         public async Task ListGivenAsync(CommandContext ctx, DiscordMember m)
         {
-            using (var db = Database.CreateContext())
-            {
-                await ctx.RespondAsync($"You have given: "
-                    + db.StarDatas.Where(x => (ulong)x.GuildId == ctx.Guild.Id).Count(x => (ulong)x.StargazerId == m.Id)
-                    + " stars in total.");
-            }
-        }
+            var embed = new DiscordEmbedBuilder()
+                .WithColor(DiscordColor.MidnightBlue)
+                .WithTitle($"@{m.Username}#{m.Discriminator} - ID: {m.Id}");
 
-        [Command("listgot"), Aliases("listg", "lgot"), Description("Returns amount of stars the user has ever been given.")]
-        public async Task ListGotAsync(CommandContext ctx, DiscordMember m)
-        {
             using (var db = Database.CreateContext())
             {
-                var messages = db.StarDatas.Where(x => (ulong)x.AuthorId == m.Id && (ulong)x.GuildId == ctx.Guild.Id);
-                if (!messages.Any())
+                var guildStars = db.StarDatas.Where(x => (ulong)x.GuildId == ctx.Guild.Id);
+                var givenStars = guildStars.Where(x => (ulong)x.StargazerId == m.Id);
+                var gotStars = guildStars.Where(x => (ulong)x.AuthorId == m.Id);
+
+                embed.Description =
+                    $"You have given **{givenStars.Count()}** to other users.\n" +
+                    $"You have been given **{gotStars.Count()}** by **{gotStars.Select(x => x.MessageId).Distinct().Count()} different users.**";
+
+                var memberNames = new Dictionary<string, int>();
+                foreach (DatabaseStarData star in gotStars)
                 {
-                    await ctx.RespondAsync("You have never been given a star.");
-                    return;
+                    DiscordMember member = await ctx.Guild.GetMemberAsync((ulong)star.StargazerId);
+                    if (memberNames.ContainsKey(member.DisplayName))
+                    {
+                        memberNames[member.DisplayName] += 1;
+                    }
+                    else
+                    {
+                        memberNames.Add(member.DisplayName, 1);
+                    }
                 }
-                var unique = messages.Select(x => x.MessageId).Distinct().Count();
-
-                await ctx.RespondAsync($"You have been given: "
-                    + messages.Count()
-                    + " stars in total, over: "
-                    + unique
-                    + " different messages.");
+                embed.AddField("Users who gave you stars", string.Join(", ", memberNames.Select(x => x.Key + " - " + x.Value)), true);
+                
             }
         }
     }

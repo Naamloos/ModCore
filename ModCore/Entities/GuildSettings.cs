@@ -354,4 +354,26 @@ namespace ModCore.Entities
         Owner,
         JoinLog
     }
+
+    public class GuildBotManagerSettings
+    {
+        /// <summary>
+        /// Gets or sets whether anyone but the owner has access to scary bot commands.
+        /// </summary>
+        [JsonProperty("enabled")]
+        public bool Enable { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets the permission level  
+        /// </summary>
+        [JsonProperty("permissionlevel")]
+        public BotManagerPermissionLevel PermissionLevel { get; set; } = BotManagerPermissionLevel.None;
+    }
+
+    public enum BotManagerPermissionLevel
+    {
+        None,
+        Update,
+        All
+    }
 }
