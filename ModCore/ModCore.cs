@@ -64,9 +64,11 @@ namespace ModCore
             //var args = Environment.GetCommandLineArgs();
             // first argument is the exeuctable file name.
             // https://msdn.microsoft.com/en-us/library/system.environment.getcommandlineargs(v=vs.110).aspx
-            SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
-            File.Create("debuggo.txt").Close();
-            File.WriteAllText("debuggo.txt", "guild" + args[1] + " channel" + args[2]);
+            if (args.Length == 3) {
+                SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
+                File.Create("debuggo.txt").Close();
+                File.WriteAllText("debuggo.txt", "guild" + args[1] + " channel" + args[2]);
+            }
            /* if (args.Length == 3) {
                 SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
             }*/
