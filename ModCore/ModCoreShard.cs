@@ -62,8 +62,6 @@ namespace ModCore
                 // NT 6.1 (Win7 SP1)
                 Client.SetWebSocketClient<WebSocket4NetCoreClient>();
             }
-    
-            Client.Ready += StartupNotifyHandler;
             
             Client.ClientErrored += async args =>
             {
@@ -119,9 +117,8 @@ namespace ModCore
         
         private async Task StartupNotifyHandler(ReadyEventArgs e)
         {
-            if (SharedData.StartNotify.guild == 0UL) return;
+            if (SharedData.StartNotify.guild == 0) return;
             //var guild = await e.Client.GetGuildAsync(SharedData.StartNotify.guild);
-            await e.Client.UpdateStatusAsync(new DiscordActivity($"ids: guild{SharedData.StartNotify.guild} channel{SharedData.StartNotify.guild}"));
             var channel = await e.Client.GetChannelAsync(SharedData.StartNotify.channel);
             await channel.SendMessageAsync("test");
 
@@ -130,10 +127,10 @@ namespace ModCore
             //}
         }
 
-        private Task Client_Ready(ReadyEventArgs e)
+        private async Task Client_Ready(ReadyEventArgs e)
         {
-            //Client.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
-            return Task.Delay(0);
+            await StartupNotifyHandler(e);
+            await Client.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
         }
 
         public Task RunAsync() =>
