@@ -39,7 +39,6 @@ namespace ModCore.Listeners
                 count++;
                 prevowns.Add(g.Owner.Id);
             }
-
             if (settings.GlobalWarn.Enable && count > 2)
             {
                 var embed = new DiscordEmbedBuilder()
