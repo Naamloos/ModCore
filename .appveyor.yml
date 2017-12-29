@@ -33,8 +33,6 @@ build: off
 
 build_script:
 - cmd: dotnet build ModCore.sln -v Minimal -c Release
-
-on_success:
 - cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\ModCore\bin\Release\netcoreapp2.0\*.dll"
 - cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\download.ps1"
 - cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\update.sh"
