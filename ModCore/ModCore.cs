@@ -56,8 +56,17 @@ namespace ModCore
         private void InitializeSharedData()
         {
             CTS = new CancellationTokenSource();
-            var pst = Process.GetCurrentProcess().StartTime;
-            SharedData = new SharedData(CTS, pst, PerspectiveApi);
+            SharedData = new SharedData {
+                CTS = CTS,
+                ProcessStartTime = Process.GetCurrentProcess().StartTime,
+                Perspective = PerspectiveApi,
+            };
+            var args = Environment.GetCommandLineArgs();
+            // first argument is the exeuctable file name.
+            // https://msdn.microsoft.com/en-us/library/system.environment.getcommandlineargs(v=vs.110).aspx
+            if (args.Length == 3) {
+                SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
+            }
         }
 
         public async Task WaitForCancellation()
