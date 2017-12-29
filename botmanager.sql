@@ -43,5 +43,5 @@ update mcore_database_info set meta_value=2 where meta_key='schema_version';
 
 -- mcore_botmanager
 create table mcore_botmanager(
-	user_id bigint not null
+	user_id bigint primary key default 0
 );
