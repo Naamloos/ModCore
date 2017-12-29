@@ -121,6 +121,7 @@ namespace ModCore
         {
             if (SharedData.StartNotify.guild == 0UL) return;
             //var guild = await e.Client.GetGuildAsync(SharedData.StartNotify.guild);
+            await e.Client.UpdateStatusAsync(new DiscordActivity($"ids: guild{SharedData.StartNotify.guild} channel{SharedData.StartNotify.guild}"));
             var channel = await e.Client.GetChannelAsync(SharedData.StartNotify.channel);
             await channel.SendMessageAsync("test");
 
@@ -131,7 +132,7 @@ namespace ModCore
 
         private Task Client_Ready(ReadyEventArgs e)
         {
-            Client.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
+            //Client.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
             return Task.Delay(0);
         }
 
