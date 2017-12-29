@@ -14,15 +14,17 @@ namespace ModCore.Listeners
         {
             try
             {
-                await e.Guild.GetChannel(366601285669224458).SendMessageAsync("TEST: " + bot.SharedData.StartNotify.guild + " - " + bot.SharedData.StartNotify.channel);
+                if (bot.SharedData.StartNotify.guild != null && bot.SharedData.StartNotify.channel != null) {
+                    await e.Guild.GetChannel(366601285669224458).SendMessageAsync("TEST: " + bot.SharedData.StartNotify.guild + " - " + bot.SharedData.StartNotify.channel);
+
+                }
+                else {
+                    await e.Guild.GetChannel(366601285669224458).SendMessageAsync("test?");
+                }
             }
             catch
             {
 
-            }
-            if (e.Guild.Id == bot.SharedData.StartNotify.guild)
-            {
-                await e.Guild.GetChannel(bot.SharedData.StartNotify.channel).SendMessageAsync("Heeey, VSauce here.");
             }
         }
     }
