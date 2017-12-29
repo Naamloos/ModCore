@@ -121,7 +121,7 @@ namespace ModCore
             await Task.Yield();
             if (e.Guild.Id == SharedData.StartNotify.guild) {
                 // don't await
-                _ = e.Guild.GetChannel(SharedData.StartNotify.channel).SendMessage("Heeey, VSauce here.");
+                _ = e.Guild.GetChannel(SharedData.StartNotify.channel).SendMessageAsync("Heeey, VSauce here.");
             }
         }
 
