@@ -16,4 +16,4 @@ echo "Beginning archive extraction"
 unzip -o ModCore%20Release%20Build.zip
 
 echo "Restarting process"
-nohup dotnet ModCore.dll $2 $3
+dotnet ModCore.dll $2 $3
