@@ -201,6 +201,8 @@ namespace ModCore.Database
 
                 entity.Property(e => e.MessageId).HasColumnName("message_id");
 
+                entity.Property(e => e.AuthorId).HasColumnName("author_id");
+
                 entity.Property(e => e.GuildId).HasColumnName("guild_id");
 
                 entity.Property(e => e.ChannelId).HasColumnName("channel_id");

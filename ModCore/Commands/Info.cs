@@ -11,7 +11,7 @@ using DSharpPlus;
 
 namespace ModCore.Commands
 {
-    [Group("info", CanInvokeWithoutSubcommand = true), Aliases("i"), Description("informative commands")]
+    [Group("info", CanInvokeWithoutSubcommand = true), Aliases("i"), Description("Information commands")]
     public class Info
     {
         public SharedData Shared { get; }
@@ -23,12 +23,12 @@ namespace ModCore.Commands
             this.Interactivity = interactive;
         }
 
-        public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Member to get information about")]DiscordMember usr)
+        public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Member to get information about.")]DiscordMember usr)
         {
             await UserInfoAsync(ctx, usr);
         }
 
-        [Command("user"), Aliases("u"), Description("Returns information about a specific user")]
+        [Command("user"), Aliases("u"), Description("Returns information about a specific user.")]
         public async Task UserInfoAsync(CommandContext ctx, [Description("Member to get information about")]DiscordMember usr)
         {
 
@@ -61,7 +61,7 @@ namespace ModCore.Commands
             await ctx.LogActionAsync();
         }
 
-        [Command("guild"), Aliases("g"), Description("Returns information about this guild")]
+        [Command("guild"), Aliases("g"), Description("Returns information about this guild.")]
         public async Task GuildInfoAsync(CommandContext ctx)
         {
             await ctx.RespondAsync("The following embed might flood this channel. Do you want to proceed?");
@@ -142,7 +142,7 @@ namespace ModCore.Commands
             await ctx.LogActionAsync();
         }
 
-        [Command("role"), Aliases("r"), Description("Returns information about a specific role")]
+        [Command("role"), Aliases("r"), Description("Returns information about a specific role.")]
         public async Task RoleInfoAsync(CommandContext ctx, [Description("Role to get information about")]DiscordRole role)
         {
             var embed = new DiscordEmbedBuilder();
@@ -156,7 +156,7 @@ namespace ModCore.Commands
             await ctx.LogActionAsync();
         }
 
-        [Command("channel"), Aliases("c"), Description("Returns information about a specific channel")]
+        [Command("channel"), Aliases("c"), Description("Returns information about a specific channel.")]
         public async Task ChannelInfoAsync(CommandContext ctx, [Description("Channel to get information about")]DiscordChannel channel)
         {
             var embed = new DiscordEmbedBuilder();

@@ -155,12 +155,12 @@ namespace ModCore.Commands
                     embed.AddField("Linkfilter", linkfilterCfg.Enable ? "Enabled" : "Disabled", true);
                     if (linkfilterCfg.Enable)
                     {
-                        embed.AddField("Linkfilter modules",
-                            $"{(linkfilterCfg.BlockInviteLinks ? "✔" : "✖")}anti-invites, " +
-                            $"{(linkfilterCfg.BlockBooters ? "✔" : "✖")}anti-ddos, " +
-                            $"{(linkfilterCfg.BlockIpLoggers ? "✔" : "✖")}anti-ip loggers, " +
-                            $"{(linkfilterCfg.BlockShockSites ? "✔" : "✖")}anti-shock sites, " +
-                            $"{(linkfilterCfg.BlockUrlShorteners ? "✔" : "✖")}anti-url shorteners", true);
+                        embed.AddField("Linkfilter Modules",
+                            $"{(linkfilterCfg.BlockInviteLinks ? "✔" : "✖")}Anti-Invites, " +
+                            $"{(linkfilterCfg.BlockBooters ? "✔" : "✖")}Anti-DDoS, " +
+                            $"{(linkfilterCfg.BlockIpLoggers ? "✔" : "✖")}Anti-IP Loggers, " +
+                            $"{(linkfilterCfg.BlockShockSites ? "✔" : "✖")}Anti-Shock Sites, " +
+                            $"{(linkfilterCfg.BlockUrlShorteners ? "✔" : "✖")}Anti-URL Shorteners", true);
 
                         if (linkfilterCfg.ExemptRoleIds.Any())
                         {
@@ -169,7 +169,7 @@ namespace ModCore.Commands
                                 .Where(xr => xr != null)
                                 .Select(xr => xr.Mention);
 
-                            embed.AddField("Linkfilter-exempt roles", string.Join(", ", roles), true);
+                            embed.AddField("Linkfilter-Exempt Roles", string.Join(", ", roles), true);
                         }
 
                         if (linkfilterCfg.ExemptUserIds.Any())
@@ -177,14 +177,14 @@ namespace ModCore.Commands
                             var users = linkfilterCfg.ExemptUserIds
                                 .Select(xid => $"<@!{xid}>");
 
-                            embed.AddField("Linkfilter-exempt users", string.Join(", ", users), true);
+                            embed.AddField("Linkfilter-Exempt Users", string.Join(", ", users), true);
                         }
 
                         if (linkfilterCfg.ExemptInviteGuildIds.Any())
                         {
                             var guilds = string.Join(", ", linkfilterCfg.ExemptInviteGuildIds);
 
-                            embed.AddField("Linkfilter-exempt invite targets", guilds, true);
+                            embed.AddField("Linkfilter-Exempt Invite Targets", guilds, true);
                         }
                     }
 
@@ -199,7 +199,7 @@ namespace ModCore.Commands
                                 .Where(xr => xr != null)
                                 .Select(xr => xr.Mention);
 
-                            embed.AddField("Role State-ignored roles", string.Join(", ", roles), true);
+                            embed.AddField("Role State-Ignored Roles", string.Join(", ", roles), true);
                         }
 
                         if (roleCfg.IgnoredChannelIds.Any())
@@ -209,7 +209,7 @@ namespace ModCore.Commands
                                 .Where(xc => xc != null)
                                 .Select(xc => xc.Mention);
 
-                            embed.AddField("Role State-ignored channels", string.Join(", ", channels), true);
+                            embed.AddField("Role State-Ignored Channels", string.Join(", ", channels), true);
                         }
                     }
 
@@ -224,7 +224,7 @@ namespace ModCore.Commands
                                 .Where(xr => xr != null)
                                 .Select(xr => xr.Mention);
 
-                            embed.AddField("InvisiCop-exempt roles", string.Join(", ", roles), true);
+                            embed.AddField("InvisiCop-Exempt Roles", string.Join(", ", roles), true);
                         }
 
                         if (inviscopCfg.ExemptUserIds.Any())
@@ -232,7 +232,7 @@ namespace ModCore.Commands
                             var users = inviscopCfg.ExemptUserIds
                                 .Select(xid => $"<@!{xid}>");
 
-                            embed.AddField("InvisiCop-exempt users", string.Join(", ", users), true);
+                            embed.AddField("InvisiCop-Exempt Users", string.Join(", ", users), true);
                         }
                     }
                     embed.AddField("Starboard",
@@ -360,14 +360,14 @@ namespace ModCore.Commands
          Description("Linkfilter configuration commands.")]
         public class Linkfilter
         {
-            [Command("enable"), Aliases("on"), Description("Enables linkfilter for this guild.")]
+            [Command("enable"), Aliases("on"), Description("Enables Linkfilter for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
                 await ctx.WithGuildSettings(cfg => cfg.Linkfilter.Enable = true);
                 await ctx.Message.CreateReactionAsync(CheckMark);
             }
 
-            [Command("disable"), Aliases("off"), Description("Disables linkfilter for this guild.")]
+            [Command("disable"), Aliases("off"), Description("Disables Linkfilter for this guild.")]
             public async Task DisableAsync(CommandContext ctx)
             {
                 await ctx.WithGuildSettings(cfg => cfg.Linkfilter.Enable = false);
@@ -375,7 +375,7 @@ namespace ModCore.Commands
             }
 
             [Group("modules"), Aliases("mod", "m", "s"),
-             Description("Commands to toggle linkfilter modules for this guild.")]
+             Description("Commands to toggle Linkfilter modules for this guild.")]
             public class Modules
             {
                 private delegate ref bool WithLinkfilter(GuildLinkfilterSettings lf);
@@ -385,7 +385,7 @@ namespace ModCore.Commands
                     await ctx.WithGuildSettings(cfg =>
                     {
                         ref var cv = ref func(cfg.Linkfilter);
-                        switch (r)
+                        switch (r.ToLower())
                         {
                             case "on":
                             case "enable":
@@ -411,16 +411,16 @@ namespace ModCore.Commands
                         }
 
                         return ctx.Message.RespondAsync(
-                            $"{(cv ? "enabled" : "disabled")} this module");
+                            $"{(cv ? "Enabled" : "Disabled")} this module.");
                     });
                     await ctx.Message.CreateReactionAsync(CheckMark);
                 }
 
-                [Group("all"), Aliases("a", "0"), Description("Commands to manage all linkfilter modules at once.")]
+                [Group("all"), Aliases("a", "0"), Description("Commands to manage all Linkfilter modules at once.")]
                 public class AllModules
                 {
                     [Command("off"), Aliases("disable", "disabled", "0", "false", "no", "n"),
-                     Description("Disables all linkfilter modules for this guild.")]
+                     Description("Disables all Linkfilter modules for this guild.")]
                     public async Task DisableAllLinkfilterModulesAsync(CommandContext ctx)
                     {
                         await ctx.WithGuildSettings(cfg =>
@@ -435,7 +435,7 @@ namespace ModCore.Commands
                     }
 
                     [Command("on"), Aliases("enable", "enabled", "1", "true", "yes", "y"),
-                     Description("Enables all linkfilter modules for this guild.")]
+                     Description("Enables all Linkfilter modules for this guild.")]
                     public async Task EnableAllLinkfilterModulesAsync(CommandContext ctx)
                     {
                         await ctx.WithGuildSettings(cfg =>
@@ -450,7 +450,7 @@ namespace ModCore.Commands
                     }
 
                     [Command("default"), Aliases("def", "d", "2"),
-                     Description("Sets all linkfilter modules to default for this guild.")]
+                     Description("Sets all Linkfilter modules to default for this guild.")]
                     public async Task RestoreDefaultAllLinkfilterModulesAsync(CommandContext ctx)
                     {
                         await ctx.WithGuildSettings(cfg =>
@@ -502,9 +502,9 @@ namespace ModCore.Commands
             [Group("user"), Aliases("usr", "u"), Description("User exemption management commands.")]
             public class User
             {
-                [Command("exempt"), Aliases("x"), Description("Exempts user from linkfilter checks.")]
+                [Command("exempt"), Aliases("x"), Description("Exempts user from Linkfilter checks.")]
                 public async Task ExemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Member to exempt from linkfilter checks.")] DiscordMember mbr)
+                    [RemainingText, Description("Member to exempt from Linkfilter checks.")] DiscordMember mbr)
                 {
                     await ctx.WithGuildSettings(cfg =>
                     {
@@ -515,9 +515,9 @@ namespace ModCore.Commands
                     await ctx.Message.CreateReactionAsync(CheckMark);
                 }
 
-                [Command("unexempt"), Aliases("ux"), Description("Unexempts user from linkfilter checks.")]
+                [Command("unexempt"), Aliases("ux"), Description("Unexempts user from Linkfilter checks.")]
                 public async Task UnexemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Member to unexempt from linkfilter checks.")] DiscordMember mbr)
+                    [RemainingText, Description("Member to unexempt from Linkfilter checks.")] DiscordMember mbr)
                 {
                     await ctx.WithGuildSettings(cfg =>
                     {
@@ -532,9 +532,9 @@ namespace ModCore.Commands
             [Group("role"), Aliases("r"), Description("Role exemption management commands.")]
             public class Role
             {
-                [Command("exempt"), Aliases("x"), Description("Exempts role from linkfilter checks.")]
+                [Command("exempt"), Aliases("x"), Description("Exempts role from Linkfilter checks.")]
                 public async Task ExemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Role to exempt from linkfilter checks.")] DiscordRole rl)
+                    [RemainingText, Description("Role to exempt from Linkfilter checks.")] DiscordRole rl)
                 {
                     await ctx.WithGuildSettings(cfg =>
                     {
@@ -544,9 +544,9 @@ namespace ModCore.Commands
                     });
                 }
 
-                [Command("unexempt"), Aliases("ux"), Description("Unexempts role from linkfilter checks.")]
+                [Command("unexempt"), Aliases("ux"), Description("Unexempts role from Linkfilter checks.")]
                 public async Task UnexemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Role to unexempt from linkfilter checks.")] DiscordRole rl)
+                    [RemainingText, Description("Role to unexempt from Linkfilter checks.")] DiscordRole rl)
                 {
                     await ctx.WithGuildSettings(cfg =>
                     {
@@ -557,7 +557,7 @@ namespace ModCore.Commands
                 }
             }
 
-            [Group("guild"), Aliases("invite", "i"), Description("Invite target exemption management commands,")]
+            [Group("guild"), Aliases("invite", "i"), Description("Invite target exemption management commands.")]
             public class Guild
             {
                 [Command("exempt"), Aliases("x"), Description("Exempts code from invite checks.")]
@@ -605,14 +605,14 @@ namespace ModCore.Commands
         [Group("rolestate"), Aliases("rs"), Description("Role State configuration commands.")]
         public class RoleState
         {
-            [Command("enable"), Aliases("on"), Description("Enables role state for this guild.")]
+            [Command("enable"), Aliases("on"), Description("Enables Role State for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
                 await ctx.WithGuildSettings(cfg => cfg.RoleState.Enable = true);
                 await ctx.RespondAsync("Role State enabled.");
             }
 
-            [Command("disable"), Aliases("off"), Description("Disables role state for this guild.")]
+            [Command("disable"), Aliases("off"), Description("Disables Role State for this guild.")]
             public async Task DisableAsync(CommandContext ctx)
             {
                 await ctx.WithGuildSettings(cfg => cfg.RoleState.Enable = false);
@@ -683,9 +683,9 @@ namespace ModCore.Commands
                 }
 
                 [Command("unignore"), Aliases("ux"),
-                 Description("Unexempts rchannel from having its overrides saved by Role State.")]
+                 Description("Unexempts channel from having its overrides saved by Role State.")]
                 public async Task UnexemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Channel to unexempt from having its invites  saved.")]
+                    [RemainingText, Description("Channel to unexempt from having its invites saved.")]
                     DiscordChannel chn)
                 {
                     var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
@@ -719,14 +719,14 @@ namespace ModCore.Commands
         [Group("invisicop"), Aliases("ic"), Description("InvisiCop configuration commands.")]
         public class InvisiCop
         {
-            [Command("enable"), Aliases("on"), Description("Enables invisicop for this guild.")]
+            [Command("enable"), Aliases("on"), Description("Enables InvisiCop for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
                 await ctx.WithGuildSettings(cfg => cfg.InvisiCop.Enable = true);
                 await ctx.RespondAsync("InvisiCop enabled.");
             }
 
-            [Command("disable"), Aliases("off"), Description("Disables invisicop for this guild.")]
+            [Command("disable"), Aliases("off"), Description("Disables InvisiCop for this guild.")]
             public async Task DisableAsync(CommandContext ctx)
             {
                 await ctx.WithGuildSettings(cfg => cfg.InvisiCop.Enable = false);
@@ -737,7 +737,7 @@ namespace ModCore.Commands
         [Group("actionlog"), Aliases("al"), Description("ActionLog configuration commands.")]
         public class ActionLog
         {
-            [Command("enable"), Aliases("on"), Description("Enables actionlog for this guild.")]
+            [Command("enable"), Aliases("on"), Description("Enables ActionLog for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
@@ -747,7 +747,7 @@ namespace ModCore.Commands
                     $"ActionLog enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config actionlog setwebhook`");
             }
 
-            [Command("disable"), Aliases("off"), Description("Disables actionlog for this guild.")]
+            [Command("disable"), Aliases("off"), Description("Disables ActionLog for this guild.")]
             public async Task DisableAsync(CommandContext ctx)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
@@ -757,7 +757,7 @@ namespace ModCore.Commands
             }
 
             [Command("setwebhook"), Aliases("swh"),
-             Description("Sets the webhook ID and token for this guild's action log")]
+             Description("Sets the webhook ID and token for this guild's action log.")]
             public async Task SetWebhookAsync(CommandContext ctx, [Description("Webhook ID")]ulong id, [Description("Webhook token")]string token)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
@@ -833,7 +833,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync($"Error reporting verbosity in chat set to `{verbosity}`.");
             }
 
-            [Command("log"), Aliases("a"), Description("Sets command error reporting for this guild (in action log).")]
+            [Command("log"), Aliases("a"), Description("Sets command error reporting for this guild (in ActionLog).")]
             public async Task ActionLogAsync(CommandContext ctx, [Description("New error verbosity")]string verbosity)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
@@ -864,11 +864,11 @@ namespace ModCore.Commands
                 }
                 cfg.CommandError.ActionLog = vb;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync($"Error reporting verbosity in action log set to `{verbosity}`.");
+                await ctx.RespondAsync($"Error reporting verbosity in ActionLog set to `{verbosity}`.");
             }
         }
 
-        [Group("joinlog"), Aliases("j"), Description("Join log configuration commands.")]
+        [Group("joinlog"), Aliases("j"), Description("JoinLog configuration commands.")]
         public class JoinLog
         {
             [Command("enable"), Aliases("on"), Description("Enables JoinLog for this guild.")]
@@ -890,8 +890,8 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("JoinLog disabled.");
             }
 
-            [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's join log.")]
-            public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to send the joinlogs to")]DiscordChannel channel)
+            [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's JoinLog.")]
+            public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to send the JoinLogs to")]DiscordChannel channel)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.JoinLog.ChannelId = (long)channel.Id;
@@ -903,7 +903,7 @@ namespace ModCore.Commands
         [Group("selfrole"), Aliases("sr"), Description("SelfRole configuration commands.")]
         public class SelfRole
         {
-            [Command("add"), Aliases("a"), Description("Adds roles to selfrole list")]
+            [Command("add"), Aliases("a"), Description("Adds roles to SelfRole list")]
             public async Task AddSelfRoleAsync(CommandContext ctx, [Description("Role to allow for self-granting")]DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
@@ -920,7 +920,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync($"Added role `{role.Name}` with ID `{role.Id}` to SelfRoles.");
             }
 
-            [Command("remove"), Aliases("r"), Description("Removes roles from selfrole list")]
+            [Command("remove"), Aliases("r"), Description("Removes roles from SelfRole list")]
             public async Task RemoveSelfRoleAsync(CommandContext ctx, [Description("Role to disallow from self-granting")]DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();

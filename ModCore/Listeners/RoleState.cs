@@ -77,7 +77,7 @@ namespace ModCore.Listeners
                     .Where(xr => xr != null);
 
                 if (roles.Any())
-                    await ea.Member.ReplaceRolesAsync(roles, "Restoring role state.");
+                    await ea.Member.ReplaceRolesAsync(roles, "Restoring Role State.");
             }
             else
             {
@@ -98,7 +98,7 @@ namespace ModCore.Listeners
                     if (chn == null)
                         continue;
 
-                    await chn.AddOverwriteAsync(ea.Member, (Permissions)chperm.PermsAllow, (Permissions)chperm.PermsDeny, "Restoring role state");
+                    await chn.AddOverwriteAsync(ea.Member, (Permissions)chperm.PermsAllow, (Permissions)chperm.PermsDeny, "Restoring Role State");
                 }
             }
         }

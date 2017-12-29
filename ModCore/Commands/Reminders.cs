@@ -136,8 +136,10 @@ If in doubt, just try it! You can always clear the reminders later.
             var (duration, text) = await Dates.ParseTime(dataToParse);
             if (duration == Dates.ParsingError)
             {
-                await ctx.RespondAsync(
-                    $"Sorry, there was an error parsing your reminder.\nIf you see a developer, this info might help them: \n```\n{text}```");
+                /* await ctx.RespondAsync(
+                     $"Sorry, there was an error parsing your reminder.\nIf you see a developer, this info might help them: \n```\n{text}```");
+                     */
+                await ctx.RespondAsync("Sorry, there was an error parsing your reminder.");
                 return;
             }
 
