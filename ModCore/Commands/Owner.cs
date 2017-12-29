@@ -161,7 +161,7 @@ namespace ModCore.Commands
 
                 }
             }
-            await ctx.RespondAsync("Users with access: " + (list.Count > 0 ? "`" + string.Join("`, `", list) + "`" : "None"));
+            await ctx.RespondAsync($"Users with access: {(list.Count > 0 ? $"`{string.Join("`, `", list)}`" : "None")}");
         }
     }
 }
