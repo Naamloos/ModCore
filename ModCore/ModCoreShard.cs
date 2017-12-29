@@ -62,7 +62,7 @@ namespace ModCore
                 Client.SetWebSocketClient<WebSocket4NetCoreClient>();
             }
     
-            Client.GuildAvailable += StartupNotifyHandler;
+            Client.Ready += StartupNotifyHandler;
             
             Client.ClientErrored += async args =>
             {
@@ -116,12 +116,12 @@ namespace ModCore
             AsyncListenerHandler.InstallListeners(Client, this);
         }
         
-        private async Task StartupNotifyHandler(GuildCreateEventArgs e)
+        private async Task StartupNotifyHandler(ReadyEventArgs e)
         {
             await Task.Yield();
-            if (e.Guild.Id == SharedData.StartNotify.guild) {
-                // don't await
-                _ = e.Guild.GetChannel(SharedData.StartNotify.channel).SendMessageAsync("Heeey, VSauce here.");
+            if (SharedData.StartNotify.guild == 0UL) return;
+            if (e.Client.Guilds.TryGetValue(SharedData.StartNotify.guild, out var guild)) {
+                _ = guild.GetChannel(SharedData.StartNotify.channel).SendMessageAsync("Heeey, VSauce here.");
             }
         }
 
