@@ -12,6 +12,7 @@ using ModCore.Logic;
 using System.Runtime.InteropServices;
 using DSharpPlus.Net.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace ModCore
 {
@@ -119,6 +120,10 @@ namespace ModCore
         private async Task StartupNotifyHandler(ReadyEventArgs e)
         {
             if (SharedData.StartNotify.guild == 0UL) return;
+            var guild = await e.Client.GetGuildAsync(SharedData.StartNotify.guild);
+            var channel = guild.GetChannel(SharedData.StartNotify.channel);
+            await channel.SendMessageAsync("test");
+
             if (e.Client.Guilds.TryGetValue(SharedData.StartNotify.guild, out var guild)) {
                 await guild.GetChannel(SharedData.StartNotify.channel).SendMessageAsync("Heeey, VSauce here.");
             }
