@@ -1,5 +1,6 @@
 ﻿using ModCore.Api;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace ModCore.Entities
@@ -12,6 +13,7 @@ namespace ModCore.Entities
         public TimerData TimerData { get; internal set; }
         public Perspective Perspective { get; internal set; }
         public (ulong guild, ulong channel) StartNotify { get; internal set; }
+        public List<ulong> BotManagers { get; internal set; }
 
         public SharedData()
         {

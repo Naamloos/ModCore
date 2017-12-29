@@ -15,7 +15,6 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseStarData> StarDatas { get; set; }
         public virtual DbSet<DatabaseBan> Bans { get; set; }
         public virtual DbSet<DatabaseTag> Tags { get; set; }
-        public virtual DbSet<DatabaseBotManager> BotManagers { get; set; }
 
         private DatabaseProvider Provider { get; }
         private string ConnectionString { get; }
@@ -246,17 +245,6 @@ namespace ModCore.Database
                 entity.Property(e => e.Name).HasColumnName("tagname");
 
                 entity.Property(e => e.Contents).HasColumnName("contents");
-            });
-
-            modelBuilder.Entity<DatabaseBotManager>(entity =>
-            {
-                entity.ToTable("mcore_botmanager");
-
-                entity.HasIndex(e => new { e.UserId})
-                    .HasName("mcore_botmanager_user_id_key")
-                    .IsUnique();
-
-                entity.Property(e => e.UserId).HasColumnName("user_id");
             });
         }
     }

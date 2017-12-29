@@ -60,6 +60,7 @@ namespace ModCore
                 CTS = CTS,
                 ProcessStartTime = Process.GetCurrentProcess().StartTime,
                 Perspective = PerspectiveApi,
+                BotManagers = Settings.BotManagers
             };
             if (args.Length == 2) {
                 SharedData.StartNotify = (ulong.Parse(args[0]), ulong.Parse(args[1]));

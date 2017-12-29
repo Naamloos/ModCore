@@ -2,6 +2,7 @@
 using ModCore.Database;
 using Newtonsoft.Json;
 using Npgsql;
+using System.Collections.Generic;
 
 namespace ModCore.Entities
 {
@@ -24,6 +25,9 @@ namespace ModCore.Entities
 
         [JsonProperty("database")]
         public DatabaseSettings Database { get; private set; }
+
+        [JsonProperty("bot_managers")]
+        public List<ulong> BotManagers { get; private set; }
     }
 
     public struct DatabaseSettings
