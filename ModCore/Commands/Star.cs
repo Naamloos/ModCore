@@ -37,41 +37,6 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("testthewater"), Aliases("ttw"), Description("oof.")]
-        public async Task TestTheWaterAsync(CommandContext ctx)
-        {
-            using (var db = Database.CreateContext())
-            {
-                await ctx.RespondAsync(db.StarDatas.First().AuthorId  == 1 ? "YAY" : "NO");
-            }
-        }
-
-        [Command("burnafterreading"), Aliases("sendhelp", "reee", "deletepls", "ahhhhh"), Description("Populates table with author IDs probably hopefully.")]
-        public async Task BurnAfterReadingAsync(CommandContext ctx)
-        {
-            await ctx.RespondAsync("I've started!");
-            using (var db = Database.CreateContext())
-            {
-                foreach (DatabaseStarData star in db.StarDatas)
-                {
-                    if (star.AuthorId == 1)
-                    {
-                        try
-                        {
-                            var message = await ctx.Client.Guilds.First(x => x.Key == (ulong)star.GuildId).Value.GetChannel((ulong)star.ChannelId).GetMessageAsync((ulong)star.MessageId);
-                            star.AuthorId = (long)message.Author.Id;
-                        }
-                        catch
-                        {
-                            continue;
-                        }
-                    }
-                }
-                await db.SaveChangesAsync();
-            }
-            await ctx.RespondAsync("I've finished!");
-        }
-
         [Command("listgiven"), Aliases("listgive", "lgive", "listgi"), Description("Returns amount of stars the user has ever given.")]
         public async Task ListGivenAsync(CommandContext ctx, DiscordMember m)
         {
@@ -94,7 +59,7 @@ namespace ModCore.Commands
                     await ctx.RespondAsync("You have never been given a star.");
                     return;
                 }
-                var unique = messages.Select(x => x).Distinct().Count();
+                var unique = messages.Select(x => x.Id).Distinct().Count();
 
                 await ctx.RespondAsync($"You have been given: "
                     + messages.Count()
