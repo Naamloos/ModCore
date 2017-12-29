@@ -94,6 +94,7 @@ namespace ModCore.Commands
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = file,
+                        Arguments = $"{ctx.Guild.Id} {ctx.Channel.Id}",
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         CreateNoWindow = true
