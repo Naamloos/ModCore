@@ -34,10 +34,15 @@ build: off
 build_script:
 - cmd: dotnet build ModCore.sln -v Minimal -c Release
 
+on_success:
+- cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\ModCore\bin\Release\netcoreapp2.0\*.dll"
+- cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\download.ps1"
+- cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\update.sh"
+- cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\update.bat"
+
 artifacts:
-  - path: 'ModCore\bin\Release\netcoreapp2.0'
+  - path: ModCore.zip
     name: ModCore Release Build
-    type: zip
 
 # i dont think i need this cuz it just read from the appveyor settings menu
 #notifications:
