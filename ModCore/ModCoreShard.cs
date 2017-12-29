@@ -114,22 +114,9 @@ namespace ModCore
 
             AsyncListenerHandler.InstallListeners(Client, this);
         }
-        
-        private async Task StartupNotifyHandler(ReadyEventArgs e)
-        {
-            if (SharedData.StartNotify.guild == 0) return;
-            //var guild = await e.Client.GetGuildAsync(SharedData.StartNotify.guild);
-            var channel = await e.Client.GetChannelAsync(SharedData.StartNotify.channel);
-            await channel.SendMessageAsync("test");
-
-            //if (e.Client.Guilds.TryGetValue(SharedData.StartNotify.guild, out var guild)) {
-            //    await guild.GetChannel(SharedData.StartNotify.channel).SendMessageAsync("Heeey, VSauce here.");
-            //}
-        }
 
         private async Task Client_Ready(ReadyEventArgs e)
         {
-            await StartupNotifyHandler(e);
             await Client.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
         }
 

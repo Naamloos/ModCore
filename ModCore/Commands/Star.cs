@@ -59,7 +59,7 @@ namespace ModCore.Commands
                     await ctx.RespondAsync("You have never been given a star.");
                     return;
                 }
-                var unique = messages.GroupBy(x => x.MessageId).Count();
+                var unique = messages.Select(x => x.MessageId).Distinct();
 
                 await ctx.RespondAsync($"You have been given: "
                     + messages.Count()
