@@ -246,7 +246,6 @@ namespace ModCore.Database
 
                 entity.Property(e => e.Contents).HasColumnName("contents");
             });
-
         }
     }
 }

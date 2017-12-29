@@ -10,11 +10,11 @@
 
 Commands
 ---------
-*Command listing is avalaible at the [Wiki.](https://github.com/NaamloosDT/ModCore/wiki/Command-Listing)*
+*Command listing is available at the [Wiki.](https://github.com/NaamloosDT/ModCore/wiki/Command-Listing)*
 
 Setup
 ---------
-*Guild setup is avalaible at the [Wiki.](https://github.com/NaamloosDT/ModCore/wiki/Guild-Setup)*
+*Guild setup is available at the [Wiki.](https://github.com/NaamloosDT/ModCore/wiki/Guild-Setup)*
 
 Setting up your own instance: *(not recommended)*
 1. Clone the repo
