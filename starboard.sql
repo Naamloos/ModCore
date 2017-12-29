@@ -50,6 +50,7 @@ create table mcore_stars(
 	channel_id bigint not null,
 	stargazer_id bigint not null,
 	message_id bigint not null,
+	author_id bigint not null,
 	starboard_entry_id bigint not null,
 	action_data jsonb
 );

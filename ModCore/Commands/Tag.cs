@@ -130,7 +130,7 @@ namespace ModCore.Commands
         }
 
         [Command("copy")]
-        [Description("copies a tag from a channel to this channel.")]
+        [Description("Copies a tag from a channel to this channel.")]
         public async Task RemoveAsync(CommandContext ctx, [Description("Channel the tag originated from")]DiscordChannel origin, 
             [Description("Name of tag to copy"), RemainingText]string name)
         {
@@ -166,7 +166,7 @@ namespace ModCore.Commands
         }
 
         [Command("info")]
-        [Description("shows info about a tag")]
+        [Description("Shows info about a tag.")]
         public async Task InfoAsync(CommandContext ctx, [Description("Tag to show information about"), RemainingText] string args)
         {
             List<string> s = (args.Split(' ')).ToList();
@@ -213,7 +213,7 @@ namespace ModCore.Commands
         }
 
         [Command("list")]
-        [Description("lists tags for this channel")]
+        [Description("Lists tags for this channel.")]
         public async Task ListAsync(CommandContext ctx)
         {
             using (var db = this.Database.CreateContext())
@@ -233,7 +233,7 @@ namespace ModCore.Commands
         }
 
         [Command("transfer")]
-        [Description("transfers ownership of a tag")]
+        [Description("Transfers ownership of a tag to another member.")]
         public async Task TransferAsync(CommandContext ctx, [Description("New owner of this tag")]DiscordMember newowner, 
             [Description("Name of tag to transfer"), RemainingText]string name)
         {

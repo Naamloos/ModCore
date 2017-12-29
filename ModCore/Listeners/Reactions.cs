@@ -58,6 +58,7 @@ namespace ModCore.Listeners
                                     ChannelId = other.ChannelId,
                                     GuildId = (long)e.Channel.Guild.Id,
                                     MessageId = other.MessageId,
+                                    AuthorId = other.AuthorId,
                                     StarboardMessageId = sbmid,
                                     StargazerId = (long)e.User.Id,
                                 });
@@ -92,6 +93,7 @@ namespace ModCore.Listeners
                             ChannelId = (long)e.Channel.Id,
                             GuildId = (long)e.Channel.Guild.Id,
                             MessageId = (long)e.Message.Id,
+                            AuthorId = (long)e.Message.Author.Id,
                             StarboardMessageId = sbmid,
                             StargazerId = (long)e.User.Id,
                         });
