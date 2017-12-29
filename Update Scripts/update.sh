@@ -1,8 +1,8 @@
 #!/bin/bash
-if [ -z "$2" ]
+if [ -z "$3" ]
 then
     echo "Relaunching"
-    nohup bash "$0" "$1" "x"
+    nohup bash "$0" "$1" "$2" "yee"
     exit
 fi
 
@@ -16,4 +16,4 @@ echo "Beginning archive extraction"
 unzip -o ModCore%20Release%20Build.zip
 
 echo "Restarting process"
-nohup dotnet ModCore.dll
+nohup dotnet ModCore.dll $2
