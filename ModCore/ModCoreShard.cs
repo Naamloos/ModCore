@@ -24,7 +24,7 @@ namespace ModCore
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
 
-        public SharedData ShardData { get; set; }
+        public SharedData SharedData { get; set; }
         internal Settings Settings { get; }
 
         public DatabaseContextBuilder Database { get; }
@@ -32,7 +32,7 @@ namespace ModCore
         public ModCoreShard(Settings settings, int id, SharedData sharedData)
         {
             this.Settings = settings;
-            this.ShardData = sharedData;
+            this.SharedData = sharedData;
             Database = settings.Database.CreateContextBuilder();
         }
 
@@ -41,7 +41,7 @@ namespace ModCore
             // Store the Start Times to use in DI
             // SocketStartTime will be updated in the SocketOpened event,
             // For now we just need to make sure its not null.
-            StartTimes = new StartTimes(ShardData.ProcessStartTime, ShardData.ProcessStartTime);
+            StartTimes = new StartTimes(SharedData.ProcessStartTime, SharedData.ProcessStartTime);
 
             // Initialize the DiscordClient
             this.Client = new DiscordClient(new DiscordConfiguration
@@ -79,7 +79,7 @@ namespace ModCore
 
             // Add the instances we need to dependencies
             var deps = new ServiceCollection()
-                .AddSingleton(this.ShardData)
+                .AddSingleton(this.SharedData)
                 //.AddInstance(this.Settings)
                 .AddSingleton(this.Interactivity)
                 .AddSingleton(this.StartTimes)
