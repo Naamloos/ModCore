@@ -1,10 +1,4 @@
 #!/bin/bash
-if [ -z "$4" ]
-then
-    echo "Relaunching"
-    nohup bash "$0" "$1" "$2" "$3" "yee"
-    exit
-fi
 
 echo "Waiting for process to terminate"
 wait "$1"
