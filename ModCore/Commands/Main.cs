@@ -438,8 +438,7 @@ namespace ModCore.Commands
             }
 
             [Command("remove"), Description("Removes the specified user from the global watchlist.")]
-            public async Task RemoveAsync(CommandContext ctx, [Description("Member to warn about")]DiscordMember m,
-           [RemainingText, Description("Reason to warn about this member")] string reason = "")
+            public async Task RemoveAsync(CommandContext ctx, [Description("Member to warn about")]DiscordMember m)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 if (cfg.GlobalWarn.WarnLevel == GlobalWarnLevel.None || cfg.GlobalWarn.Enable)
@@ -460,9 +459,8 @@ namespace ModCore.Commands
                 }
 
                 var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
-                var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
                 await m.SendMessageAsync($"You've been unbanned from {ctx.Guild.Name}.");
-                await ctx.Guild.UnbanMemberAsync(m, $"{ustr}{rstr}");
+                await ctx.Guild.UnbanMemberAsync(m, $"{ustr}");
                 await ctx.RespondAsync($"Unbanned and retracted global warn about user {m.DisplayName} (ID:{m.Id})");
 
                 await ctx.LogActionAsync($"Unbanned and retracted global warn about user {m.DisplayName} (ID:{m.Id})\n");

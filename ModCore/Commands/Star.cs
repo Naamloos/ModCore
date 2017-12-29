@@ -37,7 +37,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("info"), Aliases("i", "data", "d", "information"), Description("Returns stardata for a specified user.")]
+        [Command("info"), Aliases("i", "data", "information"), Description("Returns stardata for a specified user.")]
         public async Task ListGivenAsync(CommandContext ctx, DiscordMember m)
         {
             var embed = new DiscordEmbedBuilder()
