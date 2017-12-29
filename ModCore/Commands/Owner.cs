@@ -10,6 +10,7 @@ using System.Diagnostics;
 using DSharpPlus.Entities;
 using ModCore.Logic;
 using ModCore.Database;
+using System.Collections.Generic;
 
 namespace ModCore.Commands
 {
@@ -164,7 +165,11 @@ namespace ModCore.Commands
                     await ctx.RespondAsync("You do not have permission to use this command!");
                     return;
                 }
-
+                if (db.BotManagers.Find(m.Id) != null)
+                {
+                    await ctx.RespondAsync("That person is already in the database.");
+                    return;
+                }
                 await db.BotManagers.AddAsync(new DatabaseBotManager()
                 {
                     UserId = (long)m.Id
@@ -183,12 +188,43 @@ namespace ModCore.Commands
                     await ctx.RespondAsync("You do not have permission to use this command!");
                     return;
                 }
-                
+                if (db.BotManagers.Find(m.Id) == null)
+                {
+                    await ctx.RespondAsync("That person is not in the database.");
+                    return;
+                }
                 db.BotManagers.Remove(new DatabaseBotManager()
                 {
                     UserId = (long)m.Id
                 });
                 await db.SaveChangesAsync();
+            }
+        }
+
+        [Command("listbotmanager"), Aliases("lbm"), Hidden]
+        public async Task ListBotManagerAsync(CommandContext ctx)
+        {
+            using (var db = this.Database.CreateContext())
+            {
+                if (db.BotManagers.Find(ctx.Member.Id) == null && ctx.Client.CurrentApplication.Owner != ctx.User)
+                {
+                    await ctx.RespondAsync("You do not have permission to use this command!");
+                    return;
+                }
+                var list = new List<string>();
+                foreach (DatabaseBotManager manager in db.BotManagers)
+                {
+                    try
+                    {
+                        DiscordMember m = await ctx.Guild.GetMemberAsync((ulong)manager.UserId);
+                        list.Add(m.DisplayName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                await ctx.RespondAsync("Users with access: " + (list.Count > 0 ? string.Join(", ", list) : "None"));
             }
         }
     }
