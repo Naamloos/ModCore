@@ -81,7 +81,7 @@ namespace ModCore.Commands
             [Description("Message limit")]int limit, [Description("Amount of messages to skip")]int skip = 0)
         {
             var i = 0;
-            var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
+            var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message, limit);
             var deletThis = new List<DiscordMessage>();
             foreach (var m in ms)
             {
@@ -230,7 +230,7 @@ namespace ModCore.Commands
             var regexCompiled = new Regex(regexp, regexOptions);
 
             var i = 0;
-            var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
+            var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message, limit);
             var deletThis = new List<DiscordMessage>();
             foreach (var m in ms)
             {
@@ -260,7 +260,7 @@ namespace ModCore.Commands
             [Description("Amount of messages to skip")]int skip = 0)
         {
             var i = 0;
-            var ms = await ctx.Channel.GetMessagesAsync(limit, ctx.Message.Id);
+            var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message, limit);
             var deletThis = new List<DiscordMessage>();
             foreach (var m in ms)
             {
@@ -285,7 +285,7 @@ namespace ModCore.Commands
         {
             var gs = ctx.GetGuildSettings();
             var prefix = gs?.Prefix ?? "?>";
-            var ms = await ctx.Channel.GetMessagesAsync(100, ctx.Message.Id);
+            var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message, 100);
             var deletThis = ms.Where(m => m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix))
                 .ToList();
             if (deletThis.Any())

@@ -45,7 +45,7 @@ namespace ModCore
             StartTimes = new StartTimes(SharedData.ProcessStartTime, SharedData.ProcessStartTime);
 
             // Initialize the DiscordClient
-            this.Client = new DiscordClient(new DiscordConfiguration
+            var cfg = new DiscordConfiguration
             {
                 AutoReconnect = true,
                 GatewayCompressionLevel = GatewayCompressionLevel.Stream,
@@ -56,12 +56,14 @@ namespace ModCore
                 UseInternalLogHandler = true,
                 ShardCount = this.Settings.ShardCount,
                 ShardId = this.ShardId
-            });
+            };
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.OSVersion.Version <= new Version(6, 1, 7601, 65536))
             {
                 // NT 6.1 (Win7 SP1)
-                Client.SetWebSocketClient<WebSocket4NetCoreClient>();
+                cfg.WebSocketClientFactory = WebSocket4NetCoreClient.CreateNew;
             }
+            this.Client = new DiscordClient(cfg);
 
             Client.ClientErrored += async args =>
             {
@@ -71,7 +73,7 @@ namespace ModCore
 
             this.Interactivity = Client.UseInteractivity(new InteractivityConfiguration()
             {
-                PaginationBehaviour = TimeoutBehaviour.DeleteReactions,
+                PaginationBehavior = TimeoutBehaviour.DeleteReactions,
                 PaginationTimeout = TimeSpan.FromSeconds(30),
                 Timeout = TimeSpan.FromSeconds(30)
             });
@@ -92,12 +94,12 @@ namespace ModCore
                 EnableDefaultHelp = false,
                 EnableDms = false,
                 EnableMentionPrefix = true,
-                CustomPrefixPredicate = this.GetPrefixPositionAsync,
+                PrefixResolver = this.GetPrefixPositionAsync,
                 Services = deps
             });
 
             // set the converters
-            CommandsNextUtilities.RegisterConverter(new AugmentedBoolConverter());
+            this.Commands.RegisterConverter(new AugmentedBoolConverter());
 
             // register commands
             this.Commands.RegisterCommands(Assembly.GetExecutingAssembly());

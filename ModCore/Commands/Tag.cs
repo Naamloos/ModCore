@@ -40,7 +40,7 @@ namespace ModCore.Commands
             {
                 if (!s[0].StartsWith("<#"))
                     throw new Exception();
-                DiscordChannel c = (DiscordChannel)CommandsNextUtilities.ConvertArgument<DiscordChannel>(s[0], ctx);
+                DiscordChannel c = (DiscordChannel)await ctx.CommandsNext.ConvertArgument<DiscordChannel>(s[0], ctx);
                 s.RemoveAt(0);
                 await ReturnTag(ctx, c, string.Join(' ', s));
             }
@@ -174,7 +174,7 @@ namespace ModCore.Commands
             {
                 if (!s[0].StartsWith("<#"))
                     throw new Exception();
-                DiscordChannel c = (DiscordChannel)CommandsNextUtilities.ConvertArgument<DiscordChannel>(s[0], ctx);
+                DiscordChannel c = (DiscordChannel)await ctx.CommandsNext.ConvertArgument<DiscordChannel>(s[0], ctx);
                 s.RemoveAt(0);
                 await ReturnTagInfo(ctx, c, string.Join(' ', s));
             }
