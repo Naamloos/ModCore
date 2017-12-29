@@ -61,9 +61,7 @@ namespace ModCore
                 // NT 6.1 (Win7 SP1)
                 Client.SetWebSocketClient<WebSocket4NetCoreClient>();
             }
-    
-            Client.Ready += StartupNotifyHandler;
-            
+
             Client.ClientErrored += async args =>
             {
                 await Task.Yield();
@@ -114,14 +112,6 @@ namespace ModCore
             this.Client.Ready += Client_Ready;
 
             AsyncListenerHandler.InstallListeners(Client, this);
-        }
-        
-        private async Task StartupNotifyHandler(ReadyEventArgs e)
-        {
-            if (SharedData.StartNotify.guild == 0UL) return;
-            if (e.Client.Guilds.TryGetValue(SharedData.StartNotify.guild, out var guild)) {
-                await guild.GetChannel(SharedData.StartNotify.channel).SendMessageAsync("Heeey, VSauce here.");
-            }
         }
 
         private Task Client_Ready(ReadyEventArgs e)

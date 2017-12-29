@@ -12,17 +12,9 @@ namespace ModCore.Listeners
         [AsyncListener(EventTypes.GuildAvailable)]
         public static async Task UpdateCompleteAsync(ModCoreShard bot, GuildCreateEventArgs e)
         {
-            try
+            if (bot.SharedData.StartNotify.guild == e.Guild.Id)
             {
-                await e.Guild.GetChannel(366601285669224458).SendMessageAsync("TEST: " + bot.SharedData.StartNotify.guild + " - " + bot.SharedData.StartNotify.channel);
-            }
-            catch
-            {
-
-            }
-            if (e.Guild.Id == bot.SharedData.StartNotify.guild)
-            {
-                await e.Guild.GetChannel(bot.SharedData.StartNotify.channel).SendMessageAsync("Heeey, VSauce here.");
+                await e.Guild.GetChannel(bot.SharedData.StartNotify.channel).SendMessageAsync("Updated!");
             }
         }
     }
