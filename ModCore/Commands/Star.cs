@@ -59,19 +59,12 @@ namespace ModCore.Commands
                     await ctx.RespondAsync("You have never been given a star.");
                     return;
                 }
-                var unique = new List<ulong>();
-                foreach (DatabaseStarData message in messages)
-                {
-                    if (unique.Contains((ulong)message.MessageId))
-                        continue;
-                    else
-                        unique.Add((ulong)message.MessageId);
-                }
-                
+                var unique = messages.GroupBy(x => x.MessageId).Count();
+
                 await ctx.RespondAsync($"You have been given: "
                     + messages.Count()
                     + " stars in total, over: "
-                    + unique.Count
+                    + unique
                     + " different messages.");
             }
         }

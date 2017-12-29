@@ -28,7 +28,7 @@ namespace ModCore.Listeners
                     return;
 
                 // lock timers
-                await shard.ShardData.TimerSempahore.WaitAsync();
+                await shard.SharedData.TimerSempahore.WaitAsync();
 
                 var now = DateTimeOffset.UtcNow;
                 var past = timers.Where(xt => xt.DispatchAt <= now.AddSeconds(30)).ToArray();
@@ -37,7 +37,7 @@ namespace ModCore.Listeners
                     foreach (var xt in past)
                     {
                         // dispatch past timers
-                        _ = DispatchTimer(new TimerData(null, xt, shard.Client, shard.Database, shard.ShardData, null));
+                        _ = DispatchTimer(new TimerData(null, xt, shard.Client, shard.Database, shard.SharedData, null));
                     }
 
                     db.Timers.RemoveRange(past);
@@ -45,9 +45,9 @@ namespace ModCore.Listeners
                 }
 
                 // unlock the timers
-                shard.ShardData.TimerSempahore.Release();
+                shard.SharedData.TimerSempahore.Release();
 
-                RescheduleTimers(shard.Client, shard.Database, shard.ShardData);
+                RescheduleTimers(shard.Client, shard.Database, shard.SharedData);
             }
         }
 
