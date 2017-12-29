@@ -77,7 +77,7 @@ namespace ModCore.Commands
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = "nohup",
-                        Arguments = $"bash {file} {Process.GetCurrentProcess().Id}",
+                        Arguments = $"bash {file} {Process.GetCurrentProcess().Id} {ctx.Channel.Id}",
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         CreateNoWindow = true
