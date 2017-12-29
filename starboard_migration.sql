@@ -1,0 +1,1 @@
+alter table mcore_stars add author_id not null default 1;
