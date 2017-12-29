@@ -56,8 +56,15 @@ namespace ModCore.Commands
                 {
                     if (star.AuthorId == 1)
                     {
-                        var message = await ctx.Client.Guilds.First(x => x.Key == (ulong)star.GuildId).Value.GetChannel((ulong)star.ChannelId).GetMessageAsync((ulong)star.MessageId);
-                        star.AuthorId = (long)message.Author.Id;
+                        try
+                        {
+                            var message = await ctx.Client.Guilds.First(x => x.Key == (ulong)star.GuildId).Value.GetChannel((ulong)star.ChannelId).GetMessageAsync((ulong)star.MessageId);
+                            star.AuthorId = (long)message.Author.Id;
+                        }
+                        catch
+                        {
+                            continue;
+                        }
                     }
                 }
                 await db.SaveChangesAsync();
