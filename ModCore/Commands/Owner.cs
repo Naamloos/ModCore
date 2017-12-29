@@ -72,12 +72,14 @@ namespace ModCore.Commands
             if (File.Exists("update.sh"))
             {
                 const string file = fn + ".sh";
+                ulong guildId = 146044397861994496;
+                ulong channelId = 366601285669224458;
                 var proc = new Process
                 {
                     StartInfo = new ProcessStartInfo
                     {
                         FileName = "nohup",
-                        Arguments = $"bash {file} {Process.GetCurrentProcess().Id}",
+                        Arguments = $"bash {file} {Process.GetCurrentProcess().Id} {guildId} {channelId}",
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         CreateNoWindow = true
