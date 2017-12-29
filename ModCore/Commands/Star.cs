@@ -43,7 +43,7 @@ namespace ModCore.Commands
             using (var db = Database.CreateContext())
             {
                 await ctx.RespondAsync($"You have given: "
-                    + db.StarDatas.Count(x => (ulong)x.StargazerId == m.Id)
+                    + db.StarDatas.Where(x => (ulong)x.GuildId == ctx.Guild.Id).Count(x => (ulong)x.StargazerId == m.Id)
                     + " stars in total.");
             }
         }
@@ -53,18 +53,18 @@ namespace ModCore.Commands
         {
             using (var db = Database.CreateContext())
             {
-                var messages = db.StarDatas.Where(x => (ulong)x.AuthorId == m.Id);
+                var messages = db.StarDatas.Where(x => (ulong)x.AuthorId == m.Id && (ulong)x.GuildId == ctx.Guild.Id);
                 if (!messages.Any())
                 {
                     await ctx.RespondAsync("You have never been given a star.");
                     return;
                 }
-                var unique = messages.Select(x => x.MessageId).Distinct();
+                var unique = messages.Select(x => x.MessageId).Distinct().Count();
 
                 await ctx.RespondAsync($"You have been given: "
                     + messages.Count()
                     + " stars in total, over: "
-                    + unique.Count()
+                    + unique
                     + " different messages.");
             }
         }
