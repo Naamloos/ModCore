@@ -124,9 +124,9 @@ namespace ModCore
             var channel = guild.GetChannel(SharedData.StartNotify.channel);
             await channel.SendMessageAsync("test");
 
-            if (e.Client.Guilds.TryGetValue(SharedData.StartNotify.guild, out var guild)) {
-                await guild.GetChannel(SharedData.StartNotify.channel).SendMessageAsync("Heeey, VSauce here.");
-            }
+            //if (e.Client.Guilds.TryGetValue(SharedData.StartNotify.guild, out var guild)) {
+            //    await guild.GetChannel(SharedData.StartNotify.channel).SendMessageAsync("Heeey, VSauce here.");
+            //}
         }
 
         private Task Client_Ready(ReadyEventArgs e)
