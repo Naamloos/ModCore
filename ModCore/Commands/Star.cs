@@ -81,7 +81,7 @@ namespace ModCore.Commands
                         }
                     }
                 }
-                var ordered = memberNames.OrderBy(x => x.Value);
+                var ordered = memberNames.OrderByDescending(x => x.Value);
 
                 var memberLists = ordered.Select(x => x.Key + " - " + x.Value);
                 embed.AddField("Users who gave you stars", string.Join("\n", memberLists.Take(10)), false);
