@@ -12,7 +12,7 @@ namespace ModCore.Listeners
         {
             var t = Timers.FindNearestTimer(TimerActionType.Unban, e.Member.Id, 0, e.Guild.Id, bot.Database);
             if (t != null)
-                await Timers.UnscheduleTimerAsync(t, bot.Client, bot.Database, bot.ShardData);
+                await Timers.UnscheduleTimerAsync(t, bot.Client, bot.Database, bot.SharedData);
         }
     }
 }
