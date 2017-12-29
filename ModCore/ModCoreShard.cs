@@ -62,7 +62,7 @@ namespace ModCore
                 // NT 6.1 (Win7 SP1)
                 Client.SetWebSocketClient<WebSocket4NetCoreClient>();
             }
-            
+
             Client.ClientErrored += async args =>
             {
                 await Task.Yield();

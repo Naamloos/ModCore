@@ -64,7 +64,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync($"You have been given: "
                     + messages.Count()
                     + " stars in total, over: "
-                    + unique
+                    + unique.Count()
                     + " different messages.");
             }
         }
