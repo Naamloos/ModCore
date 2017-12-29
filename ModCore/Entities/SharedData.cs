@@ -6,18 +6,16 @@ namespace ModCore.Entities
 {
     public class SharedData
     {
-        public CancellationTokenSource CTS { get; private set; }
-        public DateTime ProcessStartTime { get; private set; }
-        public SemaphoreSlim TimerSempahore { get; private set; }
-        public TimerData TimerData { get; set; }
-        public Perspective Perspective { get; private set; }
+        public CancellationTokenSource CTS { get; internal set; }
+        public DateTime ProcessStartTime { get; internal set; }
+        public SemaphoreSlim TimerSempahore { get; internal set; }
+        public TimerData TimerData { get; internal set; }
+        public Perspective Perspective { get; internal set; }
+        public (ulong guild, ulong channel) StartNotify { get; internal set; }
 
-        public SharedData(CancellationTokenSource cts, DateTime processStartTime, Perspective psp)
+        public SharedData()
         {
-            this.CTS = cts;
-            this.ProcessStartTime = processStartTime;
             this.TimerSempahore = new SemaphoreSlim(1, 1);
-            this.Perspective = psp;
         }
     }
 }

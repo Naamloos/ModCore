@@ -3,10 +3,6 @@ version: '{build}'
 pull_requests:
   do_not_increment_build_number: true
 
-branches:
-  only:
-  - master
-
 image: Visual Studio 2017
 
 dotnet_csproj:
@@ -37,11 +33,14 @@ build: off
 
 build_script:
 - cmd: dotnet build ModCore.sln -v Minimal -c Release
+- cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\ModCore\bin\Release\netcoreapp2.0\*.dll"
+- cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\download.ps1"
+- cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\update.sh"
+- cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\update.bat"
 
 artifacts:
-  - path: 'ModCore\bin\Release\netcoreapp2.0'
+  - path: ModCore.zip
     name: ModCore Release Build
-    type: zip
 
 # i dont think i need this cuz it just read from the appveyor settings menu
 #notifications:

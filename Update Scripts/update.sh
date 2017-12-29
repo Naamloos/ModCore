@@ -1,10 +1,4 @@
 #!/bin/bash
-if [ -z "$2" ]
-then
-    echo "Relaunching"
-    nohup bash "$0" "$1" "x"
-    exit
-fi
 
 echo "Waiting for process to terminate"
 wait "$1"
@@ -16,4 +10,4 @@ echo "Beginning archive extraction"
 unzip -o ModCore%20Release%20Build.zip
 
 echo "Restarting process"
-nohup dotnet ModCore.dll
+dotnet ModCore.dll $2 $3
