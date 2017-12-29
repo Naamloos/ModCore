@@ -120,8 +120,8 @@ namespace ModCore
         private async Task StartupNotifyHandler(ReadyEventArgs e)
         {
             if (SharedData.StartNotify.guild == 0UL) return;
-            var guild = await e.Client.GetGuildAsync(SharedData.StartNotify.guild);
-            var channel = guild.GetChannel(SharedData.StartNotify.channel);
+            //var guild = await e.Client.GetGuildAsync(SharedData.StartNotify.guild);
+            var channel = await e.Client.GetChannelAsync(SharedData.StartNotify.channel);
             await channel.SendMessageAsync("test");
 
             //if (e.Client.Guilds.TryGetValue(SharedData.StartNotify.guild, out var guild)) {

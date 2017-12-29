@@ -19,7 +19,7 @@ namespace ModCore
         private CancellationTokenSource CTS { get; set; }
         private Perspective PerspectiveApi { get; set; }
 
-        internal async Task InitializeAsync()
+        internal async Task InitializeAsync(string[] args)
         {
             if (!File.Exists("settings.json"))
             {
@@ -35,7 +35,7 @@ namespace ModCore
             PerspectiveApi = new Perspective(Settings.PerspectiveToken);
 
             Shards = new List<ModCoreShard>();
-            InitializeSharedData();
+            InitializeSharedData(args);
 
             for (var i = 0; i < Settings.ShardCount; i++)
             {
@@ -53,7 +53,7 @@ namespace ModCore
         /// <summary>
         /// Initialized the SharedData we need for the shards.
         /// </summary>
-        private void InitializeSharedData()
+        private void InitializeSharedData(string[] args)
         {
             CTS = new CancellationTokenSource();
             SharedData = new SharedData {
@@ -61,10 +61,10 @@ namespace ModCore
                 ProcessStartTime = Process.GetCurrentProcess().StartTime,
                 Perspective = PerspectiveApi,
             };
-            var args = Environment.GetCommandLineArgs();
+            //var args = Environment.GetCommandLineArgs();
             // first argument is the exeuctable file name.
             // https://msdn.microsoft.com/en-us/library/system.environment.getcommandlineargs(v=vs.110).aspx
-            SharedData.StartNotify = (146044397861994496, 366601285669224458);
+            SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
            /* if (args.Length == 3) {
                 SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
             }*/
