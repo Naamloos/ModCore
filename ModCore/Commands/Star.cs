@@ -68,7 +68,8 @@ namespace ModCore.Commands
                     }
                 }
                 embed.AddField("Users who gave you stars", string.Join(", ", memberNames.Select(x => x.Key + " - " + x.Value)), true);
-                
+
+                await ctx.RespondAsync(embed: embed);
             }
         }
     }
