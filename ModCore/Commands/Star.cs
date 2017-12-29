@@ -58,8 +58,7 @@ namespace ModCore.Commands
                     string memberName = "Unknown User";
                     try 
                     {
-                        var member = await ctx.Client.GetUserAsync((ulong)star.StargazerId);
-                        memberName = $"{member.Username}#{member.Discriminator}";
+                        memberName = (await ctx.Client.GetUserAsync((ulong)star.StargazerId)).Mention;
                         if (memberNames.ContainsKey(memberName))
                         {
                             memberNames[memberName] += 1;
