@@ -61,11 +61,10 @@ namespace ModCore
                 ProcessStartTime = Process.GetCurrentProcess().StartTime,
                 Perspective = PerspectiveApi,
             };
-            var args = Environment.GetCommandLineArgs();
-            if (args.Length == 3) {
-                SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
+            if (args.Length == 2) {
+                SharedData.StartNotify = (ulong.Parse(args[0]), ulong.Parse(args[1]));
                 File.Create("debuggo.txt").Close();
-                File.WriteAllText("debuggo.txt", "guild" + args[1] + " channel" + args[2]);
+                File.WriteAllText("debuggo.txt", "guild" + args[0] + " channel" + args[1]);
             }
            /* if (args.Length == 3) {
                 SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
