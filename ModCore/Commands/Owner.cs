@@ -140,38 +140,6 @@ namespace ModCore.Commands
             this.Shared.CTS.Cancel();
         }
 
-        [Command("givebotmanager"), Aliases("gbm"), Hidden]
-        public async Task GiveBotManagerAsync(CommandContext ctx, DiscordMember m)
-        {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
-            {
-                await ctx.RespondAsync("You do not have permission to use this command!");
-                return;
-            }
-            if (Shared.BotManagers.Contains(m.Id))
-            {
-                await ctx.RespondAsync("That person is already in the database.");
-                return;
-            }
-            Shared.BotManagers.Add(m.Id);
-        }
-
-        [Command("takebotmanager"), Aliases("tbm"), Hidden]
-        public async Task TakeBotManagerAsync(CommandContext ctx, DiscordMember m)
-        {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
-            {
-                await ctx.RespondAsync("You do not have permission to use this command!");
-                return;
-            }
-            if (!Shared.BotManagers.Contains(m.Id))
-            {
-                await ctx.RespondAsync("That person is not in the database.");
-                return;
-            }
-            Shared.BotManagers.Remove(m.Id);
-        }
-
         [Command("listbotmanager"), Aliases("lbm"), Hidden]
         public async Task ListBotManagerAsync(CommandContext ctx)
         {
@@ -193,7 +161,7 @@ namespace ModCore.Commands
 
                 }
             }
-            await ctx.RespondAsync("Users with access: " + (list.Count > 0 ? string.Join(", ", list) : "None"));
+            await ctx.RespondAsync("Users with access: " + (list.Count > 0 ? "`" + string.Join("`, `", list) + "`" : "None"));
         }
     }
 }
