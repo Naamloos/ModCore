@@ -19,7 +19,7 @@ namespace ModCore
         private CancellationTokenSource CTS { get; set; }
         private Perspective PerspectiveApi { get; set; }
 
-        internal async Task InitializeAsync()
+        internal async Task InitializeAsync(string[] args)
         {
             if (!File.Exists("settings.json"))
             {
@@ -35,7 +35,7 @@ namespace ModCore
             PerspectiveApi = new Perspective(Settings.PerspectiveToken);
 
             Shards = new List<ModCoreShard>();
-            InitializeSharedData();
+            InitializeSharedData(args);
 
             for (var i = 0; i < Settings.ShardCount; i++)
             {
@@ -53,7 +53,7 @@ namespace ModCore
         /// <summary>
         /// Initialized the SharedData we need for the shards.
         /// </summary>
-        private void InitializeSharedData()
+        private void InitializeSharedData(string[] args)
         {
             CTS = new CancellationTokenSource();
             SharedData = new SharedData {
@@ -62,10 +62,14 @@ namespace ModCore
                 Perspective = PerspectiveApi,
             };
             var args = Environment.GetCommandLineArgs();
-
             if (args.Length == 3) {
                 SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
+                File.Create("debuggo.txt").Close();
+                File.WriteAllText("debuggo.txt", "guild" + args[1] + " channel" + args[2]);
             }
+           /* if (args.Length == 3) {
+                SharedData.StartNotify = (ulong.Parse(args[1]), ulong.Parse(args[2]));
+            }*/
         }
 
         public async Task WaitForCancellation()

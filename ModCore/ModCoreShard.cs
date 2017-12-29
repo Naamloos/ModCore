@@ -12,6 +12,7 @@ using ModCore.Logic;
 using System.Runtime.InteropServices;
 using DSharpPlus.Net.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace ModCore
 {
@@ -114,10 +115,9 @@ namespace ModCore
             AsyncListenerHandler.InstallListeners(Client, this);
         }
 
-        private Task Client_Ready(ReadyEventArgs e)
+        private async Task Client_Ready(ReadyEventArgs e)
         {
-            Client.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
-            return Task.Delay(0);
+            await Client.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
         }
 
         public Task RunAsync() =>
