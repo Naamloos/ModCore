@@ -57,27 +57,29 @@ namespace ModCore.Commands
                 var memberNames = new Dictionary<string, int>();
                 foreach (DatabaseStarData star in gotStars)
                 {
+                    string memberName = "unknown_user";
                     try 
                     {
                         DiscordMember member = await ctx.Guild.GetMemberAsync((ulong)star.StargazerId);
-                        if (memberNames.ContainsKey(member.DisplayName))
+                        memberName = member.DisplayName;
+                        if (memberNames.ContainsKey(memberName))
                         {
-                            memberNames[member.DisplayName] += 1;
+                            memberNames[memberName] += 1;
                         }
                         else
                         {
-                            memberNames.Add(member.DisplayName, 1);
+                            memberNames.Add(memberName, 1);
                         }
                     }
                     catch 
                     {
-                        if (memberNames.ContainsKey("unknown_user"))
+                        if (memberNames.ContainsKey(memberName))
                         {
-                            memberNames["unknown_user"] += 1;
+                            memberNames[memberName] += 1;
                         }
                         else
                         {
-                            memberNames.Add("unknown_user", 1);
+                            memberNames.Add(memberName, 1);
                         }
                     }
                 }
