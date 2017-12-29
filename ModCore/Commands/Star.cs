@@ -43,7 +43,7 @@ namespace ModCore.Commands
             using (var db = Database.CreateContext())
             {
                 await ctx.RespondAsync($"You have given: "
-                    + db.StarDatas.Count(x => (ulong)x.StargazerId == m.Id)
+                    + db.StarDatas.Where(x => (ulong)x.GuildId == ctx.Guild.Id).Count(x => (ulong)x.StargazerId == m.Id)
                     + " stars in total.");
             }
         }
