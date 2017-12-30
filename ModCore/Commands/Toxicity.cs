@@ -8,11 +8,11 @@ using ModCore.Entities;
 using DSharpPlus.Entities;
 using System.Linq;
 using ModCore.Database;
-using DSP = DSharpPlus;
+using DSharpPlus;
 
 namespace ModCore.Commands
 {
-    [Group("toxicity"), Aliases("toxic", "tox", "t"), RequireUserPermissions(DSP.Permissions.ManageMessages)]
+    [Group("toxicity"), Aliases("toxic", "tox", "t"), RequireUserPermissions(Permissions.ManageMessages)]
     public class Toxicity
     {
         public SharedData Shared { get; }

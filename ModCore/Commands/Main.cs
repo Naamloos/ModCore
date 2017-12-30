@@ -42,8 +42,7 @@ namespace ModCore.Commands
             await ctx.RespondAsync($"Pong: ({ctx.Client.Ping}) ms.");
         }
 
-        [Command("help"), Aliases("h", "?", "wtf")]
-        [Description("Displays information about commands.")]
+        [Command("help"), Aliases("h", "?", "wtf"), Description("Displays information about commands.")]
         public async Task HelpAsync(CommandContext ctx, [Description("Command to provide information for")]params string[] command)
         {
             await ctx.CommandsNext.DefaultHelpAsync(ctx, command);
@@ -78,7 +77,7 @@ namespace ModCore.Commands
         [Command("purgeuser"), Description("Delete an amount of messages by an user."), Aliases("pu"),
          RequirePermissions(Permissions.ManageMessages)]
         public async Task PurgeUserAsync(CommandContext ctx, [Description("User to delete messages from")]DiscordUser user,
-            [Description("Message limit")]int limit, [Description("Amount of messages to skip")]int skip = 0)
+            [Description("Message limit.")]int limit, [Description("Amount of messages to skip")]int skip = 0)
         {
             var i = 0;
             var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message, limit);
@@ -883,24 +882,17 @@ namespace ModCore.Commands
         public async Task ListBansAsync(CommandContext ctx, [Description("Listing limit")]int limit, [Description("Amount to skip")]int skip = 0)
         {
             var bans = await ctx.Guild.GetBansAsync();
-
             if (bans.Count == 0)
             {
                 await ctx.RespondAsync("No user is banned.");
                 return;
             }
+            var interactivity = this.Interactivity;
 
-            var embed = new DiscordEmbedBuilder();
-            embed.WithTitle("Banned Users");
+            string banString = string.Join("\n", bans.Select((ban, idx) => FormatDiscordBan(ban, idx+1)));
 
-            var pagedBans = bans.Skip(skip).Take(limit);
-            var formattedBans = pagedBans.Select((ban, idx) => FormatDiscordBan(ban, idx + skip + 1));
-            embed.WithDescription(string.Join("\n", formattedBans));
-
-            embed.WithFooter(
-                $"Total {bans.Count} banned users. Showing {skip + 1} - {Math.Min(skip + limit, bans.Count)}.");
-
-            await ctx.RespondAsync(embed: embed.Build());
+            var p = this.Interactivity.GeneratePagesInEmbeds(banString);
+            await this.Interactivity.SendPaginatedMessage(ctx.Channel, ctx.Member, p);
         }
         [Group("selfrole"), Description("Commands to give or take selfroles."), RequireBotPermissions(Permissions.ManageRoles)]
         public class SelfRole
@@ -913,8 +905,7 @@ namespace ModCore.Commands
             }
 
             [Command("give"), Aliases("g"), Description("Gives the command callee a specified role, if " +
-                                                                     "ModCore has been configured to allow so."),
-             RequireBotPermissions(Permissions.ManageRoles)]
+                                                                     "ModCore has been configured to allow so.")]
             public async Task GiveAsync(CommandContext ctx, [RemainingText, Description("Role you want to give to yourself")] DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings(); ;
@@ -940,8 +931,7 @@ namespace ModCore.Commands
             }
 
             [Command("take"), Aliases("t"), Description("Removes a specified role from the command callee, if " +
-                                                                     "ModCore has been configured to allow so."),
-             RequireBotPermissions(Permissions.ManageRoles)]
+                                                                     "ModCore has been configured to allow so.")]
             public async Task TakeAsync(CommandContext ctx, [RemainingText, Description("Role you want to take from yourself")] DiscordRole role)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings(); ;
@@ -967,14 +957,13 @@ namespace ModCore.Commands
                 }
             }
 
-            [Command("list"), Aliases("l"), Description("Lists all available selfroles, if any."), RequireBotPermissions(Permissions.ManageRoles)]
+            [Command("list"), Aliases("l"), Description("Lists all available selfroles, if any.")]
             public async Task ListAsync(CommandContext ctx)
             {
-                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                await ctx.RespondAsync("test");
+                GuildSettings cfg;
+                cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 if (cfg.SelfRoles.Any())
                 {
-                    await ctx.RespondAsync(string.Join(", ", cfg.SelfRoles));
                     var embed = new DiscordEmbedBuilder
                     {
                         Title = ctx.Guild.Name,
@@ -986,7 +975,8 @@ namespace ModCore.Commands
                         .Where(x => x != null)
                         .Select(x => x.Mention);
 
-                    embed.AddField("Available SelfRoles", string.Join(", ", roles));
+                    embed.AddField("Available SelfRoles", string.Join(", ", roles), true);
+                    await ctx.RespondAsync(embed: embed);
                 }
                 else
                 {

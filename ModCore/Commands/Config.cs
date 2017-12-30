@@ -307,7 +307,7 @@ namespace ModCore.Commands
         [Command("prefix"), Aliases("pfix"),
          Description("Sets the command prefix for this guild. Prefixes longer than 10 characters will be truncated.")]
         public async Task PrefixAsync(CommandContext ctx,
-            [Description("New command prefix for this guild.")] string prefix = null)
+            [Description("New command prefix for this guild")] string prefix = null)
         {
             if (string.IsNullOrWhiteSpace(prefix))
                 prefix = null;
@@ -348,7 +348,7 @@ namespace ModCore.Commands
         [Command("muterole"), Aliases("mr"),
          Description("Sets the role used to mute users. Invoking with no arguments will reset this setting.")]
         public async Task MuteRole(CommandContext ctx,
-            [Description("New mute role for this guild.")] DiscordRole role = null)
+            [Description("New mute role for this guild")] DiscordRole role = null)
         {
             await ctx.WithGuildSettings(cfg => cfg.MuteRoleId = role == null ? 0 : role.Id);
 
@@ -504,7 +504,7 @@ namespace ModCore.Commands
             {
                 [Command("exempt"), Aliases("x"), Description("Exempts user from Linkfilter checks.")]
                 public async Task ExemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Member to exempt from Linkfilter checks.")] DiscordMember mbr)
+                    [RemainingText, Description("Member to exempt from Linkfilter checks")] DiscordMember mbr)
                 {
                     await ctx.WithGuildSettings(cfg =>
                     {
@@ -517,7 +517,7 @@ namespace ModCore.Commands
 
                 [Command("unexempt"), Aliases("ux"), Description("Unexempts user from Linkfilter checks.")]
                 public async Task UnexemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Member to unexempt from Linkfilter checks.")] DiscordMember mbr)
+                    [RemainingText, Description("Member to unexempt from Linkfilter checks")] DiscordMember mbr)
                 {
                     await ctx.WithGuildSettings(cfg =>
                     {
@@ -534,7 +534,7 @@ namespace ModCore.Commands
             {
                 [Command("exempt"), Aliases("x"), Description("Exempts role from Linkfilter checks.")]
                 public async Task ExemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Role to exempt from Linkfilter checks.")] DiscordRole rl)
+                    [RemainingText, Description("Role to exempt from Linkfilter checks")] DiscordRole rl)
                 {
                     await ctx.WithGuildSettings(cfg =>
                     {
@@ -546,7 +546,7 @@ namespace ModCore.Commands
 
                 [Command("unexempt"), Aliases("ux"), Description("Unexempts role from Linkfilter checks.")]
                 public async Task UnexemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Role to unexempt from Linkfilter checks.")] DiscordRole rl)
+                    [RemainingText, Description("Role to unexempt from Linkfilter checks")] DiscordRole rl)
                 {
                     await ctx.WithGuildSettings(cfg =>
                     {
@@ -562,7 +562,7 @@ namespace ModCore.Commands
             {
                 [Command("exempt"), Aliases("x"), Description("Exempts code from invite checks.")]
                 public async Task ExemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Invite code to exempt from invite checks.")] string invite)
+                    [RemainingText, Description("Invite code to exempt from invite checks")] string invite)
                 {
                     var inv = await ctx.Client.GetInviteByCodeAsync(invite);
                     if (inv == null)
@@ -582,7 +582,7 @@ namespace ModCore.Commands
 
                 [Command("unexempt"), Aliases("ux"), Description("Unexempts code from invite checks.")]
                 public async Task UnexemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Invite code to unexempt from invite checks.")] string invite)
+                    [RemainingText, Description("Invite code to unexempt from invite checks")] string invite)
                 {
                     var inv = await ctx.Client.GetInviteByCodeAsync(invite);
                     if (inv == null)
@@ -624,7 +624,7 @@ namespace ModCore.Commands
             {
                 [Command("ignore"), Aliases("x"), Description("Exempts role from being saved by Role State.")]
                 public async Task ExemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Role to exempt from being saved.")] DiscordRole rl)
+                    [RemainingText, Description("Role to exempt from being saved")] DiscordRole rl)
                 {
                     var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                     var ibx = cfg.RoleState.IgnoredRoleIds;
@@ -636,7 +636,7 @@ namespace ModCore.Commands
 
                 [Command("unignore"), Aliases("ux"), Description("Unexempts role from being saved by Role State.")]
                 public async Task UnexemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Role to unexempt from being saved.")] DiscordRole rl)
+                    [RemainingText, Description("Role to unexempt from being saved")] DiscordRole rl)
                 {
                     var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                     var ibx = cfg.RoleState.IgnoredRoleIds;
@@ -660,7 +660,7 @@ namespace ModCore.Commands
                 [Command("ignore"), Aliases("x"),
                  Description("Exempts channel from having its overrides saved by Role State.")]
                 public async Task ExemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Channel to exempt from having its invites saved.")] DiscordChannel chn)
+                    [RemainingText, Description("Channel to exempt from having its invites saved")] DiscordChannel chn)
                 {
                     var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                     var ibx = cfg.RoleState.IgnoredChannelIds;
@@ -685,7 +685,7 @@ namespace ModCore.Commands
                 [Command("unignore"), Aliases("ux"),
                  Description("Unexempts channel from having its overrides saved by Role State.")]
                 public async Task UnexemptAsync(CommandContext ctx,
-                    [RemainingText, Description("Channel to unexempt from having its invites saved.")]
+                    [RemainingText, Description("Channel to unexempt from having its invites saved")]
                     DiscordChannel chn)
                 {
                     var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
@@ -960,7 +960,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("Starboard disabled.");
             }
 
-            [Command("allownsfw"), Aliases("nsfw"), Description("Disables Starboard for this guild.")]
+            [Command("allownsfw"), Aliases("nsfw"), Description("Sets whether or not to allow NSFW stars in this guild.")]
             public async Task AllowNsfwAsync(CommandContext ctx, [Description("Whether NSFW stars should be allowed")]bool allow)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
