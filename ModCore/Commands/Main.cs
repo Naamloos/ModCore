@@ -887,12 +887,53 @@ namespace ModCore.Commands
                 await ctx.RespondAsync("No user is banned.");
                 return;
             }
-            var interactivity = this.Interactivity;
 
-            string banString = string.Join("\n", bans.Select((ban, idx) => FormatDiscordBan(ban, idx+1)));
+            var interactivity = this.Interactivity;
+            var page = 1;
+            var total = bans.Count / 10 + (bans.Count % 10 == 0 ? 0 : 1);
+            var pages = new List<Page>();
+            var cembed = new DiscordEmbedBuilder
+            {
+                Title = "Banned users:",
+                Footer = new DiscordEmbedBuilder.EmbedFooter
+                {
+                    Text = $"Page {page} of {total}"
+                }
+            };
+            foreach (var xr in bans)
+            {
+                var user = xr.User;
+                var reason = (string.IsNullOrWhiteSpace(xr.Reason) ? "No reason given." : xr.Reason);
+                if (reason.Contains('\n'))
+                    reason = string.Concat(reason.Substring(0, reason.IndexOf('\n')), "...");
+
+                cembed.AddField(
+                    $"{user.Username}#{user.Discriminator} (ID: {user.Id})",
+                    $"{reason}");
+                if (cembed.Fields.Count < 5) continue;
+                page++;
+                pages.Add(new Page { Embed = cembed.Build() });
+                cembed = new DiscordEmbedBuilder
+                {
+                    Title = "Banned users",
+                    Footer = new DiscordEmbedBuilder.EmbedFooter
+                    {
+                        Text = $"Page {page} of {total}"
+                    }
+                };
+            }
+            if (cembed.Fields.Count > 0)
+                pages.Add(new Page { Embed = cembed.Build() });
+
+            if (pages.Count > 1)
+                await interactivity.SendPaginatedMessage(ctx.Channel, ctx.User, pages);
+            else
+                await ctx.RespondAsync(embed: pages.First().Embed);
+
+            /*string banString = string.Join("\n", bans.Select((ban, idx) => FormatDiscordBan(ban, idx+1)));
 
             var p = this.Interactivity.GeneratePagesInEmbeds(banString);
-            await this.Interactivity.SendPaginatedMessage(ctx.Channel, ctx.Member, p);
+            await this.Interactivity.SendPaginatedMessage(ctx.Channel, ctx.Member, p);*/
         }
         [Group("selfrole"), Description("Commands to give or take selfroles."), RequireBotPermissions(Permissions.ManageRoles)]
         public class SelfRole
@@ -967,7 +1008,8 @@ namespace ModCore.Commands
                     var embed = new DiscordEmbedBuilder
                     {
                         Title = ctx.Guild.Name,
-                        ThumbnailUrl = ctx.Guild.IconUrl
+                        ThumbnailUrl = ctx.Guild.IconUrl,
+                        Description = "Available SelfRoles:"
                     };
                     var roles = cfg.SelfRoles
                         .Select(ctx.Guild.GetRole)
