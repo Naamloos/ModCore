@@ -50,7 +50,7 @@ namespace ModCore.Commands
 
                 embed.Description =
                     $"You have given **{givenStars.Count()}** stars to other users.\n" +
-                    $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StarGazerId).Distinct().Count()}** different users, over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
+                    $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StargazerId).Distinct().Count()}** different users, over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
 
                 var memberNames = new Dictionary<string, int>();
                 foreach (DatabaseStarData star in gotStars)
