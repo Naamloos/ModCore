@@ -62,17 +62,6 @@ namespace ModCore.Commands
                     {
                         memberName = allMembers.First(x => x.Id == (ulong)star.AuthorId).Mention;
                     }
-                    else
-                    {
-                        try
-                        {
-                            memberName = (await ctx.Client.GetUserAsync((ulong)star.AuthorId)).Mention;
-                        }
-                        catch
-                        {
-                            // TODO: Make SSG proud (Still)
-                        }
-                    }
                     if (givenMemberNames.ContainsKey(memberName))
                     {
                         givenMemberNames[memberName] += 1;
@@ -97,17 +86,7 @@ namespace ModCore.Commands
                     {
                         memberName = allMembers.First(x => x.Id == (ulong)star.StargazerId).Mention;
                     }
-                    else
-                    {
-                        try
-                        {
-                            memberName = (await ctx.Client.GetUserAsync((ulong)star.StargazerId)).Mention;
-                        }
-                        catch
-                        {
-                            // TODO: Make SSG proud (Still)
-                        }
-                    }
+
                     if (gotMemberNames.ContainsKey(memberName))
                     {
                         gotMemberNames[memberName] += 1;
