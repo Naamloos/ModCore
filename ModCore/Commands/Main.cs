@@ -970,10 +970,11 @@ namespace ModCore.Commands
             [Command("list"), Aliases("l"), Description("Lists all available selfroles, if any."), RequireBotPermissions(Permissions.ManageRoles)]
             public async Task ListAsync(CommandContext ctx)
             {
-                GuildSettings cfg;
-                cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                await ctx.RespondAsync("test");
                 if (cfg.SelfRoles.Any())
                 {
+                    await ctx.RespondAsync(string.Join(", ", cfg.SelfRoles));
                     var embed = new DiscordEmbedBuilder
                     {
                         Title = ctx.Guild.Name,
@@ -985,7 +986,7 @@ namespace ModCore.Commands
                         .Where(x => x != null)
                         .Select(x => x.Mention);
 
-                    embed.AddField("Available SelfRoles", string.Join(", ", roles), true);
+                    embed.AddField("Available SelfRoles", string.Join(", ", roles));
                 }
                 else
                 {
