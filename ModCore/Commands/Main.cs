@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -982,9 +982,9 @@ namespace ModCore.Commands
                         Description = "Available SelfRoles:"
                     };
                     var roles = cfg.SelfRoles
-                        .Select(ctx.Guild.GetRole)
+                        .Select(x => ctx.Guild.GetRole(x))
                         .Where(x => x != null)
-                        .Select(x => x.Mention);
+                        .Select(x => x.IsMentionable ? x.Mention : x.Name);
 
                     embed.AddField("Available SelfRoles", string.Join(", ", roles));
                 }
