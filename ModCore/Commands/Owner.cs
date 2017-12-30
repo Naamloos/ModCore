@@ -14,7 +14,7 @@ using System.Collections.Generic;
 
 namespace ModCore.Commands
 {
-    [Group("owner"), Aliases("o")]
+    [Group("owner"), Aliases("o"), Hidden]
     public class Owner
     {
         public SharedData Shared { get; }
@@ -140,8 +140,8 @@ namespace ModCore.Commands
             this.Shared.CTS.Cancel();
         }
 
-        [Command("listbotmanager"), Aliases("lbm"), Hidden]
-        public async Task ListBotManagerAsync(CommandContext ctx)
+        [Command("botmanagers"), Aliases("bm"), Hidden]
+        public async Task BotManagersAsync(CommandContext ctx)
         {
             if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
             {
