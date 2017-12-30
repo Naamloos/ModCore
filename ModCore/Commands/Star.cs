@@ -60,18 +60,7 @@ namespace ModCore.Commands
                     string memberName = "Removed User";
                     if (allMembers.Any(x => x.Id == (ulong)star.AuthorId))
                     {
-                        memberName = allMembers.First(x => x.Id == (ulong)star.AuthorId).Mention;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            memberName = (await ctx.Client.GetUserAsync((ulong)star.AuthorId)).Mention;
-                        }
-                        catch
-                        {
-                            // TODO: Make SSG proud (Still)
-                        }
+                        memberName = allMembers.First(x => x.Id == (ulong)star.AuthorId).DisplayName;
                     }
                     if (givenMemberNames.ContainsKey(memberName))
                     {
@@ -96,17 +85,6 @@ namespace ModCore.Commands
                     if (allMembers.Any(x => x.Id == (ulong)star.StargazerId))
                     {
                         memberName = allMembers.First(x => x.Id == (ulong)star.StargazerId).Mention;
-                    }
-                    else
-                    {
-                        try
-                        {
-                            memberName = (await ctx.Client.GetUserAsync((ulong)star.StargazerId)).Mention;
-                        }
-                        catch
-                        {
-                            // TODO: Make SSG proud (Still)
-                        }
                     }
                     if (gotMemberNames.ContainsKey(memberName))
                     {

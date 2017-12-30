@@ -187,7 +187,7 @@ namespace ModCore
 
         public static async Task LogActionAsync(this CommandContext ctx, string additionalinfo = "")
         {
-            var s = ctx.GetGuildSettings();
+            var s = ctx.GetGuildSettings() ?? new GuildSettings();
             if (s == null)
                 return;
             var a = s.ActionLog;
