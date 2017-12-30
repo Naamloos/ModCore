@@ -60,7 +60,7 @@ namespace ModCore.Commands
                     string memberName = "Removed User";
                     if (allMembers.Any(x => x.Id == (ulong)star.AuthorId))
                     {
-                        memberName = allMembers.First(x => x.Id == (ulong)star.AuthorId).Mention;
+                        memberName = allMembers.First(x => x.Id == (ulong)star.AuthorId).DisplayName;
                     }
                     if (givenMemberNames.ContainsKey(memberName))
                     {
@@ -86,7 +86,6 @@ namespace ModCore.Commands
                     {
                         memberName = allMembers.First(x => x.Id == (ulong)star.StargazerId).Mention;
                     }
-
                     if (gotMemberNames.ContainsKey(memberName))
                     {
                         gotMemberNames[memberName] += 1;

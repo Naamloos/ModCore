@@ -283,7 +283,7 @@ namespace ModCore.Commands
          RequirePermissions(Permissions.ManageMessages)]
         public async Task CleanAsync(CommandContext ctx)
         {
-            var gs = ctx.GetGuildSettings();
+            var gs = ctx.GetGuildSettings() ?? new GuildSettings();
             var prefix = gs?.Prefix ?? "?>";
             var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message, 100);
             var deletThis = ms.Where(m => m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix))
@@ -585,7 +585,7 @@ namespace ModCore.Commands
                 return;
             }
 
-            var guildSettings = ctx.GetGuildSettings();
+            var guildSettings = ctx.GetGuildSettings() ?? new GuildSettings();
             if (guildSettings == null)
             {
                 await ctx.RespondAsync("Guild is not configured, please configure and rerun");
@@ -627,7 +627,7 @@ namespace ModCore.Commands
                 return;
             }
 
-            var gcfg = ctx.GetGuildSettings();
+            var gcfg = ctx.GetGuildSettings() ?? new GuildSettings();
             if (gcfg == null)
             {
                 await ctx.RespondAsync(
@@ -746,7 +746,7 @@ namespace ModCore.Commands
                 return;
             }
 
-            var guildSettings = ctx.GetGuildSettings();
+            var guildSettings = ctx.GetGuildSettings() ?? new GuildSettings();
             if (guildSettings == null)
             {
                 await ctx.RespondAsync(
@@ -795,7 +795,7 @@ namespace ModCore.Commands
                 Discriminator = m.Discriminator,
                 DisplayName = m.Username,
                 UserId = (long)m.Id,
-                MuteRoleId = (long)ctx.GetGuildSettings().MuteRoleId
+                MuteRoleId = (long)(ctx.GetGuildSettings() ?? new GuildSettings()).MuteRoleId
             });
             using (var db = this.Database.CreateContext())
             {
@@ -917,9 +917,7 @@ namespace ModCore.Commands
              RequireBotPermissions(Permissions.ManageRoles)]
             public async Task GiveAsync(CommandContext ctx, [RemainingText, Description("Role you want to give to yourself")] DiscordRole role)
             {
-                GuildSettings cfg;
-                using (var db = this.Database.CreateContext())
-                    cfg = ctx.Guild.GetGuildSettings(db);
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings(); ;
                 if (cfg.SelfRoles.Contains(role.Id))
                 {
                     if (ctx.Member.Roles.Any(x => x.Id == role.Id))
@@ -946,9 +944,8 @@ namespace ModCore.Commands
              RequireBotPermissions(Permissions.ManageRoles)]
             public async Task TakeAsync(CommandContext ctx, [RemainingText, Description("Role you want to take from yourself")] DiscordRole role)
             {
-                GuildSettings cfg;
-                using (var db = Database.CreateContext())
-                    cfg = ctx.Guild.GetGuildSettings(db);
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings(); ;
+
                 if (cfg.SelfRoles.Contains(role.Id))
                 {
                     if (ctx.Member.Roles.All(x => x.Id != role.Id))
@@ -974,8 +971,7 @@ namespace ModCore.Commands
             public async Task ListAsync(CommandContext ctx)
             {
                 GuildSettings cfg;
-                using (var db = Database.CreateContext())
-                    cfg = ctx.Guild.GetGuildSettings(db);
+                cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 if (cfg.SelfRoles.Any())
                 {
                     var embed = new DiscordEmbedBuilder
