@@ -879,7 +879,7 @@ namespace ModCore.Commands
         }
 
         [Command("listbans"), Aliases("lb"), Description("Lists banned users. Real complex stuff.")]
-        public async Task ListBansAsync(CommandContext ctx, [Description("Listing limit")]int limit, [Description("Amount to skip")]int skip = 0)
+        public async Task ListBansAsync(CommandContext ctx)
         {
             var bans = await ctx.Guild.GetBansAsync();
             if (bans.Count == 0)
