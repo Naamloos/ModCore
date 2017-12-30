@@ -51,41 +51,74 @@ namespace ModCore.Commands
                 embed.Description =
                     $"You have given **{givenStars.Count()}** stars to other users.\n\n" +
                     $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StargazerId).Distinct().Count()}** different users, over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
-
-                var givenMemberNames = new Dictionary<string, int>();
                 
+                var givenMemberNames = new Dictionary<string, int>();                
+                foreach (DatabaseStarData star in givenStars)
+                {
+                    string memberName = "Unknown User";
+                    try 
+                    {
+                        memberName = (await ctx.Client.GetUserAsync((ulong)star.AuthorId)).Mention;
+                        if (gotMemberNames.ContainsKey(memberName))
+                        {
+                            gotMemberNames[memberName] += 1;
+                        }
+                        else
+                        {
+                            gotMemberNames.Add(memberName, 1);
+                        }
+                    }
+                    catch 
+                    {
+                        if (gotMemberNames.ContainsKey(memberName))
+                        {
+                            gotMemberNames[memberName] += 1;
+                        }
+                        else
+                        {
+                            gotMemberNames.Add(memberName, 1);
+                        }
+                    }
+                }
+                var orderGivenmemberNames = givenMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
+                embed.AddField("Users who you gave stars", string.Join("\n", orderGivenmemberNames.Take(10)), false);
+                
+                if (orderGivenmemberNames.Count() > 10)
+                    embed.Fields.Last().Value += $"\nAnd {orderGivenmemberNames.Count() - 10} more...";
+                
+                var gotMemberNames = new Dictionary<string, int>();
                 foreach (DatabaseStarData star in gotStars)
                 {
                     string memberName = "Unknown User";
                     try 
                     {
                         memberName = (await ctx.Client.GetUserAsync((ulong)star.StargazerId)).Mention;
-                        if (givenMemberNames.ContainsKey(memberName))
+                        if (gotMemberNames.ContainsKey(memberName))
                         {
-                            givenMemberNames[memberName] += 1;
+                            gotMemberNames[memberName] += 1;
                         }
                         else
                         {
-                            givenMemberNames.Add(memberName, 1);
+                            gotMemberNames.Add(memberName, 1);
                         }
                     }
                     catch 
                     {
-                        if (givenMemberNames.ContainsKey(memberName))
+                        if (gotMemberNames.ContainsKey(memberName))
                         {
-                            givenMemberNames[memberName] += 1;
+                            gotMemberNames[memberName] += 1;
                         }
                         else
                         {
-                            givenMemberNames.Add(memberName, 1);
+                            gotMemberNames.Add(memberName, 1);
                         }
                     }
                 }
-                var ordered = givenMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
-                embed.AddField("Users who gave you stars", string.Join("\n", ordered.Take(10)), false);
+                var orderedGotMemberNames = gotMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
+                embed.AddField("Users who gave you stars", string.Join("\n", orderedGotMemberNames.Take(10)), false);
                 
-                if (ordered.Count() > 10)
-                    embed.Fields.Last().Value += $"\nAnd {ordered.Count() - 10} more...";
+                if (orderedGotMemberNames.Count() > 10)
+                    embed.Fields.Last().Value += $"\nAnd {orderedGotMemberNames.Count() - 10} more...";
 
                 await ctx.RespondAsync(embed: embed);
             }
