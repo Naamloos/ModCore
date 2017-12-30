@@ -52,22 +52,35 @@ namespace ModCore.Commands
                     $"You have given **{givenStars.Count()}** stars to other users.\n\n" +
                     $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StargazerId).Distinct().Count()}** different users, over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
 
+                var allMembers = await ctx.Guild.GetAllMembersAsync();
+
                 var givenMemberNames = new Dictionary<string, int>();                
                 foreach (DatabaseStarData star in givenStars)
                 {
                     string memberName = "Removed User";
-                    try
+                    if (allMembers.Any(x => x.Id == (ulong)star.AuthorId))
                     {
-                        memberName = (await ctx.Guild.GetMemberAsync((ulong)star.AuthorId)).Mention;
+                        memberName = allMembers.First(x => x.Id == (ulong)star.AuthorId).Mention;
                     }
-                    catch
+                    else
                     {
-                        // TODO: Make SSG proud (Still)
+                        try
+                        {
+                            memberName = (await ctx.Client.GetUserAsync((ulong)star.AuthorId)).Mention;
+                        }
+                        catch
+                        {
+                            // TODO: Make SSG proud (Still)
+                        }
                     }
                     if (givenMemberNames.ContainsKey(memberName))
+                    {
                         givenMemberNames[memberName] += 1;
+                    }
                     else
+                    {
                         givenMemberNames.Add(memberName, 1);
+                    }
                 }
 
                 var orderGivenmemberNames = givenMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
@@ -80,18 +93,29 @@ namespace ModCore.Commands
                 foreach (DatabaseStarData star in gotStars)
                 {
                     string memberName = "Removed User";
-                    try
+                    if (allMembers.Any(x => x.Id == (ulong)star.StargazerId))
                     {
-                        memberName = (await ctx.Guild.GetMemberAsync((ulong)star.StargazerId)).Mention;
+                        memberName = allMembers.First(x => x.Id == (ulong)star.StargazerId).Mention;
                     }
-                    catch
-                    {
-                        // TODO: Make SSG proud (Still)
-                    }
-                    if (givenMemberNames.ContainsKey(memberName))
-                        givenMemberNames[memberName] += 1;
                     else
-                        givenMemberNames.Add(memberName, 1);
+                    {
+                        try
+                        {
+                            memberName = (await ctx.Client.GetUserAsync((ulong)star.StargazerId)).Mention;
+                        }
+                        catch
+                        {
+                            // TODO: Make SSG proud (Still)
+                        }
+                    }
+                    if (gotMemberNames.ContainsKey(memberName))
+                    {
+                        gotMemberNames[memberName] += 1;
+                    }
+                    else
+                    {
+                        gotMemberNames.Add(memberName, 1);
+                    }
                 }
                 var orderedGotMemberNames = gotMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
                 embed.AddField("Users who have given you stars", string.Join("\n", orderedGotMemberNames.Take(10)), false);
