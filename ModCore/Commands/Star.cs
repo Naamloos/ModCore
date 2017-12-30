@@ -52,7 +52,7 @@ namespace ModCore.Commands
                     $"You have given **{givenStars.Count()}** stars to other users.\n\n" +
                     $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StargazerId).Distinct().Count()}** different users, over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
 
-                var allMembers = ctx.Guild.Members;
+                var allMembers = await ctx.Guild.GetAllMembersAsync();
 
                 var givenMemberNames = new Dictionary<string, int>();                
                 foreach (DatabaseStarData star in givenStars)
@@ -84,7 +84,7 @@ namespace ModCore.Commands
                 }
 
                 var orderGivenmemberNames = givenMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
-                embed.AddField("Users who you gave stars", string.Join("\n", orderGivenmemberNames.Take(10)), false);
+                embed.AddField("Users who have been given stars by you", string.Join("\n", orderGivenmemberNames.Take(10)), false);
                 
                 if (orderGivenmemberNames.Count() > 10)
                     embed.Fields.Last().Value += $"\nAnd {orderGivenmemberNames.Count() - 10} more...";
@@ -118,7 +118,7 @@ namespace ModCore.Commands
                     }
                 }
                 var orderedGotMemberNames = gotMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
-                embed.AddField("Users who gave you stars", string.Join("\n", orderedGotMemberNames.Take(10)), false);
+                embed.AddField("Users who have given you stars", string.Join("\n", orderedGotMemberNames.Take(10)), false);
                 
                 if (orderedGotMemberNames.Count() > 10)
                     embed.Fields.Last().Value += $"\nAnd {orderedGotMemberNames.Count() - 10} more...";
