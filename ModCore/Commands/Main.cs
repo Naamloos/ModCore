@@ -970,7 +970,8 @@ namespace ModCore.Commands
             [Command("list"), Aliases("l"), Description("Lists all available selfroles, if any."), RequireBotPermissions(Permissions.ManageRoles)]
             public async Task ListAsync(CommandContext ctx)
             {
-                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                GuildSettings cfg;
+                cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 if (cfg.SelfRoles.Any())
                 {
                     var embed = new DiscordEmbedBuilder
@@ -979,29 +980,13 @@ namespace ModCore.Commands
                         ThumbnailUrl = ctx.Guild.IconUrl,
                         Description = "Available SelfRoles:"
                     };
-                    var roles = new List<string>();
-                    foreach (ulong shotgun in cfg.SelfRoles)
-                    {
-                        DiscordRole role = null;
-                        try
-                        {
-                            role = ctx.Guild.GetRole(shotgun);
-                        } catch {}
+                    var roles = cfg.SelfRoles
+                        .Select(ctx.Guild.GetRole)
+                        .Where(x => x != null)
+                        .Select(x => x.Mention);
 
-                        if (role != null)
-                        {
-                            roles.Add(role.Mention);
-                        }
-                        else
-                        {
-                            roles.Add("ERROR");
-                        }
-                    }
-                    //var roles = cfg.SelfRoles.Select(x => ctx.Guild.GetRole(x).Name);
-                      //  .Where(x => x != null)
-                      //  .Select(x => x.IsMentionable ? x.Mention : x.Name);
-
-                    embed.AddField("Available SelfRoles", string.Join(", ", roles));
+                    embed.AddField("Available SelfRoles", string.Join(", ", roles), true);
+                    await ctx.RespondAsync(embed: embed);
                 }
                 else
                 {
