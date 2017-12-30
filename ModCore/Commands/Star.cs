@@ -1,4 +1,4 @@
-﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
@@ -40,7 +40,7 @@ namespace ModCore.Commands
         {
             var embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.MidnightBlue)
-                .WithTitle($"@{m.Username}#{m.Discriminator} - ID: {m.Id}");
+                .WithTitle($"{m.DisplayName} - {m.Username}#{m.Discriminator}");
 
             using (var db = Database.CreateContext())
             {
@@ -49,44 +49,76 @@ namespace ModCore.Commands
                 var gotStars = guildStars.Where(x => (ulong)x.AuthorId == m.Id);
 
                 embed.Description =
-                    $"You have given **{givenStars.Count()}** stars to other users.\n" +
-                    $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different users.";
-
-                var memberNames = new Dictionary<string, int>();
+                    $"You have given **{givenStars.Count()}** stars to other users.\n\n" +
+                    $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StargazerId).Distinct().Count()}** different users, over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
+                
+                var givenMemberNames = new Dictionary<string, int>();                
+                foreach (DatabaseStarData star in givenStars)
+                {
+                    string memberName = "Unknown User";
+                    try 
+                    {
+                        memberName = (await ctx.Client.GetUserAsync((ulong)star.AuthorId)).Mention;
+                        if (givenMemberNames.ContainsKey(memberName))
+                        {
+                            givenMemberNames[memberName] += 1;
+                        }
+                        else
+                        {
+                            givenMemberNames.Add(memberName, 1);
+                        }
+                    }
+                    catch 
+                    {
+                        if (givenMemberNames.ContainsKey(memberName))
+                        {
+                            givenMemberNames[memberName] += 1;
+                        }
+                        else
+                        {
+                            givenMemberNames.Add(memberName, 1);
+                        }
+                    }
+                }
+                var orderGivenmemberNames = givenMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
+                embed.AddField("Users who you gave stars", string.Join("\n", orderGivenmemberNames.Take(10)), false);
+                
+                if (orderGivenmemberNames.Count() > 10)
+                    embed.Fields.Last().Value += $"\nAnd {orderGivenmemberNames.Count() - 10} more...";
+                
+                var gotMemberNames = new Dictionary<string, int>();
                 foreach (DatabaseStarData star in gotStars)
                 {
                     string memberName = "Unknown User";
                     try 
                     {
-                        var member = await ctx.Client.GetUserAsync((ulong)star.StargazerId);
-                        memberName = $"{member.Username}#{member.Discriminator}";
-                        if (memberNames.ContainsKey(memberName))
+                        memberName = (await ctx.Client.GetUserAsync((ulong)star.StargazerId)).Mention;
+                        if (gotMemberNames.ContainsKey(memberName))
                         {
-                            memberNames[memberName] += 1;
+                            gotMemberNames[memberName] += 1;
                         }
                         else
                         {
-                            memberNames.Add(memberName, 1);
+                            gotMemberNames.Add(memberName, 1);
                         }
                     }
                     catch 
                     {
-                        if (memberNames.ContainsKey(memberName))
+                        if (gotMemberNames.ContainsKey(memberName))
                         {
-                            memberNames[memberName] += 1;
+                            gotMemberNames[memberName] += 1;
                         }
                         else
                         {
-                            memberNames.Add(memberName, 1);
+                            gotMemberNames.Add(memberName, 1);
                         }
                     }
                 }
-                var ordered = memberNames.OrderBy(x => x.Value);
-
-                var memberLists = memberNames.Select(x => x.Key + " - " + x.Value);
-                embed.AddField("Users who gave you stars", string.Join("\n", memberLists.Take(10)), false);
-                if (memberLists.Count() > 10)
-                    embed.Fields.Last().Value += $"\n and {memberLists.Count() - 10} more...";
+                var orderedGotMemberNames = gotMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
+                embed.AddField("Users who gave you stars", string.Join("\n", orderedGotMemberNames.Take(10)), false);
+                
+                if (orderedGotMemberNames.Count() > 10)
+                    embed.Fields.Last().Value += $"\nAnd {orderedGotMemberNames.Count() - 10} more...";
 
                 await ctx.RespondAsync(embed: embed);
             }
