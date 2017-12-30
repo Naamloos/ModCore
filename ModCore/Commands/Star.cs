@@ -40,7 +40,7 @@ namespace ModCore.Commands
         {
             var embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.MidnightBlue)
-                .WithTitle($"{m.Mention} - ID: {m.Id}");
+                .WithTitle($"{m.DisplayName} - ID: {m.Id}");
 
             using (var db = Database.CreateContext())
             {
