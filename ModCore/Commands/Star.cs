@@ -59,24 +59,24 @@ namespace ModCore.Commands
                     try 
                     {
                         memberName = (await ctx.Client.GetUserAsync((ulong)star.AuthorId)).Mention;
-                        if (gotMemberNames.ContainsKey(memberName))
+                        if (givenMemberNames.ContainsKey(memberName))
                         {
-                            gotMemberNames[memberName] += 1;
+                            givenMemberNames[memberName] += 1;
                         }
                         else
                         {
-                            gotMemberNames.Add(memberName, 1);
+                            givenMemberNames.Add(memberName, 1);
                         }
                     }
                     catch 
                     {
-                        if (gotMemberNames.ContainsKey(memberName))
+                        if (givenMemberNames.ContainsKey(memberName))
                         {
-                            gotMemberNames[memberName] += 1;
+                            givenMemberNames[memberName] += 1;
                         }
                         else
                         {
-                            gotMemberNames.Add(memberName, 1);
+                            givenMemberNames.Add(memberName, 1);
                         }
                     }
                 }
