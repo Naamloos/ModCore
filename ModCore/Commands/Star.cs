@@ -26,7 +26,7 @@ namespace ModCore.Commands
             this.Database = db;
         }
 
-        [Command("debug"), Aliases("d"), Description("Returns amount of stars in database.")]
+        [Command("debug"), Aliases("d"), Description("Returns amount of stars in database."), Hidden]
         public async Task DebugAsync(CommandContext ctx)
         {
             using (var db = Database.CreateContext())
@@ -36,17 +36,17 @@ namespace ModCore.Commands
         }
 
         [Command("info"), Aliases("i", "data", "information"), Description("Returns stardata for a specified user.")]
-        public async Task ListGivenAsync(CommandContext ctx, DiscordMember m)
+        public async Task ListGivenAsync(CommandContext ctx, [Description("User to show stardata information about.")] DiscordMember member)
         {
             var embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.MidnightBlue)
-                .WithTitle($"{m.DisplayName} - {m.Username}#{m.Discriminator}");
+                .WithTitle($"{member.DisplayName} - {member.Username}#{member.Discriminator}");
 
             using (var db = Database.CreateContext())
             {
                 var guildStars = db.StarDatas.Where(x => (ulong)x.GuildId == ctx.Guild.Id);
-                var givenStars = guildStars.Where(x => (ulong)x.StargazerId == m.Id);
-                var gotStars = guildStars.Where(x => (ulong)x.AuthorId == m.Id);
+                var givenStars = guildStars.Where(x => (ulong)x.StargazerId == member.Id);
+                var gotStars = guildStars.Where(x => (ulong)x.AuthorId == member.Id);
 
                 embed.Description =
                     $"You have given **{givenStars.Count()}** stars to other users.\n\n" +
@@ -60,7 +60,7 @@ namespace ModCore.Commands
                     string memberName = "Removed User";
                     if (allMembers.Any(x => x.Id == (ulong)star.AuthorId))
                     {
-                        memberName = allMembers.First(x => x.Id == (ulong)star.AuthorId).DisplayName;
+                        memberName = allMembers.First(x => x.Id == (ulong)star.AuthorId).Mention;
                     }
                     if (givenMemberNames.ContainsKey(memberName))
                     {
@@ -84,7 +84,7 @@ namespace ModCore.Commands
                     string memberName = "Removed User";
                     if (allMembers.Any(x => x.Id == (ulong)star.StargazerId))
                     {
-                        memberName = allMembers.First(x => x.Id == (ulong)star.StargazerId).DisplayName;
+                        memberName = allMembers.First(x => x.Id == (ulong)star.StargazerId).Mention;
                     }
                     if (gotMemberNames.ContainsKey(memberName))
                     {
