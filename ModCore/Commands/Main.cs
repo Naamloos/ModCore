@@ -904,9 +904,6 @@ namespace ModCore.Commands
             {
                 var user = xr.User;
                 var reason = (string.IsNullOrWhiteSpace(xr.Reason) ? "No reason given." : xr.Reason);
-                if (reason.Contains('\n'))
-                    reason = string.Concat(reason.Substring(0, reason.IndexOf('\n')), "...");
-
                 cembed.AddField(
                     $"{user.Username}#{user.Discriminator} (ID: {user.Id})",
                     $"{reason}");
