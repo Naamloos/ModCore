@@ -40,7 +40,7 @@ namespace ModCore.Commands
         {
             var embed = new DiscordEmbedBuilder()
                 .WithColor(DiscordColor.MidnightBlue)
-                .WithTitle($"{m.DisplayName} - ID: {m.Id}");
+                .WithTitle($"{m.DisplayName} - {m.Username}#{m.Discriminator}");
 
             using (var db = Database.CreateContext())
             {
@@ -49,6 +49,7 @@ namespace ModCore.Commands
                 var gotStars = guildStars.Where(x => (ulong)x.AuthorId == m.Id);
 
                 embed.Description =
+                    $"In this guild,\n" + 
                     $"You have given **{givenStars.Count()}** stars to other users.\n\n" +
                     $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StargazerId).Distinct().Count()}** different users, over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
 
