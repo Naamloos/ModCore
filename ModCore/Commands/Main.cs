@@ -878,7 +878,7 @@ namespace ModCore.Commands
                 $"In {pinuntil.Humanize(4, minUnit: TimeUnit.Second)} this message will be unpinned.");
         }
 
-        [Command("listbans"), Aliases("lb"), Description("Lists banned users. Real complex stuff.")]
+        [Command("listbans"), Aliases("lb"), Description("Lists banned users. Real complex stuff."), RequireUserPermissions(Permissions.ViewAuditLog)]
         public async Task ListBansAsync(CommandContext ctx)
         {
             var bans = await ctx.Guild.GetBansAsync();
