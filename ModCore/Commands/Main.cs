@@ -971,17 +971,33 @@ namespace ModCore.Commands
             public async Task ListAsync(CommandContext ctx)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                await ctx.RespondAsync("test");
                 if (cfg.SelfRoles.Any())
                 {
-                    await ctx.RespondAsync(string.Join(", ", cfg.SelfRoles));
                     var embed = new DiscordEmbedBuilder
                     {
                         Title = ctx.Guild.Name,
                         ThumbnailUrl = ctx.Guild.IconUrl,
                         Description = "Available SelfRoles:"
                     };
-                    var roles = cfg.SelfRoles.Select(x => ctx.Guild.GetRole(x).Name);
+                    var roles = new List<string>();
+                    foreach (ulong shotgun in cfg.SelfRoles)
+                    {
+                        DiscordRole role = null;
+                        try
+                        {
+                            role = ctx.Guild.GetRole(shotgun);
+                        } catch {}
+
+                        if (role != null)
+                        {
+                            roles.Add(role.Mention);
+                        }
+                        else
+                        {
+                            roles.Add("ERROR");
+                        }
+                    }
+                    //var roles = cfg.SelfRoles.Select(x => ctx.Guild.GetRole(x).Name);
                       //  .Where(x => x != null)
                       //  .Select(x => x.IsMentionable ? x.Mention : x.Name);
 
