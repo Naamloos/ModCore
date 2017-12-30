@@ -985,7 +985,7 @@ namespace ModCore.Commands
                       //  .Where(x => x != null)
                       //  .Select(x => x.IsMentionable ? x.Mention : x.Name);
 
-                    embed.AddField("Available SelfRoles", string.Join(", ", roles.));
+                    embed.AddField("Available SelfRoles", string.Join(", ", roles));
                 }
                 else
                 {
