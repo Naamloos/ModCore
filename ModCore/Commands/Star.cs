@@ -51,35 +51,38 @@ namespace ModCore.Commands
                 embed.Description =
                     $"You have given **{givenStars.Count()}** stars to other users.\n\n" +
                     $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StargazerId).Distinct().Count()}** different users, over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
-                
+
+                var allMembers = ctx.Guild.Members;
+
                 var givenMemberNames = new Dictionary<string, int>();                
                 foreach (DatabaseStarData star in givenStars)
                 {
-                    string memberName = "Unknown User";
-                    try 
+                    string memberName = "Removed User";
+                    if (allMembers.Any(x => x.Id == (ulong)star.AuthorId))
                     {
-                        memberName = (await ctx.Client.GetUserAsync((ulong)star.AuthorId)).Mention;
-                        if (givenMemberNames.ContainsKey(memberName))
+                        memberName = allMembers.First(x => x.Id == (ulong)star.AuthorId).Mention;
+                    }
+                    else
+                    {
+                        try
                         {
-                            givenMemberNames[memberName] += 1;
+                            memberName = (await ctx.Client.GetUserAsync((ulong)star.AuthorId)).Mention;
                         }
-                        else
+                        catch
                         {
-                            givenMemberNames.Add(memberName, 1);
+                            // TODO: Make SSG proud (Still)
                         }
                     }
-                    catch 
+                    if (givenMemberNames.ContainsKey(memberName))
                     {
-                        if (givenMemberNames.ContainsKey(memberName))
-                        {
-                            givenMemberNames[memberName] += 1;
-                        }
-                        else
-                        {
-                            givenMemberNames.Add(memberName, 1);
-                        }
+                        givenMemberNames[memberName] += 1;
+                    }
+                    else
+                    {
+                        givenMemberNames.Add(memberName, 1);
                     }
                 }
+
                 var orderGivenmemberNames = givenMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
                 embed.AddField("Users who you gave stars", string.Join("\n", orderGivenmemberNames.Take(10)), false);
                 
@@ -89,29 +92,29 @@ namespace ModCore.Commands
                 var gotMemberNames = new Dictionary<string, int>();
                 foreach (DatabaseStarData star in gotStars)
                 {
-                    string memberName = "Unknown User";
-                    try 
+                    string memberName = "Removed User";
+                    if (allMembers.Any(x => x.Id == (ulong)star.StargazerId))
                     {
-                        memberName = (await ctx.Client.GetUserAsync((ulong)star.StargazerId)).Mention;
-                        if (gotMemberNames.ContainsKey(memberName))
+                        memberName = allMembers.First(x => x.Id == (ulong)star.StargazerId).Mention;
+                    }
+                    else
+                    {
+                        try
                         {
-                            gotMemberNames[memberName] += 1;
+                            memberName = (await ctx.Client.GetUserAsync((ulong)star.StargazerId)).Mention;
                         }
-                        else
+                        catch
                         {
-                            gotMemberNames.Add(memberName, 1);
+                            // TODO: Make SSG proud (Still)
                         }
                     }
-                    catch 
+                    if (gotMemberNames.ContainsKey(memberName))
                     {
-                        if (gotMemberNames.ContainsKey(memberName))
-                        {
-                            gotMemberNames[memberName] += 1;
-                        }
-                        else
-                        {
-                            gotMemberNames.Add(memberName, 1);
-                        }
+                        gotMemberNames[memberName] += 1;
+                    }
+                    else
+                    {
+                        gotMemberNames.Add(memberName, 1);
                     }
                 }
                 var orderedGotMemberNames = gotMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
