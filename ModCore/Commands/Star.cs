@@ -1,4 +1,4 @@
-﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
@@ -49,44 +49,43 @@ namespace ModCore.Commands
                 var gotStars = guildStars.Where(x => (ulong)x.AuthorId == m.Id);
 
                 embed.Description =
-                    $"In this guild,\n" + 
                     $"You have given **{givenStars.Count()}** stars to other users.\n\n" +
                     $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StargazerId).Distinct().Count()}** different users, over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
 
-                var memberNames = new Dictionary<string, int>();
+                var givenMemberNames = new Dictionary<string, int>();
+                
                 foreach (DatabaseStarData star in gotStars)
                 {
                     string memberName = "Unknown User";
                     try 
                     {
                         memberName = (await ctx.Client.GetUserAsync((ulong)star.StargazerId)).Mention;
-                        if (memberNames.ContainsKey(memberName))
+                        if (givenMemberNames.ContainsKey(memberName))
                         {
-                            memberNames[memberName] += 1;
+                            givenMemberNames[memberName] += 1;
                         }
                         else
                         {
-                            memberNames.Add(memberName, 1);
+                            givenMemberNames.Add(memberName, 1);
                         }
                     }
                     catch 
                     {
-                        if (memberNames.ContainsKey(memberName))
+                        if (givenMemberNames.ContainsKey(memberName))
                         {
-                            memberNames[memberName] += 1;
+                            givenMemberNames[memberName] += 1;
                         }
                         else
                         {
-                            memberNames.Add(memberName, 1);
+                            givenMemberNames.Add(memberName, 1);
                         }
                     }
                 }
-                var ordered = memberNames.OrderByDescending(x => x.Value);
-
-                var memberLists = ordered.Select(x => x.Key + " - " + x.Value);
-                embed.AddField("Users who gave you stars", string.Join("\n", memberLists.Take(10)), false);
-                if (memberLists.Count() > 10)
-                    embed.Fields.Last().Value += $"\nAnd {memberLists.Count() - 10} more...";
+                var ordered = givenMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
+                embed.AddField("Users who gave you stars", string.Join("\n", ordered.Take(10)), false);
+                
+                if (ordered.Count() > 10)
+                    embed.Fields.Last().Value += $"\nAnd {ordered.Count() - 10} more...";
 
                 await ctx.RespondAsync(embed: embed);
             }
