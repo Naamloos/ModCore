@@ -981,12 +981,11 @@ namespace ModCore.Commands
                         ThumbnailUrl = ctx.Guild.IconUrl,
                         Description = "Available SelfRoles:"
                     };
-                    var roles = cfg.SelfRoles
-                        .Select(x => ctx.Guild.GetRole(x))
-                        .Where(x => x != null)
-                        .Select(x => x.IsMentionable ? x.Mention : x.Name);
+                    var roles = cfg.SelfRoles.Select(x => ctx.Guild.GetRole(x).Name);
+                      //  .Where(x => x != null)
+                      //  .Select(x => x.IsMentionable ? x.Mention : x.Name);
 
-                    embed.AddField("Available SelfRoles", string.Join(", ", roles));
+                    embed.AddField("Available SelfRoles", string.Join(", ", roles.));
                 }
                 else
                 {
