@@ -910,7 +910,7 @@ namespace ModCore.Commands
                 cembed.AddField(
                     $"{user.Username}#{user.Discriminator} (ID: {user.Id})",
                     $"{reason}");
-                if (cembed.Fields.Count < 5) continue;
+                if (cembed.Fields.Count < 10) continue;
                 page++;
                 pages.Add(new Page { Embed = cembed.Build() });
                 cembed = new DiscordEmbedBuilder
@@ -929,11 +929,6 @@ namespace ModCore.Commands
                 await interactivity.SendPaginatedMessage(ctx.Channel, ctx.User, pages);
             else
                 await ctx.RespondAsync(embed: pages.First().Embed);
-
-            /*string banString = string.Join("\n", bans.Select((ban, idx) => FormatDiscordBan(ban, idx+1)));
-
-            var p = this.Interactivity.GeneratePagesInEmbeds(banString);
-            await this.Interactivity.SendPaginatedMessage(ctx.Channel, ctx.Member, p);*/
         }
         [Group("selfrole"), Description("Commands to give or take selfroles."), RequireBotPermissions(Permissions.ManageRoles)]
         public class SelfRole
@@ -1045,11 +1040,6 @@ namespace ModCore.Commands
                 await ctx.LogActionAsync(
                     $"Failed announcement\nMessage: {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
             }
-        }
-
-        private static string FormatDiscordBan(DiscordBan ban, int number)
-        {
-            return $"{number}. **{ban.User.ToDiscordTag()}**, Reason: {ban.Reason}";
         }
     }
 }
