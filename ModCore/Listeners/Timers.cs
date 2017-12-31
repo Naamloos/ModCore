@@ -186,8 +186,6 @@ namespace ModCore.Listeners
 
         public static TimerData RescheduleTimers(DiscordClient client, DatabaseContextBuilder database, SharedData shared)
         {
-            if (shared.TimerData != null)
-                client.Guilds.First(x => x.Key == shared.StartNotify.guild).Value.GetChannel(shared.StartNotify.channel).SendMessageAsync("Next timer - " + shared.TimerData.DispatchTime.ToString());
             // lock the timers
             shared.TimerSempahore.Wait();
 
