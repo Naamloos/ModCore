@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,6 +65,7 @@ namespace ModCore.Listeners
             {
                 db.Timers.Remove(tdata.DbTimer);
                 db.SaveChanges();
+                
                 tdata.Shared.TimerData = null;
             }
 
@@ -185,6 +186,8 @@ namespace ModCore.Listeners
 
         public static TimerData RescheduleTimers(DiscordClient client, DatabaseContextBuilder database, SharedData shared)
         {
+            if (shared.TimerData != null)
+                client.Guilds.First(x => x.Key == shared.StartNotify.guild).Value.GetChannel(shared.StartNotify.channel).SendMessageAsync("Next timer - " + shared.TimerData.DispatchTime.ToString());
             // lock the timers
             shared.TimerSempahore.Wait();
 
