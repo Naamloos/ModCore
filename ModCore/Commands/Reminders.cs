@@ -248,5 +248,11 @@ If in doubt, just try it! You can always clear the reminders later.
                 await ctx.RespondAsync("Never mind then, maybe next time.");
             }
         }
+        
+        [Command("test"), Description("WIP.")]
+        public async Task TestAsync(CommandContext ctx)
+        {
+            await ctx.RespondAsync($"Timer will dispatch at: `{Shared.TimerData.DispatchTime}`, and has the message ```{Shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText}```.");
+        }
     }
 }
