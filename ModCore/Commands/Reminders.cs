@@ -1,308 +1,258 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
+using DSharpPlus.Interactivity;
+using Humanizer;
+using Humanizer.Localisation;
 using ModCore.Database;
 using ModCore.Entities;
+using ModCore.Listeners;
 using ModCore.Logic;
-using System.Collections.Generic;
 
-namespace ModCore.Listeners
+namespace ModCore.Commands
 {
-    public static class Timers
+    [Group("reminder", CanInvokeWithoutSubcommand = true), Aliases("remindme"), Description("Commands for managing your reminders.")]
+    public class Reminders
     {
-        [AsyncListener(EventTypes.Ready)]
-        public static async Task OnReady(ModCoreShard shard, ReadyEventArgs ea)
+        private const string ReminderTut = @"
+Sets a new reminder. The time span parser is fluent and will understand many different formats of reminders:
+
+<Time span>, <Message>
+[in] <Time span> to <Message>
+<Short time span> <Message> 
+
+Where ""Time span"" represents a time period or a relative date (optionally with time of day specified), such as
+\* Tomorrow at 2:00 PM Chicago time
+\* Next fortnight
+\* 8 hours 20 minutes
+
+A ""Short time span"" represents a time span represented in a single word (we call this a token), such as
+\* 2h
+\* 4m5s
+\* 15min
+\* 30min55sec
+
+See these examples:
+
+```
++remindme next week to walk the dog
++remindme tomorrow, fix socket
++remindme 2h5m watch new stranger things episode
++remindme 8 hours wake up
++remindme in an hour to eat something
++remindme in nine months to have a baby
+```
+
+Note that even if your arguments don't fit the grammar denoted above, they might still be parsed fine.
+If in doubt, just try it! You can always clear the reminders later. 
+";
+        public SharedData Shared { get; }
+        public DatabaseContextBuilder Database { get; }
+        public InteractivityExtension Interactivity { get; }
+
+        public Reminders(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive)
         {
-            using (var db = shard.Database.CreateContext())
-            {
-                if (!db.Timers.Any())
-                    return;
-
-                var ids = ea.Client.Guilds.Select(xg => (long)xg.Key).ToArray();
-                var timers = db.Timers.Where(xt => ids.Contains(xt.GuildId)).ToArray();
-                if (!timers.Any())
-                    return;
-
-                // lock timers
-                await shard.SharedData.TimerSempahore.WaitAsync();
-
-                var now = DateTimeOffset.UtcNow;
-                var past = timers.Where(xt => xt.DispatchAt <= now.AddSeconds(30)).ToArray();
-                if (past.Any())
-                {
-                    foreach (var xt in past)
-                    {
-                        // dispatch past timers
-                        _ = DispatchTimer(new TimerData(null, xt, shard.Client, shard.Database, shard.SharedData, null));
-                    }
-
-                    db.Timers.RemoveRange(past);
-                    await db.SaveChangesAsync();
-                }
-
-                // unlock the timers
-                shard.SharedData.TimerSempahore.Release();
-
-                RescheduleTimers(shard.Client, shard.Database, shard.SharedData);
-            }
+            this.Shared = shared;
+            this.Database = db;
+            this.Interactivity = interactive;
         }
 
-        public static void TimerCallback(Task t, object state)
+        [Description(ReminderTut)]
+        public async Task ExecuteGroupAsync(CommandContext ctx, [RemainingText, Description("When the reminder is to be sent.")] string dataToParse)
         {
-            var tdata = state as TimerData;
-            var shard = tdata.Context;
-            var shared = tdata.Shared;
-
-            // lock the timers
-            shared.TimerSempahore.Wait();
-
-            // remove the timer
-            using (var db = tdata.Database.CreateContext())
-            {
-                db.Timers.Remove(tdata.DbTimer);
-                db.SaveChanges();
-                
-                tdata.Shared.TimerData = null;
-            }
-
-            // release the lock
-            shared.TimerSempahore.Release();
-
-            // dispatch the timer
-            _ = Task.Run(LocalDispatch);
-
-            // schedule new one
-            RescheduleTimers(shard, tdata.Database, tdata.Shared);
-
-            Task LocalDispatch()
-                => DispatchTimer(tdata);
+            await SetAsync(ctx, dataToParse);
         }
 
-        private static async Task DispatchTimer(TimerData tdata)
+        [Command("list"), Description("Lists your active reminders.")]
+        public async Task ListAsync(CommandContext ctx)
         {
-            var timer = tdata.DbTimer;
-            var client = tdata.Context;
-            if (timer.ActionType == TimerActionType.Reminder)
+            await ctx.TriggerTypingAsync();
+            DatabaseTimer[] reminders;
+            using (var db = this.Database.CreateContext())
+                reminders = db.Timers.Where(xt =>
+                    xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long)ctx.Guild.Id &&
+                    xt.UserId == (long)ctx.User.Id).ToArray();
+            if (!reminders.Any())
             {
-                DiscordChannel chn = null;
-                try
-                {
-                    chn = await client.GetChannelAsync((ulong)timer.ChannelId);
-                }
-                catch { }
-                if (chn == null)
-                    return;
+                await ctx.RespondAsync("You have no reminders set.");
+                return;
+            }
 
-                var data = timer.GetData<TimerReminderData>();
-                var emoji = DiscordEmoji.FromName(client, ":alarm_clock:");
-                var msg = $"{emoji} <@!{(ulong)timer.UserId}>, you wanted to be reminded of the following:\n\n{data.ReminderText}";
-                await chn.SendMessageAsync(msg);
-            }
-            else if (timer.ActionType == TimerActionType.Unban)
-            {
-                var data = timer.GetData<TimerUnbanData>();
-                if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
-                {
-                    using (var db = tdata.Database.CreateContext())
-                    {
-                        var Guild = client.Guilds[(ulong)timer.GuildId];
-                        try
-                        {
-                            await Guild.UnbanMemberAsync((ulong)data.UserId);
-                        }
-                        catch (Exception) { }
+            var rms = reminders.OrderByDescending(xt => xt.DispatchAt).ToArray();
+            var interactivity = this.Interactivity;
+            var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
 
-                        var settings = Guild.GetGuildSettings(db);
-                        await client.LogAutoActionAsync(Guild, db, $"Member unbanned: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
-                    }
-                }
-            }
-            else if (timer.ActionType == TimerActionType.Unmute)
+            var page = 1;
+            var total = rms.Length / 5 + (rms.Length % 5 == 0 ? 0 : 1);
+            var pages = new List<Page>();
+            var cembed = new DiscordEmbedBuilder
             {
-                var data = timer.GetData<TimerUnmuteData>();
-                if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
+                Title = $"{emoji} Your currently set reminders:",
+                Footer = new DiscordEmbedBuilder.EmbedFooter
                 {
-                    using (var db = tdata.Database.CreateContext())
-                    {
-                        var Guild = client.Guilds[(ulong)timer.GuildId];
-                        var Member = await Guild.GetMemberAsync((ulong)data.UserId);
-                        var Role = (DiscordRole)null;
-                        try
-                        {
-                            Role = Guild.GetRole((ulong)data.MuteRoleId);
-                        }
-                        catch (Exception)
-                        {
-                            try
-                            {
-                                Role = Guild.GetRole(Guild.GetGuildSettings(db).MuteRoleId);
-                            }
-                            catch (Exception)
-                            {
-                                await client.LogAutoActionAsync(Guild, db, $"**[IMPORTANT]**\nFailed to unmute member: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})\nMute role does not exist!");
-                                return;
-                            }
-                        }
-                        await Member.RevokeRoleAsync(Role, "");
-                        await client.LogAutoActionAsync(Guild, db, $"Member unmuted: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
-                    }
+                    Text = $"Page {page} of {total}"
                 }
-            }
-            else if (timer.ActionType == TimerActionType.Pin)
+            };
+            foreach (var xr in rms)
             {
-                var data = timer.GetData<TimerPinData>();
-                if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
+                var data = xr.GetData<TimerReminderData>();
+                var note = data.ReminderText;
+                if (note.Contains('\n'))
+                    note = string.Concat(note.Substring(0, note.IndexOf('\n')), "...");
+
+                cembed.AddField(
+                    $"In {(DateTimeOffset.UtcNow - xr.DispatchAt).Humanize(4, minUnit: TimeUnit.Second)} (ID: #{xr.Id})",
+                    $"{note}");
+                if (cembed.Fields.Count < 5) continue;
+                page++;
+                pages.Add(new Page {Embed = cembed.Build()});
+                cembed = new DiscordEmbedBuilder
                 {
-                    using (var db = tdata.Database.CreateContext())
+                    Title = $"{emoji} Your currently set reminders:",
+                    Footer = new DiscordEmbedBuilder.EmbedFooter
                     {
-                        var Guild = client.Guilds[(ulong)timer.GuildId];
-                        var Channel = Guild.GetChannel((ulong)data.ChannelId);
-                        var Message = await Channel.GetMessageAsync((ulong)data.MessageId);
-                        await Message.PinAsync();
-                        await client.LogAutoActionAsync(Guild, db, $"Scheduled pin: Message with ID: {data.MessageId} in Channel #{Channel.Name} ({Channel.Id})");
+                        Text = $"Page {page} of {total}"
                     }
-                }
+                };
             }
-            else if (timer.ActionType == TimerActionType.Unpin)
-            {
-                var data = timer.GetData<TimerPinData>();
-                if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
-                {
-                    using (var db = tdata.Database.CreateContext())
-                    {
-                        var Guild = client.Guilds[(ulong)timer.GuildId];
-                        var Channel = Guild.GetChannel((ulong)data.ChannelId);
-                        var Message = await Channel.GetMessageAsync((ulong)data.MessageId);
-                        await Message.UnpinAsync();
-                        await client.LogAutoActionAsync(Guild, db, $"Scheduled unpin: Message with ID: {data.MessageId} in Channel #{Channel.Name} ({Channel.Id})");
-                    }
-                }
-            }
+            if (cembed.Fields.Count > 0)
+                pages.Add(new Page {Embed = cembed.Build()});
+
+            if (pages.Count > 1)
+                await interactivity.SendPaginatedMessage(ctx.Channel, ctx.User, pages);
+            else
+                await ctx.RespondAsync(embed: pages.First().Embed);
         }
 
-        public static TimerData RescheduleTimers(DiscordClient client, DatabaseContextBuilder database, SharedData shared)
+        [Command("set"), Description(ReminderTut)]
+        public async Task SetAsync(CommandContext ctx, [Description("When the reminder is to be sent"), RemainingText] string dataToParse)
         {
-            DiscordChannel c = client.Guilds.First(x => x.Key == shared.StartNotify.guild).Value.GetChannel(shared.StartNotify.channel);
-            c.SendMessageAsync("In RescheduleTimers");
-            // lock the timers
-            shared.TimerSempahore.Wait();
+            await ctx.TriggerTypingAsync();
 
-            // set a new timer
-            DatabaseTimer[] timers = null;
-            bool force = false;
-            using (var db = database.CreateContext())
+            var (duration, text) = await Dates.ParseTime(dataToParse);
+            if (duration == Dates.ParsingError)
             {
-                var ids = client.Guilds.Select(xg => (long)xg.Key).ToArray();
-                timers = db.Timers.Where(xt => ids.Contains(xt.GuildId))
-                    .OrderBy(xt => xt.DispatchAt)
-                    .ToArray();
-
-                if (shared.TimerData != null)
-                    force = db.Timers.Count(xt => xt.Id == shared.TimerData.DbTimer.Id) == 0; // .Any() throws
-            }
-            c.SendMessageAsync($"Force is {force}");
-
-            var nearest = timers.FirstOrDefault();
-            if (nearest == null)
-            {
-                // there's no nearest timer
-                shared.TimerSempahore.Release();
-                return null;
-            }
-            c.SendMessageAsync("There are timers in the list");
-
-            var tdata = shared.TimerData;
-            if (tdata != null && tdata.DbTimer.Id == nearest.Id)
-            {
-                // it's the same timer
-                shared.TimerSempahore.Release();
-                return tdata;
-            }
-            c.SendMessageAsync("It's not the same timer");
-
-
-            if (CancelIfLaterThan(nearest.DispatchAt, shared, force))
-            {
-                var cts = new CancellationTokenSource();
-                var t = Task.Delay(nearest.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-                tdata = new TimerData(t, nearest, client, database, shared, cts);
-                _ = t.ContinueWith(TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
-                shared.TimerData = tdata;
-                c.SendMessageAsync($"{shared.TimerData.DispatchTime} - {shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText}");
-
+                /* await ctx.RespondAsync(
+                     $"Sorry, there was an error parsing your reminder.\nIf you see a developer, this info might help them: \n```\n{text}```");
+                     */
+                await ctx.RespondAsync("Sorry, there was an error parsing your reminder.");
+                return;
             }
 
-            // release the lock
-            shared.TimerSempahore.Release();
-
-            return tdata;
-        }
-
-        public static async Task<TimerData> UnscheduleTimerAsync(DatabaseTimer timer, DiscordClient shard, DatabaseContextBuilder database, SharedData shared)
-        {
-            // lock the timers
-            await shared.TimerSempahore.WaitAsync();
-
-            // remove the requested timer
-            using (var db = database.CreateContext())
+            if (string.IsNullOrWhiteSpace(text) || text.Length > 128)
             {
-                db.Timers.Remove(timer);
+                await ctx.RespondAsync(
+                    "Reminder text must to be no longer than 128 characters, not empty and not whitespace.");
+                return;
+            }
+#if !DEBUG
+            if (duration < TimeSpan.FromSeconds(30))
+            {
+                await ctx.RespondAsync("Minimum required time span to set a reminder is 30 seconds.");
+                return;
+            }
+#endif
+
+            if (duration > TimeSpan.FromDays(365)) // 1 year is the maximum
+            {
+                await ctx.RespondAsync("Maximum allowed time span to set a reminder is 1 year.");
+                return;
+            }
+
+            var now = DateTimeOffset.UtcNow;
+            var dispatchAt = now + duration;
+
+            // create a new timer
+            var reminder = new DatabaseTimer
+            {
+                GuildId = (long) ctx.Guild.Id,
+                ChannelId = (long) ctx.Channel.Id,
+                UserId = (long) ctx.User.Id,
+                DispatchAt = dispatchAt.LocalDateTime,
+                ActionType = TimerActionType.Reminder
+            };
+            reminder.SetData(new TimerReminderData {ReminderText = text});
+            using (var db = this.Database.CreateContext())
+            {
+                db.Timers.Add(reminder);
                 await db.SaveChangesAsync();
             }
 
-            // release the lock
-            shared.TimerSempahore.Release();
+            // reschedule timers
+            Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
-            // trigger a reschedule
-            return RescheduleTimers(shard, database, shared);
+            var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
+            await ctx.RespondAsync(
+                $"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text}");
         }
 
-        public static async Task<TimerData> UnscheduleTimersAsync(List<DatabaseTimer> timers, DiscordClient shard, DatabaseContextBuilder database, SharedData shared) 
+        [Command("stop"), Aliases("unset", "remove"), Description("Stops and removes a reminder.")]
+        public async Task UnsetAsync(CommandContext ctx, [Description("Which timer to stop. To get a Timer ID, use " +
+                                                                        "the `reminder list` command.")] int timerId)
         {
-            // lock the timers
-            await shared.TimerSempahore.WaitAsync();
+            await ctx.TriggerTypingAsync();
 
-            // remove the requested timers
-            using (var db = database.CreateContext())
+            // find the timer
+            var reminder = Timers.FindTimer(timerId, TimerActionType.Reminder, ctx.User.Id, this.Database);
+            if (reminder == null)
             {
-                db.Timers.RemoveRange(timers);
-                await db.SaveChangesAsync();
+                await ctx.RespondAsync($"Timer with specified ID (#{timerId}) was not found.");
+                return;
             }
 
-            // release the lock
-            shared.TimerSempahore.Release();
+            // unschedule and reset timers
+            await Timers.UnscheduleTimerAsync(reminder, ctx.Client, this.Database, this.Shared);
 
-            // trigger a reschedule
-            return RescheduleTimers(shard, database, shared);
+            var duration = reminder.DispatchAt - DateTimeOffset.Now;
+            var data = reminder.GetData<TimerReminderData>();
+            var emoji = DiscordEmoji.FromName(ctx.Client, ":ballot_box_with_check:");
+            await ctx.RespondAsync(
+                $"{emoji} Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText}");
         }
 
-        public static DatabaseTimer FindNearestTimer(TimerActionType actionType, ulong userId, ulong channelId, ulong guildId, DatabaseContextBuilder database)
+        [Command("clear"), Description("Clears all active reminders.")]
+        public async Task ClearAsync(CommandContext ctx)
         {
-            using (var db = database.CreateContext())
-                return db.Timers.FirstOrDefault(xt => xt.ActionType == actionType && xt.UserId == (long)userId && xt.ChannelId == (long)channelId && xt.GuildId == (long)guildId);
-        }
+            await ctx.TriggerTypingAsync();
 
-        public static DatabaseTimer FindTimer(int id, TimerActionType actionType, ulong userId, DatabaseContextBuilder database)
-        {
-            using (var db = database.CreateContext())
-                return db.Timers.FirstOrDefault(xt => xt.Id == id && xt.ActionType == actionType && xt.UserId == (long)userId);
-        }
+            await ctx.RespondAsync("Are you sure you want to clear all your active reminders? This action cannot be undone!");
 
-        private static bool CancelIfLaterThan(DateTimeOffset dto, SharedData shared, bool force)
-        {
-            // check if a timer is going
-            if (force || shared.TimerData == null || shared.TimerData.DispatchTime >= dto)
+            var m = await this.Interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
+
+            if (m == null)
             {
-                var xtdata = shared.TimerData;
-                xtdata?.Cancel?.Cancel();
-                return true;
+                await ctx.RespondAsync("Timed out.");
             }
+            else if (InteractivityUtil.Confirm(m))
+            {
+                await ctx.RespondAsync("Brace for impact!");
+                await ctx.TriggerTypingAsync();
+                using (var db = this.Database.CreateContext())
+                {
+                    List<DatabaseTimer> timers = db.Timers.Where(xt => xt.ActionType == TimerActionType.Reminder && xt.UserId == (long)ctx.User.Id).ToList();
 
-            return false;
+                    var count = timers.Count;
+                    await Timers.UnscheduleTimersAsync(timers, ctx.Client, this.Database, this.Shared);
+
+
+                    await ctx.RespondAsync("Alright, cleared " + count + " timers.");
+                }
+
+            }
+            else
+            {
+                await ctx.RespondAsync("Never mind then, maybe next time.");
+            }
+        }
+
+        [Command("test"), Description("WIP.")]
+        public async Task TestAsync(CommandContext ctx)
+        {
+            await ctx.RespondAsync($"Timer will dispatch at: `{Shared.TimerData.DispatchTime}`, and has the message ```{Shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText}```.");
         }
     }
 }
