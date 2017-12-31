@@ -186,8 +186,6 @@ namespace ModCore.Listeners
 
         public static TimerData RescheduleTimers(DiscordClient client, DatabaseContextBuilder database, SharedData shared)
         {
-            DiscordChannel c = client.Guilds.First(x => x.Key == shared.StartNotify.guild).Value.GetChannel(shared.StartNotify.channel);
-            c.SendMessageAsync("In RescheduleTimers");
             // lock the timers
             shared.TimerSempahore.Wait();
 
@@ -204,7 +202,7 @@ namespace ModCore.Listeners
                 if (shared.TimerData != null)
                     force = db.Timers.Count(xt => xt.Id == shared.TimerData.DbTimer.Id) == 0; // .Any() throws
             }
-            c.SendMessageAsync($"Force is {force}");
+            
 
             var nearest = timers.FirstOrDefault();
             if (nearest == null)
@@ -213,7 +211,6 @@ namespace ModCore.Listeners
                 shared.TimerSempahore.Release();
                 return null;
             }
-            c.SendMessageAsync("There are timers in the list");
 
             var tdata = shared.TimerData;
             if (tdata != null && tdata.DbTimer.Id == nearest.Id)
@@ -222,7 +219,6 @@ namespace ModCore.Listeners
                 shared.TimerSempahore.Release();
                 return tdata;
             }
-            c.SendMessageAsync("It's not the same timer");
 
 
             if (CancelIfLaterThan(nearest.DispatchAt, shared, force))
@@ -232,7 +228,6 @@ namespace ModCore.Listeners
                 tdata = new TimerData(t, nearest, client, database, shared, cts);
                 _ = t.ContinueWith(TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
                 shared.TimerData = tdata;
-                c.SendMessageAsync($"{shared.TimerData.DispatchTime} - {shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText}");
 
             }
 

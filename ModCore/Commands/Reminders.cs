@@ -175,16 +175,18 @@ If in doubt, just try it! You can always clear the reminders later.
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Reminder
             };
+            await ctx.RespondAsync("After new DBTimer");
             reminder.SetData(new TimerReminderData {ReminderText = text});
+            await ctx.RespondAsync("reminder.SetData");
             using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
                 await db.SaveChangesAsync();
             }
+            await ctx.RespondAsync("set data in db");
 
             // reschedule timers
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
-
             var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
             await ctx.RespondAsync(
                 $"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text}");
