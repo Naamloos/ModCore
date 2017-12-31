@@ -186,8 +186,11 @@ namespace ModCore.Listeners
 
         public static TimerData RescheduleTimers(DiscordClient client, DatabaseContextBuilder database, SharedData shared)
         {
+            DiscordChannel c = client.Guilds.First(x => x.Key == shared.StartNotify.guild).Value.GetChannel(shared.StartNotify.channel);
+            c.SendMessageAsync("In Method");
             // lock the timers
             shared.TimerSempahore.Wait();
+            c.SendMessageAsync("Semaphore waiting");
 
             // set a new timer
             DatabaseTimer[] timers = null;
@@ -202,7 +205,8 @@ namespace ModCore.Listeners
                 if (shared.TimerData != null)
                     force = db.Timers.Count(xt => xt.Id == shared.TimerData.DbTimer.Id) == 0; // .Any() throws
             }
-            
+            c.SendMessageAsync("1");
+
 
             var nearest = timers.FirstOrDefault();
             if (nearest == null)
@@ -211,6 +215,7 @@ namespace ModCore.Listeners
                 shared.TimerSempahore.Release();
                 return null;
             }
+            c.SendMessageAsync("2");
 
             var tdata = shared.TimerData;
             if (tdata != null && tdata.DbTimer.Id == nearest.Id)
@@ -220,6 +225,7 @@ namespace ModCore.Listeners
                 return tdata;
             }
 
+            c.SendMessageAsync("3");
 
             if (CancelIfLaterThan(nearest.DispatchAt, shared, force))
             {
@@ -230,9 +236,11 @@ namespace ModCore.Listeners
                 shared.TimerData = tdata;
 
             }
+            c.SendMessageAsync("4");
 
             // release the lock
             shared.TimerSempahore.Release();
+            c.SendMessageAsync("5");
 
             return tdata;
         }
