@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -192,7 +192,7 @@ If in doubt, just try it! You can always clear the reminders later.
 
         [Command("stop"), Aliases("unset", "remove"), Description("Stops and removes a reminder.")]
         public async Task UnsetAsync(CommandContext ctx, [Description("Which timer to stop. To get a Timer ID, use " +
-                                                                      "the `reminder list` command.")] int timerId)
+                                                                        "the `reminder list` command.")] int timerId)
         {
             await ctx.TriggerTypingAsync();
 
@@ -247,6 +247,12 @@ If in doubt, just try it! You can always clear the reminders later.
             {
                 await ctx.RespondAsync("Never mind then, maybe next time.");
             }
+        }
+
+        [Command("test"), Description("WIP.")]
+        public async Task TestAsync(CommandContext ctx)
+        {
+            await ctx.RespondAsync($"Timer will dispatch at: `{Shared.TimerData.DispatchTime}`, and has the message ```{Shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText}```.");
         }
     }
 }
