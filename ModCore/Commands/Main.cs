@@ -78,7 +78,7 @@ namespace ModCore.Commands
         class Purge
         {
             [Description("Delete an amount of messages from the current channel.")]
-            public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Amount of messages to remove")]int limit,
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Amount of messages to remove (max 100)")]int limit = 50,
                 [Description("Amount of messages to skip")]int skip = 0)
             {
                 var i = 0;
@@ -103,7 +103,7 @@ namespace ModCore.Commands
 
             [Command("user"), Description("Delete an amount of messages by an user."), Aliases("u", "pu")]
             public async Task PurgeUserAsync(CommandContext ctx, [Description("User to delete messages from")]DiscordUser user,
-            [Description("Message limit.")]int limit, [Description("Amount of messages to skip")]int skip = 0)
+            [Description("Amount of messages to remove (max 100)")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
             {
                 var i = 0;
                 var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message, limit);
@@ -133,7 +133,7 @@ namespace ModCore.Commands
              "Pass a Regexp in ECMAScript ( /expression/flags ) format, or simply a regex string " +
              "in quotes."), Aliases("purgeregex", "pr", "r")]
             public async Task PurgeRegexpAsync(CommandContext ctx, [Description("Your regex")] string regexp,
-            [Description("Message limit")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
+            [Description("Amount of messages to remove (max 100)")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
             {
                 // TODO add a flag to disable CultureInvariant.
                 var regexOptions = RegexOptions.CultureInvariant;
