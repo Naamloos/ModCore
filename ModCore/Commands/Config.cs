@@ -264,6 +264,14 @@ namespace ModCore.Commands
                             ? "Enabled\nMode: " + globalwarn.WarnLevel
                             : "Disabled", true);
 
+                    var messageLog = gcfg.MessageLog;
+                    embed.AddField(@"Message Deletion Logging",
+                        messageLog.Enable
+                            ? "Enabled\nMode: \n" + messageLog.LogLevel + "\n" + (messageLog.ChannelId == 0 ? ", but no channel configured!" : 
+                            "\nChannel: " + ctx.Guild.GetChannel((ulong)messageLog.ChannelId).Name)
+                            : "Disabled"
+                            , true);
+
                     await ctx.RespondAsync(embed: embed.Build());
                 });
         }
@@ -1042,6 +1050,72 @@ namespace ModCore.Commands
                 }
                 await ctx.SetGuildSettingsAsync(cfg);
                 await ctx.RespondAsync("GlobalWarn mode configured to " + cfg.GlobalWarn.WarnLevel.ToString());
+            }
+        }
+
+        [Group("messagelog"), Aliases("ml"), Description("MessageLog configuration commands.")]
+        public class MessageLog
+        {
+            [Command("enable"), Aliases("on"), Description("Enables MessageLog for this guild.")]
+            public async Task EnableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.MessageLog.Enable = true;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("MessageLog enabled.");
+            }
+
+            [Command("disable"), Aliases("off"), Description("Disables MessageLog for this guild.")]
+            public async Task DisableAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.MessageLog.Enable = false;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("MessageLog disabled.");
+            }
+
+            [Command("changemode"), Aliases("cm"),
+             Description("Sets the MessageLog mode.")]
+            public async Task SetRoleAsync(CommandContext ctx)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                await ctx.RespondAsync("__**Available MessageLog modes:**__\n1. None\n2. Delete (Logs any message deletions in the specified channel)\n3. Edit (Logs both message deletions and message edits in the specified channel)\n\nType an option.");
+                var iv = ctx.Client.GetInteractivity();
+
+                var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id &&
+                (xm.Content.ToLower() == "none" || xm.Content.ToLower() == "delete" || xm.Content.ToLower() == "edit" || xm.Content == "1" || xm.Content == "2" || xm.Content == "3"),
+                TimeSpan.FromSeconds(45));
+                if (msg == null)
+                {
+                    await ctx.RespondAsync("Operation aborted.");
+                    return;
+                }
+                switch (msg.Message.Content)
+                {
+                    case "none":
+                    case "1":
+                        cfg.MessageLog.LogLevel = MessageLogLevel.None;
+                        break;
+                    case "delete":
+                    case "2":
+                        cfg.MessageLog.LogLevel = MessageLogLevel.Delete;
+                        break;
+                    case "edit":
+                    case "3":
+                        cfg.MessageLog.LogLevel = MessageLogLevel.Edit;
+                        break;
+                }
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("MessageLog mode configured to " + cfg.MessageLog.LogLevel.ToString());
+            }
+
+            [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for the MessageLog.")]
+            public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to log Deleted/Edited messages to.")]DiscordChannel channel)
+            {
+                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+                cfg.MessageLog.ChannelId = (long)channel.Id;
+                await ctx.SetGuildSettingsAsync(cfg);
+                await ctx.RespondAsync("MessageLog channel configured.");
             }
         }
     }
