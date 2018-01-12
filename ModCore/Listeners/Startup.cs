@@ -15,6 +15,7 @@ namespace ModCore.Listeners
             if (e.Guild.Id == bot.SharedData.StartNotify.guild)
             {
                 await e.Guild.GetChannel(bot.SharedData.StartNotify.channel).SendMessageAsync("Done updating. We're back online!");
+                bot.SharedData.StartNotify = default;
             }
         }
     }
