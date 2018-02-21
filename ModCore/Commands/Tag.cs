@@ -57,7 +57,7 @@ namespace ModCore.Commands
                 try
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)channel.Id);
-                    await ctx.RespondAsync($"`{tag.Name}`:\n{tag.Contents.Replace("@everyone", "`@everyone`").Replace("@here", "`@here`")}");
+                    await ctx.RespondAsync($"`{tag.Name}`:\n{tag.Contents.Replace("@everyone", "@-everyone").Replace("@here", "@-here")}");
                 }
                 catch (Exception)
                 {
@@ -218,8 +218,12 @@ namespace ModCore.Commands
         {
             using (var db = this.Database.CreateContext())
             {
-                var list = db.Tags.Where(x => x.ChannelId == (channel != null ? (long)channel.Id : (long)ctx.Channel.Id));
-                if (list.Count() < 1)
+				long chan = (long)ctx.Channel.Id;
+				if (channel != null)
+					chan = (long)channel.Id;
+
+				var list = db.Tags.Where(x => x.ChannelId == chan);
+				if (list.Count() < 1)
                 {
                     await ctx.RespondAsync("This channel has no tags!");
                 }
