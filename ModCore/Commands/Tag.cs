@@ -57,7 +57,7 @@ namespace ModCore.Commands
                 try
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)channel.Id);
-                    await ctx.RespondAsync($"`{tag.Name}`:\n{tag.Contents}");
+                    await ctx.RespondAsync($"`{tag.Name}`:\n{tag.Contents.Replace("@everyone", "`@everyone`").Replace("@here", "`@here`")}");
                 }
                 catch (Exception)
                 {
@@ -111,7 +111,7 @@ namespace ModCore.Commands
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id);
 
-                    if ((ctx.Member.PermissionsIn(ctx.Channel) & DSharpPlus.Permissions.ManageMessages) == 0 || tag.OwnerId == (long)ctx.Member.Id)
+                    if ((ctx.Member.PermissionsIn(ctx.Channel) & DSharpPlus.Permissions.ManageMessages) == 0 || tag.OwnerId == (long)ctx.Member.Id || ctx.Guild.Owner.Id == ctx.Member.Id)
                     {
                         db.Tags.Remove(tag);
                         await db.SaveChangesAsync();
@@ -214,11 +214,11 @@ namespace ModCore.Commands
 
         [Command("list")]
         [Description("Lists tags for this channel.")]
-        public async Task ListAsync(CommandContext ctx)
+        public async Task ListAsync(CommandContext ctx, DiscordChannel channel = null)
         {
             using (var db = this.Database.CreateContext())
             {
-                var list = db.Tags.Where(x => x.ChannelId == (long)ctx.Channel.Id);
+                var list = db.Tags.Where(x => x.ChannelId == (channel != null ? (long)channel.Id : (long)ctx.Channel.Id));
                 if (list.Count() < 1)
                 {
                     await ctx.RespondAsync("This channel has no tags!");
