@@ -103,8 +103,10 @@ If in doubt, just try it! You can always clear the reminders later.
                 var note = data.ReminderText;
                 if (note.Contains('\n'))
                     note = string.Concat(note.Substring(0, note.IndexOf('\n')), "...");
+				note.BreakMentions();
 
-                cembed.AddField(
+
+				cembed.AddField(
                     $"In {(DateTimeOffset.UtcNow - xr.DispatchAt).Humanize(4, minUnit: TimeUnit.Second)} (ID: #{xr.Id})",
                     $"{note}");
                 if (cembed.Fields.Count < 5) continue;
@@ -186,7 +188,7 @@ If in doubt, just try it! You can always clear the reminders later.
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
             var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
             await ctx.RespondAsync(
-                $"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text}");
+                $"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text.BreakMentions()}");
         }
 
         [Command("stop"), Aliases("unset", "remove"), Description("Stops and removes a reminder.")]
@@ -210,7 +212,7 @@ If in doubt, just try it! You can always clear the reminders later.
             var data = reminder.GetData<TimerReminderData>();
             var emoji = DiscordEmoji.FromName(ctx.Client, ":ballot_box_with_check:");
             await ctx.RespondAsync(
-                $"{emoji} Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText}");
+                $"{emoji} Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText.BreakMentions()}");
         }
 
         [Command("clear"), Description("Clears all active reminders.")]
@@ -251,7 +253,7 @@ If in doubt, just try it! You can always clear the reminders later.
         [Command("test"), Description("WIP.")]
         public async Task TestAsync(CommandContext ctx)
         {
-            await ctx.RespondAsync($"Timer will dispatch at: `{Shared.TimerData.DispatchTime}`, and has the message ```{Shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText}```.");
+            await ctx.RespondAsync($"Timer will dispatch at: `{Shared.TimerData.DispatchTime}`, and has the message ```{Shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText.BreakMentions()}```.");
         }
     }
 }

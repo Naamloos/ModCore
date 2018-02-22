@@ -57,7 +57,7 @@ namespace ModCore.Commands
                 try
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)channel.Id);
-                    await ctx.RespondAsync($"`{tag.Name}`:\n{tag.Contents.Replace("@everyone", "@-everyone").Replace("@here", "@-here")}");
+                    await ctx.RespondAsync($"`{tag.Name}`:\n{tag.Contents.BreakMentions()}");
                 }
                 catch (Exception)
                 {
@@ -82,7 +82,7 @@ namespace ModCore.Commands
                         tag.Contents = contents;
                         db.Tags.Update(tag);
                         await db.SaveChangesAsync();
-                        await ctx.RespondAsync($"Succesfully modified your tag `{name}`!");
+                        await ctx.RespondAsync($"Succesfully modified your tag `{name.BreakMentions()}`!");
                     }
                     return;
                 }
@@ -97,7 +97,7 @@ namespace ModCore.Commands
                 };
                 db.Tags.Add(t);
                 await db.SaveChangesAsync();
-                await ctx.RespondAsync($"Tag `{name}` succesfully created!");
+                await ctx.RespondAsync($"Tag `{name.BreakMentions()}` succesfully created!");
             }
         }
 
@@ -115,7 +115,7 @@ namespace ModCore.Commands
                     {
                         db.Tags.Remove(tag);
                         await db.SaveChangesAsync();
-                        await ctx.RespondAsync($"Tag `{name}` successfully removed!");
+                        await ctx.RespondAsync($"Tag `{name.BreakMentions()}` successfully removed!");
                     }
                     else
                     {
@@ -151,11 +151,11 @@ namespace ModCore.Commands
                         };
                         db.Tags.Add(newtag);
                         await db.SaveChangesAsync();
-                        await ctx.RespondAsync($"Tag `{name}` successfully copied from {origin.Mention}!");
+                        await ctx.RespondAsync($"Tag `{name.BreakMentions()}` successfully copied from {origin.Mention}!");
                     }
                     else
                     {
-                        await ctx.RespondAsync($"Tag `{name}` already exists in this channel!");
+                        await ctx.RespondAsync($"Tag `{name.BreakMentions()}` already exists in this channel!");
                     }
                 }
                 else
@@ -253,7 +253,7 @@ namespace ModCore.Commands
                         tag.OwnerId = (long)newowner.Id;
                         db.Tags.Update(tag);
                         await db.SaveChangesAsync();
-                        await ctx.RespondAsync($"Tag `{name}` successfully transferred to {newowner.Mention}!");
+                        await ctx.RespondAsync($"Tag `{name.BreakMentions()}` successfully transferred to {newowner.Mention}!");
                     }
                 }
                 else

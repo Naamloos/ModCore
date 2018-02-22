@@ -32,6 +32,12 @@ namespace ModCore
             return ctx;
         }
 
+		public static string BreakMentions(this string input)
+		{
+			input = input.Replace("@", "@\u200B");
+			return input;
+		}
+
         /// <summary>
         /// Executes a synchronous function on the GuildSettings object, that can mutate it.
         /// The resulting GuildSettings will be automatically persisted.
