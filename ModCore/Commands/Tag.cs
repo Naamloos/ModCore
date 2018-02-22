@@ -57,7 +57,7 @@ namespace ModCore.Commands
                 try
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)channel.Id);
-                    await ctx.RespondAsync($"`{tag.Name}`:\n{tag.Contents.BreakMentions()}");
+                    await ctx.RespondAsync($"`{tag.Name.BreakMentions()}`:\n{tag.Contents.BreakMentions()}");
                 }
                 catch (Exception)
                 {
