@@ -49,6 +49,6 @@
         WebhooksUpdated, // AsyncEventHandler<WebhooksUpdateEventArgs>
         Heartbeated, // AsyncEventHandler<HeartbeatEventArgs>
         CommandExecuted,
-        CommandErrored,
+        CommandErrored
     }
 }

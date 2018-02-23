@@ -1,13 +1,12 @@
-﻿using System.Threading.Tasks;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using ModCore.Entities;
-using ModCore.Logic;
-using System;
-using ModCore.Database;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Collections.Generic;
+using System.Threading.Tasks;
+using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
+using ModCore.Database;
+using ModCore.Entities;
+using ModCore.Logic;
 
 namespace ModCore.Listeners
 {
@@ -51,11 +50,11 @@ namespace ModCore.Listeners
 
                 if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Owner)
                 {
-                    await e.Guild.Owner.SendMessageAsync("", embed: embed);
+                    await e.Guild.Owner.ElevatedMessageAsync(embed: embed);
                 }
                 else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
                 {
-                    await e.Guild.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).SendMessageAsync(embed: embed);
+                    await e.Guild.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).ElevatedMessageAsync(embed: embed);
                 }
             }
         }

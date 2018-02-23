@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace ModCore.Database
 {
-    public partial class DatabaseGuildConfig
+    public class DatabaseGuildConfig
     {
         public int Id { get; set; }
         public long GuildId { get; set; }

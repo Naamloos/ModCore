@@ -7,7 +7,7 @@ using DSharpPlus.Entities;
 namespace ModCore.Logic.Utils
 {
     // TODO dependency injection
-    public static partial class Utils
+    public static class Utils
     {
         /// <summary>
         /// Tries to find, through enterprise-level heuristic analysis, a valid mute role. If not found, creates one.

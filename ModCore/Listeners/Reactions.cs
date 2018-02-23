@@ -1,14 +1,11 @@
-﻿using DSharpPlus.Entities;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Humanizer;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Humanizer;
 
 namespace ModCore.Listeners
 {
@@ -52,9 +49,9 @@ namespace ModCore.Listeners
                                 if (msg.Author.Id == e.User.Id || e.User.IsBot)
                                     return;
 
-                                var d = await (await c.GetMessageAsync((ulong)other.StarboardMessageId)).ModifyAsync($"{e.Emoji.ToString()}: {count + 1} ({msg.Id}) in {msg.Channel.Mention}", embed: BuildMessageEmbed(msg));
+                                var d = await (await c.GetMessageAsync((ulong)other.StarboardMessageId)).ModifyAsync($"{e.Emoji}: {count + 1} ({msg.Id}) in {msg.Channel.Mention}", embed: BuildMessageEmbed(msg));
                                 sbmid = (long)d.Id;
-                                await db.StarDatas.AddAsync(new DatabaseStarData()
+                                await db.StarDatas.AddAsync(new DatabaseStarData
                                 {
                                     ChannelId = other.ChannelId,
                                     GuildId = (long)e.Channel.Guild.Id,
@@ -64,10 +61,6 @@ namespace ModCore.Listeners
                                     StargazerId = (long)e.User.Id,
                                 });
                                 await db.SaveChangesAsync();
-                            }
-                            else
-                            {
-                                return;
                             }
                         }
                     }
@@ -81,15 +74,15 @@ namespace ModCore.Listeners
                             if (msg.Author.Id == e.User.Id || e.User.IsBot)
                                 return;
 
-                            var d = await msg.ModifyAsync($"{e.Emoji.ToString()}: {count + 1} ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
+                            var d = await msg.ModifyAsync($"{e.Emoji}: {count + 1} ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
                             sbmid = (long)d.Id;
                         }
                         else
                         {
-                            var d = await c.SendMessageAsync($"{e.Emoji.ToString()}: 1 ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
+                            var d = await c.ElevatedMessageAsync($"{e.Emoji}: 1 ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
                             sbmid = (long)d.Id;
                         }
-                        await db.StarDatas.AddAsync(new DatabaseStarData()
+                        await db.StarDatas.AddAsync(new DatabaseStarData
                         {
                             ChannelId = (long)e.Channel.Id,
                             GuildId = (long)e.Channel.Guild.Id,
@@ -134,7 +127,7 @@ namespace ModCore.Listeners
                             var chn = await e.Client.GetChannelAsync((ulong)star.ChannelId);
                             var msg = await chn.GetMessageAsync((ulong)star.MessageId);
                             if (count - 1 > 0)
-                                await m.ModifyAsync($"{e.Emoji.ToString()}: {count - 1} ({msg.Id}) in {msg.Channel.Mention}", embed: BuildMessageEmbed(msg));
+                                await m.ModifyAsync($"{e.Emoji}: {count - 1} ({msg.Id}) in {msg.Channel.Mention}", embed: BuildMessageEmbed(msg));
                             else
                                 await m.DeleteAsync();
                             db.StarDatas.Remove(star);
@@ -149,7 +142,7 @@ namespace ModCore.Listeners
                             var count = db.StarDatas.Count(x => (ulong)x.MessageId == e.Message.Id);
                             var m = await c.GetMessageAsync((ulong)star.StarboardMessageId);
                             if (count - 1 > 0)
-                                await m.ModifyAsync($"{e.Emoji.ToString()}: {count - 1} ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
+                                await m.ModifyAsync($"{e.Emoji}: {count - 1} ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
                             else
                                 await m.DeleteAsync();
                             db.StarDatas.Remove(star);

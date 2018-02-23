@@ -210,7 +210,7 @@ namespace ModCore
                 if (!string.IsNullOrEmpty(additionalinfo))
                     b.AddField("Additional information", additionalinfo);
 
-                var e = new List<DiscordEmbed>()
+                var e = new List<DiscordEmbed>
                 {
                     b.Build()
                 };
@@ -227,7 +227,7 @@ namespace ModCore
             if (a.Enable)
             {
                 var w = await ctx.Client.GetWebhookWithTokenAsync(a.WebhookId, a.WebhookToken);
-                await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed>() {embed} : null);
+                await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed> {embed} : null);
             }
         }
 
@@ -246,7 +246,7 @@ namespace ModCore
                     .WithDescription($"Executed action: {additionalinfo}")
                     .WithFooter($"Guild: {gld.Name}", string.IsNullOrEmpty(gld.IconHash) ? "" : gld.IconUrl);
 
-                var e = new List<DiscordEmbed>()
+                var e = new List<DiscordEmbed>
                 {
                     b.Build()
                 };
@@ -263,7 +263,7 @@ namespace ModCore
             if (s.ActionLog.Enable)
             {
                 var w = await clnt.GetWebhookWithTokenAsync(s.ActionLog.WebhookId, s.ActionLog.WebhookToken);
-                await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed>() {embed} : null);
+                await w.ExecuteAsync(content, embeds: embed != null ? new List<DiscordEmbed> {embed} : null);
             }
         }
 
@@ -329,9 +329,6 @@ namespace ModCore
 
 namespace MoreLinq
 {
-    using System;
-    using System.Collections.Generic;
-
     internal static class MoreEnumerable
     {
         /// <summary>

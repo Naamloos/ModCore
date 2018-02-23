@@ -14,6 +14,7 @@ using Humanizer.Localisation;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Listeners;
+using ModCore.Logic;
 using ModCore.Logic.Utils;
 
 namespace ModCore.Commands
@@ -39,7 +40,7 @@ namespace ModCore.Commands
         [Command("ping"), Description("Check ModCore's API connection status.")]
         public async Task PingAsync(CommandContext ctx)
         {
-            await ctx.RespondAsync($"Pong: ({ctx.Client.Ping}) ms.");
+            await ctx.SafeRespondAsync($"Pong: ({ctx.Client.Ping}) ms.");
         }
 
         [Command("help"), Aliases("h", "?", "wtf"), Description("Displays information about commands.")]
@@ -56,7 +57,7 @@ namespace ModCore.Commands
             var sup = DateTimeOffset.Now.Subtract(st.SocketStartTime);
 
             // Needs improvement
-            await ctx.RespondAsync(
+            await ctx.SafeRespondAsync(
                 $"Program uptime: {string.Format("{0} days, {1}", bup.ToString("dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
                 $"Socket uptime: {string.Format("{0} days, {1}", sup.ToString("dd"), sup.ToString(@"hh\:mm\:ss"))}");
         }
@@ -68,10 +69,10 @@ namespace ModCore.Commands
             // what the hell is an invite builder? - chris
             var app = ctx.Client.CurrentApplication;
             if (app.IsPublic != null && (bool)app.IsPublic)
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                     $"Add ModCore to your server!\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
             else
-                await ctx.RespondAsync("I'm sorry Mario, but this instance of ModCore has been set to private!");
+                await ctx.SafeRespondAsync("I'm sorry Mario, but this instance of ModCore has been set to private!");
         }
 
         [Group("purge", CanInvokeWithoutSubcommand = true), Aliases("p"), RequirePermissions(Permissions.ManageMessages)]
@@ -93,7 +94,7 @@ namespace ModCore.Commands
                 }
                 if (deletThis.Any())
                     await ctx.Channel.DeleteMessagesAsync(deletThis, "Purged messages.");
-                var resp = await ctx.RespondAsync("Latest messages deleted.");
+                var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
                 await Task.Delay(2000);
                 await resp.DeleteAsync("Purge command executed.");
                 await ctx.Message.DeleteAsync("Purge command executed.");
@@ -119,7 +120,7 @@ namespace ModCore.Commands
                 if (deletThis.Any())
                     await ctx.Channel.DeleteMessagesAsync(deletThis,
                         $"Purged messages by {user?.Username}#{user?.Discriminator} (ID:{user?.Id})");
-                var resp = await ctx.RespondAsync($"Latest messages by {user?.Mention} (ID:{user?.Id}) deleted.");
+                var resp = await ctx.SafeRespondAsync($"Latest messages by {user?.Mention} (ID:{user?.Id}) deleted.");
                 await Task.Delay(2000);
                 await resp.DeleteAsync("Purge command executed.");
                 await ctx.Message.DeleteAsync("Purge command executed.");
@@ -142,7 +143,7 @@ namespace ModCore.Commands
 
                 if (string.IsNullOrEmpty(regexp))
                 {
-                    await ctx.RespondAsync("RegExp is empty");
+                    await ctx.SafeRespondAsync("RegExp is empty");
                     return;
                 }
                 var blockType = regexp[0];
@@ -201,7 +202,7 @@ namespace ModCore.Commands
                         }
                         else
                         {
-                            await ctx.RespondAsync(tokens[1] + " is not a valid int");
+                            await ctx.SafeRespondAsync(tokens[1] + " is not a valid int");
                             return;
                         }
                         if (tokens.Count > 2)
@@ -212,7 +213,7 @@ namespace ModCore.Commands
                             }
                             else
                             {
-                                await ctx.RespondAsync(tokens[2] + " is not a valid int");
+                                await ctx.SafeRespondAsync(tokens[2] + " is not a valid int");
                                 return;
                             }
                         }
@@ -236,7 +237,7 @@ namespace ModCore.Commands
                     $"Purged {deletThis.Count} messages by /{regexp.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
                 if (deletThis.Any())
                     await ctx.Channel.DeleteMessagesAsync(deletThis, resultString);
-                var resp = await ctx.RespondAsync(resultString);
+                var resp = await ctx.SafeRespondAsync(resultString);
                 await Task.Delay(2000);
                 await resp.DeleteAsync("Purge command executed.");
                 await ctx.Message.DeleteAsync("Purge command executed.");
@@ -256,7 +257,7 @@ namespace ModCore.Commands
                     .ToList();
                 if (deletThis.Any())
                     await ctx.Channel.DeleteMessagesAsync(deletThis, "Cleaned up commands");
-                var resp = await ctx.RespondAsync("Latest messages deleted.");
+                var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
                 await Task.Delay(2000);
                 await resp.DeleteAsync("Clean command executed.");
                 await ctx.Message.DeleteAsync("Clean command executed.");
@@ -275,7 +276,7 @@ namespace ModCore.Commands
                     .ToList();
                 if (deletThis.Any())
                     await ctx.Channel.DeleteMessagesAsync(deletThis, "Cleaned up commands");
-                var resp = await ctx.RespondAsync("Latest messages deleted.");
+                var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
                 await Task.Delay(2000);
                 await resp.DeleteAsync("Purge bot command executed.");
                 await ctx.Message.DeleteAsync("Purge bot command executed.");
@@ -292,7 +293,7 @@ namespace ModCore.Commands
                 var deleteThis = ms.Where(m => ImageRegex.IsMatch(m.Content) || m.Attachments.Any()).ToList();
                 if (deleteThis.Any())
                     await ctx.Channel.DeleteMessagesAsync(deleteThis, "Purged images");
-                var resp = await ctx.RespondAsync("Latest messages deleted.");
+                var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
                 await Task.Delay(2000);
                 await resp.DeleteAsync("Image purge command executed.");
                 await ctx.Message.DeleteAsync("Image purge command executed.");
@@ -344,15 +345,15 @@ namespace ModCore.Commands
         {
             if (ctx.Member.Id == m.Id)
             {
-                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await m.SendMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+            await m.ElevatedMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
-            await ctx.RespondAsync($"Banned user {m.DisplayName} (ID:{m.Id})");
+            await ctx.SafeRespondAsync($"Banned user {m.DisplayName} (ID:{m.Id})");
 
             await ctx.LogActionAsync($"Banned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
@@ -364,14 +365,14 @@ namespace ModCore.Commands
         {
             if (ctx.Member.Id == id)
             {
-                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             await ctx.Guild.BanMemberAsync(id, 7, $"{ustr}{rstr}");
-            await ctx.RespondAsync("User hackbanned successfully.");
+            await ctx.SafeRespondAsync("User hackbanned successfully.");
 
             await ctx.LogActionAsync($"Hackbanned ID: {id}\n{rstr}");
         }
@@ -383,15 +384,15 @@ namespace ModCore.Commands
         {
             if (ctx.Member.Id == m.Id)
             {
-                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await m.SendMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+            await m.ElevatedMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.RemoveAsync($"{ustr}{rstr}");
-            await ctx.RespondAsync($"Kicked user {m.DisplayName} (ID:{m.Id})");
+            await ctx.SafeRespondAsync($"Kicked user {m.DisplayName} (ID:{m.Id})");
 
             await ctx.LogActionAsync($"Kicked user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
@@ -405,16 +406,16 @@ namespace ModCore.Commands
         {
             if (ctx.Member.Id == m.Id)
             {
-                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await m.SendMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+            await m.ElevatedMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.BanAsync(7, $"{ustr}{rstr} (softban)");
             await m.UnbanAsync(ctx.Guild, $"{ustr}{rstr}");
-            await ctx.RespondAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})");
+            await ctx.SafeRespondAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})");
 
             await ctx.LogActionAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
         }
@@ -438,19 +439,19 @@ namespace ModCore.Commands
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 if (cfg.GlobalWarn.WarnLevel == GlobalWarnLevel.None || cfg.GlobalWarn.Enable)
-                    await ctx.RespondAsync("You do not have globalwarn enabled on this server.");
+                    await ctx.SafeRespondAsync("You do not have globalwarn enabled on this server.");
 
                 bool issuedBefore = false;
                 using (var db = this.Database.CreateContext())
                     issuedBefore = db.Bans.Any(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id);
                 if (issuedBefore)
                 {
-                    await ctx.RespondAsync("You have already warned about this user! Stop picking on them...");
+                    await ctx.SafeRespondAsync("You have already warned about this user! Stop picking on them...");
                     return;
                 }
                 if (ctx.Member.Id == m.Id)
                 {
-                    await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                    await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
                     return;
                 }
 
@@ -469,9 +470,9 @@ namespace ModCore.Commands
 
                 var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
                 var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-                await m.SendMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}");
+                await m.ElevatedMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}");
                 await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
-                await ctx.RespondAsync($"Banned and issued global warn about user {m.DisplayName} (ID:{m.Id})");
+                await ctx.SafeRespondAsync($"Banned and issued global warn about user {m.DisplayName} (ID:{m.Id})");
 
                 await ctx.LogActionAsync($"Banned and issued global warn about user {m.DisplayName} (ID:{m.Id})\n{rstr}\n");
                 await GlobalWarnUpdateAsync(ctx, m, true);
@@ -482,14 +483,14 @@ namespace ModCore.Commands
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 if (cfg.GlobalWarn.WarnLevel == GlobalWarnLevel.None || cfg.GlobalWarn.Enable)
-                    await ctx.RespondAsync("You do not have globalwarn enabled on this server.");
+                    await ctx.SafeRespondAsync("You do not have globalwarn enabled on this server.");
 
                 bool issuedBefore = false;
                 using (var db = this.Database.CreateContext())
                     issuedBefore = db.Bans.Any(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id);
                 if (issuedBefore)
                 {
-                    await ctx.RespondAsync("You have already warned about this user! Stop picking on them...");
+                    await ctx.SafeRespondAsync("You have already warned about this user! Stop picking on them...");
                     return;
                 }
                 using (var db = this.Database.CreateContext())
@@ -499,9 +500,9 @@ namespace ModCore.Commands
                 }
 
                 var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
-                await m.SendMessageAsync($"You've been unbanned from {ctx.Guild.Name}.");
+                await m.ElevatedMessageAsync($"You've been unbanned from {ctx.Guild.Name}.");
                 await ctx.Guild.UnbanMemberAsync(m, $"{ustr}");
-                await ctx.RespondAsync($"Unbanned and retracted global warn about user {m.DisplayName} (ID:{m.Id})");
+                await ctx.SafeRespondAsync($"Unbanned and retracted global warn about user {m.DisplayName} (ID:{m.Id})");
 
                 await ctx.LogActionAsync($"Unbanned and retracted global warn about user {m.DisplayName} (ID:{m.Id})\n");
                 await GlobalWarnUpdateAsync(ctx, m, false);
@@ -548,11 +549,11 @@ namespace ModCore.Commands
 
                                         if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Owner)
                                         {
-                                            await g.Owner.SendMessageAsync("", embed: embed);
+                                            await g.Owner.ElevatedMessageAsync(embed: embed);
                                         }
                                         else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
                                         {
-                                            await g.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).SendMessageAsync(embed: embed);
+                                            await g.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).ElevatedMessageAsync(embed: embed);
                                         }
                                     }
                                 }
@@ -593,11 +594,11 @@ namespace ModCore.Commands
                                         }
                                         if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Owner)
                                         {
-                                            await g.Owner.SendMessageAsync("", embed: embed);
+                                            await g.Owner.ElevatedMessageAsync(embed: embed);
                                         }
                                         else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
                                         {
-                                            await g.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).SendMessageAsync(embed: embed);
+                                            await g.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).ElevatedMessageAsync(embed: embed);
                                         }
                                     }
                                 }
@@ -621,14 +622,14 @@ namespace ModCore.Commands
         {
             if (ctx.Member.Id == m.Id)
             {
-                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
 
             var guildSettings = ctx.GetGuildSettings() ?? new GuildSettings();
             if (guildSettings == null)
             {
-                await ctx.RespondAsync("Guild is not configured, please configure and rerun");
+                await ctx.SafeRespondAsync("Guild is not configured, please configure and rerun");
                 return;
             }
 
@@ -639,16 +640,16 @@ namespace ModCore.Commands
                 var setupStatus = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
                 mute = setupStatus.Role;
                 guildSettings.MuteRoleId = setupStatus.Role.Id;
-                await ctx.RespondAsync("Mute role is not configured or missing, " + setupStatus.Message);
+                await ctx.SafeRespondAsync("Mute role is not configured or missing, " + setupStatus.Message);
                 await ctx.SetGuildSettingsAsync(guildSettings);
             }
             await Utils.GuaranteeMuteRoleDeniedEverywhere(ctx.Guild, mute);
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await m.SendMessageAsync($"You've been muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+            await m.ElevatedMessageAsync($"You've been muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
-            await ctx.RespondAsync(
+            await ctx.SafeRespondAsync(
                 $"Muted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
 
             await ctx.LogActionAsync(
@@ -663,14 +664,14 @@ namespace ModCore.Commands
         {
             if (ctx.Member.Id == m.Id)
             {
-                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
 
             var gcfg = ctx.GetGuildSettings() ?? new GuildSettings();
             if (gcfg == null)
             {
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                     "Guild is not configured. Adjust this guild's configuration and re-run this command.");
                 return;
             }
@@ -679,7 +680,7 @@ namespace ModCore.Commands
             var mute = ctx.Guild.GetRole(b);
             if (b == 0 || mute == null)
             {
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                     "Mute role is not configured or missing. Set a correct role and re-run this command.");
                 return;
             }
@@ -690,9 +691,9 @@ namespace ModCore.Commands
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await m.SendMessageAsync($"You've been unmuted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+            await m.ElevatedMessageAsync($"You've been unmuted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
             await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
-            await ctx.RespondAsync(
+            await ctx.SafeRespondAsync(
                 $"Unmuted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
 
             await ctx.LogActionAsync(
@@ -704,20 +705,20 @@ namespace ModCore.Commands
         public async Task LeaveAsync(CommandContext ctx)
         {
             var interactivity = this.Interactivity;
-            await ctx.RespondAsync("Are you sure you want to remove modcore from your guild?");
+            await ctx.SafeRespondAsync("Are you sure you want to remove modcore from your guild?");
             var m = await interactivity.WaitForMessageAsync(
                 x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
             if (m == null)
-                await ctx.RespondAsync("Timed out.");
+                await ctx.SafeRespondAsync("Timed out.");
             else if (m.Message.Content == "yes")
             {
-                await ctx.RespondAsync("Thanks for using ModCore. Leaving this guild.");
+                await ctx.SafeRespondAsync("Thanks for using ModCore. Leaving this guild.");
                 await ctx.LogActionAsync("Left your server. Thanks for using ModCore.");
                 await ctx.Guild.LeaveAsync();
             }
             else
-                await ctx.RespondAsync("Operation canceled by user.");
+                await ctx.SafeRespondAsync("Operation canceled by user.");
         }
 
         [Command("tempban"), Aliases("tb"), Description(
@@ -729,13 +730,13 @@ namespace ModCore.Commands
         {
             if (ctx.Member.Id == m.Id)
             {
-                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await m.SendMessageAsync($"You've been temporarily banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+            await m.ElevatedMessageAsync($"You've been temporarily banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
                 $"\nYou can rejoin after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
             await m.BanAsync(7, $"{ustr}{rstr}");
             // Add timer
@@ -765,7 +766,7 @@ namespace ModCore.Commands
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
             // End of Timer adding
-            await ctx.RespondAsync(
+            await ctx.SafeRespondAsync(
                 $"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 
             await ctx.LogActionAsync(
@@ -782,14 +783,14 @@ namespace ModCore.Commands
         {
             if (ctx.Member.Id == m.Id)
             {
-                await ctx.RespondAsync("You can't do that to yourself! You have so much to live for!");
+                await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
                 return;
             }
 
             var guildSettings = ctx.GetGuildSettings() ?? new GuildSettings();
             if (guildSettings == null)
             {
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                     "Guild is not configured. Adjust this guild's configuration and re-run this command.");
                 return;
             }
@@ -801,7 +802,7 @@ namespace ModCore.Commands
                 var setupStatus = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
                 mute = setupStatus.Role;
                 guildSettings.MuteRoleId = setupStatus.Role.Id;
-                await ctx.RespondAsync("Mute role is not configured or missing, " + setupStatus.Message);
+                await ctx.SafeRespondAsync("Mute role is not configured or missing, " + setupStatus.Message);
                 await ctx.SetGuildSettingsAsync(guildSettings);
             }
             await Utils.GuaranteeMuteRoleDeniedEverywhere(ctx.Guild, mute);
@@ -809,13 +810,13 @@ namespace ModCore.Commands
             var timer = Timers.FindNearestTimer(TimerActionType.Unmute, m.Id, 0, ctx.Guild.Id, this.Database);
             if (timer != null)
             {
-                await ctx.RespondAsync("This member was already muted! Please try to unmute them first!");
+                await ctx.SafeRespondAsync("This member was already muted! Please try to unmute them first!");
                 return;
             }
 
             var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
             var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-            await m.SendMessageAsync($"You've been temporarily muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+            await m.ElevatedMessageAsync($"You've been temporarily muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
                 $"\nYou can talk again after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
             await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
             // Add timer
@@ -846,7 +847,7 @@ namespace ModCore.Commands
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
             // End of Timer adding
-            await ctx.RespondAsync(
+            await ctx.SafeRespondAsync(
                 $"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 
             await ctx.LogActionAsync(
@@ -881,7 +882,7 @@ namespace ModCore.Commands
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
             // End of Timer adding
-            await ctx.RespondAsync(
+            await ctx.SafeRespondAsync(
                 $"After {pinfrom.Humanize(4, minUnit: TimeUnit.Second)} this message will be pinned");
         }
 
@@ -915,7 +916,7 @@ namespace ModCore.Commands
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
             // End of Timer adding
-            await ctx.RespondAsync(
+            await ctx.SafeRespondAsync(
                 $"In {pinuntil.Humanize(4, minUnit: TimeUnit.Second)} this message will be unpinned.");
         }
 
@@ -925,7 +926,7 @@ namespace ModCore.Commands
             var bans = await ctx.Guild.GetBansAsync();
             if (bans.Count == 0)
             {
-                await ctx.RespondAsync("No user is banned.");
+                await ctx.SafeRespondAsync("No user is banned.");
                 return;
             }
 
@@ -966,7 +967,7 @@ namespace ModCore.Commands
             if (pages.Count > 1)
                 await interactivity.SendPaginatedMessage(ctx.Channel, ctx.User, pages);
             else
-                await ctx.RespondAsync(embed: pages.First().Embed);
+                await ctx.ElevatedRespondAsync(embed: pages.First().Embed);
         }
         [Group("selfrole"), Description("Commands to give or take selfroles."), RequireBotPermissions(Permissions.ManageRoles)]
         public class SelfRole
@@ -987,20 +988,20 @@ namespace ModCore.Commands
                 {
                     if (ctx.Member.Roles.Any(x => x.Id == role.Id))
                     {
-                        await ctx.RespondAsync("You already have that role!");
+                        await ctx.SafeRespondAsync("You already have that role!");
                         return;
                     }
                     if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
                     {
                         await ctx.Member.GrantRoleAsync(role, "AutoRole granted.");
-                        await ctx.RespondAsync($"Granted you the role `{role.Name}`.");
+                        await ctx.SafeRespondAsync($"Granted you the role `{role.Name}`.");
                     }
                     else
-                        await ctx.RespondAsync("Can't grant you this role because that role is above my highest role!");
+                        await ctx.SafeRespondAsync("Can't grant you this role because that role is above my highest role!");
                 }
                 else
                 {
-                    await ctx.RespondAsync("You can't grant yourself that role!");
+                    await ctx.SafeRespondAsync("You can't grant yourself that role!");
                 }
             }
 
@@ -1014,20 +1015,20 @@ namespace ModCore.Commands
                 {
                     if (ctx.Member.Roles.All(x => x.Id != role.Id))
                     {
-                        await ctx.RespondAsync("You don't have that role!");
+                        await ctx.SafeRespondAsync("You don't have that role!");
                         return;
                     }
                     if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
                     {
                         await ctx.Member.RevokeRoleAsync(role, "AutoRole revoke.");
-                        await ctx.RespondAsync($"Revoked your role: `{role.Name}`.");
+                        await ctx.SafeRespondAsync($"Revoked your role: `{role.Name}`.");
                     }
                     else
-                        await ctx.RespondAsync("Can't take this role because that role is above my highest role!");
+                        await ctx.SafeRespondAsync("Can't take this role because that role is above my highest role!");
                 }
                 else
                 {
-                    await ctx.RespondAsync("You can't revoke that role!");
+                    await ctx.SafeRespondAsync("You can't revoke that role!");
                 }
             }
 
@@ -1050,11 +1051,11 @@ namespace ModCore.Commands
                         .Select(x => x.Mention);
 
                     embed.AddField("Available SelfRoles", string.Join(", ", roles), true);
-                    await ctx.RespondAsync(embed: embed);
+                    await ctx.ElevatedRespondAsync(embed: embed);
                 }
                 else
                 {
-                    await ctx.RespondAsync("No available selfroles.");
+                    await ctx.SafeRespondAsync("No available selfroles.");
                 }
             }
         }
@@ -1067,14 +1068,14 @@ namespace ModCore.Commands
             if (!role.IsMentionable)
             {
                 await role.UpdateAsync(mentionable: true);
-                await channel.SendMessageAsync($"{role.Mention} {message}");
+                await channel.SafeMessageAsync($"{role.Mention} {message}", ctx);
                 await role.UpdateAsync(mentionable: false);
                 await ctx.Message.DeleteAsync();
                 await ctx.LogActionAsync($"Announced {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
             }
             else
             {
-                await ctx.Channel.SendMessageAsync("You can't announce to that role because it is mentionable!");
+                await ctx.Channel.SafeMessageAsync("You can't announce to that role because it is mentionable!", true);
                 await ctx.LogActionAsync(
                     $"Failed announcement\nMessage: {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
             }

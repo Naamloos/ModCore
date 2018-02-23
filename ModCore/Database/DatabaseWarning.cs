@@ -2,7 +2,7 @@
 
 namespace ModCore.Database
 {
-    public partial class DatabaseWarning
+    public class DatabaseWarning
     {
         public int Id { get; set; }
         public long MemberId { get; set; }

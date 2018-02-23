@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Globalization;
+using System.Text;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using ModCore.Entities;
-using DSharpPlus.Entities;
-using System.Text;
-using DSharpPlus;
+using ModCore.Logic;
 
 namespace ModCore.Commands
 {
@@ -57,14 +58,14 @@ namespace ModCore.Commands
 
             embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now}");
 
-            await ctx.RespondAsync("", false, embed: embed);
+            await ctx.ElevatedRespondAsync(embed: embed);
             await ctx.LogActionAsync();
         }
 
         [Command("guild"), Aliases("g"), Description("Returns information about this guild.")]
         public async Task GuildInfoAsync(CommandContext ctx)
         {
-            await ctx.RespondAsync("The following embed might flood this channel. Do you want to proceed?");
+            await ctx.SafeRespondAsync("The following embed might flood this channel. Do you want to proceed?");
             var m = await Interactivity.WaitForMessageAsync(x => x.Content.ToLower() == "yes" || x.Content.ToLower() == "no");
             if (m?.Message?.Content == "yes")
             {
@@ -130,13 +131,13 @@ namespace ModCore.Commands
                     $"MFA Level: {g.MfaLevel}.\n" +
                     $"Verification Level: {g.VerificationLevel}");
 
-                await ctx.RespondAsync("", false, embed: embed);
+                await ctx.ElevatedRespondAsync(embed: embed);
                 #endregion
             }
             else
             {
                 #region no or timeout
-                await ctx.RespondAsync("Okay, I'm not sending the embed.");
+                await ctx.SafeRespondAsync("Okay, I'm not sending the embed.");
                 #endregion
             }
             await ctx.LogActionAsync();
@@ -152,7 +153,7 @@ namespace ModCore.Commands
                 .AddField("Data", $"Mentionable: {(role.IsMentionable ? "yes" : "no")}.\nHoisted: {(role.IsHoisted ? "yes" : "no")}.\nManaged: {(role.IsManaged ? "yes" : "no")}.")
                 .WithColor(role.Color);
 
-            await ctx.RespondAsync(embed: embed);
+            await ctx.ElevatedRespondAsync(embed: embed);
             await ctx.LogActionAsync();
         }
 
@@ -195,7 +196,7 @@ namespace ModCore.Commands
             embed.AddField("Misc", $"NSFW: {(channel.IsNSFW ? "yes" : "no")}\n" +
                 $"{(channel.Type == ChannelType.Text ? $"Last message ID: {channel.LastMessageId}" : "")}");
 
-            await ctx.RespondAsync(embed: embed);
+            await ctx.ElevatedRespondAsync(embed: embed);
             await ctx.LogActionAsync();
         }
     }

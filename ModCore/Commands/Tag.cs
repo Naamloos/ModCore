@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Interactivity;
-using Microsoft.Extensions.DependencyInjection;
-using ModCore.Entities;
-using System.IO;
-using System.Diagnostics;
-using DSharpPlus.Entities;
-using ModCore.Logic;
-using ModCore.Database;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
+using ModCore.Database;
+using ModCore.Entities;
+using ModCore.Logic;
 
 namespace ModCore.Commands
 {
@@ -57,11 +55,11 @@ namespace ModCore.Commands
                 try
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)channel.Id);
-                    await ctx.RespondAsync($"`{tag.Name.BreakMentions()}`:\n{tag.Contents.BreakMentions()}");
+                    await ctx.SafeRespondAsync($"`{tag.Name.BreakMentions()}`:\n{tag.Contents.BreakMentions()}");
                 }
                 catch (Exception)
                 {
-                    await ctx.RespondAsync("No such tag exists!");
+                    await ctx.SafeRespondAsync("No such tag exists!");
                 }
             }
         }
@@ -76,18 +74,18 @@ namespace ModCore.Commands
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id);
                     if (tag.OwnerId != (long)ctx.Member.Id)
-                        await ctx.RespondAsync("That tag already exists for this channel and you don't own it!");
+                        await ctx.SafeRespondAsync("That tag already exists for this channel and you don't own it!");
                     else
                     {
                         tag.Contents = contents;
                         db.Tags.Update(tag);
                         await db.SaveChangesAsync();
-                        await ctx.RespondAsync($"Succesfully modified your tag `{name.BreakMentions()}`!");
+                        await ctx.SafeRespondAsync($"Succesfully modified your tag `{name.BreakMentions()}`!");
                     }
                     return;
                 }
 
-                var t = new DatabaseTag()
+                var t = new DatabaseTag
                 {
                     ChannelId = (long)ctx.Channel.Id,
                     Contents = contents,
@@ -97,7 +95,7 @@ namespace ModCore.Commands
                 };
                 db.Tags.Add(t);
                 await db.SaveChangesAsync();
-                await ctx.RespondAsync($"Tag `{name.BreakMentions()}` succesfully created!");
+                await ctx.SafeRespondAsync($"Tag `{name.BreakMentions()}` succesfully created!");
             }
         }
 
@@ -111,20 +109,20 @@ namespace ModCore.Commands
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id);
 
-                    if ((ctx.Member.PermissionsIn(ctx.Channel) & DSharpPlus.Permissions.ManageMessages) == 0 || tag.OwnerId == (long)ctx.Member.Id || ctx.Guild.Owner.Id == ctx.Member.Id)
+                    if ((ctx.Member.PermissionsIn(ctx.Channel) & Permissions.ManageMessages) == 0 || tag.OwnerId == (long)ctx.Member.Id || ctx.Guild.Owner.Id == ctx.Member.Id)
                     {
                         db.Tags.Remove(tag);
                         await db.SaveChangesAsync();
-                        await ctx.RespondAsync($"Tag `{name.BreakMentions()}` successfully removed!");
+                        await ctx.SafeRespondAsync($"Tag `{name.BreakMentions()}` successfully removed!");
                     }
                     else
                     {
-                        await ctx.RespondAsync("You don't own that tag!");
+                        await ctx.SafeRespondAsync("You don't own that tag!");
                     }
                 }
                 else
                 {
-                    await ctx.RespondAsync($"No such tag exists!");
+                    await ctx.SafeRespondAsync($"No such tag exists!");
                 }
             }
         }
@@ -141,7 +139,7 @@ namespace ModCore.Commands
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)origin.Id);
                     if (!db.Tags.Any(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id))
                     {
-                        var newtag = new DatabaseTag()
+                        var newtag = new DatabaseTag
                         {
                             ChannelId = (long)ctx.Channel.Id,
                             Contents = tag.Contents,
@@ -151,16 +149,16 @@ namespace ModCore.Commands
                         };
                         db.Tags.Add(newtag);
                         await db.SaveChangesAsync();
-                        await ctx.RespondAsync($"Tag `{name.BreakMentions()}` successfully copied from {origin.Mention}!");
+                        await ctx.SafeRespondAsync($"Tag `{name.BreakMentions()}` successfully copied from {origin.Mention}!");
                     }
                     else
                     {
-                        await ctx.RespondAsync($"Tag `{name.BreakMentions()}` already exists in this channel!");
+                        await ctx.SafeRespondAsync($"Tag `{name.BreakMentions()}` already exists in this channel!");
                     }
                 }
                 else
                 {
-                    await ctx.RespondAsync($"No such tag exists!");
+                    await ctx.SafeRespondAsync($"No such tag exists!");
                 }
             }
         }
@@ -203,11 +201,11 @@ namespace ModCore.Commands
                         .WithDescription($"Created at: {tag.CreatedAt.ToString()}\nOwned by: {owner}\nChannel: {channel.Mention}")
                         .AddField("Content", tag.Contents);
 
-                    await ctx.RespondAsync(embed: embed);
+                    await ctx.ElevatedRespondAsync(embed: embed);
                 }
                 catch (Exception)
                 {
-                    await ctx.RespondAsync("No such tag exists!");
+                    await ctx.SafeRespondAsync("No such tag exists!");
                 }
             }
         }
@@ -225,7 +223,7 @@ namespace ModCore.Commands
 				var list = db.Tags.Where(x => x.ChannelId == chan);
 				if (list.Count() < 1)
                 {
-                    await ctx.RespondAsync("This channel has no tags!");
+                    await ctx.SafeRespondAsync("This channel has no tags!");
                 }
                 else
                 {
@@ -247,18 +245,18 @@ namespace ModCore.Commands
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id);
                     if (tag.OwnerId != (long)ctx.Member.Id)
-                        await ctx.RespondAsync("You don't own that tag!");
+                        await ctx.SafeRespondAsync("You don't own that tag!");
                     else
                     {
                         tag.OwnerId = (long)newowner.Id;
                         db.Tags.Update(tag);
                         await db.SaveChangesAsync();
-                        await ctx.RespondAsync($"Tag `{name.BreakMentions()}` successfully transferred to {newowner.Mention}!");
+                        await ctx.SafeRespondAsync($"Tag `{name.BreakMentions()}` successfully transferred to {newowner.Mention}!");
                     }
                 }
                 else
                 {
-                    await ctx.RespondAsync($"No such tag exists!");
+                    await ctx.SafeRespondAsync($"No such tag exists!");
                 }
             }
         }

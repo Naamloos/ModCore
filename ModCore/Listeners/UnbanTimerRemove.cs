@@ -1,7 +1,7 @@
-﻿using DSharpPlus.EventArgs;
+﻿using System.Threading.Tasks;
+using DSharpPlus.EventArgs;
 using ModCore.Entities;
 using ModCore.Logic;
-using System.Threading.Tasks;
 
 namespace ModCore.Listeners
 {

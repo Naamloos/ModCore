@@ -3,7 +3,7 @@ using ModCore.Entities;
 
 namespace ModCore.Database
 {
-    public partial class DatabaseContext : DbContext
+    public class DatabaseContext : DbContext
     {
         public virtual DbSet<DatabaseInfo> Info { get; set; }
         public virtual DbSet<DatabaseGuildConfig> GuildConfig { get; set; }
