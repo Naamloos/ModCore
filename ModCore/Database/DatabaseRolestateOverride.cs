@@ -1,6 +1,6 @@
 ﻿namespace ModCore.Database
 {
-    public partial class DatabaseRolestateOverride
+    public class DatabaseRolestateOverride
     {
         public int Id { get; set; }
         public long MemberId { get; set; }

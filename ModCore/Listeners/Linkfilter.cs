@@ -54,7 +54,7 @@ namespace ModCore.Listeners
                 if (match.Success)
                 {
                     await e.Message.DeleteAsync($"Discovered IP logger site <{match.Matched}> and deleted message");
-                    await (e.Author as DiscordMember).SendMessageAsync(
+                    await (e.Author as DiscordMember).ElevatedMessageAsync(
                         $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
                         $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to an IP logger website: **`{match.Matched}`**");
                 }
@@ -66,7 +66,7 @@ namespace ModCore.Listeners
                 if (match.Success)
                 {
                     await e.Message.DeleteAsync($"Discovered Booter/DDoS site <{match.Matched}> and deleted message");
-                    await (e.Author as DiscordMember).SendMessageAsync(
+                    await (e.Author as DiscordMember).ElevatedMessageAsync(
                         $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
                         $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to a DDoS/booter website: **`{match.Matched}`**");
                 }
@@ -78,7 +78,7 @@ namespace ModCore.Listeners
                 if (match.Success)
                 {
                     await e.Message.DeleteAsync($"Discovered shock site <{match.Matched}> and deleted message");
-                    await (e.Author as DiscordMember).SendMessageAsync(
+                    await (e.Author as DiscordMember).ElevatedMessageAsync(
                         $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
                         $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to a shock/gore site: **`{match.Matched}`**");
                 }
@@ -122,7 +122,7 @@ namespace ModCore.Listeners
                 var origin = UrlShortenerConstants.UrlShorteners[match.Matched];
                 await e.Message.DeleteAsync(
                     $"Discovered URL shortener <{match.Matched}> and deleted message. Info: <{origin}>");
-                await (e.Author as DiscordMember).SendMessageAsync(
+                await (e.Author as DiscordMember).ElevatedMessageAsync(
                     $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
                     $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to an URL shortener: **`{match.Matched}`**\n" +
                     $"This URL shortener seems to have originated from the following domain: **`{origin}`**");
@@ -570,7 +570,7 @@ namespace ModCore.Listeners
     // use a separate class to avoid class loader bloat
     public static class UrlShortenerConstants
     {
-        public static readonly ImmutableDictionary<string, string> UrlShorteners = new Dictionary<string, string>()
+        public static readonly ImmutableDictionary<string, string> UrlShorteners = new Dictionary<string, string>
         {
             ["jesais.fr"] = "http://www.jelev.eu/accueil.php",
             ["aelita.fr"] = "http://www.jelev.eu/accueil.php",

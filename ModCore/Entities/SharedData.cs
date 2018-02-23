@@ -1,7 +1,7 @@
-﻿using ModCore.Api;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using ModCore.Api;
 
 namespace ModCore.Entities
 {

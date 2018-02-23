@@ -2,7 +2,7 @@
 
 namespace ModCore.Database
 {
-    public partial class DatabaseBan
+    public class DatabaseBan
     {
         public int Id { get; set; }
         public long GuildId { get; set; }

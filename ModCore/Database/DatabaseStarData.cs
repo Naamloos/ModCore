@@ -1,6 +1,6 @@
 ﻿namespace ModCore.Database
 {
-    public partial class DatabaseStarData
+    public class DatabaseStarData
     {
         public int Id { get; set; }
         public long StargazerId { get; set; } // Member that starred

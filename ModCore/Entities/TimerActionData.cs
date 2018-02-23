@@ -92,7 +92,7 @@ namespace ModCore.Entities
     /// <summary>
     /// Represents timer action type.
     /// </summary>
-    public enum TimerActionType : int
+    public enum TimerActionType
     {
         Unknown = 0, // Action type that is not known
         Reminder = 1, // Reminders

@@ -1,9 +1,6 @@
-﻿using DSharpPlus.EventArgs;
+﻿using System.Threading.Tasks;
+using DSharpPlus.EventArgs;
 using ModCore.Logic;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ModCore.Listeners
 {
@@ -14,7 +11,7 @@ namespace ModCore.Listeners
         {
             if (e.Guild.Id == bot.SharedData.StartNotify.guild)
             {
-                await e.Guild.GetChannel(bot.SharedData.StartNotify.channel).SendMessageAsync("Done updating. We're back online!");
+                await e.Guild.GetChannel(bot.SharedData.StartNotify.channel).ElevatedMessageAsync("Done updating. We're back online!");
                 bot.SharedData.StartNotify = default;
             }
         }

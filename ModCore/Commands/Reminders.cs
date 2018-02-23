@@ -78,7 +78,7 @@ If in doubt, just try it! You can always clear the reminders later.
                     xt.UserId == (long)ctx.User.Id).ToArray();
             if (!reminders.Any())
             {
-                await ctx.RespondAsync("You have no reminders set.");
+                await ctx.SafeRespondAsync("You have no reminders set.");
                 return;
             }
 
@@ -127,7 +127,7 @@ If in doubt, just try it! You can always clear the reminders later.
             if (pages.Count > 1)
                 await interactivity.SendPaginatedMessage(ctx.Channel, ctx.User, pages);
             else
-                await ctx.RespondAsync(embed: pages.First().Embed);
+                await ctx.ElevatedRespondAsync(embed: pages.First().Embed);
         }
 
         [Command("set"), Description(ReminderTut)]
@@ -138,30 +138,30 @@ If in doubt, just try it! You can always clear the reminders later.
             var (duration, text) = await Dates.ParseTime(dataToParse);
             if (duration == Dates.ParsingError)
             {
-                /* await ctx.RespondAsync(
+                /* await ctx.SafeRespondAsync(
                      $"Sorry, there was an error parsing your reminder.\nIf you see a developer, this info might help them: \n```\n{text}```");
                      */
-                await ctx.RespondAsync("Sorry, there was an error parsing your reminder.");
+                await ctx.SafeRespondAsync("Sorry, there was an error parsing your reminder.");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(text) || text.Length > 128)
             {
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                     "Reminder text must to be no longer than 128 characters, not empty and not whitespace.");
                 return;
             }
 #if !DEBUG
             if (duration < TimeSpan.FromSeconds(30))
             {
-                await ctx.RespondAsync("Minimum required time span to set a reminder is 30 seconds.");
+                await ctx.SafeRespondAsync("Minimum required time span to set a reminder is 30 seconds.");
                 return;
             }
 #endif
 
             if (duration > TimeSpan.FromDays(365)) // 1 year is the maximum
             {
-                await ctx.RespondAsync("Maximum allowed time span to set a reminder is 1 year.");
+                await ctx.SafeRespondAsync("Maximum allowed time span to set a reminder is 1 year.");
                 return;
             }
 
@@ -187,7 +187,7 @@ If in doubt, just try it! You can always clear the reminders later.
             // reschedule timers
             Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
             var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
-            await ctx.RespondAsync(
+            await ctx.SafeRespondAsync(
                 $"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text.BreakMentions()}");
         }
 
@@ -201,7 +201,7 @@ If in doubt, just try it! You can always clear the reminders later.
             var reminder = Timers.FindTimer(timerId, TimerActionType.Reminder, ctx.User.Id, this.Database);
             if (reminder == null)
             {
-                await ctx.RespondAsync($"Timer with specified ID (#{timerId}) was not found.");
+                await ctx.SafeRespondAsync($"Timer with specified ID (#{timerId}) was not found.");
                 return;
             }
 
@@ -211,7 +211,7 @@ If in doubt, just try it! You can always clear the reminders later.
             var duration = reminder.DispatchAt - DateTimeOffset.Now;
             var data = reminder.GetData<TimerReminderData>();
             var emoji = DiscordEmoji.FromName(ctx.Client, ":ballot_box_with_check:");
-            await ctx.RespondAsync(
+            await ctx.SafeRespondAsync(
                 $"{emoji} Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText.BreakMentions()}");
         }
 
@@ -220,17 +220,17 @@ If in doubt, just try it! You can always clear the reminders later.
         {
             await ctx.TriggerTypingAsync();
 
-            await ctx.RespondAsync("Are you sure you want to clear all your active reminders? This action cannot be undone!");
+            await ctx.SafeRespondAsync("Are you sure you want to clear all your active reminders? This action cannot be undone!");
 
             var m = await this.Interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
             if (m == null)
             {
-                await ctx.RespondAsync("Timed out.");
+                await ctx.SafeRespondAsync("Timed out.");
             }
             else if (InteractivityUtil.Confirm(m))
             {
-                await ctx.RespondAsync("Brace for impact!");
+                await ctx.SafeRespondAsync("Brace for impact!");
                 await ctx.TriggerTypingAsync();
                 using (var db = this.Database.CreateContext())
                 {
@@ -240,20 +240,20 @@ If in doubt, just try it! You can always clear the reminders later.
                     await Timers.UnscheduleTimersAsync(timers, ctx.Client, this.Database, this.Shared);
 
 
-                    await ctx.RespondAsync("Alright, cleared " + count + " timers.");
+                    await ctx.SafeRespondAsync("Alright, cleared " + count + " timers.");
                 }
 
             }
             else
             {
-                await ctx.RespondAsync("Never mind then, maybe next time.");
+                await ctx.SafeRespondAsync("Never mind then, maybe next time.");
             }
         }
 
         [Command("test"), Description("WIP.")]
         public async Task TestAsync(CommandContext ctx)
         {
-            await ctx.RespondAsync($"Timer will dispatch at: `{Shared.TimerData.DispatchTime}`, and has the message ```{Shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText.BreakMentions()}```.");
+            await ctx.SafeRespondAsync($"Timer will dispatch at: `{Shared.TimerData.DispatchTime}`, and has the message ```{Shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText.BreakMentions()}```.");
         }
     }
 }

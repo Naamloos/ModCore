@@ -9,6 +9,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using ModCore.Database;
 using ModCore.Entities;
+using ModCore.Logic;
 
 namespace ModCore.Commands
 {
@@ -34,7 +35,7 @@ namespace ModCore.Commands
         {
             await ctx.IfGuildSettingsAsync(async () =>
             {
-                var t0 = await ctx.RespondAsync(
+                var t0 = await ctx.SafeRespondAsync(
                     "Welcome to ModCore! Looks like you haven't configured your guild yet." +
                     "Would you like to go through a quick setup? (Y/N)");
 
@@ -46,7 +47,7 @@ namespace ModCore.Commands
                     !message.Message.Content.EqualsIgnoreCase("ja") &&
                     !message.Message.Content.EqualsIgnoreCase("da"))
                 {
-                    await ctx.RespondAsync(
+                    await ctx.SafeRespondAsync(
                         "OK, I won't bother you anymore. Just execute this command again if you need help configuring.");
                     await t0.DeleteAsync("modcore cleanup after itself: welcome message");
                     await message.Message.DeleteAsync(
@@ -64,7 +65,7 @@ namespace ModCore.Commands
                 }
                 catch
                 {
-                    await ctx.RespondAsync("Unfortunately, I wasn't able to create the modcore setup channel.\n" +
+                    await ctx.SafeRespondAsync("Unfortunately, I wasn't able to create the modcore setup channel.\n" +
                                            "Could you kindly create a channel called `modcore-setup` and re-run the command?\n" +
                                            "I'll set up the rest for you. This will help keep the setup process away from prying eyes.");
                     return;
@@ -74,7 +75,7 @@ namespace ModCore.Commands
                 await channel.AddOverwriteAsync(ctx.Member, Permissions.AccessChannels, Permissions.None,
                     "modcore overwrites for setup channel");
 
-                await channel.SendMessageAsync(
+                await channel.ElevatedMessageAsync(
                     "OK, now, can you create a webhook for ModCore and give me its URL?\n" +
                     "If you don't know what that is, simply say no and I'll make one for you.");
 
@@ -83,7 +84,7 @@ namespace ModCore.Commands
                 var mContent = message2.Message.Content;
                 if (!mContent.Contains("discordapp.com/api/webhooks/"))
                 {
-                    await channel.SendMessageAsync("Alright, I'll make a webhook for you then. Sit tight...");
+                    await channel.ElevatedMessageAsync("Alright, I'll make a webhook for you then. Sit tight...");
                     DiscordChannel logChannel;
                     try
                     {
@@ -94,7 +95,7 @@ namespace ModCore.Commands
                     }
                     catch
                     {
-                        await ctx.RespondAsync("Unfortunately, I wasn't able to create the modcore logging channel.\n" +
+                        await ctx.SafeRespondAsync("Unfortunately, I wasn't able to create the modcore logging channel.\n" +
                                                "Could you kindly create a channel called `modlog` and re-run the command?\n" +
                                                "I'll set up the rest for you. This is to setup a channel for the actionlog to post into.");
                         return;
@@ -118,7 +119,7 @@ namespace ModCore.Commands
                     cfg.ActionLog.WebhookToken = tokens[1];
                     await ctx.SetGuildSettingsAsync(cfg);
                 }
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                         "Webhook configured. Looks like you're all set! ModCore has been set up.");
 
             },
@@ -240,7 +241,7 @@ namespace ModCore.Commands
 
                     var suggestions = gcfg.SpellingHelperEnabled;
                     embed.AddField("Command Suggestions",
-                        suggestions ? $"Enabled" : "Disabled", true);
+                        suggestions ? "Enabled" : "Disabled", true);
 
                     var joinlog = gcfg.JoinLog;
                     embed.AddField("Join Logging",
@@ -272,7 +273,7 @@ namespace ModCore.Commands
                             : "Disabled"
                             , true);
 
-                    await ctx.RespondAsync(embed: embed.Build());
+                    await ctx.ElevatedRespondAsync(embed: embed.Build());
                 });
         }
 
@@ -284,7 +285,7 @@ namespace ModCore.Commands
                 var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
                 if (cfg == null)
                 {
-                    await ctx.RespondAsync("This guild is not configured.");
+                    await ctx.SafeRespondAsync("This guild is not configured.");
                     return;
                 }
 
@@ -294,14 +295,14 @@ namespace ModCore.Commands
                 var numss = string.Join(", ", nums);
                 var numst = string.Join(" ", nums.Reverse());
 
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                     $"You are about to reset the configuration for this guild. To confirm, type these numbers in reverse order, using single space as separator: {numss}. You have 45 seconds.");
                 var iv = ctx.Client.GetInteractivity();
                 var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && xm.Content == numst,
                     TimeSpan.FromSeconds(45));
                 if (msg == null)
                 {
-                    await ctx.RespondAsync("Operation aborted.");
+                    await ctx.SafeRespondAsync("Operation aborted.");
                     return;
                 }
 
@@ -309,7 +310,7 @@ namespace ModCore.Commands
                 await db.SaveChangesAsync();
             }
 
-            await ctx.RespondAsync("Configuration reset.");
+            await ctx.SafeRespondAsync("Configuration reset.");
         }
 
         [Command("prefix"), Aliases("pfix"),
@@ -326,7 +327,7 @@ namespace ModCore.Commands
 
             await ctx.WithGuildSettings(cfg => { cfg.Prefix = prefix; });
 
-            await ctx.RespondAsync(prefix == null
+            await ctx.SafeRespondAsync(prefix == null
                 ? "Prefix restored to default."
                 : $"Prefix changed to: \"{prefix}\".");
         }
@@ -340,7 +341,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.SpellingHelperEnabled = true;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("Enabled command suggestions.");
+                await ctx.SafeRespondAsync("Enabled command suggestions.");
             }
 
             [Command("disable"), Aliases("off"), Description("Disables command suggestions for this guild.")]
@@ -349,7 +350,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.SpellingHelperEnabled = true;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("Disabled command suggestions.");
+                await ctx.SafeRespondAsync("Disabled command suggestions.");
             }
         }
 
@@ -360,7 +361,7 @@ namespace ModCore.Commands
         {
             await ctx.WithGuildSettings(cfg => cfg.MuteRoleId = role == null ? 0 : role.Id);
 
-            await ctx.RespondAsync(role == null ? "Muting disabled." : $"Mute role set to {role.Mention}.");
+            await ctx.SafeRespondAsync(role == null ? "Muting disabled." : $"Mute role set to {role.Mention}.");
         }
 
 
@@ -393,33 +394,11 @@ namespace ModCore.Commands
                     await ctx.WithGuildSettings(cfg =>
                     {
                         ref var cv = ref func(cfg.Linkfilter);
-                        switch (r.ToLower())
-                        {
-                            case "on":
-                            case "enable":
-                            case "enabled":
-                            case "1":
-                            case "true":
-                            case "yes":
-                            case "y":
-                                cv = true;
-                                break;
-                            case "off":
-                            case "disable":
-                            case "disabled":
-                            case "0":
-                            case "false":
-                            case "no":
-                            case "n":
-                                cv = false;
-                                break;
-                            default:
-                                cv = !cv;
-                                break;
-                        }
-
-                        return ctx.Message.RespondAsync(
-                            $"{(cv ? "Enabled" : "Disabled")} this module.");
+                        
+                        if (AugmentedBoolConverter.TryConvert(r, ctx, out var b)) cv = b;
+                        else cv = !cv;
+                        
+                        return ctx.ElevatedRespondAsync($"{(cv ? "Enabled" : "Disabled")} this module.");
                     });
                     await ctx.Message.CreateReactionAsync(CheckMark);
                 }
@@ -575,7 +554,7 @@ namespace ModCore.Commands
                     var inv = await ctx.Client.GetInviteByCodeAsync(invite);
                     if (inv == null)
                     {
-                        await ctx.RespondAsync("Invite seems to be invalid. Maybe the bot is banned.");
+                        await ctx.SafeRespondAsync("Invite seems to be invalid. Maybe the bot is banned.");
                         return;
                     }
 
@@ -595,7 +574,7 @@ namespace ModCore.Commands
                     var inv = await ctx.Client.GetInviteByCodeAsync(invite);
                     if (inv == null)
                     {
-                        await ctx.RespondAsync("Invite seems to be invalid. Maybe the bot is banned.");
+                        await ctx.SafeRespondAsync("Invite seems to be invalid. Maybe the bot is banned.");
                         return;
                     }
 
@@ -617,14 +596,14 @@ namespace ModCore.Commands
             public async Task EnableAsync(CommandContext ctx)
             {
                 await ctx.WithGuildSettings(cfg => cfg.RoleState.Enable = true);
-                await ctx.RespondAsync("Role State enabled.");
+                await ctx.SafeRespondAsync("Role State enabled.");
             }
 
             [Command("disable"), Aliases("off"), Description("Disables Role State for this guild.")]
             public async Task DisableAsync(CommandContext ctx)
             {
                 await ctx.WithGuildSettings(cfg => cfg.RoleState.Enable = false);
-                await ctx.RespondAsync("Role State disabled.");
+                await ctx.SafeRespondAsync("Role State disabled.");
             }
 
             [Group("role"), Aliases("r"), Description("Role exemption management commands.")]
@@ -731,14 +710,14 @@ namespace ModCore.Commands
             public async Task EnableAsync(CommandContext ctx)
             {
                 await ctx.WithGuildSettings(cfg => cfg.InvisiCop.Enable = true);
-                await ctx.RespondAsync("InvisiCop enabled.");
+                await ctx.SafeRespondAsync("InvisiCop enabled.");
             }
 
             [Command("disable"), Aliases("off"), Description("Disables InvisiCop for this guild.")]
             public async Task DisableAsync(CommandContext ctx)
             {
                 await ctx.WithGuildSettings(cfg => cfg.InvisiCop.Enable = false);
-                await ctx.RespondAsync("InvisiCop disabled.");
+                await ctx.SafeRespondAsync("InvisiCop disabled.");
             }
         }
 
@@ -751,7 +730,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.ActionLog.Enable = true;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                     $"ActionLog enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config actionlog setwebhook`");
             }
 
@@ -761,7 +740,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.ActionLog.Enable = false;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("ActionLog disabled.");
+                await ctx.SafeRespondAsync("ActionLog disabled.");
             }
 
             [Command("setwebhook"), Aliases("swh"),
@@ -772,7 +751,7 @@ namespace ModCore.Commands
                 cfg.ActionLog.WebhookId = id;
                 cfg.ActionLog.WebhookToken = token;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("ActionLog webhook configured.");
+                await ctx.SafeRespondAsync("ActionLog webhook configured.");
             }
         }
 
@@ -785,7 +764,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.AutoRole.Enable = true;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                     $"AutoRole enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config autorole setrole`");
             }
 
@@ -795,7 +774,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.AutoRole.Enable = false;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("AutoRole disabled.");
+                await ctx.SafeRespondAsync("AutoRole disabled.");
             }
 
             [Command("setrole"), Aliases("sr"),
@@ -805,7 +784,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.AutoRole.RoleId = (long)role.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("AutoRole role configured.");
+                await ctx.SafeRespondAsync("AutoRole role configured.");
             }
         }
 
@@ -832,13 +811,13 @@ namespace ModCore.Commands
                         vb = CommandErrorVerbosity.Exception;
                         break;
                     default:
-                        await ctx.RespondAsync(
+                        await ctx.SafeRespondAsync(
                             "Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
                         return;
                 }
                 cfg.CommandError.Chat = vb;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync($"Error reporting verbosity in chat set to `{verbosity}`.");
+                await ctx.SafeRespondAsync($"Error reporting verbosity in chat set to `{verbosity}`.");
             }
 
             [Command("log"), Aliases("a"), Description("Sets command error reporting for this guild (in ActionLog).")]
@@ -861,18 +840,18 @@ namespace ModCore.Commands
                         if (ctx.Client.CurrentApplication.Owner.Id == ctx.Member.Id)
                             vb = CommandErrorVerbosity.Exception;
                         else
-                            await ctx.RespondAsync(
+                            await ctx.SafeRespondAsync(
                                 "Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
                         break;
                     default:
-                        await ctx.RespondAsync(
+                        await ctx.SafeRespondAsync(
                             "Unsupported verbosity level.\nSupported levels: `none`, `name`" 
                             + ((ctx.Client.CurrentApplication.Owner.Id == ctx.Member.Id)? ", `namedesc` or `exception`" : "or`namedesc`"));
                         return;
                 }
                 cfg.CommandError.ActionLog = vb;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync($"Error reporting verbosity in ActionLog set to `{verbosity}`.");
+                await ctx.SafeRespondAsync($"Error reporting verbosity in ActionLog set to `{verbosity}`.");
             }
         }
 
@@ -885,7 +864,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.JoinLog.Enable = true;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                     $"Joinlog enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config joinlog setchannel`");
             }
 
@@ -895,7 +874,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.JoinLog.Enable = false;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("JoinLog disabled.");
+                await ctx.SafeRespondAsync("JoinLog disabled.");
             }
 
             [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's JoinLog.")]
@@ -904,7 +883,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.JoinLog.ChannelId = (long)channel.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("JoinLog channel configured.");
+                await ctx.SafeRespondAsync("JoinLog channel configured.");
             }
         }
 
@@ -921,11 +900,11 @@ namespace ModCore.Commands
                 }
                 else
                 {
-                    await ctx.RespondAsync("This role has already been added!");
+                    await ctx.SafeRespondAsync("This role has already been added!");
                     return;
                 }
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync($"Added role `{role.Name}` with ID `{role.Id}` to SelfRoles.");
+                await ctx.SafeRespondAsync($"Added role `{role.Name}` with ID `{role.Id}` to SelfRoles.");
             }
 
             [Command("remove"), Aliases("r"), Description("Removes roles from SelfRole list")]
@@ -938,11 +917,11 @@ namespace ModCore.Commands
                 }
                 else
                 {
-                    await ctx.RespondAsync("This role isn't in SelfRoles!");
+                    await ctx.SafeRespondAsync("This role isn't in SelfRoles!");
                     return;
                 }
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync($"Removed role `{role.Name}` with ID `{role.Id}` from SelfRoles.");
+                await ctx.SafeRespondAsync($"Removed role `{role.Name}` with ID `{role.Id}` from SelfRoles.");
             }
         }
 
@@ -955,7 +934,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.Starboard.Enable = true;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync(
+                await ctx.SafeRespondAsync(
                     $"Starboard enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config starboard setchannel`");
             }
 
@@ -965,7 +944,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.Starboard.Enable = false;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("Starboard disabled.");
+                await ctx.SafeRespondAsync("Starboard disabled.");
             }
 
             [Command("allownsfw"), Aliases("nsfw"), Description("Sets whether or not to allow NSFW stars in this guild.")]
@@ -974,7 +953,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.Starboard.AllowNSFW = allow;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync($"Set allow NSFW to: {allow}.");
+                await ctx.SafeRespondAsync($"Set allow NSFW to: {allow}.");
             }
 
             [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's Starboard.")]
@@ -983,16 +962,16 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.Starboard.ChannelId = (long)channel.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("Starboard channel configured.");
+                await ctx.SafeRespondAsync("Starboard channel configured.");
             }
 
             [Command("setemoji"), Aliases("se"), Description("Sets the Starboard emoji for this guild.")]
             public async Task SetEmojiAsync(CommandContext ctx, [Description("Starboard emoji")]DiscordEmoji emoji)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                cfg.Starboard.Emoji = new GuildStarboardEmoji() { EmojiId = (long)emoji.Id, EmojiName = emoji.Name };
+                cfg.Starboard.Emoji = new GuildStarboardEmoji { EmojiId = (long)emoji.Id, EmojiName = emoji.Name };
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync($"Starboard emoji set to {emoji.ToString()}.");
+                await ctx.SafeRespondAsync($"Starboard emoji set to {emoji}.");
             }
         }
 
@@ -1005,7 +984,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.GlobalWarn.Enable = true;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("GlobalWarn enabled.");
+                await ctx.SafeRespondAsync("GlobalWarn enabled.");
             }
 
             [Command("disable"), Aliases("off"), Description("Disables GlobalWarn for this guild.")]
@@ -1014,7 +993,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.GlobalWarn.Enable = false;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("GlobalWarn disabled.");
+                await ctx.SafeRespondAsync("GlobalWarn disabled.");
             }
 
             [Command("changemode"), Aliases("cm"),
@@ -1022,7 +1001,7 @@ namespace ModCore.Commands
             public async Task SetRoleAsync(CommandContext ctx)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                await ctx.RespondAsync("__**Available GlobalWarn modes:**__\n1. None\n2. Owner (Warns the Server Owner if someone on the GlobalWarn list joins the server)\n3. Joinlog (Sends the warning to the JoinLog channel)\n\nType an option.");
+                await ctx.SafeRespondAsync("__**Available GlobalWarn modes:**__\n1. None\n2. Owner (Warns the Server Owner if someone on the GlobalWarn list joins the server)\n3. Joinlog (Sends the warning to the JoinLog channel)\n\nType an option.");
                 var iv = ctx.Client.GetInteractivity();
 
                 var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id &&
@@ -1030,7 +1009,7 @@ namespace ModCore.Commands
                 TimeSpan.FromSeconds(45));
                 if (msg == null)
                 {
-                    await ctx.RespondAsync("Operation aborted.");
+                    await ctx.SafeRespondAsync("Operation aborted.");
                     return;
                 }
                 switch (msg.Message.Content)
@@ -1049,7 +1028,7 @@ namespace ModCore.Commands
                         break;
                 }
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("GlobalWarn mode configured to " + cfg.GlobalWarn.WarnLevel.ToString());
+                await ctx.SafeRespondAsync("GlobalWarn mode configured to " + cfg.GlobalWarn.WarnLevel);
             }
         }
 
@@ -1062,7 +1041,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.MessageLog.Enable = true;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("MessageLog enabled.");
+                await ctx.SafeRespondAsync("MessageLog enabled.");
             }
 
             [Command("disable"), Aliases("off"), Description("Disables MessageLog for this guild.")]
@@ -1071,7 +1050,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.MessageLog.Enable = false;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("MessageLog disabled.");
+                await ctx.SafeRespondAsync("MessageLog disabled.");
             }
 
             [Command("changemode"), Aliases("cm"),
@@ -1079,7 +1058,7 @@ namespace ModCore.Commands
             public async Task SetRoleAsync(CommandContext ctx)
             {
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                await ctx.RespondAsync("__**Available MessageLog modes:**__\n1. None\n2. Delete (Logs any message deletions in the specified channel)\n3. Edit (Logs both message deletions and message edits in the specified channel)\n\nType an option.");
+                await ctx.SafeRespondAsync("__**Available MessageLog modes:**__\n1. None\n2. Delete (Logs any message deletions in the specified channel)\n3. Edit (Logs both message deletions and message edits in the specified channel)\n\nType an option.");
                 var iv = ctx.Client.GetInteractivity();
 
                 var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id &&
@@ -1087,7 +1066,7 @@ namespace ModCore.Commands
                 TimeSpan.FromSeconds(45));
                 if (msg == null)
                 {
-                    await ctx.RespondAsync("Operation aborted.");
+                    await ctx.SafeRespondAsync("Operation aborted.");
                     return;
                 }
                 switch (msg.Message.Content)
@@ -1106,7 +1085,7 @@ namespace ModCore.Commands
                         break;
                 }
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("MessageLog mode configured to " + cfg.MessageLog.LogLevel.ToString());
+                await ctx.SafeRespondAsync("MessageLog mode configured to " + cfg.MessageLog.LogLevel);
             }
 
             [Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for the MessageLog.")]
@@ -1115,7 +1094,7 @@ namespace ModCore.Commands
                 var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
                 cfg.MessageLog.ChannelId = (long)channel.Id;
                 await ctx.SetGuildSettingsAsync(cfg);
-                await ctx.RespondAsync("MessageLog channel configured.");
+                await ctx.SafeRespondAsync("MessageLog channel configured.");
             }
         }
     }

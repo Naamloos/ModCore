@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ModCore.Database
 {
-    public partial class DatabaseTag
+    public class DatabaseTag
     {
         public int Id { get; set; }
         public long ChannelId { get; set; }
