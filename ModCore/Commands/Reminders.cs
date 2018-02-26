@@ -15,9 +15,9 @@ using ModCore.Logic;
 
 namespace ModCore.Commands
 {
-    [Group("reminder", CanInvokeWithoutSubcommand = true), Aliases("remindme"), Description("Commands for managing your reminders.")]
-    public class Reminders
-    {
+    [Group("reminder"), Aliases("remindme"), Description("Commands for managing your reminders.")]
+    public class Reminders : BaseCommandModule
+	{
         private const string ReminderTut = @"
 Sets a new reminder. The time span parser is fluent and will understand many different formats of reminders:
 
@@ -61,7 +61,7 @@ If in doubt, just try it! You can always clear the reminders later.
             this.Interactivity = interactive;
         }
 
-        [Description(ReminderTut)]
+        [GroupCommand, Description(ReminderTut)]
         public async Task ExecuteGroupAsync(CommandContext ctx, [RemainingText, Description("When the reminder is to be sent.")] string dataToParse)
         {
             await SetAsync(ctx, dataToParse);

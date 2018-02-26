@@ -10,11 +10,11 @@
     <DSharpPlusVersion>4.0.0-beta-00368</DSharpPlusVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.0.0-beta-00400" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-beta-00400" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-beta-00400" />
-    <PackageReference Include="DSharpPlus.ModernEmbedBuilder" Version="1.0.62" />
-    <PackageReference Include="DSharpPlus.WebSocket.WebSocket4NetCore" Version="4.0.0-beta-00400" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-beta-00426" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-beta-00426" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-beta-00426" />
+    <PackageReference Include="DSharpPlus.ModernEmbedBuilder" Version="1.0.86" />
+    <PackageReference Include="DSharpPlus.WebSocket.WebSocket4NetCore" Version="4.0.0-beta-00426" />
     <PackageReference Include="F23.StringSimilarity" Version="3.0.0" />
     <PackageReference Include="Humanizer.Core" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0" />

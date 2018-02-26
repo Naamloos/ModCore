@@ -13,8 +13,8 @@ using System.Threading.Tasks;
 namespace ModCore.Commands
 {
     [Group("star"), Aliases("s"), Description("Star commands.")]
-    public class Star
-    {
+    public class Star : BaseCommandModule
+	{
         public SharedData Shared { get; }
         public InteractivityExtension Interactivity { get; }
         public DatabaseContextBuilder Database { get; }

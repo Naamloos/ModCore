@@ -13,7 +13,7 @@ using DSharpPlus;
 namespace ModCore.Commands
 {
     [Group("toxicity"), Aliases("toxic", "tox", "t"), RequireUserPermissions(Permissions.ManageMessages)]
-    public class Toxicity
+    public class Toxicity : BaseCommandModule
     {
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
@@ -33,7 +33,7 @@ namespace ModCore.Commands
         public async Task AnalyzeAsync(CommandContext ctx, [Description("Member to calculate toxicity from")]DiscordMember member, 
             [Description("Channel to calculate in")]DiscordChannel channel)
         {
-            var msg = await channel.GetMessagesBeforeAsync(await channel.GetMessageAsync(channel.LastMessageId), 100);
+            var msg = await channel.GetMessagesBeforeAsync(channel.LastMessageId, 100);
             var msgstr = msg.Where(x => x.Author.Id == member.Id).Select(x => x.Content);
             var str = string.Join('\n', msgstr);
             var a = await Shared.Perspective.RequestAnalysis(str);

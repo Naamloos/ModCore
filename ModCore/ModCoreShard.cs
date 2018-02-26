@@ -91,7 +91,7 @@ namespace ModCore
             this.Commands = Client.UseCommandsNext(new CommandsNextConfiguration
             {
                 CaseSensitive = false,
-                EnableDefaultHelp = false,
+                EnableDefaultHelp = true,
                 EnableDms = false,
                 EnableMentionPrefix = true,
                 PrefixResolver = this.GetPrefixPositionAsync,

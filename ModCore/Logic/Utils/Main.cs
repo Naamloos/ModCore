@@ -122,22 +122,22 @@ namespace ModCore.Logic.Utils
             var everyoneOverwrites = chan.PermissionOverwrites.FirstOrDefault(xo => xo.Id == everyoneRole.Id);
             if (everyoneOverwrites != null)
             {
-                perms &= ~everyoneOverwrites.Deny;
-                perms |= everyoneOverwrites.Allow;
+                perms &= ~everyoneOverwrites.Denied;
+                perms |= everyoneOverwrites.Allowed;
             }
 
             // assign channel permission overwrites for member's roles (explicit deny)
-            perms &= ~mbRoleOverrides.Aggregate(def, (c, overs) => c | overs.Deny);
+            perms &= ~mbRoleOverrides.Aggregate(def, (c, overs) => c | overs.Denied);
             // assign channel permission overwrites for member's roles (explicit allow)
-            perms |= mbRoleOverrides.Aggregate(def, (c, overs) => c | overs.Allow);
+            perms |= mbRoleOverrides.Aggregate(def, (c, overs) => c | overs.Allowed);
 
             // channel overrides for just this member
             var mbOverrides = chan.PermissionOverwrites.FirstOrDefault(xo => xo.Id == mbr.Id);
             if (mbOverrides == null) return perms;
 
             // assign channel permission overwrites for just this member
-            perms &= ~mbOverrides.Deny;
-            perms |= mbOverrides.Allow;
+            perms &= ~mbOverrides.Denied;
+            perms |= mbOverrides.Allowed;
 
             return perms;
         }
@@ -151,11 +151,11 @@ namespace ModCore.Logic.Utils
                     channel.PermissionOverwrites.FirstOrDefault(e => e.Type == OverwriteType.Role && e.Id == role.Id);
                 if (roleOverwrite != null)
                 {
-                    if (!roleOverwrite.Deny.HasPermission(Permissions.SendMessages) ||
-                        roleOverwrite.Allow.HasPermission(Permissions.SendMessages))
+                    if (!roleOverwrite.Denied.HasPermission(Permissions.SendMessages) ||
+                        roleOverwrite.Allowed.HasPermission(Permissions.SendMessages))
                     {
-                        await channel.AddOverwriteAsync(role, roleOverwrite.Allow & ~Permissions.SendMessages,
-                            roleOverwrite.Deny | Permissions.SendMessages,
+                        await channel.AddOverwriteAsync(role, roleOverwrite.Allowed & ~Permissions.SendMessages,
+                            roleOverwrite.Denied | Permissions.SendMessages,
                             $"ModCore automatically replacing denying SendMessages permission for {role.Name} in {channel.Name}");
                     }
                 }

@@ -206,15 +206,15 @@ namespace ModCore.Listeners
                         ChannelId = (long)ea.ChannelAfter.Id,
                         GuildId = (long)ea.Guild.Id,
                         MemberId = xid,
-                        PermsAllow = (long)os[xid].Allow,
-                        PermsDeny = (long)os[xid].Deny
+                        PermsAllow = (long)os[xid].Allowed,
+                        PermsDeny = (long)os[xid].Denied
                     }));
 
                 if (mod.Any())
                     foreach (var xid in mod)
                     {
-                        chperms[xid].PermsAllow = (long)os[xid].Allow;
-                        chperms[xid].PermsDeny = (long)os[xid].Deny;
+                        chperms[xid].PermsAllow = (long)os[xid].Allowed;
+                        chperms[xid].PermsDeny = (long)os[xid].Denied;
 
                         db.RolestateOverrides.Update(chperms[xid]);
                     }
@@ -256,8 +256,8 @@ namespace ModCore.Listeners
                             ChannelId = (long)chn.Id,
                             GuildId = (long)chn.Guild.Id,
                             MemberId = (long)xo.Id,
-                            PermsAllow = (long)xo.Allow,
-                            PermsDeny = (long)xo.Deny
+                            PermsAllow = (long)xo.Allowed,
+                            PermsDeny = (long)xo.Denied
                         }));
                     }
                     else
@@ -279,15 +279,15 @@ namespace ModCore.Listeners
                                 ChannelId = (long)chn.Id,
                                 GuildId = (long)ea.Guild.Id,
                                 MemberId = xid,
-                                PermsAllow = (long)os[xid].Allow,
-                                PermsDeny = (long)os[xid].Deny
+                                PermsAllow = (long)os[xid].Allowed,
+                                PermsDeny = (long)os[xid].Denied
                             }));
 
                         if (any |= mod.Any())
                             foreach (var xid in mod)
                             {
-                                cps[xid].PermsAllow = (long)os[xid].Allow;
-                                cps[xid].PermsDeny = (long)os[xid].Deny;
+                                cps[xid].PermsAllow = (long)os[xid].Allowed;
+                                cps[xid].PermsDeny = (long)os[xid].Denied;
 
                                 db.RolestateOverrides.Update(cps[xid]);
                             }

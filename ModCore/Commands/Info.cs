@@ -11,9 +11,9 @@ using DSharpPlus;
 
 namespace ModCore.Commands
 {
-    [Group("info", CanInvokeWithoutSubcommand = true), Aliases("i"), Description("Information commands")]
-    public class Info
-    {
+    [Group("info"), Aliases("i"), Description("Information commands")]
+    public class Info : BaseCommandModule
+	{
         public SharedData Shared { get; }
         public InteractivityExtension Interactivity { get; }
 
@@ -23,6 +23,7 @@ namespace ModCore.Commands
             this.Interactivity = interactive;
         }
 
+		[GroupCommand]
         public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Member to get information about.")]DiscordMember usr)
         {
             await UserInfoAsync(ctx, usr);

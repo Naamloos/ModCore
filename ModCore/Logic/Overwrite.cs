@@ -28,8 +28,8 @@ namespace ModCore.Logic
         public Overwrite(DiscordOverwrite ov, DiscordGuild guild)
         {
             this.Type = ov.Type;
-            this.Allow = ov.Allow;
-            this.Deny = ov.Deny;
+            this.Allow = ov.Allowed;
+            this.Deny = ov.Denied;
             this.Id = ov.Id;
             _guild = guild;
         }

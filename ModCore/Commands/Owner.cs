@@ -15,8 +15,8 @@ using System.Collections.Generic;
 namespace ModCore.Commands
 {
     [Group("owner"), Aliases("o"), Hidden]
-    public class Owner
-    {
+    public class Owner : BaseCommandModule
+	{
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
         public Owner(SharedData shared, DatabaseContextBuilder db)

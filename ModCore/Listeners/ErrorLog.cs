@@ -48,7 +48,7 @@ namespace ModCore.Listeners
                 
                 // TODO: this only gives the first invalid token, so "a b" will just recognize as "a".
                 //       it should probably take into consideration all the tokens.
-                var attemptedName = commandNotFound.Command;
+                var attemptedName = commandNotFound.CommandName;
                 try
                 {
                     var commands = bot.Commands.RegisteredCommands.SelectMany(CommandSelector);
@@ -130,7 +130,7 @@ namespace ModCore.Listeners
                         st = st.Length > 1000 ? st.Substring(0, 1000) : st;
                         var b = new DiscordEmbedBuilder().WithDescription(st);
                         await ctx.LogMessageAsync(
-                            $"**Command {qualifiedName} {e.Command.Arguments} errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}",
+                            $"**Command {qualifiedName} {e.Command.Overloads.First().Arguments} errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}",
                             b);
                         break;
                 }

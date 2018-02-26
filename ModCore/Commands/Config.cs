@@ -12,12 +12,12 @@ using ModCore.Entities;
 
 namespace ModCore.Commands
 {
-    [Group("config", CanInvokeWithoutSubcommand = true)]
+    [Group("config")]
     [Aliases("cfg")]
     [Description("Guild configuration options. Invoking without a subcommand will list current guild's settings.")]
     [RequirePermissions(Permissions.ManageGuild)]
-    public class Config
-    {
+    public class Config : BaseCommandModule
+	{
         public static DiscordEmoji CheckMark { get; } = DiscordEmoji.FromUnicode("✅");
 
         public DatabaseContextBuilder Database { get; }
@@ -29,7 +29,7 @@ namespace ModCore.Commands
             this.Interactivity = interactive;
         }
 
-        [Description("Starts the ModCore configuration wizard. You probably want to do this first!")]
+        [GroupCommand, Description("Starts the ModCore configuration wizard. You probably want to do this first!")]
         public async Task ExecuteGroupAsync(CommandContext ctx)
         {
             await ctx.IfGuildSettingsAsync(async () =>
@@ -712,8 +712,8 @@ namespace ModCore.Commands
                                 ChannelId = (long)chn.Id,
                                 GuildId = (long)chn.Guild.Id,
                                 MemberId = (long)xo.Id,
-                                PermsAllow = (long)xo.Allow,
-                                PermsDeny = (long)xo.Deny
+                                PermsAllow = (long)xo.Allowed,
+                                PermsDeny = (long)xo.Denied
                             }));
                             await db.SaveChangesAsync();
                         }

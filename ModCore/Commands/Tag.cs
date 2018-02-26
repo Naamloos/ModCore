@@ -15,9 +15,9 @@ using System.Linq;
 
 namespace ModCore.Commands
 {
-    [Group("tag", CanInvokeWithoutSubcommand = true)]
-    public class Tag
-    {
+    [Group("tag")]
+    public class Tag : BaseCommandModule
+	{
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
         public InteractivityExtension Interactivity { get; }
@@ -32,7 +32,8 @@ namespace ModCore.Commands
             this.StartTimes = starttimes;
         }
 
-        public async Task ExecuteGroupAsync(CommandContext ctx, 
+		[GroupCommand]
+		public async Task ExecuteGroupAsync(CommandContext ctx, 
             [RemainingText, Description("Tag to get information about. Prefix with a channel to get it from a different channel.")] string args)
         {
             List<string> s = (args.Split(' ')).ToList();
