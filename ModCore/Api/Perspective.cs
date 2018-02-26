@@ -1,12 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Net.Http;
 using Newtonsoft.Json;
-using System.IO;
-using ModCore.Entities;
-using System;
-using System.Linq;
 
 namespace ModCore.Api
 {
@@ -41,9 +37,9 @@ namespace ModCore.Api
 
         public async Task<PerspectiveAnalysisResponse> RequestAnalysis(string message)
         {
-            var RequestPayload = new PerspectiveAnalysisRequest()
+            var RequestPayload = new PerspectiveAnalysisRequest
             {
-                Comment = new PerspectiveComment()
+                Comment = new PerspectiveComment
                 {
                     Text = message
                 }
@@ -67,13 +63,13 @@ namespace ModCore.Api
         public PerspectiveContext Context = new PerspectiveContext();
 
         [JsonProperty("requestedAttributes")]
-        public Dictionary<string, PerspectiveAttributes> RequestedAttributes = new Dictionary<string, PerspectiveAttributes>()
+        public Dictionary<string, PerspectiveAttributes> RequestedAttributes = new Dictionary<string, PerspectiveAttributes>
         {
-            { "TOXICITY", new PerspectiveAttributes(){ ScoreTreshold = null, ScoreType = null } }
+            { "TOXICITY", new PerspectiveAttributes { ScoreTreshold = null, ScoreType = null } }
         };
 
         [JsonProperty("languages")]
-        public List<string> Languages = new List<string>() { "en" };
+        public List<string> Languages = new List<string> { "en" };
 
         [JsonProperty("doNotStore")]
         public bool DoNotStore = true;
@@ -138,9 +134,9 @@ namespace ModCore.Api
     public class SpanScore
     {
         [JsonProperty("begin")]
-        public int Begin = 0;
+        public int Begin;
         [JsonProperty("end")]
-        public int End = 0;
+        public int End;
         [JsonProperty("score")]
         public Score Score;
     }
@@ -148,7 +144,7 @@ namespace ModCore.Api
     public class Score
     {
         [JsonProperty("value")]
-        public float Value = 0.0f;
+        public float Value;
 
         [JsonProperty("type")]
         public string Type = "";

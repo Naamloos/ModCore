@@ -1,6 +1,6 @@
 ﻿namespace ModCore.Database
 {
-    public partial class DatabaseModNote
+    public class DatabaseModNote
     {
         public int Id { get; set; }
         public long MemberId { get; set; }

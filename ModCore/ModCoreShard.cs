@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Net.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
-using System.Runtime.InteropServices;
-using DSharpPlus.Net.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
 
 namespace ModCore
 {
@@ -71,7 +70,7 @@ namespace ModCore
                 Console.WriteLine(args.Exception);
             };
 
-            this.Interactivity = Client.UseInteractivity(new InteractivityConfiguration()
+            this.Interactivity = Client.UseInteractivity(new InteractivityConfiguration
             {
                 PaginationBehavior = TimeoutBehaviour.DeleteReactions,
                 PaginationTimeout = TimeSpan.FromSeconds(30),

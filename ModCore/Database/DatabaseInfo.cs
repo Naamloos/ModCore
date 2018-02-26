@@ -1,6 +1,6 @@
 ﻿namespace ModCore.Database
 {
-    public partial class DatabaseInfo
+    public class DatabaseInfo
     {
         public int Id { get; set; }
         public string MetaKey { get; set; }

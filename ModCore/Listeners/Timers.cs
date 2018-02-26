@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,7 +9,6 @@ using DSharpPlus.EventArgs;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
-using System.Collections.Generic;
 
 namespace ModCore.Listeners
 {
@@ -93,14 +93,19 @@ namespace ModCore.Listeners
                 {
                     chn = await client.GetChannelAsync((ulong)timer.ChannelId);
                 }
-                catch { }
+                catch
+                {
+                    return;
+                }
+
                 if (chn == null)
                     return;
 
                 var data = timer.GetData<TimerReminderData>();
                 var emoji = DiscordEmoji.FromName(client, ":alarm_clock:");
-                var msg = $"{emoji} <@!{(ulong)timer.UserId}>, you wanted to be reminded of the following:\n\n{data.ReminderText}";
-                await chn.SendMessageAsync(msg);
+                var user = (ulong)timer.UserId;
+                var msg = $"{emoji} <@!{user}>, you wanted to be reminded of the following:\n\n{data.ReminderText}";
+                await chn.SafeMessageAsync(msg, Sanitization.IsPrivileged(await chn.Guild.GetMemberAsync(user), chn));
             }
             else if (timer.ActionType == TimerActionType.Unban)
             {
@@ -109,15 +114,18 @@ namespace ModCore.Listeners
                 {
                     using (var db = tdata.Database.CreateContext())
                     {
-                        var Guild = client.Guilds[(ulong)timer.GuildId];
+                        var guild = client.Guilds[(ulong)timer.GuildId];
                         try
                         {
-                            await Guild.UnbanMemberAsync((ulong)data.UserId);
+                            await guild.UnbanMemberAsync((ulong) data.UserId);
                         }
-                        catch (Exception) { }
+                        catch
+                        {
+                            // ignored
+                        }
 
-                        var settings = Guild.GetGuildSettings(db);
-                        await client.LogAutoActionAsync(Guild, db, $"Member unbanned: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
+                        var settings = guild.GetGuildSettings(db);
+                        await client.LogAutoActionAsync(guild, db, $"Member unbanned: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
                     }
                 }
             }
@@ -128,27 +136,27 @@ namespace ModCore.Listeners
                 {
                     using (var db = tdata.Database.CreateContext())
                     {
-                        var Guild = client.Guilds[(ulong)timer.GuildId];
-                        var Member = await Guild.GetMemberAsync((ulong)data.UserId);
-                        var Role = (DiscordRole)null;
+                        var guild = client.Guilds[(ulong)timer.GuildId];
+                        var member = await guild.GetMemberAsync((ulong)data.UserId);
+                        var role = (DiscordRole)null;
                         try
                         {
-                            Role = Guild.GetRole((ulong)data.MuteRoleId);
+                            role = guild.GetRole((ulong)data.MuteRoleId);
                         }
                         catch (Exception)
                         {
                             try
                             {
-                                Role = Guild.GetRole(Guild.GetGuildSettings(db).MuteRoleId);
+                                role = guild.GetRole(guild.GetGuildSettings(db).MuteRoleId);
                             }
                             catch (Exception)
                             {
-                                await client.LogAutoActionAsync(Guild, db, $"**[IMPORTANT]**\nFailed to unmute member: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})\nMute role does not exist!");
+                                await client.LogAutoActionAsync(guild, db, $"**[IMPORTANT]**\nFailed to unmute member: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})\nMute role does not exist!");
                                 return;
                             }
                         }
-                        await Member.RevokeRoleAsync(Role, "");
-                        await client.LogAutoActionAsync(Guild, db, $"Member unmuted: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
+                        await member.RevokeRoleAsync(role, "");
+                        await client.LogAutoActionAsync(guild, db, $"Member unmuted: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
                     }
                 }
             }
@@ -159,11 +167,11 @@ namespace ModCore.Listeners
                 {
                     using (var db = tdata.Database.CreateContext())
                     {
-                        var Guild = client.Guilds[(ulong)timer.GuildId];
-                        var Channel = Guild.GetChannel((ulong)data.ChannelId);
-                        var Message = await Channel.GetMessageAsync((ulong)data.MessageId);
-                        await Message.PinAsync();
-                        await client.LogAutoActionAsync(Guild, db, $"Scheduled pin: Message with ID: {data.MessageId} in Channel #{Channel.Name} ({Channel.Id})");
+                        var guild = client.Guilds[(ulong)timer.GuildId];
+                        var channel = guild.GetChannel((ulong)data.ChannelId);
+                        var message = await channel.GetMessageAsync((ulong)data.MessageId);
+                        await message.PinAsync();
+                        await client.LogAutoActionAsync(guild, db, $"Scheduled pin: Message with ID: {data.MessageId} in Channel #{channel.Name} ({channel.Id})");
                     }
                 }
             }
@@ -174,11 +182,11 @@ namespace ModCore.Listeners
                 {
                     using (var db = tdata.Database.CreateContext())
                     {
-                        var Guild = client.Guilds[(ulong)timer.GuildId];
-                        var Channel = Guild.GetChannel((ulong)data.ChannelId);
-                        var Message = await Channel.GetMessageAsync((ulong)data.MessageId);
-                        await Message.UnpinAsync();
-                        await client.LogAutoActionAsync(Guild, db, $"Scheduled unpin: Message with ID: {data.MessageId} in Channel #{Channel.Name} ({Channel.Id})");
+                        var guild = client.Guilds[(ulong)timer.GuildId];
+                        var channel = guild.GetChannel((ulong)data.ChannelId);
+                        var message = await channel.GetMessageAsync((ulong)data.MessageId);
+                        await message.UnpinAsync();
+                        await client.LogAutoActionAsync(guild, db, $"Scheduled unpin: Message with ID: {data.MessageId} in Channel #{channel.Name} ({channel.Id})");
                     }
                 }
             }

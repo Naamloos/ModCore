@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using ModCore.Database;
 using Newtonsoft.Json;
 using Npgsql;
-using System.Collections.Generic;
 
 namespace ModCore.Entities
 {
@@ -98,6 +98,6 @@ namespace ModCore.Entities
     {
         PostgreSql,
         InMemory,
-        Sqlite,
+        Sqlite
     }
 }

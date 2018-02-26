@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using ModCore.Entities;
 using ModCore.Logic;
-using System;
 
 namespace ModCore.Listeners
 {
@@ -34,7 +34,7 @@ namespace ModCore.Listeners
                     .AddField("Join Date", $"{m.JoinedAt.DateTime.ToString()}")
                     .AddField("Register Date", $"{m.CreationTimestamp.DateTime.ToString()}")
                     .WithColor(DiscordColor.Green);
-                await c.SendMessageAsync(embed: embed);
+                await c.ElevatedMessageAsync(embed: embed);
             }
         }
 
@@ -65,7 +65,7 @@ namespace ModCore.Listeners
                 embed.AddField("Leave Date", $"{DateTime.Now.ToString()}")
                 .AddField("Register Date", $"{m.CreationTimestamp.DateTime.ToString()}")
                 .WithColor(DiscordColor.Red);
-                await c.SendMessageAsync(embed: embed);
+                await c.ElevatedMessageAsync(embed: embed);
             }
         }
     }

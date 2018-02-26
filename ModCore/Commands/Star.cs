@@ -1,14 +1,13 @@
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using ModCore.Database;
 using ModCore.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ModCore.Logic;
 
 namespace ModCore.Commands
 {
@@ -31,7 +30,7 @@ namespace ModCore.Commands
         {
             using (var db = Database.CreateContext())
             {
-                await ctx.RespondAsync($"Stars: {db.StarDatas.Count()}");
+                await ctx.SafeRespondAsync($"Stars: {db.StarDatas.Count()}");
             }
         }
 
@@ -72,11 +71,11 @@ namespace ModCore.Commands
                     }
                 }
 
-                var orderGivenmemberNames = givenMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
-                embed.AddField("Users who have been given stars by you", string.Join("\n", orderGivenmemberNames.Take(10)), false);
+                var orderGivenmemberNames = givenMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value).ToArray();
+                embed.AddField("Users who have been given stars by you", string.Join("\n", orderGivenmemberNames.Take(10)));
                 
-                if (orderGivenmemberNames.Count() > 10)
-                    embed.Fields.Last().Value += $"\nAnd {orderGivenmemberNames.Count() - 10} more...";
+                if (orderGivenmemberNames.Length > 10)
+                    embed.Fields.Last().Value += $"\nAnd {orderGivenmemberNames.Length - 10} more...";
                 
                 var gotMemberNames = new Dictionary<string, int>();
                 foreach (DatabaseStarData star in gotStars)
@@ -95,13 +94,13 @@ namespace ModCore.Commands
                         gotMemberNames.Add(memberName, 1);
                     }
                 }
-                var orderedGotMemberNames = gotMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value);
-                embed.AddField("Users who have given you stars", string.Join("\n", orderedGotMemberNames.Take(10)), false);
+                var orderedGotMemberNames = gotMemberNames.OrderByDescending(x => x.Value).Select(x => x.Key + " - " + x.Value).ToArray();
+                embed.AddField("Users who have given you stars", string.Join("\n", orderedGotMemberNames.Take(10)));
                 
-                if (orderedGotMemberNames.Count() > 10)
-                    embed.Fields.Last().Value += $"\nAnd {orderedGotMemberNames.Count() - 10} more...";
+                if (orderedGotMemberNames.Length > 10)
+                    embed.Fields.Last().Value += $"\nAnd {orderedGotMemberNames.Length - 10} more...";
 
-                await ctx.RespondAsync(embed: embed);
+                await ctx.ElevatedRespondAsync(embed: embed);
             }
         }
     }

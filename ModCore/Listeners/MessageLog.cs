@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.ModernEmbedBuilder;
 using ModCore.Entities;
 using ModCore.Logic;
-using System;
-using DSharpPlus.ModernEmbedBuilder;
-using System.Linq;
 
 namespace ModCore.Listeners
 {
@@ -35,7 +35,7 @@ namespace ModCore.Listeners
                 await new ModernEmbedBuilder
                 {
                     Title = "Message Deleted",
-                    Author = new DuckAuthor()
+                    Author = new DuckAuthor
                     {
                         Name = $"{m.Username}#{m.Discriminator}",
                         IconUrl = string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl
@@ -78,7 +78,7 @@ namespace ModCore.Listeners
                 await new ModernEmbedBuilder
                 {
                     Title = "Message Edited",
-                    Author = new DuckAuthor()
+                    Author = new DuckAuthor
                     {
                         Name = $"{m.Username}#{m.Discriminator}",
                         IconUrl = string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl

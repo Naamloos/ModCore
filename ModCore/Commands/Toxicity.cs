@@ -1,14 +1,13 @@
-﻿using System;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Interactivity;
-using Microsoft.Extensions.DependencyInjection;
-using ModCore.Entities;
 using DSharpPlus.Entities;
-using System.Linq;
+using DSharpPlus.Interactivity;
 using ModCore.Database;
-using DSharpPlus;
+using ModCore.Entities;
+using ModCore.Logic;
 
 namespace ModCore.Commands
 {
@@ -37,7 +36,7 @@ namespace ModCore.Commands
             var msgstr = msg.Where(x => x.Author.Id == member.Id).Select(x => x.Content);
             var str = string.Join('\n', msgstr);
             var a = await Shared.Perspective.RequestAnalysis(str);
-            await ctx.RespondAsync($"Toxicity: {a.AttributeScores.First().Value.SummaryScore.Value}");
+            await ctx.SafeRespondAsync($"Toxicity: {a.AttributeScores.First().Value.SummaryScore.Value}");
         }
     }
 }

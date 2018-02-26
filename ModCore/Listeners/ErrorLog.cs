@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using DSharpPlus.CommandsNext;
-using ModCore.Logic;
-using System.Threading.Tasks;
 using System.IO;
 using System.Linq;
-using ModCore.Entities;
-using DSharpPlus.Entities;
-using DSharpPlus.CommandsNext.Exceptions;
+using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Exceptions;
+using DSharpPlus.Entities;
 using DSharpPlus.ModernEmbedBuilder;
 using F23.StringSimilarity;
 using Humanizer;
+using ModCore.Entities;
+using ModCore.Logic;
 using MoreLinq;
 
 namespace ModCore.Listeners
@@ -93,10 +93,10 @@ namespace ModCore.Listeners
                     break;
 
                 case CommandErrorVerbosity.Name:
-                    await ctx.RespondAsync($"**Command {qualifiedName} Errored!**");
+                    await ctx.SafeRespondAsync($"**Command {qualifiedName} Errored!**");
                     break;
                 case CommandErrorVerbosity.NameDesc:
-                    await ctx.RespondAsync($"**Command {qualifiedName} Errored!**\n{e.Exception.Message}");
+                    await ctx.SafeRespondAsync($"**Command {qualifiedName} Errored!**\n{e.Exception.Message}");
                     break;
                 case CommandErrorVerbosity.Exception:
                     var stream = new MemoryStream();
@@ -135,8 +135,6 @@ namespace ModCore.Listeners
                         break;
                 }
             }
-
-            return;
         }
     }
 }
