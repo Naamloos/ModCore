@@ -333,8 +333,8 @@ namespace ModCore.Commands
         }
 
         [Group("suggestions"), Aliases("suggestion", "sugg", "sug", "s"), Description("Suggestions configuration commands.")]
-        public class Suggestions
-        {
+        public class Suggestions : BaseCommandModule
+		{
             [Command("enable"), Aliases("on"), Description("Enables command suggestions for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
@@ -367,8 +367,8 @@ namespace ModCore.Commands
 
         [Group("linkfilter"), Aliases("inviteblocker", "invite", "ib", "filter", "lf"),
          Description("Linkfilter configuration commands.")]
-        public class Linkfilter
-        {
+        public class Linkfilter : BaseCommandModule
+		{
             [Command("enable"), Aliases("on"), Description("Enables Linkfilter for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
@@ -385,8 +385,8 @@ namespace ModCore.Commands
 
             [Group("modules"), Aliases("mod", "m", "s"),
              Description("Commands to toggle Linkfilter modules for this guild.")]
-            public class Modules
-            {
+            public class Modules : BaseCommandModule
+			{
                 private delegate ref bool WithLinkfilter(GuildLinkfilterSettings lf);
 
                 private static async Task Toggle(CommandContext ctx, string r, WithLinkfilter func)
@@ -404,8 +404,8 @@ namespace ModCore.Commands
                 }
 
                 [Group("all"), Aliases("a", "0"), Description("Commands to manage all Linkfilter modules at once.")]
-                public class AllModules
-                {
+                public class AllModules : BaseCommandModule
+				{
                     [Command("off"), Aliases("disable", "disabled", "0", "false", "no", "n"),
                      Description("Disables all Linkfilter modules for this guild.")]
                     public async Task DisableAllLinkfilterModulesAsync(CommandContext ctx)
@@ -487,8 +487,8 @@ namespace ModCore.Commands
             }
 
             [Group("user"), Aliases("usr", "u"), Description("User exemption management commands.")]
-            public class User
-            {
+            public class User : BaseCommandModule
+			{
                 [Command("exempt"), Aliases("x"), Description("Exempts user from Linkfilter checks.")]
                 public async Task ExemptAsync(CommandContext ctx,
                     [RemainingText, Description("Member to exempt from Linkfilter checks")] DiscordMember mbr)
@@ -517,8 +517,8 @@ namespace ModCore.Commands
             }
 
             [Group("role"), Aliases("r"), Description("Role exemption management commands.")]
-            public class Role
-            {
+            public class Role : BaseCommandModule
+			{
                 [Command("exempt"), Aliases("x"), Description("Exempts role from Linkfilter checks.")]
                 public async Task ExemptAsync(CommandContext ctx,
                     [RemainingText, Description("Role to exempt from Linkfilter checks")] DiscordRole rl)
@@ -545,8 +545,8 @@ namespace ModCore.Commands
             }
 
             [Group("guild"), Aliases("invite", "i"), Description("Invite target exemption management commands.")]
-            public class Guild
-            {
+            public class Guild : BaseCommandModule
+			{
                 [Command("exempt"), Aliases("x"), Description("Exempts code from invite checks.")]
                 public async Task ExemptAsync(CommandContext ctx,
                     [RemainingText, Description("Invite code to exempt from invite checks")] string invite)
@@ -590,8 +590,8 @@ namespace ModCore.Commands
         }
 
         [Group("rolestate"), Aliases("rs"), Description("Role State configuration commands.")]
-        public class RoleState
-        {
+        public class RoleState : BaseCommandModule
+		{
             [Command("enable"), Aliases("on"), Description("Enables Role State for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
@@ -607,8 +607,8 @@ namespace ModCore.Commands
             }
 
             [Group("role"), Aliases("r"), Description("Role exemption management commands.")]
-            public class Role
-            {
+            public class Role : BaseCommandModule
+			{
                 [Command("ignore"), Aliases("x"), Description("Exempts role from being saved by Role State.")]
                 public async Task ExemptAsync(CommandContext ctx,
                     [RemainingText, Description("Role to exempt from being saved")] DiscordRole rl)
@@ -635,8 +635,8 @@ namespace ModCore.Commands
             }
 
             [Group("channel"), Aliases("c"), Description("Channel exemption management commands.")]
-            public class Channel
-            {
+            public class Channel : BaseCommandModule
+			{
                 private DatabaseContextBuilder Database { get; }
 
                 public Channel(DatabaseContextBuilder db)
@@ -704,8 +704,8 @@ namespace ModCore.Commands
         }
 
         [Group("invisicop"), Aliases("ic"), Description("InvisiCop configuration commands.")]
-        public class InvisiCop
-        {
+        public class InvisiCop : BaseCommandModule
+		{
             [Command("enable"), Aliases("on"), Description("Enables InvisiCop for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
@@ -722,8 +722,8 @@ namespace ModCore.Commands
         }
 
         [Group("actionlog"), Aliases("al"), Description("ActionLog configuration commands.")]
-        public class ActionLog
-        {
+        public class ActionLog : BaseCommandModule
+		{
             [Command("enable"), Aliases("on"), Description("Enables ActionLog for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
@@ -756,8 +756,8 @@ namespace ModCore.Commands
         }
 
         [Group("autorole"), Aliases("ar"), Description("AutoRole configuration commands.")]
-        public class AutoRole
-        {
+        public class AutoRole : BaseCommandModule
+		{
             [Command("enable"), Aliases("on"), Description("Enables AutoRole for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
@@ -789,8 +789,8 @@ namespace ModCore.Commands
         }
 
         [Group("error"), Aliases("er"), Description("Error verbosity configuration commands.")]
-        public class ErrorVerbosity
-        {
+        public class ErrorVerbosity : BaseCommandModule
+		{
             [Command("chat"), Aliases("c"), Description("Sets command error reporting for this guild (in chat).")]
             public async Task ChatAsync(CommandContext ctx, [Description("New error verbosity")]string verbosity)
             {
@@ -856,8 +856,8 @@ namespace ModCore.Commands
         }
 
         [Group("joinlog"), Aliases("j"), Description("JoinLog configuration commands.")]
-        public class JoinLog
-        {
+        public class JoinLog : BaseCommandModule
+		{
             [Command("enable"), Aliases("on"), Description("Enables JoinLog for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
@@ -888,8 +888,8 @@ namespace ModCore.Commands
         }
 
         [Group("selfrole"), Aliases("sr"), Description("SelfRole configuration commands.")]
-        public class SelfRole
-        {
+        public class SelfRole : BaseCommandModule
+		{
             [Command("add"), Aliases("a"), Description("Adds roles to SelfRole list")]
             public async Task AddSelfRoleAsync(CommandContext ctx, [Description("Role to allow for self-granting")]DiscordRole role)
             {
@@ -926,8 +926,8 @@ namespace ModCore.Commands
         }
 
         [Group("starboard"), Aliases("star"), Description("Starboard configuration commands.")]
-        public class Starboard
-        {
+        public class Starboard : BaseCommandModule
+		{
             [Command("enable"), Aliases("on"), Description("Enables Starboard for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
@@ -976,8 +976,8 @@ namespace ModCore.Commands
         }
 
         [Group("globalwarn"), Aliases("gw"), Description("GlobalWarn configuration commands.")]
-        public class GlobalWarn
-        {
+        public class GlobalWarn : BaseCommandModule
+		{
             [Command("enable"), Aliases("on"), Description("Enables GlobalWarn for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {
@@ -1033,8 +1033,8 @@ namespace ModCore.Commands
         }
 
         [Group("messagelog"), Aliases("ml"), Description("MessageLog configuration commands.")]
-        public class MessageLog
-        {
+        public class MessageLog : BaseCommandModule
+		{
             [Command("enable"), Aliases("on"), Description("Enables MessageLog for this guild.")]
             public async Task EnableAsync(CommandContext ctx)
             {

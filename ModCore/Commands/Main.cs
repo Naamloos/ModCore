@@ -19,7 +19,7 @@ using ModCore.Logic.Utils;
 
 namespace ModCore.Commands
 {
-    public class Main
+    public class Main : BaseCommandModule
     {
         private static readonly Regex SpaceReplacer = new Regex(" {2,}", RegexOptions.Compiled);
 
@@ -70,8 +70,8 @@ namespace ModCore.Commands
         }
 
         [Group("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages)]
-        class Purge
-        {
+        class Purge : BaseCommandModule
+		{
             [GroupCommand, Description("Delete an amount of messages from the current channel.")]
             public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Amount of messages to remove (max 100)")]int limit = 50,
                 [Description("Amount of messages to skip")]int skip = 0)
@@ -418,8 +418,8 @@ namespace ModCore.Commands
 
         [Group("globalwarn"), Aliases("gw", "gwarn", "globalw"), Description("Commands to add or remove globalwarns."), 
             RequireUserPermissions(Permissions.Administrator), RequireBotPermissions(Permissions.BanMembers)]
-        public class GlobalWarn
-        {
+        public class GlobalWarn : BaseCommandModule
+		{
             private DatabaseContextBuilder Database { get; }
 
             public GlobalWarn(DatabaseContextBuilder db)
@@ -964,8 +964,8 @@ namespace ModCore.Commands
                 await ctx.ElevatedRespondAsync(embed: pages.First().Embed);
         }
         [Group("selfrole"), Description("Commands to give or take selfroles."), RequireBotPermissions(Permissions.ManageRoles)]
-        public class SelfRole
-        {
+        public class SelfRole : BaseCommandModule
+		{
             private DatabaseContextBuilder Database { get; }
 
             public SelfRole(DatabaseContextBuilder db)
