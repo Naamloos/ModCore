@@ -1096,5 +1096,149 @@ namespace ModCore.Commands
 			await m.DeleteAllReactionsAsync("Remove polling reactions");
 			await ctx.SafeModifyAsync(m, sb.ToString());
 		}
+
+		[Command("buildmessage"), Description("Builds a message for you, complete with embeds.")]
+		[RequirePermissions(Permissions.ManageMessages)]
+		public async Task BuildMessageAsync(CommandContext ctx)
+		{
+			var msg = await ctx.RespondAsync($"Hello and welcome to the ModCore message builder!\nI am your host Smirky, and I will guide you through the creation of a message!" +
+				$"{DiscordEmoji.FromName(ctx.Client, ":smirk:").ToString()}\n\n___**[REMEMBER: WIP!!]**___");
+			await Task.Delay(TimeSpan.FromSeconds(2));
+			var menu = new DiscordEmbedBuilder()
+				.WithTitle("Message Builder Options")
+				.WithDescription("__0__. Set Content\n" + 
+								 "__1__. Set Title\n" +
+								 "__2__. Set Description\n" +
+								 "__3__. Set Image\n" +
+								 "__4__. Set Thumbnail\n" +
+								 "__5__. Set Timestamp\n" +
+								 "__6__. Set Url\n" +
+								 "__7__. Set Color\n" +
+								 "__8__. Set Footer\n" +
+								 "__9__. Set Author\n" +
+								 "__10__. Add Field\n" +
+								 "__11__. Clear fields\n" +
+								 "__12__. Send message.\n" +
+								 "__13__. Preview message.\n\n" +
+								 "__14__. Cancel"
+								 )
+				.Build();
+
+			var building = true;
+			var embed = new DiscordEmbedBuilder();
+
+			while (building)
+			{
+				await msg.ModifyAsync("", menu);
+				var response = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
+				if (response == null)
+				{
+					await msg.ModifyAsync("Message building timed out.", null);
+					return;
+				}
+
+				switch (response.Message.Content.ToLower())
+				{
+					default:
+						#region Invalid Response
+						await msg.ModifyAsync("Invalid response.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+					#endregion
+					case "0":
+						#region Set Content
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+					#endregion
+					case "1":
+						#region Set Title
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "2":
+						#region Set Description
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "3":
+						#region Set Image
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "4":
+						#region Set Thumbnail
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "5":
+						#region Set Timestamp
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "6":
+						#region Set Url
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "7":
+						#region Set Color
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "8":
+						#region Set Footer
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "9":
+						#region Set Author
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "10":
+						#region Add Field
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "11":
+						#region Clear Fields
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "12":
+						#region Send Message
+						// Remember to pick a channel to send to first!!
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "13":
+						#region Preview Message
+						await msg.ModifyAsync("Method not yet implemented.", null);
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+						#endregion
+					case "14":
+						#region Cancel Building
+						await msg.ModifyAsync("Message building canceled.", null);
+						building = false;
+						break;
+						#endregion
+				}
+				await response.Message.DeleteAsync();
+			}
+		}
 	}
 }
