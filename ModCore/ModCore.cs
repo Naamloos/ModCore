@@ -48,6 +48,13 @@ namespace ModCore
                 await shard.RunAsync();
 
             await WaitForCancellation();
+
+			foreach (var shard in Shards)
+				await shard.DisconnectAndDispose();
+
+			this.SharedData.CTS.Dispose();
+			this.SharedData.TimerData.Cancel.Cancel();
+			this.SharedData.TimerSempahore.Dispose();
         }
 
         /// <summary>
