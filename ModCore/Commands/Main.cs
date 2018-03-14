@@ -44,6 +44,12 @@ namespace ModCore.Commands
 			await ctx.SafeRespondAsync($"Pong: ({ctx.Client.Ping}) ms.");
 		}
 
+		[Command("prefix"), Description("Check ModCore's current prefix.")]
+		public async Task PrefixAsync(CommandContext ctx)
+		{
+			await ctx.SafeRespondAsync($"Current prefix: {ctx.GetGuildSettings().Prefix}");
+		}
+
 		[Command("uptime"), Description("Check ModCore's uptime."), Aliases("u")]
 		public async Task UptimeAsync(CommandContext ctx)
 		{
