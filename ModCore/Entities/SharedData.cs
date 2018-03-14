@@ -14,6 +14,7 @@ namespace ModCore.Entities
         public Perspective Perspective { get; internal set; }
         public (ulong guild, ulong channel) StartNotify { get; internal set; }
         public List<ulong> BotManagers { get; internal set; }
+		public string DefaultPrefix { get; internal set; }
 
         public SharedData()
         {

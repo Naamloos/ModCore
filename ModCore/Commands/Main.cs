@@ -47,7 +47,9 @@ namespace ModCore.Commands
 		[Command("prefix"), Description("Check ModCore's current prefix.")]
 		public async Task PrefixAsync(CommandContext ctx)
 		{
-			await ctx.SafeRespondAsync($"Current prefix: {ctx.GetGuildSettings().Prefix}");
+			await ctx.IfGuildSettings(
+				async (e) => await ctx.SafeRespondAsync($"Current prefix: {e.Prefix}"),
+				async () => await ctx.SafeRespondAsync($"Current prefix: {this.Shared.DefaultPrefix}"));
 		}
 
 		[Command("uptime"), Description("Check ModCore's uptime."), Aliases("u")]
