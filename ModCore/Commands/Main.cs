@@ -1307,10 +1307,13 @@ namespace ModCore.Commands
 							if (channel.HasValue)
 							{
 								await channel.Value.SendMessageAsync(content, embed: embed.Build());
+								await case12.Message.DeleteAsync();
+								await msg.ModifyAsync("Message sent.", null);
 								return;
 							}
 							else
 							{
+								await case12.Message.DeleteAsync();
 								await msg.ModifyAsync("Invalid channel.", null);
 							}
 						}
