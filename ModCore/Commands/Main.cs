@@ -1110,8 +1110,8 @@ namespace ModCore.Commands
 		[RequirePermissions(Permissions.ManageMessages)]
 		public async Task BuildMessageAsync(CommandContext ctx)
 		{
-			var msg = await ctx.RespondAsync($"Hello and welcome to the ModCore message builder!\nI am your host Smirky, and I will guide you through the creation of a message!" +
-				$"{DiscordEmoji.FromName(ctx.Client, ":smirk:").ToString()}\n\n___**[REMEMBER: WIP!!]**___");
+			var msg = await ctx.RespondAsync($"Hello and welcome to the ModCore message builder!\nI am your host Smirky, and I will guide you through the creation of a message! "
+				+ DiscordEmoji.FromName(ctx.Client, ":smirk:").ToString());
 			await Task.Delay(TimeSpan.FromSeconds(2));
 			var menu = new DiscordEmbedBuilder()
 				.WithTitle("Message Builder Options")
@@ -1123,8 +1123,11 @@ namespace ModCore.Commands
 								 "__5__. Set Timestamp\n" +
 								 "__6__. Set Url\n" +
 								 "__7__. Set Color\n" +
-								 "__8__. Set Footer\n" +
-								 "__9__. Set Author\n" +
+								 "__8__. Set Footer text\n" +
+								 "__8b__. Set Footer icon\n" +
+								 "__9__. Set Author name\n" +
+								 "__9b__. Set Author icon\n" +
+								 "__9c__. Set Author URL\n" +
 								 "__10__. Add Field\n" +
 								 "__11__. Clear fields\n" +
 								 "__12__. Send message.\n" +
@@ -1270,31 +1273,127 @@ namespace ModCore.Commands
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
 						break;
-					#endregion
+						#endregion
 					case "8":
-						#region Set Footer
-						await msg.ModifyAsync("Method not yet implemented.", null);
+						#region Set Footer Text
+						await msg.ModifyAsync("What would you like to set the Footer text to?", null);
+						var case8 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
+						if (case8?.Message?.Content != null)
+						{
+							if (embed.Footer == null)
+								embed.WithFooter(case8.Message.Content);
+							else
+								embed.Footer.Text = case8.Message.Content;
+							await case8.Message.DeleteAsync();
+							await msg.ModifyAsync($"Footer text set.", null);
+						}
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+					#endregion
+					case "8b":
+						#region Set Footer Icon
+						await msg.ModifyAsync("What would you like to set the Footer icon URL to?", null);
+						var case8b = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
+						if (case8b?.Message?.Content != null)
+						{
+							if (embed.Footer == null)
+								embed.WithFooter(null, case8b.Message.Content);
+							else
+								embed.Footer.IconUrl = case8b.Message.Content;
+
+							await case8b.Message.DeleteAsync();
+							await msg.ModifyAsync($"Footer icon set.", null);
+						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
 						break;
 					#endregion
 					case "9":
-						#region Set Author
-						await msg.ModifyAsync("Method not yet implemented.", null);
+						#region Set Author Name
+						await msg.ModifyAsync("What would you like to set the Author name to?", null);
+						var case9 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
+						if (case9?.Message?.Content != null)
+						{
+							if (embed.Author == null)
+								embed.WithAuthor(case9.Message.Content);
+							else
+								embed.Author.Name = case9.Message.Content;
+							await case9.Message.DeleteAsync();
+							await msg.ModifyAsync($"Author name set.", null);
+						}
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+					#endregion
+					case "9b":
+						#region Set Author Icon
+						await msg.ModifyAsync("What would you like to set the Author Icon URL to?", null);
+						var case9b = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
+						if (case9b?.Message?.Content != null)
+						{
+							if (embed.Author == null)
+								embed.WithAuthor(icon_url: case9b.Message.Content);
+							else
+								embed.Author.IconUrl = case9b.Message.Content;
+							await case9b.Message.DeleteAsync();
+							await msg.ModifyAsync($"Author Icon set.", null);
+						}
+						await Task.Delay(TimeSpan.FromSeconds(2));
+						break;
+					#endregion
+					case "9c":
+						#region Set Author Icon
+						await msg.ModifyAsync("What would you like to set the Author URL to?", null);
+						var case9c = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
+						if (case9c?.Message?.Content != null)
+						{
+							if (embed.Author == null)
+								embed.WithAuthor(url: case9c.Message.Content);
+							else
+								embed.Author.Url = case9c.Message.Content;
+							await case9c.Message.DeleteAsync();
+							await msg.ModifyAsync($"Author URL set.", null);
+						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
 						break;
 					#endregion
 					case "10":
 						#region Add Field
-						await msg.ModifyAsync("Method not yet implemented.", null);
+						(string, string, bool) field;
+
+						await msg.ModifyAsync("What should the field title be?", null);
+						var case10a = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
+						if (case10a?.Message?.Content == null)
+							break;
+						field.Item1 = case10a.Message.Content;
+						await case10a.Message.DeleteAsync();
+
+						await msg.ModifyAsync("What should the field content be?", null);
+						var case10b = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
+						if (case10b?.Message?.Content == null)
+							break;
+						field.Item2 = case10b.Message.Content;
+						await case10b.Message.DeleteAsync();
+
+						await msg.ModifyAsync("Should the field be inline?", null);
+						var case10c = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
+						if (case10c?.Message?.Content == null)
+							break;
+						var bcv = new AugmentedBoolConverter();
+						var inl = await bcv.ConvertAsync(case10c.Message.Content, ctx);
+						field.Item3 = (inl.HasValue? inl.Value : false);
+						await case10c.Message.DeleteAsync();
+
+						embed.AddField(field.Item1, field.Item2, field.Item3);
+						await msg.ModifyAsync("Field added.", null);
 						await Task.Delay(TimeSpan.FromSeconds(2));
 						break;
-					#endregion
+						#endregion
 					case "11":
 						#region Clear Fields
-						await msg.ModifyAsync("Method not yet implemented.", null);
+						embed.ClearFields();
+						await msg.ModifyAsync("Cleared fields.", null);
 						await Task.Delay(TimeSpan.FromSeconds(2));
 						break;
-					#endregion
+						#endregion
 					case "12":
 						#region Send Message
 						// Remember to pick a channel to send to first!!
