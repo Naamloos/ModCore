@@ -21,6 +21,16 @@ namespace ModCore.Listeners
                 if (cfg == null)
                     return;
 
+				if (cfg.ReactionRoles.Any(x => (ulong)x.Channel_Id == e.Channel.Id && (ulong)x.Message_Id == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name))
+				{
+					var rrid = (ulong)cfg.ReactionRoles.First(
+						x => (ulong)x.Channel_Id == e.Channel.Id && (ulong)x.Message_Id == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name).Role_Id;
+					var rrrole = e.Channel.Guild.GetRole(rrid);
+					var mem = await e.Channel.Guild.GetMemberAsync(e.User.Id);
+					if(!mem.Roles.Any(x => x.Id == rrid))
+						await mem.GrantRoleAsync(rrrole);
+				}
+
                 var emoji = cfg.Starboard.Emoji;
                 DiscordEmoji em = null;
                 if (emoji.EmojiId != 0)
@@ -107,7 +117,17 @@ namespace ModCore.Listeners
                 if (cfg == null)
                     return;
 
-                var emoji = cfg.Starboard.Emoji;
+				if (cfg.ReactionRoles.Any(x => (ulong)x.Channel_Id == e.Channel.Id && (ulong)x.Message_Id == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name))
+				{
+					var rrid = (ulong)cfg.ReactionRoles.First(
+						x => (ulong)x.Channel_Id == e.Channel.Id && (ulong)x.Message_Id == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name).Role_Id;
+					var rrrole = e.Channel.Guild.GetRole(rrid);
+					var mem = await e.Channel.Guild.GetMemberAsync(e.User.Id);
+					if (mem.Roles.Any(x => x.Id == rrid))
+						await mem.RevokeRoleAsync(rrrole);
+				}
+
+				var emoji = cfg.Starboard.Emoji;
                 DiscordEmoji em = null;
                 if (emoji.EmojiId != 0)
                     em = DiscordEmoji.FromGuildEmote(e.Client, (ulong)emoji.EmojiId);

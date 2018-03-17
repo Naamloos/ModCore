@@ -90,6 +90,12 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("spellhelp")]
         public bool SpellingHelperEnabled { get; set; }
+
+		/// <summary>
+		/// Gets the list of Reaction Roles for this guild.
+		/// </summary>
+		[JsonProperty("reactionroles")]
+		public List<GuildReactionRole> ReactionRoles { get; private set; } = new List<GuildReactionRole>();
     }
 
     public class GuildStarboardSettings
@@ -104,7 +110,7 @@ namespace ModCore.Entities
         /// Gets or sets the starboard emoji.
         /// </summary>
         [JsonProperty("emoji")]
-        public GuildStarboardEmoji Emoji { get; set; } = new GuildStarboardEmoji();
+        public GuildEmoji Emoji { get; set; } = new GuildEmoji();
 
         /// <summary>
         /// Gets or sets whether starboard should be enabled.
@@ -119,7 +125,7 @@ namespace ModCore.Entities
         public bool AllowNSFW { get; set; }
     }
 
-    public class GuildStarboardEmoji
+    public class GuildEmoji
     {
         [JsonProperty("id")]
         public long EmojiId { get; set; }
@@ -376,4 +382,34 @@ namespace ModCore.Entities
         Update,
         All
     }
+
+	/// <summary>
+	/// Represents a ReactionRole.
+	/// </summary>
+	public class GuildReactionRole
+	{
+		/// <summary>
+		/// Channel message is in.
+		/// </summary>
+		[JsonProperty("channel_id")]
+		public long Channel_Id { get; set; }
+
+		/// <summary>
+		/// Message reaction is on.
+		/// </summary>
+		[JsonProperty("message_id")]
+		public long Message_Id { get; set; }
+
+		/// <summary>
+		/// Role to grant.
+		/// </summary>
+		[JsonProperty("role_id")]
+		public long Role_Id { get; set; }
+
+		/// <summary>
+		/// Reaction to grant role on.
+		/// </summary>
+		[JsonProperty("reaction")]
+		public GuildEmoji Reaction { get; set; }
+	}
 }
