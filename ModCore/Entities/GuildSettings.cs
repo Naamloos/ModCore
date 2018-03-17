@@ -90,12 +90,6 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("spellhelp")]
         public bool SpellingHelperEnabled { get; set; }
-
-        /// <summary>
-        /// Gets the configuration for MessageLog. MessageLog logs new memebrs to a channel.
-        /// </summary>
-        [JsonProperty("messagelog")]
-        public GuildMessageLogSettings MessageLog { get; private set; } = new GuildMessageLogSettings();
     }
 
     public class GuildStarboardSettings
@@ -381,37 +375,5 @@ namespace ModCore.Entities
         None,
         Update,
         All
-    }
-
-    /// <summary>
-    /// Represents configuration for MessageLog
-    /// </summary>
-    public class GuildMessageLogSettings
-    {
-        /// <summary>
-        /// Gets or sets whether MessageLog should be enabled.
-        /// </summary>
-        [JsonProperty("enabled")]
-        public bool Enable { get; set; }
-
-        /// <summary>
-        /// Gets or sets the MessageLog channel ID.
-        /// </summary>
-        [JsonProperty("channel_id")]
-        public long ChannelId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the MessageLog channel ID.
-        /// </summary>
-        [JsonProperty("log_level")]
-        public MessageLogLevel LogLevel { get; set; } = MessageLogLevel.None;
-
-    }
-
-    public enum MessageLogLevel
-    {
-        None,
-        Delete,
-        Edit
     }
 }
