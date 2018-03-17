@@ -970,19 +970,19 @@ namespace ModCore.Commands
 		public class ReactionRole : BaseCommandModule
 		{
 			[Command("add"), Aliases("a"), Description("Add a reaction role to this guild.")]
-			public async Task AddAsync(CommandContext ctx, DiscordMessage msg, DiscordChannel chnl, DiscordRole role, DiscordEmoji emoji)
+			public async Task AddAsync(CommandContext ctx, ulong msg_id, DiscordChannel chnl, DiscordRole role, DiscordEmoji emoji)
 			{
 				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
 				// Checks whether there's no existing reactionrole that has the same:
 				// Channel, Message AND Reaction or Role.
 				if(!cfg.ReactionRoles.Any(
-					x => (ulong)x.Channel_Id == chnl.Id && (ulong)x.Message_Id == msg.Id 
+					x => (ulong)x.Channel_Id == chnl.Id && (ulong)x.Message_Id == msg_id 
 					&& ((ulong)x.Role_Id == role.Id || (ulong)x.Reaction.EmojiId == emoji.Id && x.Reaction.EmojiName == emoji.Name)))
 				{
 					cfg.ReactionRoles.Add(new GuildReactionRole()
 					{
 						Channel_Id = (long)chnl.Id,
-						Message_Id = (long)msg.Id,
+						Message_Id = (long)msg_id,
 						Role_Id = (long)role.Id,
 						Reaction = new GuildEmoji()
 						{
@@ -990,6 +990,7 @@ namespace ModCore.Commands
 							EmojiName = emoji.Name
 						}
 					});
+					var msg = await chnl.GetMessageAsync(msg_id);
 					await msg.CreateReactionAsync(emoji);
 					await ctx.SetGuildSettingsAsync(cfg);
 					await ctx.SafeRespondAsync("New reactionrole added!");
@@ -1001,12 +1002,12 @@ namespace ModCore.Commands
 			}
 
 			[Command("remove"), Aliases("r"), Description("Removes a reaction role from this guild.")]
-			public async Task RemoveAsync(CommandContext ctx, DiscordChannel chnl, DiscordMessage msg, DiscordRole role)
+			public async Task RemoveAsync(CommandContext ctx, DiscordChannel chnl, ulong msg_id, DiscordRole role)
 			{
 				var cfg = ctx.GetGuildSettings();
-				if(cfg.ReactionRoles.Any(x => (ulong)x.Channel_Id == chnl.Id && (ulong)x.Message_Id == msg.Id && (ulong)x.Role_Id == role.Id))
+				if(cfg.ReactionRoles.Any(x => (ulong)x.Channel_Id == chnl.Id && (ulong)x.Message_Id == msg_id && (ulong)x.Role_Id == role.Id))
 				{
-					cfg.ReactionRoles.RemoveAll(x => (ulong)x.Channel_Id == chnl.Id && (ulong)x.Message_Id == msg.Id && (ulong)x.Role_Id == role.Id);
+					cfg.ReactionRoles.RemoveAll(x => (ulong)x.Channel_Id == chnl.Id && (ulong)x.Message_Id == msg_id && (ulong)x.Role_Id == role.Id);
 					await ctx.SetGuildSettingsAsync(cfg);
 					await ctx.SafeRespondAsync("Removed reactionrole!");
 				}
