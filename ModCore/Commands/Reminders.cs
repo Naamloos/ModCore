@@ -15,7 +15,7 @@ using ModCore.Logic;
 
 namespace ModCore.Commands
 {
-    [Group("reminder"), Aliases("remindme"), Description("Commands for managing your reminders.")]
+    [Group("reminder"), Aliases("remindme"), Description("Commands for managing your reminders."), CheckDisable]
     public class Reminders : BaseCommandModule
 	{
         private const string ReminderTut = @"
@@ -67,7 +67,7 @@ If in doubt, just try it! You can always clear the reminders later.
             await SetAsync(ctx, dataToParse);
         }
 
-        [Command("list"), Description("Lists your active reminders.")]
+        [Command("list"), Description("Lists your active reminders."), CheckDisable]
         public async Task ListAsync(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
@@ -130,7 +130,7 @@ If in doubt, just try it! You can always clear the reminders later.
                 await ctx.ElevatedRespondAsync(embed: pages.First().Embed);
         }
 
-        [Command("set"), Description(ReminderTut)]
+        [Command("set"), Description(ReminderTut), CheckDisable]
         public async Task SetAsync(CommandContext ctx, [Description("When the reminder is to be sent"), RemainingText] string dataToParse)
         {
             await ctx.TriggerTypingAsync();
@@ -191,7 +191,7 @@ If in doubt, just try it! You can always clear the reminders later.
                 $"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text.BreakMentions()}");
         }
 
-        [Command("stop"), Aliases("unset", "remove"), Description("Stops and removes a reminder.")]
+        [Command("stop"), Aliases("unset", "remove"), Description("Stops and removes a reminder."), CheckDisable]
         public async Task UnsetAsync(CommandContext ctx, [Description("Which timer to stop. To get a Timer ID, use " +
                                                                         "the `reminder list` command.")] int timerId)
         {
@@ -215,7 +215,7 @@ If in doubt, just try it! You can always clear the reminders later.
                 $"{emoji} Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText.BreakMentions()}");
         }
 
-        [Command("clear"), Description("Clears all active reminders.")]
+        [Command("clear"), Description("Clears all active reminders."), CheckDisable]
         public async Task ClearAsync(CommandContext ctx)
         {
             await ctx.TriggerTypingAsync();
@@ -250,7 +250,7 @@ If in doubt, just try it! You can always clear the reminders later.
             }
         }
 
-        [Command("test"), Description("WIP.")]
+        [Command("test"), Description("WIP."), CheckDisable]
         public async Task TestAsync(CommandContext ctx)
         {
             await ctx.SafeRespondAsync($"Timer will dispatch at: `{Shared.TimerData.DispatchTime}`, and has the message ```{Shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText.BreakMentions()}```.");

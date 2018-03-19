@@ -13,7 +13,7 @@ using ModCore.Logic;
 
 namespace ModCore.Commands
 {
-    [Group("tag")]
+    [Group("tag"), CheckDisable]
     public class Tag : BaseCommandModule
 	{
         public SharedData Shared { get; }
@@ -65,7 +65,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("set")]
+        [Command("set"), CheckDisable]
         [Description("Sets a new tag for this channel, or modifies one if you own it.")]
         public async Task SetAsync(CommandContext ctx, [Description("Tag to create")]string name, [Description("Contents of tag"), RemainingText]string contents)
         {
@@ -100,7 +100,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("remove")]
+        [Command("remove"), CheckDisable]
         [Description("Removes a tag for this channel, if it exists and you own it")]
         public async Task RemoveAsync(CommandContext ctx, [Description("Tag to remove"), RemainingText]string name)
         {
@@ -128,7 +128,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("copy")]
+        [Command("copy"), CheckDisable]
         [Description("Copies a tag from a channel to this channel.")]
         public async Task RemoveAsync(CommandContext ctx, [Description("Channel the tag originated from")]DiscordChannel origin, 
             [Description("Name of tag to copy"), RemainingText]string name)
@@ -164,7 +164,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("info")]
+        [Command("info"), CheckDisable]
         [Description("Shows info about a tag.")]
         public async Task InfoAsync(CommandContext ctx, [Description("Tag to show information about"), RemainingText] string args)
         {
@@ -211,7 +211,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("list")]
+        [Command("list"), CheckDisable]
         [Description("Lists tags for this channel.")]
         public async Task ListAsync(CommandContext ctx, DiscordChannel channel = null)
         {
@@ -235,7 +235,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("transfer")]
+        [Command("transfer"), CheckDisable]
         [Description("Transfers ownership of a tag to another member.")]
         public async Task TransferAsync(CommandContext ctx, [Description("New owner of this tag")]DiscordMember newowner, 
             [Description("Name of tag to transfer"), RemainingText]string name)

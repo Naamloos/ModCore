@@ -11,7 +11,7 @@ using ModCore.Logic;
 
 namespace ModCore.Commands
 {
-    [Group("toxicity"), Aliases("toxic", "tox", "t"), RequireUserPermissions(Permissions.ManageMessages)]
+    [Group("toxicity"), Aliases("toxic", "tox", "t"), RequireUserPermissions(Permissions.ManageMessages), CheckDisable]
     public class Toxicity : BaseCommandModule
     {
         public SharedData Shared { get; }
@@ -28,7 +28,7 @@ namespace ModCore.Commands
         }
 
         [Command("analyze"), Description("Analyze a member's toxicity level from a channel's message history. Note " +
-                                         "that this feature is still in heavy development and subject to change!")]
+                                         "that this feature is still in heavy development and subject to change!"), CheckDisable]
         public async Task AnalyzeAsync(CommandContext ctx, [Description("Member to calculate toxicity from")]DiscordMember member, 
             [Description("Channel to calculate in")]DiscordChannel channel)
         {

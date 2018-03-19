@@ -6,7 +6,7 @@ using Npgsql;
 
 namespace ModCore.Entities
 {
-    public struct Settings
+    public class Settings
     {
         [JsonProperty("token")]
         public string Token { get; private set; }
@@ -26,8 +26,8 @@ namespace ModCore.Entities
         [JsonProperty("database")]
         public DatabaseSettings Database { get; private set; }
 
-        [JsonProperty("bot_managers")]
-        public List<ulong> BotManagers { get; private set; }
+		[JsonProperty("bot_managers")]
+		public List<ulong> BotManagers { get; private set; } = new List<ulong>();
     }
 
     public struct DatabaseSettings

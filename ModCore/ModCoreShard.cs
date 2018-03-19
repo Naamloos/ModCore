@@ -94,7 +94,7 @@ namespace ModCore
                 EnableDms = false,
                 EnableMentionPrefix = true,
                 PrefixResolver = this.GetPrefixPositionAsync,
-                Services = deps
+                Services = deps,
             });
 
             // set the converters

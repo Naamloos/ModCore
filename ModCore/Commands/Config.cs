@@ -1074,5 +1074,72 @@ namespace ModCore.Commands
 				await ctx.SafeRespondAsync("GlobalWarn mode configured to " + cfg.GlobalWarn.WarnLevel);
 			}
 		}
+
+		[Group("commandsettings"), Aliases("cs"), Description("Command settings commands.")]
+		public class CommandSettings : BaseCommandModule
+		{
+			[Command("disable"), Aliases("d")]
+			public async Task DisableAsync(CommandContext ctx, [RemainingText]string cmd)
+			{
+				string command = cmd.ToLower();
+				if (command.StartsWith("config"))
+				{
+					await ctx.RespondAsync("You can't disable configuration commands!");
+					return;
+				}
+				if (command.StartsWith("owner"))
+				{
+					await ctx.RespondAsync("You can't disable owner commands!");
+					return;
+				}
+				if (ctx.CommandsNext.RegisteredCommands.Any(x => CheckCommand(command, x.Value)))
+				{
+					var stng = ctx.GetGuildSettings() ?? new GuildSettings();
+					stng.DisabledCommands.Add(command);
+					await ctx.SetGuildSettingsAsync(stng);
+					await ctx.RespondAsync($"Disabled command `{command}` from use in this guild!");
+				}
+				else
+				{
+					await ctx.SafeRespondAsync($"No such command! `{command}`");
+				}
+			}
+
+			public bool CheckCommand(string command, Command x)
+			{
+				if (x.QualifiedName.StartsWith(command))
+					return true;
+				if (x is CommandGroup)
+					return (x as CommandGroup).Children.Any(xx => CheckCommand(command, xx));
+				return false;
+			}
+
+			[Command("enable"), Aliases("e")]
+			public async Task EnableAsync(CommandContext ctx, [RemainingText]string cmd)
+			{
+				string command = cmd.ToLower();
+				var stng = ctx.GetGuildSettings() ?? new GuildSettings();
+				if(stng.DisabledCommands.Any(x => x == command))
+				{
+					stng.DisabledCommands.RemoveAll(x => x == command);
+					await ctx.SetGuildSettingsAsync(stng);
+					await ctx.RespondAsync($"Enabled command `{command}` in this guild!");
+					return;
+				}
+				await ctx.RespondAsync("That command does not exist!");
+			}
+
+			[Command("list"), Aliases("l")]
+			public async Task ListAsync(CommandContext ctx)
+			{
+				var stng = ctx.GetGuildSettings() ?? new GuildSettings();
+				if(stng.DisabledCommands.Count == 0)
+				{
+					await ctx.RespondAsync("No commands were disabled!");
+					return;
+				}
+				// List disabled commands
+			}
+		}
 	}
 }
