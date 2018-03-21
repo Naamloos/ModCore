@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using ModCore.Entities;
 
 namespace ModCore.Database
@@ -15,6 +16,7 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseStarData> StarDatas { get; set; }
         public virtual DbSet<DatabaseBan> Bans { get; set; }
         public virtual DbSet<DatabaseTag> Tags { get; set; }
+        public virtual DbSet<DatabaseCommandId> CommandIds { get; set; }
 
         private DatabaseProvider Provider { get; }
         private string ConnectionString { get; }
@@ -29,6 +31,10 @@ namespace ModCore.Database
         {
             if (optionsBuilder.IsConfigured) return;
 
+            #if DEBUG
+            optionsBuilder.EnableSensitiveDataLogging(true);
+            #endif
+            
             switch (this.Provider)
             {
                 case DatabaseProvider.PostgreSql:
@@ -239,12 +245,30 @@ namespace ModCore.Database
 
                 e.Property(t => t.OwnerId).HasColumnName("owner_id");
 
-                e.Property(t => t.CreatedAt).HasColumnName("created_at")
-                .HasColumnType("timestamptz");
+                e.Property(t => t.CreatedAt)
+                    .HasColumnName("created_at")
+                    .HasColumnType("timestamptz");
 
                 e.Property(t => t.Name).HasColumnName("tagname");
 
                 e.Property(t => t.Contents).HasColumnName("contents");
+            });
+
+            model.Entity<DatabaseCommandId>(e =>
+            {
+                e.HasIndex(t => t.Id).HasName("index_id").IsUnique(true);
+                e.HasKey(t => t.Id).HasName("id");
+                e.HasAlternateKey(t => t.Command).HasName("command_qualified");
+                
+                e.ToTable("mcore_cmd_state");
+
+                e.Property(t => t.Id)
+                    .HasColumnName("id")
+                    .HasColumnType("smallint")
+                    .HasAnnotation("Sqlite:Autoincrement", true)
+                    .ValueGeneratedOnAdd();
+                
+                e.Property(t => t.Command).HasColumnName("command_qualified");
             });
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -25,7 +26,28 @@ namespace ModCore.Commands
             this.Database = db;
         }
 
-        [Command("exit"), Aliases("e"), Hidden]
+	    [Command("dbtest"), Hidden]
+	    public async Task DbTestAsync(CommandContext ctx, [RemainingText] string s)
+	    {
+	        if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
+	        {
+	            await ctx.SafeRespondAsync("You do not have permission to use this command!");
+	            return;
+	        }
+
+	        using (var db = this.Database.CreateContext())
+	        {
+	            await db.CommandIds.AddAsync(new DatabaseCommandId()
+	            {
+	                Command = "test" + s
+	            });
+	            await ctx.SafeRespondAsync("a"+string.Join(",", db.CommandIds.Select(e => e.Command + ":" + e.Id)));
+	            await db.SaveChangesAsync();
+	            await ctx.SafeRespondAsync("b"+string.Join(",", db.CommandIds.Select(e => e.Command + ":" + e.Id)));
+	        }
+	    }
+
+	    [Command("exit"), Aliases("e"), Hidden]
         public async Task ExitAsync(CommandContext ctx)
         {
             if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)

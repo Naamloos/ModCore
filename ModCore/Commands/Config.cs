@@ -1078,6 +1078,13 @@ namespace ModCore.Commands
 		[Group("commandsettings"), Aliases("cs"), Description("Command settings commands.")]
 		public class CommandSettings : BaseCommandModule
 		{
+			public DatabaseContextBuilder Database { get; }
+
+			public CommandSettings(DatabaseContextBuilder db)
+			{
+				this.Database = db;
+			}
+			
 			[Command("disable"), Aliases("d")]
 			public async Task DisableAsync(CommandContext ctx, [RemainingText]string cmd)
 			{
@@ -1095,7 +1102,10 @@ namespace ModCore.Commands
 				if (ctx.CommandsNext.RegisteredCommands.Any(x => CheckCommand(command, x.Value)))
 				{
 					var stng = ctx.GetGuildSettings() ?? new GuildSettings();
-					stng.DisabledCommands.Add(command);
+					using (var db = Database.CreateContext())
+					{
+						stng.DisabledCommands.Add(db.CommandIds.FirstOrDefault(e => e.Command == command).Id);
+					}
 					await ctx.SetGuildSettingsAsync(stng);
 					await ctx.RespondAsync($"Disabled command `{command}` from use in this guild!");
 				}
@@ -1109,19 +1119,26 @@ namespace ModCore.Commands
 			{
 				if (x.QualifiedName.StartsWith(command))
 					return true;
-				if (x is CommandGroup)
-					return (x as CommandGroup).Children.Any(xx => CheckCommand(command, xx));
+				if (x is CommandGroup g)
+					return g.Children.Any(xx => CheckCommand(command, xx));
 				return false;
 			}
 
 			[Command("enable"), Aliases("e")]
 			public async Task EnableAsync(CommandContext ctx, [RemainingText]string cmd)
 			{
-				string command = cmd.ToLower();
+				var command = cmd.ToLower();
 				var stng = ctx.GetGuildSettings() ?? new GuildSettings();
-				if(stng.DisabledCommands.Any(x => x == command))
+
+				short id = 0; 
+				using (var db = Database.CreateContext())
 				{
-					stng.DisabledCommands.RemoveAll(x => x == command);
+					id = db.CommandIds.FirstOrDefault(e => e.Command == command).Id;
+				}
+				
+				if(stng.DisabledCommands.Any(x => x == id))
+				{
+					stng.DisabledCommands.RemoveAll(x => x == id);
 					await ctx.SetGuildSettingsAsync(stng);
 					await ctx.RespondAsync($"Enabled command `{command}` in this guild!");
 					return;
