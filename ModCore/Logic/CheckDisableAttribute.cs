@@ -24,11 +24,10 @@ namespace ModCore.Logic
 				var stg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id)?.GetSettings();
 				if (stg?.DisabledCommands == null || stg?.DisabledCommands?.Count == 0) return true;
 			
-				var lower = ctx.Command.QualifiedName.ToLower();
 				foreach (var disabledCommand in stg.DisabledCommands)
 				{
 					var cmd = db.CommandIds.Find(disabledCommand);
-					if (cmd == null || !lower.StartsWith(cmd.Command)) continue;
+					if (cmd == null || !ctx.Command.QualifiedName.StartsWith(cmd.Command)) continue;
 					
 					await ctx.RespondAsync("Sorry! that command has been disabled in this guild.");
 					return false;

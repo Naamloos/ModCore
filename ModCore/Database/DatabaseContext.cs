@@ -262,11 +262,15 @@ namespace ModCore.Database
                 
                 e.ToTable("mcore_cmd_state");
 
-                e.Property(t => t.Id)
+                var prop = e.Property(t => t.Id)
                     .HasColumnName("id")
                     .HasColumnType("smallint")
-                    .HasAnnotation("Sqlite:Autoincrement", true)
                     .ValueGeneratedOnAdd();
+
+                if (this.Provider == DatabaseProvider.Sqlite)
+                {
+                    prop.HasAnnotation("Sqlite:Autoincrement", true);
+                }
                 
                 e.Property(t => t.Command).HasColumnName("command_qualified");
             });
