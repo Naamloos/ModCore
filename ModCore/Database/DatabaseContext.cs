@@ -43,208 +43,208 @@ namespace ModCore.Database
             }
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder model)
         {
-            modelBuilder.Entity<DatabaseInfo>(entity =>
+            model.Entity<DatabaseInfo>(e =>
             {
-                entity.ToTable("mcore_database_info");
+                e.ToTable("mcore_database_info");
 
-                entity.HasIndex(e => e.MetaKey)
+                e.HasIndex(t => t.MetaKey)
                     .HasName("mcore_database_info_meta_key_key")
                     .IsUnique();
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                e.Property(t => t.Id).HasColumnName("id");
 
-                entity.Property(e => e.MetaKey)
+                e.Property(t => t.MetaKey)
                     .IsRequired()
                     .HasColumnName("meta_key");
 
-                entity.Property(e => e.MetaValue)
+                e.Property(t => t.MetaValue)
                     .IsRequired()
                     .HasColumnName("meta_value");
             });
 
-            modelBuilder.Entity<DatabaseGuildConfig>(entity =>
+            model.Entity<DatabaseGuildConfig>(e =>
             {
-                entity.ToTable("mcore_guild_config");
+                e.ToTable("mcore_guild_config");
 
-                entity.HasIndex(e => e.GuildId)
+                e.HasIndex(t => t.GuildId)
                     .HasName("mcore_guild_config_guild_id_key")
                     .IsUnique();
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                e.Property(t => t.Id).HasColumnName("id");
 
-                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+                e.Property(t => t.GuildId).HasColumnName("guild_id");
 
-                entity.Property(e => e.Settings)
+                e.Property(t => t.Settings)
                     .IsRequired()
                     .HasColumnName("settings")
                     .HasColumnType("jsonb");
             });
 
-            modelBuilder.Entity<DatabaseModNote>(entity =>
+            model.Entity<DatabaseModNote>(e =>
             {
-                entity.ToTable("mcore_modnotes");
+                e.ToTable("mcore_modnotes");
 
-                entity.HasIndex(e => new { e.MemberId, e.GuildId })
+                e.HasIndex(t => new { t.MemberId, t.GuildId })
                     .HasName("mcore_modnotes_member_id_guild_id_key")
                     .IsUnique();
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                e.Property(t => t.Id).HasColumnName("id");
 
-                entity.Property(e => e.Contents).HasColumnName("contents");
+                e.Property(t => t.Contents).HasColumnName("contents");
 
-                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+                e.Property(t => t.GuildId).HasColumnName("guild_id");
 
-                entity.Property(e => e.MemberId).HasColumnName("member_id");
+                e.Property(t => t.MemberId).HasColumnName("member_id");
             });
 
-            modelBuilder.Entity<DatabaseRolestateOverride>(entity =>
+            model.Entity<DatabaseRolestateOverride>(e =>
             {
-                entity.ToTable("mcore_rolestate_overrides");
+                e.ToTable("mcore_rolestate_overrides");
 
-                entity.HasIndex(e => new { e.MemberId, e.GuildId, e.ChannelId })
+                e.HasIndex(t => new { t.MemberId, t.GuildId, t.ChannelId })
                     .HasName("mcore_rolestate_overrides_member_id_guild_id_channel_id_key")
                     .IsUnique();
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                e.Property(t => t.Id).HasColumnName("id");
 
-                entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+                e.Property(t => t.ChannelId).HasColumnName("channel_id");
 
-                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+                e.Property(t => t.GuildId).HasColumnName("guild_id");
 
-                entity.Property(e => e.MemberId).HasColumnName("member_id");
+                e.Property(t => t.MemberId).HasColumnName("member_id");
 
-                entity.Property(e => e.PermsAllow).HasColumnName("perms_allow");
+                e.Property(t => t.PermsAllow).HasColumnName("perms_allow");
 
-                entity.Property(e => e.PermsDeny).HasColumnName("perms_deny");
+                e.Property(t => t.PermsDeny).HasColumnName("perms_deny");
             });
 
-            modelBuilder.Entity<DatabaseRolestateRoles>(entity =>
+            model.Entity<DatabaseRolestateRoles>(e =>
             {
-                entity.ToTable("mcore_rolestate_roles");
+                e.ToTable("mcore_rolestate_roles");
 
-                entity.HasIndex(e => new { e.MemberId, e.GuildId })
+                e.HasIndex(t => new { t.MemberId, t.GuildId })
                     .HasName("mcore_rolestate_roles_member_id_guild_id_key")
                     .IsUnique();
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                e.Property(t => t.Id).HasColumnName("id");
 
-                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+                e.Property(t => t.GuildId).HasColumnName("guild_id");
 
-                entity.Property(e => e.MemberId).HasColumnName("member_id");
+                e.Property(t => t.MemberId).HasColumnName("member_id");
 
-                entity.Property(e => e.RoleIds).HasColumnName("role_ids");
+                e.Property(t => t.RoleIds).HasColumnName("role_ids");
 
                 if (this.Provider != DatabaseProvider.PostgreSql)
-                    entity.Ignore(e => e.RoleIds);
+                    e.Ignore(t => t.RoleIds);
             });
 
-            modelBuilder.Entity<DatabaseWarning>(entity =>
+            model.Entity<DatabaseWarning>(e =>
             {
-                entity.ToTable("mcore_warnings");
+                e.ToTable("mcore_warnings");
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                e.Property(t => t.Id).HasColumnName("id");
 
-                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+                e.Property(t => t.GuildId).HasColumnName("guild_id");
 
-                entity.Property(e => e.IssuedAt)
+                e.Property(t => t.IssuedAt)
                     .HasColumnName("issued_at")
                     .HasColumnType("timestamptz");
 
-                entity.Property(e => e.IssuerId).HasColumnName("issuer_id");
+                e.Property(t => t.IssuerId).HasColumnName("issuer_id");
 
-                entity.Property(e => e.MemberId).HasColumnName("member_id");
+                e.Property(t => t.MemberId).HasColumnName("member_id");
 
-                entity.Property(e => e.WarningText)
+                e.Property(t => t.WarningText)
                     .IsRequired()
                     .HasColumnName("warning_text");
             });
 
-            modelBuilder.Entity<DatabaseTimer>(entity =>
+            model.Entity<DatabaseTimer>(e =>
             {
-                entity.ToTable("mcore_timers");
+                e.ToTable("mcore_timers");
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                e.Property(t => t.Id).HasColumnName("id");
 
-                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+                e.Property(t => t.GuildId).HasColumnName("guild_id");
 
-                entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+                e.Property(t => t.ChannelId).HasColumnName("channel_id");
 
-                entity.Property(e => e.UserId).HasColumnName("user_id");
+                e.Property(t => t.UserId).HasColumnName("user_id");
 
-                entity.Property(e => e.DispatchAt)
+                e.Property(t => t.DispatchAt)
                     .HasColumnName("dispatch_at")
                     .HasColumnType("timestamptz");
 
-                entity.Property(e => e.ActionType).HasColumnName("action_type");
+                e.Property(t => t.ActionType).HasColumnName("action_type");
 
-                entity.Property(e => e.ActionData)
+                e.Property(t => t.ActionData)
                     .IsRequired()
                     .HasColumnName("action_data")
                     .HasColumnType("jsonb");
             });
 
-            modelBuilder.Entity<DatabaseStarData>(entity =>
+            model.Entity<DatabaseStarData>(e =>
             {
-                entity.ToTable("mcore_stars");
+                e.ToTable("mcore_stars");
 
-                entity.HasIndex(e => new { e.MessageId, e.ChannelId, e.StargazerId })
+                e.HasIndex(t => new { t.MessageId, t.ChannelId, t.StargazerId })
                     .HasName("mcore_stars_member_id_guild_id_key")
                     .IsUnique();
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                e.Property(t => t.Id).HasColumnName("id");
 
-                entity.Property(e => e.StargazerId).HasColumnName("stargazer_id");
+                e.Property(t => t.StargazerId).HasColumnName("stargazer_id");
 
-                entity.Property(e => e.StarboardMessageId).HasColumnName("starboard_entry_id");
+                e.Property(t => t.StarboardMessageId).HasColumnName("starboard_entry_id");
 
-                entity.Property(e => e.MessageId).HasColumnName("message_id");
+                e.Property(t => t.MessageId).HasColumnName("message_id");
 
-                entity.Property(e => e.AuthorId).HasColumnName("author_id");
+                e.Property(t => t.AuthorId).HasColumnName("author_id");
 
-                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+                e.Property(t => t.GuildId).HasColumnName("guild_id");
 
-                entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+                e.Property(t => t.ChannelId).HasColumnName("channel_id");
             });
 
-            modelBuilder.Entity<DatabaseBan>(entity =>
+            model.Entity<DatabaseBan>(e =>
             {
-                entity.ToTable("mcore_bans");
+                e.ToTable("mcore_bans");
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                e.Property(t => t.Id).HasColumnName("id");
 
-                entity.Property(e => e.GuildId).HasColumnName("guild_id");
+                e.Property(t => t.GuildId).HasColumnName("guild_id");
 
-                entity.Property(e => e.UserId).HasColumnName("user_id");
+                e.Property(t => t.UserId).HasColumnName("user_id");
 
-                entity.Property(e => e.IssuedAt)
+                e.Property(t => t.IssuedAt)
                 .HasColumnName("issued_at")
                 .HasColumnType("timestamptz");
 
-                entity.Property(e => e.BanReason).HasColumnName("ban_reason");
+                e.Property(t => t.BanReason).HasColumnName("ban_reason");
             });
 
-            modelBuilder.Entity<DatabaseTag>(entity =>
+            model.Entity<DatabaseTag>(e =>
             {
-                entity.HasIndex(e => new { e.ChannelId, e.Name })
+                e.HasIndex(t => new { t.ChannelId, t.Name })
                     .HasName("mcore_tags_channel_id_tag_name_key")
                     .IsUnique();
 
-                entity.ToTable("mcore_tags");
+                e.ToTable("mcore_tags");
 
-                entity.Property(e => e.Id).HasColumnName("id");
+                e.Property(t => t.Id).HasColumnName("id");
 
-                entity.Property(e => e.ChannelId).HasColumnName("channel_id");
+                e.Property(t => t.ChannelId).HasColumnName("channel_id");
 
-                entity.Property(e => e.OwnerId).HasColumnName("owner_id");
+                e.Property(t => t.OwnerId).HasColumnName("owner_id");
 
-                entity.Property(e => e.CreatedAt).HasColumnName("created_at")
+                e.Property(t => t.CreatedAt).HasColumnName("created_at")
                 .HasColumnType("timestamptz");
 
-                entity.Property(e => e.Name).HasColumnName("tagname");
+                e.Property(t => t.Name).HasColumnName("tagname");
 
-                entity.Property(e => e.Contents).HasColumnName("contents");
+                e.Property(t => t.Contents).HasColumnName("contents");
             });
         }
     }
