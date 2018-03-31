@@ -1086,12 +1086,12 @@ namespace ModCore.Commands
 
 		[Command("poll"), Description("Creates a reaction-based poll."), CheckDisable]
 		[RequireBotPermissions(Permissions.ManageMessages)]
-		public async Task PollAsync(CommandContext ctx, [Description("Question to ask")]string message, [Description("Reaction options")]params DiscordEmoji[] options)
+		public async Task PollAsync(CommandContext ctx, [Description("Question to ask")]string message, [Description("Time to run poll")]TimeSpan timespan, [Description("Reaction options")]params DiscordEmoji[] options)
 		{
 			await ctx.Message.DeleteAsync();
 			var m = await ctx.SafeRespondAsync($"**[Poll]**: {message}");
 			var intr = ctx.Client.GetInteractivity();
-			var responses = await intr.CreatePollAsync(m, options);
+			var responses = await intr.CreatePollAsync(m, options, timespan);
 			StringBuilder sb = new StringBuilder($"**[Poll]**: {message}");
 			foreach (var em in options)
 			{
