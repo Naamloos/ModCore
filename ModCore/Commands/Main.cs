@@ -430,10 +430,12 @@ namespace ModCore.Commands
 		public class GlobalWarn : BaseCommandModule
 		{
 			private DatabaseContextBuilder Database { get; }
+			private SharedData Shared;
 
-			public GlobalWarn(DatabaseContextBuilder db)
+			public GlobalWarn(DatabaseContextBuilder db, SharedData sd)
 			{
 				this.Database = db;
+				this.Shared = sd;
 			}
 
 			[Command("add"), Description("Adds the specified user to a global watchlist."), CheckDisable]
@@ -520,7 +522,7 @@ namespace ModCore.Commands
 
 					var prevowns = new List<ulong>();
 					int count = 0;
-					var guilds = ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
+					var guilds = Shared.ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
 					foreach (var b in bans)
 					{
 						var g = guilds.First(x => x.Id == (ulong)b.GuildId);
