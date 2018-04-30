@@ -52,7 +52,7 @@ namespace ModCore
             foreach (var shard in Shards)
                 await shard.RunAsync();
 
-			await BuildWebHost().RunAsync();
+			await BuildWebHost().RunAsync(CTS.Token);
 
 			await WaitForCancellation();
 
