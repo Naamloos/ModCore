@@ -66,7 +66,7 @@ namespace ModCore.Commands
 			}
 			int tk = new Random().Next(0, int.MaxValue);
 			await ctx.RespondAsync("Received a new token by DM!");
-			this.Shared.ModCore.SharedData.Token = tk.ToString();
+			this.Shared.ModCore.SharedData.ApiToken = tk.ToString();
 			await ctx.Member.SendMessageAsync(tk.ToString());
 		}
 

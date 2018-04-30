@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ModCore.CoreApi.Entities;
 using ModCore.Database;
 using Newtonsoft.Json;
 using System;
@@ -8,7 +9,7 @@ using System.Text;
 
 namespace ModCore.CoreApi.Controllers
 {
-	[Route("{token}")]
+	[Route("")]
 	public class ApiController : Controller
     {
 		private ModCore core;
@@ -18,60 +19,58 @@ namespace ModCore.CoreApi.Controllers
 			this.core = cont.mcore;
 		}
 
-		public string Index(string token)
+		public string Index()
 		{
-			if(string.IsNullOrEmpty(token) || token != core.SharedData.Token)
-			{
-				NotFound();
-				return null;
-			}
-
 			return "ModCore API";
+		}
+
+		[HttpGet("token/{token}")]
+		public bool Token(string token)
+		{
+			// allow cross-domain shit for w/e reason
+			Response.Headers.Add("Access-Control-Allow-Origin", "*");
+
+			if (core.SharedData.ApiToken == token)
+				return true;
+			return false;
 		}
 
 		// GET ping
 		[HttpGet("ping")]
-		public string Ping(string token)
+		public string Ping()
 		{
-			if (string.IsNullOrEmpty(token) || token != core.SharedData.Token)
-			{
-				NotFound();
-				return null;
-			}
-
 			return "pong!";
 		}
 
 		[HttpGet("default")]
-		public string Dp(string token)
+		public string Dp()
 		{
-			if (string.IsNullOrEmpty(token) || token != core.SharedData.Token)
-			{
-				NotFound();
-				return null;
-			}
-
 			return "Default prefix: " + core.SharedData.DefaultPrefix;
 		}
 
-		[HttpGet("config/{gid}")]
-		public string Config(string token, long gid)
+		[HttpGet("roles/{gid}")]
+		public string Roles(ulong gid)
 		{
-			if (string.IsNullOrEmpty(token) || token != core.SharedData.Token)
+			// Check token.
+			var h = Request.Headers["Token"];
+			if (string.IsNullOrEmpty(h) || core.SharedData.ApiToken != h)
 			{
-				NotFound();
+				this.Unauthorized();
 				return null;
 			}
 
-			var gcs = this.core.Shards.SelectMany(x => x.Client.Guilds.Values);
-			if (gcs.Any(x => x.Id == (ulong)gid))
+			var arl = new ApiRoleList();
+			var guildsfound = core.Shards.SelectMany(x => x.Client.Guilds.Values.Where(g => g.Id == gid));
+			if(guildsfound.Count() > 0)
 			{
-				var gd = gcs.First(x => x.Id == (ulong)gid);
-				var cfg = gd.GetGuildSettings(this.core.Shards.First().Database.CreateContext());
-				return JsonConvert.SerializeObject(cfg);
+				foreach (var r in guildsfound.First().Roles)
+				{
+					arl.Roles.Add(new ApiRole() { RoleId = r.Id, RoleName = r.Name });
+				}
+				Response.ContentType = "application/json";
+				return JsonConvert.SerializeObject(arl);
 			}
-
-			this.NotFound();
+			NotFound();
 			return null;
 		}
 	}

@@ -16,7 +16,7 @@ namespace ModCore.Entities
         public (ulong guild, ulong channel) StartNotify { get; internal set; }
         public List<ulong> BotManagers { get; internal set; }
 		public string DefaultPrefix { get; internal set; }
-		public string Token = null;
+		public string ApiToken = null;
 
 		internal ModCore ModCore;
 
