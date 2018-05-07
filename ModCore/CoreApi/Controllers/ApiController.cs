@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ModCore.CoreApi.Entities;
 using ModCore.Database;
+using ModCore.Entities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,6 +74,16 @@ namespace ModCore.CoreApi.Controllers
 			}
 			NotFound();
 			return null;
+		}
+
+		[HttpGet("emptyconfig")]
+		public JObject EmptyConfig()
+		{
+			// allow cross-domain shit for w/e reason
+			Response.Headers.Add("Access-Control-Allow-Origin", "*");
+
+			Response.ContentType = "application/json";
+			return JObject.FromObject(new GuildSettings() { Prefix = "data served by ModCore."});
 		}
 	}
 }

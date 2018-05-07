@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.ModernEmbedBuilder;
 using F23.StringSimilarity;
@@ -13,6 +14,7 @@ using Humanizer;
 using ModCore.Entities;
 using ModCore.Logic;
 using MoreLinq;
+using System.Text;
 
 namespace ModCore.Listeners
 {
@@ -96,7 +98,7 @@ namespace ModCore.Listeners
                     await ctx.SafeRespondAsync($"**Command {qualifiedName} Errored!**");
                     break;
                 case CommandErrorVerbosity.NameDesc:
-                    await ctx.SafeRespondAsync($"**Command {qualifiedName} Errored!**\n{e.Exception.Message}");
+					await DescribeCommandErrorAsync(e.Exception, qualifiedName, ctx);
                     break;
                 case CommandErrorVerbosity.Exception:
                     var stream = new MemoryStream();
@@ -136,5 +138,38 @@ namespace ModCore.Listeners
                 }
             }
         }
+
+		public static async Task DescribeCommandErrorAsync(Exception ex, string cmd, CommandContext ctx)
+		{
+			if(ex.GetType() == typeof(ChecksFailedException))
+			{
+				var reasons = new List<string>();
+
+				var ext = (DSharpPlus.CommandsNext.Exceptions.ChecksFailedException)ex;
+				var failed = ext.FailedChecks;
+
+				if(failed.Any(x => x.GetType() == typeof(RequireUserPermissionsAttribute)))
+					reasons.Add("you don't have the right permissions to execute this command");
+				if (failed.Any(x => x.GetType() == typeof(RequireRolesAttribute)))
+					reasons.Add("you don't have the right roles to execute this command");
+				if (failed.Any(x => x.GetType() == typeof(RequirePrefixesAttribute)))
+					reasons.Add("you can't execute this command with that prefix");
+				if (failed.Any(x => x.GetType() == typeof(RequirePermissionsAttribute)))
+					reasons.Add("one of us doesn't have the right permissions to execute this command");
+				if (failed.Any(x => x.GetType() == typeof(RequireOwnerAttribute)))
+					reasons.Add("you don't own this bot");
+				if (failed.Any(x => x.GetType() == typeof(RequireNsfwAttribute)))
+					reasons.Add("this command can only be executed in NSFW channels");
+				if (failed.Any(x => x.GetType() == typeof(RequireBotPermissionsAttribute)))
+					reasons.Add("I don't have the right permissions to execute this command");
+
+				var response = $"I couldn't execute `{cmd}` because ";
+				response += string.Join(" and ", reasons);
+				response += "!";
+				await ctx.SafeRespondAsync(response);
+				return;
+			}
+			await ctx.SafeRespondAsync($"**Command {cmd} Errored!**\n{ex.Message}");
+		}
     }
 }
