@@ -11,7 +11,7 @@ using System.Text;
 
 namespace ModCore.CoreApi.Controllers
 {
-	[Route("")]
+	[Route("api")]
 	public class ApiController : Controller
     {
 		private ModCore core;

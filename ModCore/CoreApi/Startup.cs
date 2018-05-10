@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -33,6 +35,20 @@ namespace ModCore.CoreApi
 			{
 				app.UseDeveloperExceptionPage();
 			}
+
+			if (!Directory.Exists("wwwstatic"))
+				Directory.CreateDirectory("wwwstatic");
+
+			var fp = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwstatic"));
+
+			var df = new DefaultFilesOptions();
+			df.DefaultFileNames.Clear();
+			df.DefaultFileNames.Add("index.html");
+			df.FileProvider = fp;
+			df.RequestPath = "";
+
+			app.UseDefaultFiles(df);
+			app.UseStaticFiles(new StaticFileOptions() { FileProvider = fp, RequestPath = "" });
 
 			app.UseMvc();
 		}

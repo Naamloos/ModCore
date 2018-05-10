@@ -49,8 +49,10 @@ namespace ModCore
                 Shards.Add(shard);
             }
 
-            foreach (var shard in Shards)
-                await shard.RunAsync();
+			foreach (var shard in Shards)
+			{
+				await shard.RunAsync();
+			}
 
 			await BuildWebHost().RunAsync(CTS.Token);
 

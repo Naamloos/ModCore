@@ -38,6 +38,28 @@ namespace ModCore.Commands
 			this.StartTimes = starttimes;
 		}
 
+		[Command("about"), Description("About this bot.")]
+		public async Task AboutAsync(CommandContext ctx)
+		{
+			var eb = new DiscordEmbedBuilder()
+				.WithColor(new DiscordColor(0x007FFF))
+				.WithTitle("ModCore")
+				.WithDescription("A powerful moderating bot written on top of DSharpPlus")
+				.AddField("Special thanks to these contributors:",
+				"[uwx](https://github.com/uwx)\n" +
+				"[jcryer](https://github.com/jcryer)\n" +
+				"[Emzi0767](https://github.com/Emzi0767)\n" +
+				"[YourAverageBlackGuy](https://github.com/YourAverageBlackGuy)\n" +
+				"[DrCreo](https://github.com/DrCreo)\n" +
+				"[aexolate](https://github.com/aexolate)\n" +
+				"[Drake103](https://github.com/Drake103)\n")
+				.AddField("Contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/NaamloosDT/ModCore)")
+				.WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
+				.Build();
+
+			await ctx.RespondAsync(embed: eb);
+		}
+
 		[Command("ping"), Description("Check ModCore's API connection status."), CheckDisable]
 		public async Task PingAsync(CommandContext ctx)
 		{
