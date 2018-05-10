@@ -95,7 +95,7 @@ namespace ModCore.Commands
 			var app = ctx.Client.CurrentApplication;
 			if (app.IsPublic != null && (bool)app.IsPublic)
 				await ctx.SafeRespondAsync(
-					$"Add ModCore to your server!\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
+					$"Add ModCore to your server!\nhttps://modcore.naamloos.me/");
 			else
 				await ctx.SafeRespondAsync("I'm sorry Mario, but this instance of ModCore has been set to private!");
 		}
