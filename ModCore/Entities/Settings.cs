@@ -9,7 +9,7 @@ namespace ModCore.Entities
     public class Settings
     {
         [JsonProperty("token")]
-        public string Token { get; private set; }
+        internal string Token { get; private set; }
 
         [JsonProperty("prefix")]
         public string DefaultPrefix { get; private set; }
@@ -21,10 +21,10 @@ namespace ModCore.Entities
         public bool UsePerspective { get; private set; }
 
         [JsonProperty("perspective_token")]
-        public string PerspectiveToken { get; private set; }
+        internal string PerspectiveToken { get; private set; }
 
         [JsonProperty("database")]
-        public DatabaseSettings Database { get; private set; }
+        internal DatabaseSettings Database { get; private set; }
 
 		[JsonProperty("bot_managers")]
 		public List<ulong> BotManagers { get; private set; } = new List<ulong>();

@@ -16,11 +16,11 @@ using Newtonsoft.Json;
 
 namespace ModCore
 {
-    internal class ModCore
+    public class ModCore
     {
-        internal Settings Settings { get; private set; }
-        internal SharedData SharedData { get; private set; }
-        internal List<ModCoreShard> Shards { get; set; }
+		public Settings Settings { get; private set; }
+		public SharedData SharedData { get; private set; }
+		public List<ModCoreShard> Shards { get; set; }
         private CancellationTokenSource CTS { get; set; }
         private Perspective PerspectiveApi { get; set; }
 

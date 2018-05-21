@@ -18,7 +18,7 @@ namespace ModCore.Entities
 		public string DefaultPrefix { get; internal set; }
 		public string ApiToken = null;
 
-		internal ModCore ModCore;
+		public ModCore ModCore;
 
         public SharedData()
         {
