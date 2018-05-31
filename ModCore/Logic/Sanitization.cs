@@ -45,7 +45,7 @@ namespace ModCore.Logic
         public static Task<DiscordMessage> ElevatedMessageAsync(this DiscordMember m, DiscordEmbed embed) 
             => m.SendMessageAsync(embed: embed);
 
-        private static string Sanitize(string s, bool privileged)
+        public static string Sanitize(string s, bool privileged)
         {
             return privileged ? s : EscapeEveryoneMention.Replace(s, @"\@$1");
         }
