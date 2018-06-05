@@ -1467,5 +1467,23 @@ namespace ModCore.Commands
 				}
 			}
 		}
+
+		[Command("distance")]
+		[Description("Counts the amount of messages until a specific Message")]
+		public async Task DistanceAsync(CommandContext ctx, DiscordMessage msg)
+		{
+			var ms = new List<ulong>();
+			while (!ms.Contains(ctx.Message.Id))
+			{
+				var m = await ctx.Channel.GetMessagesAfterAsync(msg.Id, 100);
+				foreach(var mm in m)
+				{
+					if (!ms.Contains(mm.Id))
+						ms.Add(mm.Id);
+				}
+			}
+
+			await ctx.RespondAsync($"Counted {ms.Count} Messages.");
+		}
 	}
 }
