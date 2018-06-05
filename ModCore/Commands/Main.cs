@@ -1472,6 +1472,12 @@ namespace ModCore.Commands
 		[Description("Counts the amount of messages until a specific Message")]
 		public async Task DistanceAsync(CommandContext ctx, DiscordMessage msg)
 		{
+			if(DateTimeOffset.Now.Subtract(msg.Timestamp).TotalDays > 1)
+			{
+				await ctx.RespondAsync("Yeah.. Can't do that for messages older than a day");
+				return;
+			}
+
 			var ms = new List<ulong>();
 			while (!ms.Contains(ctx.Message.Id))
 			{
