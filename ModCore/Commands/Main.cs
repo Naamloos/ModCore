@@ -1491,5 +1491,44 @@ namespace ModCore.Commands
 
 			await ctx.RespondAsync($"Counted {ms.Count} Messages.");
 		}
+
+		[Command("quote")]
+		[Description("Quotes a message")]
+		public async Task QuoteAsync(CommandContext ctx, DiscordChannel channel, ulong message)
+		{
+			var m = await channel.GetMessageAsync(message);
+			await QuoteAsync(ctx, m);
+		}
+
+		[Command("quote")]
+		[Description("Quotes a message")]
+		public async Task QuoteAsync(CommandContext ctx, [Description("Gets a previous message (by amount of \"^\"")]int up = 1)
+		{
+			if (up > 100)
+			{
+				await ctx.RespondAsync("Limited to 100 messages max and 1 message min!");
+				return;
+			}
+			var msgs = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, up + 1);
+			msgs = msgs.OrderBy(x => x.Timestamp).ToList();
+			var m = msgs[up];
+			await QuoteAsync(ctx, m);
+		}
+
+		[Command("quote")]
+		[Description("Quotes a message")]
+		public async Task QuoteAsync(CommandContext ctx, DiscordMessage message)
+		{
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Message by {message.Author.Username}#{message.Author.Discriminator}")
+				.WithDescription($"{message.Content}\n\n_(https://discordapp.com/channels/{message.Channel.GuildId}/{message.ChannelId}/{message.Id})_")
+				.WithFooter($" Quoted by {ctx.Member.Username}#{ctx.Member.Discriminator}. ID: {message.Id}.", ctx.Member.GetAvatarUrl(ImageFormat.Png))
+				.WithThumbnailUrl(message.Author.GetAvatarUrl(ImageFormat.Png))
+				.WithTimestamp(message.Timestamp)
+				.Build();
+
+			await ctx.Message.DeleteAsync();
+			await ctx.RespondAsync(embed: embed);
+		}
 	}
 }
