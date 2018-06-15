@@ -1094,9 +1094,9 @@ namespace ModCore.Commands
 		{
 			if (!role.IsMentionable)
 			{
-				await role.UpdateAsync(mentionable: true);
+				await role.ModifyAsync(mentionable: true);
 				await channel.SafeMessageAsync($"{role.Mention} {message}", ctx);
-				await role.UpdateAsync(mentionable: false);
+				await role.ModifyAsync(mentionable: false);
 				await ctx.Message.DeleteAsync();
 				await ctx.LogActionAsync($"Announced {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
 			}
