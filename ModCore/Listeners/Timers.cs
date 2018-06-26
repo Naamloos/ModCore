@@ -47,11 +47,11 @@ namespace ModCore.Listeners
                 // unlock the timers
                 shard.SharedData.TimerSempahore.Release();
 
-                RescheduleTimers(shard.Client, shard.Database, shard.SharedData);
+                await RescheduleTimers(shard.Client, shard.Database, shard.SharedData);
             }
         }
 
-        public static void TimerCallback(Task t, object state)
+        public static async Task TimerCallback(Task t, object state)
         {
             var tdata = state as TimerData;
             var shard = tdata.Context;
@@ -76,7 +76,7 @@ namespace ModCore.Listeners
             _ = Task.Run(LocalDispatch);
 
             // schedule new one
-            RescheduleTimers(shard, tdata.Database, tdata.Shared);
+            await RescheduleTimers(shard, tdata.Database, tdata.Shared);
 
             Task LocalDispatch()
                 => DispatchTimer(tdata);
@@ -192,11 +192,10 @@ namespace ModCore.Listeners
             }
         }
 
-        public static TimerData RescheduleTimers(DiscordClient client, DatabaseContextBuilder database, SharedData shared)
+        public static async Task<TimerData> RescheduleTimers(DiscordClient client, DatabaseContextBuilder database, SharedData shared)
         {
-            
             // lock the timers
-            shared.TimerSempahore.Wait();
+            await shared.TimerSempahore.WaitAsync();
 
             // set a new timer
             DatabaseTimer[] timers = null;
@@ -224,8 +223,9 @@ namespace ModCore.Listeners
             var tdata = shared.TimerData;
             if (tdata != null && tdata.DbTimer.Id == nearest.Id)
             {
-                // it's the same timer
-                shared.TimerSempahore.Release();
+				// it's the same timer
+				Console.WriteLine("Passed a reschedule method (same timer)");
+				shared.TimerSempahore.Release();
                 return tdata;
             }
             
@@ -237,12 +237,12 @@ namespace ModCore.Listeners
                 tdata = new TimerData(t, nearest, client, database, shared, cts);
                 _ = t.ContinueWith(TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
                 shared.TimerData = tdata;
-
             }
 
             // release the lock
             shared.TimerSempahore.Release();
 
+			Console.WriteLine("Passed a reschedule method (full reschedule)");
             return tdata;
         }
 
@@ -262,7 +262,7 @@ namespace ModCore.Listeners
             shared.TimerSempahore.Release();
 
             // trigger a reschedule
-            return RescheduleTimers(shard, database, shared);
+            return await RescheduleTimers(shard, database, shared);
         }
 
         public static async Task<TimerData> UnscheduleTimersAsync(List<DatabaseTimer> timers, DiscordClient shard, DatabaseContextBuilder database, SharedData shared) 
@@ -281,7 +281,7 @@ namespace ModCore.Listeners
             shared.TimerSempahore.Release();
 
             // trigger a reschedule
-            return RescheduleTimers(shard, database, shared);
+            return await RescheduleTimers(shard, database, shared);
         }
 
         public static DatabaseTimer FindNearestTimer(TimerActionType actionType, ulong userId, ulong channelId, ulong guildId, DatabaseContextBuilder database)

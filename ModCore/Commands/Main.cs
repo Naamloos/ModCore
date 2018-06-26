@@ -790,7 +790,7 @@ namespace ModCore.Commands
 				await db.SaveChangesAsync();
 			}
 
-			Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+			await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
@@ -871,7 +871,7 @@ namespace ModCore.Commands
 				await db.SaveChangesAsync();
 			}
 
-			Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+			await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
@@ -906,7 +906,7 @@ namespace ModCore.Commands
 				await db.SaveChangesAsync();
 			}
 
-			Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+			await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
@@ -940,7 +940,7 @@ namespace ModCore.Commands
 				await db.SaveChangesAsync();
 			}
 
-			Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+			await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
