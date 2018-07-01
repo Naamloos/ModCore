@@ -49,6 +49,9 @@ namespace ModCore.Logic
             // if everything else fails...
             throw new Exception("Parsed fail, there was no result!");
         }
+        
+        // TODO i've noticed all my returns are just "time" or "time + X", why not make the return value a relative
+        // instead of an absolute?
 
         /// <summary>
         /// Action for an individual token in the reminder text.
@@ -74,20 +77,20 @@ namespace ModCore.Logic
             // read values like "5 seconds"
             if (DateLexer.TryIsNumber(s, out var i))
             {
-                // throw if tokens end early
+                // ended early, so assume it's talking about minutes (e.g remindme in 5)
                 if (!tokenizer.Next(out var s2))
-                    throw new Exception($"Found length of time {i} but no unit to match it to");
+                    return (Continue, time + (i * (ulong)Unit.Minutes));
                 
                 // ending words, so assume it's talking about minutes (e.g remindme in 5 to ...)
                 if (DateLexer.IsFinishingWord(s2))
-                    return (Break, i * (ulong)Unit.Minutes);
+                    return (Break, time + (i * (ulong)Unit.Minutes));
                 
                 // get the amount of ms that corresponds to the unit of time s2
                 if (!Enum.TryParse<Unit>(s2.Trim(), true, out var tk))
                     throw new Exception($"Unknown amount of time '{i}' of '{s2}'. If you think this is an unaccounted-for scenario, notify the dev!");
 
                 // return N * MsValue
-                return (Continue, (ulong) tk * i);
+                return (Continue, time + ((ulong) tk * i));
             }
             
             // read values like "5s"
@@ -101,7 +104,7 @@ namespace ModCore.Logic
             DebugWriteLine("####\n" +
                            $"Unrecognized token: {s}\n" +
                            $"In text: {tokenizer.String}\n" +
-                           $"At pos:  {new string('-', Math.Max(0, tokenizer.Index-tokenizer.Current.Length))}^ (semi-accurate)\n" +
+                           $"At pos:  {new string('-', Math.Max(0, (tokenizer.Index==-1?tokenizer.String.Length:tokenizer.Index)-tokenizer.Current.Length))}^ (semi-accurate)\n" + // this is bad
                            "####");
             
             // what to do with invalid tokens? break? continue? i guess break
