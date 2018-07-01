@@ -19,18 +19,14 @@ namespace ModCore.Commands
     public class Reminders : BaseCommandModule
 	{
         private const string ReminderTut = @"
-Sets a new reminder. The time span parser is fluent and will understand many different formats of reminders:
+Sets a new reminder. The time span parser is fluent and will understand many different formats of time, as long as they follow the base:
 
-<Time span>, <Message>
-[in] <Time span> to <Message>
-<Short time span> <Message> 
+[in] <Time span> [to] <Message>
 
-Where ""Time span"" represents a time period or a relative date (optionally with time of day specified), such as
-\* Tomorrow at 2:00 PM Chicago time
+Where ""Time span"" represents a time period such as
+\* Tomorrow
 \* Next fortnight
 \* 8 hours 20 minutes
-
-A ""Short time span"" represents a time span represented in a single word (we call this a token), such as
 \* 2h
 \* 4m5s
 \* 15min
@@ -40,7 +36,7 @@ See these examples:
 
 ```
 +remindme next week to walk the dog
-+remindme tomorrow, fix socket
++remindme tomorrow fix socket
 +remindme 2h5m watch new stranger things episode
 +remindme 8 hours wake up
 +remindme in an hour to eat something
@@ -78,7 +74,7 @@ If in doubt, just try it! You can always clear the reminders later.
                     xt.UserId == (long)ctx.User.Id).ToArray();
             if (!reminders.Any())
             {
-                await ctx.SafeRespondAsync("You have no reminders set.");
+                await ctx.ElevatedRespondAsync("You have no reminders set.");
                 return;
             }
 
@@ -135,33 +131,33 @@ If in doubt, just try it! You can always clear the reminders later.
         {
             await ctx.TriggerTypingAsync();
 
-            var (duration, text) = await Dates.ParseTime(dataToParse);
+            var (duration, text) = Dates.ParseTime(dataToParse);
             if (duration == Dates.ParsingError)
             {
                 /* await ctx.SafeRespondAsync(
                      $"Sorry, there was an error parsing your reminder.\nIf you see a developer, this info might help them: \n```\n{text}```");
                      */
-                await ctx.SafeRespondAsync("Sorry, there was an error parsing your reminder.");
+                await ctx.ElevatedRespondAsync("Sorry, there was an error parsing your reminder.");
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(text) || text.Length > 128)
             {
-                await ctx.SafeRespondAsync(
+                await ctx.ElevatedRespondAsync(
                     "Reminder text must to be no longer than 128 characters, not empty and not whitespace.");
                 return;
             }
 #if !DEBUG
             if (duration < TimeSpan.FromSeconds(30))
             {
-                await ctx.SafeRespondAsync("Minimum required time span to set a reminder is 30 seconds.");
+                await ctx.ElevatedRespondAsync("Minimum required time span to set a reminder is 30 seconds.");
                 return;
             }
 #endif
 
             if (duration > TimeSpan.FromDays(365)) // 1 year is the maximum
             {
-                await ctx.SafeRespondAsync("Maximum allowed time span to set a reminder is 1 year.");
+                await ctx.ElevatedRespondAsync("Maximum allowed time span to set a reminder is 1 year.");
                 return;
             }
 

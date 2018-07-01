@@ -1,226 +1,195 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using RestSharp;
-using static System.String;
+using Chronic;
+using RayBotSharp.Utils;
 
 namespace ModCore.Logic
 {
     public static class Dates
     {
-        public static readonly TimeSpan ParsingError = TimeSpan.MinValue;
+        private const bool Continue = true;
+        private const bool Break = false;
+
+        public static (TimeSpan duration, string text) ParseTime(string dataToParse)
+        {
+            var tokenizer = new StringTokenizer(dataToParse);
+            var time = 0UL;
+            foreach (var s in tokenizer)
+            {
+                var result = _parseToken(tokenizer, s.Trim(), time);
+                time = result.time;
+                if (!result.cont) break;
+            }
+
+            // if my parsing yielded any results, return it
+            if (time != 0UL) 
+                return (TimeSpan.FromMilliseconds(time), tokenizer.Current + " " + tokenizer.Remaining());
+            
+            // attempt parsing with NChronic
+            if (TryParseChronic(dataToParse, out var atime, out var atext) && atime > 0)
+                return (TimeSpan.FromMilliseconds(atime), atext);
+
+            // if everything else fails...
+            throw new Exception("Parsed fail, there was no result!");
+        }
+
+        private static (bool cont, ulong time) _parseToken(StringTokenizer tokenizer, string s, ulong time)
+        {
+            // filler words
+            if (IsFillerWord(s))
+                return (Continue, time);
+
+            if (s == "tomorrow")
+                return (Continue, time + (ulong) Unit.Day);
+            
+            // TODO maybe restore "next X" functionality?
+
+            // read values like "5 seconds"
+            if (TryIsNumber(s, out var i))
+            {
+                // throw if tokens end early
+                if (!tokenizer.Next(out var s2))
+                    throw new Exception($"Found length of time {i} but no unit to match it to");
+                
+                // ending words, so assume it's talking about minutes (e.g remindme in 5 to ...)
+                if (IsFinishingWord(s2))
+                    return (Break, i * (ulong)Unit.Minutes);
+                
+                // get the amount of ms that corresponds to the unit of time s2
+                if (!Enum.TryParse<Unit>(s2.Trim(), true, out var tk))
+                    throw new Exception($"Unknown amount of time '{i}' of '{s2}'. If you think this is an unaccounted-for scenario, notify the dev!");
+
+                // return N * MsValue
+                return (Continue, (ulong) tk * i);
+            }
+            
+            // read values like "5s"
+            if (TimeSpan.TryParse(s, out var ts))
+                return (Continue, time + (ulong) ts.TotalMilliseconds);
+
+            // ending words, so break and make the rest into a message
+            if (IsFinishingWord(s))
+                return (Break, time);
+
+            DebugWriteLine("####\n" +
+                           $"Unrecognized token: {s}" +
+                           $"In text: {tokenizer.String}" +
+                           $"At pos:  {new string('-', tokenizer.Index)}^" +
+                           "####");
+            
+            // what to do with invalid tokens? break? continue? i guess break
+            return (Break, time);
+        }
+
+        private static bool IsFillerWord(string s) => s == "in" || s == "at";
+
+        private static bool IsFinishingWord(string s2) => s2 == "to";
+
+        private static bool TryIsNumber(string s, out uint i)
+        {
+            switch (s)
+            {
+                case "a":
+                case "an":
+                case "one":
+                    i = 1;
+                    return true;
+                case "two":
+                    i = 2;
+                    return true;
+                case "three":
+                    i = 3;
+                    return true;
+                case "four":
+                    i = 4;
+                    return true;
+                case "five":
+                    i = 5;
+                    return true;
+                case "six":
+                    i = 6;
+                    return true;
+                case "seven":
+                    i = 7;
+                    return true;
+                case "eight":
+                    i = 8;
+                    return true;
+                case "nine":
+                    i = 9;
+                    return true;
+                case "ten":
+                    i = 10;
+                    return true;
+                case "eleven":
+                    i = 11;
+                    return true;
+                case "twelve":
+                    i = 12;
+                    return true;
+                default:
+                    return uint.TryParse(s, out i);
+            }
+        }
         
-        public static async Task<(TimeSpan duration, string text)> ParseTime(string dataToParse)
+        /// <summary>
+        /// Attempt to parse data in <c>in x to y</c> or <c>x ... y</c> format using NChronic <see cref="Parser"/>
+        /// </summary>
+        /// <param name="dataToParse">The input data to parse</param>
+        /// <param name="time">The amount of time from now until the trigger point</param>
+        /// <param name="text">The message left after the time</param>
+        /// <returns>True if succeeded, false otherwise</returns>
+        private static bool TryParseChronic(string dataToParse, out double time, out string text)
         {
-            (TimeSpan duration, string text) times;
-            Exception originalException = null;
+            var parser = new Parser(new Options
+            {
+                Clock = () => DateTime.Now,
+            });
+
             try
             {
-                 times = await _parseTime(dataToParse);
+                var start = parser.Parse(dataToParse).Start;
+                if (start.HasValue && start != DateTime.Now)
+                {
+                    time = start.Value.Subtract(DateTime.Now).TotalMilliseconds;
+                    text = dataToParse;
+                    return true;
+                }
             }
-            catch (Exception e)
+            catch(Exception e)
             {
-                DebugWriteLine($"{e}\n{e.StackTrace}");
-                originalException = e;
-                times = default;
+                DebugWriteLine($"NChronic parsing failed step 1 with: {e}");
             }
 
-            if (!times.Equals(default) && times.duration.TotalMilliseconds >= 0 && Math.Abs(times.duration.TotalMilliseconds) > double.Epsilon)
-            {
-                return times;
-            }
-            
-            DebugWriteLine(
-                "Got a bad result in regular scan. Trying aggressive natural parse, useful for invalid timespan-likes");
-            
-            (TimeSpan duration, string text) times2;
-            
             try
             {
-                times2 = await _parseTime(dataToParse, aggressive: true);
-            }
-            catch (Exception e)
-            {
-                DebugWriteLine($"{e}\n{e.StackTrace}");
-#if DEBUG
-                return (ParsingError, $"parsing (second pass) errored with {e}");
-#else
-                throw;
-#endif
-            }
-            
-            var originalError = originalException != null 
-                ? $"threw `{originalException.GetType().Name}`: {originalException.Message}" 
-                : times.duration.TotalMilliseconds < 0 
-                ? $@"returned a time value ""{times.duration.TotalMilliseconds}"" less than 0" 
-                : $@"returned a time value 0 or absurdly close ({times.duration.TotalMilliseconds})";
-            
-            if (times2.duration.TotalMilliseconds < 0)
-            {
-                return (ParsingError,
-                    $@"parsing errored (first pass): {originalError}\n" +
-                    $@"parsing errored (second pass): returned a time value ""{times2.duration.TotalMilliseconds}"" less than 0");
-            }
-            if (Math.Abs(times2.duration.TotalMilliseconds) < double.Epsilon)
-            {
-                return (ParsingError,
-                    $@"parsing errored (first pass): {originalError}\n" +
-                    $@"parsing errored (second pass): returned a time value 0 or absurdly close ({times2.duration.TotalMilliseconds})"
-                    );
-            }
-            
-            DebugWriteLine(
-                $"Got through with aggressive parsing: original result errored with <{originalError}> but we managed with <{times2.duration},{times2.text}>");
+                if (dataToParse.Contains("to"))
+                {
+                    var whereTo = dataToParse.IndexOf("to", StringComparison.Ordinal);
 
-            return times2;
-        }
-    
-        private static async Task<(TimeSpan duration, string text)> _parseTime(string preData, bool aggressive = false)
-        {
-            preData = preData.Trim();
-            var spaces = preData.Count(e => e == ' ');
-            if (preData.Length <= 3)
-            {
-                DebugWriteLine($"Parse error: {Join(' ', preData)}");
-                return (ParsingError, "not enough data given to infer input.");
-            }
-            switch (spaces)
-            {
-                case 0:
-                    DebugWriteLine("spaces: 0");
-                    return (ParsingError, "please give both a time amount and a reason.");
-                // fast-track if there's only one space
-                case 1:
-                    DebugWriteLine("spaces: 1");
-                    var data = preData.Split(' ');
-                    return (await ParseTimeSpan(data[0], aggressive), data[1]);
-            }
-            // try parsing regular timespan as first word. this allows the old syntax to continue working without side effects.
-            var firstSpace = preData.IndexOf(' ');
-            var firstToken = preData.Substring(0, firstSpace);
-            if (!AllNumbers.IsMatch(firstToken) && TimeSpan.TryParse(firstToken, out var ts))
-            {
-                DebugWriteLine($"Returning pure timespan: {firstToken}");
-                return (ts, preData.Substring(firstSpace + 1));
-            }
-            // try split by 'to' or comma, whichever gives the lowest result
-            var idx1 = preData.IndexOfInvariant(" to ");
-            var idx2 = preData.IndexOfInvariant(", ");
-            if (idx2 != -1 && (idx1 == -1 || idx2 < idx1))
-            {
-                DebugWriteLine("splitting by comma");
-                return (await ParseTimeSpan(preData.Substring(0, idx2).Trim(), aggressive), preData.Substring(idx2 + 2));
-            }
-            if (idx1 != -1)
-            {
-                DebugWriteLine("splitting by 'to'");
-                return (await ParseTimeSpan(preData.Substring(0, idx1).Trim(), aggressive), preData.Substring(idx1 + 4));
-            }
-            
-            var adata = preData.Split(' ');
+                    var lhs = dataToParse.Substring(0, whereTo);
+                    var rhs = dataToParse.Substring(whereTo);
 
-            // split at last known unit
-            var lastUnit = new int[BigUnits.Length]
-                .Select((e, i) => (index: Array.FindLastIndex(adata, e2 => e2.EndsWith(BigUnits[i])), point: i))
-                .OrderByDescending(e => e.index)
-                .FirstOrDefault();
-            if (!lastUnit.Equals((default, default)) && lastUnit.index != -1)
-            {
-                DebugWriteLine($"Splitting by last available token {BigUnits[lastUnit.point]} at {lastUnit.index+1}");
-                DebugWriteLine($"-: {Join(' ', adata.Take(lastUnit.index+1))}");
-                DebugWriteLine($"-: {Join(' ', adata.Skip(lastUnit.index+1))}");
-                return (await ParseTimeSpan(Join(' ', adata.Take(lastUnit.index+1)), aggressive), Join(' ', adata.Skip(lastUnit.index+1)));
+                    var start = parser.Parse(lhs).Start;
+                    if (start.HasValue && start != DateTime.Now)
+                    {
+                        time = start.Value.Subtract(DateTime.Now).TotalMilliseconds;
+                        text = rhs;
+                        return true;
+                    }
+                }
             }
-            // sometimes people type invalid timespans like 2m5s in the old syntax. we can parse these as well.
-            var aggMatches = NumWordAggressive.Matches(firstToken);
-            if (aggMatches.Count > 0)
+            catch(Exception e)
             {
-                DebugWriteLine($"Splitting by invalid timespan match (aggressive) from {firstToken}: {Join(';', aggMatches.Select(e => Join(',', e.Groups)))}");
-                // call ParseTimeSpan in aggressive so it'll split, for example, 2m5s into 2 m 5 s. in non aggressive it
-                // would only split eg 2m 5s. 
-                // this might mean that this is ran twice, a second time if the first time fails by the aggressive fallback.
-                // i don't really care.
-                return (await ParseTimeSpan(firstToken, true), Join(' ', adata.Skip(1)));
+                DebugWriteLine($"NChronic parsing failed step 2 with: {e}");
             }
-            // this is the last resort. we found no units. take half and try to parse
-            var halfindex = (int)(adata.Length/2.0);
-            DebugWriteLine($"Taking half at {halfindex}");
-            DebugWriteLine($"-: {Join(' ', adata.Take(halfindex))}");
-            DebugWriteLine($"-: {Join(' ', adata.Skip(halfindex))}");
-            return (await ParseTimeSpan(Join(' ', adata.Take(halfindex)), aggressive), Join(' ', adata.Skip(halfindex)));
+
+            time = 0UL;
+            text = null;
+            return false;
         }
 
-        private static readonly Regex AllNumbers = new Regex("^[0-9]+$", RegexOptions.Compiled);
-        private static readonly Regex NoneNumbers = new Regex("^[^0-9]+$", RegexOptions.Compiled);
-        private static readonly Regex NumWord = new Regex("^([0-9]+)([a-zA-Z]+)$", RegexOptions.Compiled);
-        private static readonly Regex NumWordAggressive = new Regex("([0-9]+)([a-zA-Z]+)", RegexOptions.Compiled);
-
-        private static async Task<TimeSpan> ParseTimeSpan(string data, bool aggressive = false)
-        {
-            DebugWriteLine($"Parsing time data: {data}");
-            if (TimeSpan.TryParse(data, out var time))
-            {
-                DebugWriteLine($"Parsed pure TimeSpan: {time}");
-                return time;
-            }
-            var tokens = data.Split(' ').Where(e => !IsNullOrWhiteSpace(e)).Select(e =>
-            {
-                var t = e.Trim();
-                switch (t)
-                {
-                    case "a":
-                    case "an":
-                    case "one":
-                        return "1";
-                    case "two":
-                        return "2";
-                    case "three":
-                        return "3";
-                    case "four":
-                        return "4";
-                    case "five":
-                        return "5";
-                    case "six":
-                        return "6";
-                    case "seven":
-                        return "7";
-                    case "eight":
-                        return "8";
-                    case "nine":
-                        return "9";
-                    case "ten":
-                        return "10";
-                    case "eleven":
-                        return "11";
-                    case "twelve":
-                        return "12";
-                    default:
-                        return t;
-                }
-            }).ToList();
-
-            // ReSharper disable once ConvertIfStatementToSwitchStatement
-            if (tokens[0] == "in")
-            {
-                DebugWriteLine("Removing 'in' from tokens");
-                tokens.RemoveAt(0);
-            }
-
-            if (tokens[0] == "tomorrow")
-            {
-                if (tokens.Count > 1 && tokens[1] == "at")
-                {
-                    DebugWriteLine($"Returning tomorrow at {Join(' ', tokens.Skip(1))}");
-                    return await ParseTomorrow(tokens);
-                }
-                DebugWriteLine("Returning tomorrow");
-                return TimeSpan.FromDays(1);
-            }
+        /*
             if (tokens[0] == "next")
             {
                 // hour, month, year, monday, tuesday...
@@ -261,7 +230,9 @@ namespace ModCore.Logic
                         return NextQuarter() - today;
                     case "semester":
                         DebugWriteLine("Returning: start of next semester");
-                        return (today.Month <= 6 ? new DateTime(today.Year, 7, 1) : new DateTime(today.Year + 1, 1, 1)) -
+                        return (today.Month <= 6
+                                   ? new DateTime(today.Year, 7, 1)
+                                   : new DateTime(today.Year + 1, 1, 1)) -
                                today;
                     case "year":
                         DebugWriteLine("Returning: next year");
@@ -275,200 +246,40 @@ namespace ModCore.Logic
                 DebugWriteLine($@"Bad use of next: ""{tokens[0]}{tokens[1]}""");
                 tokens.RemoveAt(0);
             }
-
-            if (NoneNumbers.IsMatch(tokens[0]))
-            {
-                // we don't know the amount
-                if (tokens[0].EndsWith('s'))
-                {
-                    DebugWriteLine($"Invalid first token {tokens[0]}");
-                    tokens.RemoveAt(0);
-                }
-                else
-                {
-                    DebugWriteLine($"Implicitly interpreting unit '{tokens[0]}' without amount as '1 {tokens[0]}'");
-                    tokens.Insert(0, "1");
-                }
-            }
-
-            tokens = aggressive 
-                ? tokens.SelectMany(PossibleTokenSplitAggressive).ToList() 
-                : tokens.SelectMany(PossibleTokenSplit).ToList();
             
-            DebugWriteLine($"Tokenization finished, about to parse {Join(' ', tokens)}");
-
-            //var units = new Dictionary<Unit, int>();
-            ulong millis = 0;
-            for (var i = 0; i < tokens.Count; i += 2)
-            {
-                if (!Enum.TryParse<Unit>(tokens[i + 1], true, out var tk))
-                {
-                    DebugWriteLine($"Unknown unit {tokens[i + 1]} (value:{tokens[i]})");
-                    continue;
-                }
-                DebugWriteLine(
-                    $"Detected unit amount({tokens[i]};{(ulong) tk * ulong.Parse(tokens[i])}ms) unit({tokens[i + 1]};{Enum.GetName(typeof(Unit), tk)})");
-                millis += (ulong) tk * ulong.Parse(tokens[i]);
-//                if (units.ContainsKey(tk))
-//                {
-//                    units[tk] += int.Parse(tokens[i]);
-//                }
-//                else
-//                {
-//                    units[tk] = int.Parse(tokens[i]);
-//                }
-            }
-#if DEBUG
-            if (tokens.Count % 2 != 0)
-                DebugWriteLine($"Uneven tokens, {Join(";", tokens)}");
-#endif
-
-            return TimeSpan.FromMilliseconds(millis);
-        }
-
-        private static async Task<TimeSpan> ParseTomorrow(IReadOnlyList<string> tokens)
-        {
-            var data = Join(' ', tokens).Trim();
-            var now = DateTime.UtcNow;
             
-            // Using constants to keep redundant code concise
-            var iv = CultureInfo.InvariantCulture;
-            const DateTimeStyles adj = DateTimeStyles.AdjustToUniversal;
             
-            if (DateTime.TryParseExact(data, "HH:mm", iv, adj, out var dt))
-            {
-                return dt.AddDays(1) - now;
-            }
-            if (DateTime.TryParseExact(data, "HH:mm:ss", iv, adj, out var dt2))
-            {
-                return dt2.AddDays(1) - now;
-            }
-            if (DateTime.TryParseExact(data, "HH:mm:ss z", iv, adj, out var dt3))
-            {
-                return dt3.AddDays(1) - now;
-            }
-            if (DateTime.TryParseExact(data, "HH:mm:ss zz", iv, adj, out var dt4))
-            {
-                return dt4.AddDays(1) - now;
-            }
-            if (DateTime.TryParseExact(data, "HH:mm:ss zzz", iv, adj, out var dt5))
-            {
-                return dt5.AddDays(1) - now;
-            }
-            var endTokens = Join(' ', tokens.Skip(1));
-            try
-            {
-                var tz = TimeZoneInfo.FindSystemTimeZoneById(endTokens);
-                if (DateTime.TryParseExact(tokens[0], "HH:mm", iv, adj, out var dt6))
-                {
-                    return TimeZoneInfo.ConvertTimeFromUtc(dt6, tz).AddDays(1) - now;
-                }
-                if (DateTime.TryParseExact(tokens[0], "HH:mm:ss", iv, adj, out var dt7))
-                {
-                    return TimeZoneInfo.ConvertTimeFromUtc(dt7, tz).AddDays(1) - now;
-                }
-            }
-            catch (TimeZoneNotFoundException e)
-            {
-                DebugWriteLine($@"Failed getting time zone from ""{endTokens}"": {e}");
-                try
-                {
-                    var local = await GetLocalDateTimeOffset(endTokens);
-
-                    if (DateTime.TryParseExact(tokens[0], "HH:mm", iv, adj, out var dt10))
-                    {
-                        return ApplyOffset(dt10.AddDays(1), local) - now;
-                    }
-                    if (DateTime.TryParseExact(tokens[0], "HH:mm:ss", iv, adj, out var dt11))
-                    {
-                        return ApplyOffset(dt11.AddDays(1), local) - now;
-                    }
-                }
-                catch (Exception e2)
-                {
-                    DebugWriteLine($@"Failed getting time zone ""{endTokens}"" from GAPI: {e2}");
-                }
-                if (DateTime.TryParseExact(tokens[0], "HH:mm", iv, adj, out var dt8))
-                {
-                    return dt8.AddDays(1) - now;
-                }
-                if (DateTime.TryParseExact(tokens[0], "HH:mm:ss", iv, adj, out var dt9))
-                {
-                    return dt9.AddDays(1) - now;
-                }
-            }
-            return TimeSpan.FromDays(1);
+            
+            
+        private static DateTime NextQuarter()
+        {
+            var today = DateTime.Today;
+            return today
+                .AddMonths(3 - (today.Month - 1) % 3)
+                .AddDays(-today.Day)
+                .AddMonths(1);
         }
 
-        private static async Task<double> GetLocalDateTimeOffset(string place)
+        private static DateTime GetNextWorkingDay(DateTime date)
         {
-            var client = new RestClient("https://maps.googleapis.com");
-            var request = new RestRequest("maps/api/geocode/json", Method.GET);
-            request.AddParameter("address", place.Replace(' ', '+'));
-            var aresponse = await client.ExecuteTaskAsync<GeocodeResponse>(request);
-            var loc = aresponse.Data.Results.FirstOrDefault()?.Geometry?.Location;
-            if (loc == null) throw new MissingMemberException("location n/a (no results)");
-            var lat = loc.Lat;
-            var lon = loc.Lng;
-
-            request = new RestRequest("maps/api/timezone/json", Method.GET);
-            request.AddParameter("location", lat + "," + lon);
-            request.AddParameter("timestamp", ToTimestamp(DateTime.UtcNow));
-            request.AddParameter("sensor", "false");
-            var response = await client.ExecuteTaskAsync<GoogleTimeZone>(request);
-
-            return response.Data.RawOffset + response.Data.DstOffset;
-        }
-
-        private static DateTime ApplyOffset(DateTime utcDate, double offset) => utcDate.AddSeconds(offset);
-
-        private static double ToTimestamp(DateTime date)
-        {
-            var origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            var diff = date.ToUniversalTime() - origin;
-            return Math.Floor(diff.TotalSeconds);
-        }
-
-        private static IEnumerable<string> PossibleTokenSplitAggressive(string e)
-        {
-            return NumWordAggressive.Matches(e).SelectMany(match =>
+            do
             {
-                DebugWriteLine($"Possible aggressive token split: success {Join(';', match.Groups)}");
-                return new[] {match.Groups[1].Value, match.Groups[2].Value};
-            });
+                date = date.AddDays(1);
+            } while (IsHoliday(date) || IsWeekEnd(date));
+
+            return date;
         }
+        
+        private static bool IsHoliday(DateTime date) => date.Day == 1 && date.Month == 1
+                                                        || date.Day == 5 && date.Month == 1
+                                                        || date.Day == 10 && date.Month == 3
+                                                        || date.Day == 25 && date.Month == 12;
 
-        private static IEnumerable<string> PossibleTokenSplit(string e)
-        {
-            var match = NumWord.Match(e);
-            DebugWriteLine($"Possible token split: success {match.Success}, {Join(';', match.Groups)}");
-            return !match.Success ? new[] {e} : new[] {match.Groups[1].Value, match.Groups[2].Value};
-        }
+        private static bool IsWeekEnd(DateTime date) => date.DayOfWeek == DayOfWeek.Saturday
+                                                        || date.DayOfWeek == DayOfWeek.Sunday;
 
-        private static readonly string[] BigUnits =
-        {
-            "milis",
-            "millis",
-            "milisecond",
-            "miliseconds",
-            "millisecond",
-            "milliseconds",
-            "sec",
-            "second",
-            "secs",
-            "seconds",
-            "min",
-            "minute",
-            "mins",
-            "minutes",
-            "hour",
-            "hours",
-            "day",
-            "days",
-            "week",
-            "weeks"
-        };
-
+        */
+        
         // ReSharper disable UnusedMember.Local
         private enum Unit : ulong
         {
@@ -479,37 +290,37 @@ namespace ModCore.Logic
             Miliseconds = Ms,
             Millisecond = Ms,
             Milliseconds = Ms,
-            
+
             S = 1000 * Milisecond,
             Sec = S,
             Second = S,
             Secs = S,
             Seconds = S,
-            
+
             M = 60 * Second,
             Min = M,
             Minute = M,
             Mins = M,
             Minutes = M,
-            
+
             H = 60 * Minute,
             Hr = H,
             Hrs = H,
             Hour = H,
             Hours = H,
-            
+
             D = 24 * Hour,
             Ds = D,
             Day = D,
             Days = D,
-            
+
             W = 7 * Day,
             Ws = W,
             Week = W,
             Weeks = W,
-            
+
             // Uncommon / fictional units
-            
+
             Fortnight = 14 * Day, // 14 days
             Month = 30 * Day,
             Quarter = 3 * Month, // 3 months
@@ -534,9 +345,9 @@ namespace ModCore.Logic
             Vorn = 83 * Year, //83 years
             Decivorn = 2988 * Day, //8.3 years
             Exapi = 3_141_590_400 * Millisecond, //36.361 days
-            
+
             // Plural forms, ditto
-            
+
             Fortnights = Fortnight,
             Months = Month,
             Quarters = Quarter,
@@ -565,126 +376,10 @@ namespace ModCore.Logic
         }
         // ReSharper restore UnusedMember.Local
 
-        private static DateTime NextQuarter()
-        {
-            var today = DateTime.Today;
-            return today
-                .AddMonths(3 - (today.Month - 1) % 3)
-                .AddDays(-today.Day)
-                .AddMonths(1);
-        }
-
-        private static bool IsHoliday(DateTime date) => date.Day == 1 && date.Month == 1
-                                                        || date.Day == 5 && date.Month == 1
-                                                        || date.Day == 10 && date.Month == 3
-                                                        || date.Day == 25 && date.Month == 12;
-
-        private static bool IsWeekEnd(DateTime date) => date.DayOfWeek == DayOfWeek.Saturday
-                                                        || date.DayOfWeek == DayOfWeek.Sunday;
-
-        private static DateTime GetNextWorkingDay(DateTime date)
-        {
-            do
-            {
-                date = date.AddDays(1);
-            } while (IsHoliday(date) || IsWeekEnd(date));
-            return date;
-        }
-        
         [Conditional("DEBUG")]
         private static void DebugWriteLine(string text)
         {
             Console.WriteLine(text);
         }
-    }
-
-    internal class GoogleTimeZone
-    {
-        [JsonProperty("dstOffset")]
-        public double DstOffset { get; set; }
-
-        [JsonProperty("rawOffset")]
-        public double RawOffset { get; set; }
-
-        [JsonProperty("status")]
-        public string Status { get; set; }
-
-        [JsonProperty("timeZoneId")]
-        public string TimeZoneId { get; set; }
-
-        [JsonProperty("timeZoneName")]
-        public string TimeZoneName { get; set; }
-    }
-
-    internal class GeocodeResponse
-    {
-        [JsonProperty("results")]
-        public Result[] Results { get; set; }
-
-        [JsonProperty("status")]
-        public string Status { get; set; }
-    }
-
-    internal class Result
-    {
-        [JsonProperty("address_components")]
-        public AddressComponent[] AddressComponents { get; set; }
-
-        [JsonProperty("formatted_address")]
-        public string FormattedAddress { get; set; }
-
-        [JsonProperty("geometry")]
-        public Geometry Geometry { get; set; }
-
-        [JsonProperty("place_id")]
-        public string PlaceId { get; set; }
-
-        [JsonProperty("types")]
-        public string[] Types { get; set; }
-    }
-
-    internal class Geometry
-    {
-        [JsonProperty("bounds")]
-        public Bounds Bounds { get; set; }
-
-        [JsonProperty("location")]
-        public Location Location { get; set; }
-
-        [JsonProperty("location_type")]
-        public string LocationType { get; set; }
-
-        [JsonProperty("viewport")]
-        public Bounds Viewport { get; set; }
-    }
-
-    internal class Bounds
-    {
-        [JsonProperty("northeast")]
-        public Location Northeast { get; set; }
-
-        [JsonProperty("southwest")]
-        public Location Southwest { get; set; }
-    }
-
-    internal class Location
-    {
-        [JsonProperty("lat")]
-        public double Lat { get; set; }
-
-        [JsonProperty("lng")]
-        public double Lng { get; set; }
-    }
-
-    internal class AddressComponent
-    {
-        [JsonProperty("long_name")]
-        public string LongName { get; set; }
-
-        [JsonProperty("short_name")]
-        public string ShortName { get; set; }
-
-        [JsonProperty("types")]
-        public string[] Types { get; set; }
     }
 }
