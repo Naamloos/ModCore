@@ -32,6 +32,7 @@ namespace ModCore.Logic
             if (time != 0UL)
             {
                 // if we didn't find a delimiter, the tokenizer be empty, so let's use all of the data instead
+                // TODO maybe come up with a better message than just using all the data?
                 var message = foundDelimiter
                     ? tokenizer.Current + " " + tokenizer.Remaining()
                     : dataToParse;
