@@ -101,7 +101,7 @@ namespace ModCore.Logic
             DebugWriteLine("####\n" +
                            $"Unrecognized token: {s}\n" +
                            $"In text: {tokenizer.String}\n" +
-                           $"At pos:  {new string('-', tokenizer.Index-tokenizer.Current.Length)}^ (semi-accurate)\n" +
+                           $"At pos:  {new string('-', Math.Max(0, tokenizer.Index-tokenizer.Current.Length))}^ (semi-accurate)\n" +
                            "####");
             
             // what to do with invalid tokens? break? continue? i guess break
