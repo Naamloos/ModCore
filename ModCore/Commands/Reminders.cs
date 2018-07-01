@@ -21,7 +21,7 @@ namespace ModCore.Commands
         private const string ReminderTut = @"
 Sets a new reminder. The time span parser is fluent and will understand many different formats of time, as long as they follow the base:
 
-[in] <Time span> [to] <Message>
+[in] <Time span> [to] [Message]
 
 Where ""Time span"" represents a time period such as
 \* Tomorrow
@@ -41,6 +41,8 @@ See these examples:
 +remindme 8 hours wake up
 +remindme in an hour to eat something
 +remindme in nine months to have a baby
++remindme in 7 minutes
++remindme 7m
 ```
 
 Note that even if your arguments don't fit the grammar denoted above, they might still be parsed fine.
@@ -132,15 +134,7 @@ If in doubt, just try it! You can always clear the reminders later.
             await ctx.TriggerTypingAsync();
 
             var (duration, text) = Dates.ParseTime(dataToParse);
-            if (duration == Dates.ParsingError)
-            {
-                /* await ctx.SafeRespondAsync(
-                     $"Sorry, there was an error parsing your reminder.\nIf you see a developer, this info might help them: \n```\n{text}```");
-                     */
-                await ctx.ElevatedRespondAsync("Sorry, there was an error parsing your reminder.");
-                return;
-            }
-
+            
             if (string.IsNullOrWhiteSpace(text) || text.Length > 128)
             {
                 await ctx.ElevatedRespondAsync(

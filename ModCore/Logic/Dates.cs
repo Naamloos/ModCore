@@ -14,29 +14,56 @@ namespace ModCore.Logic
         {
             var tokenizer = new StringTokenizer(dataToParse);
             var time = 0UL;
+            
+            var foundDelimiter = false;
             foreach (var s in tokenizer)
             {
                 var result = _parseToken(tokenizer, s.Trim(), time);
                 time = result.time;
-                if (!result.cont) break;
+                // if broken by Break, we found a delimiter, if exited the loop normally no delimiter was found
+                if (!result.cont)
+                {
+                    foundDelimiter = true;
+                    break;
+                }
             }
 
             // if my parsing yielded any results, return it
-            if (time != 0UL) 
-                return (TimeSpan.FromMilliseconds(time), tokenizer.Current + " " + tokenizer.Remaining());
-            
+            if (time != 0UL)
+            {
+                // if we didn't find a delimiter, the tokenizer be empty, so let's use all of the data instead
+                var message = foundDelimiter
+                    ? tokenizer.Current + " " + tokenizer.Remaining()
+                    : dataToParse;
+
+                // if no message was provided, use the full text as a message
+                return string.IsNullOrWhiteSpace(message) 
+                    ? (Ts(time), dataToParse) 
+                    : (Ts(time), message);
+            }
+
             // attempt parsing with NChronic
             if (TryParseChronic(dataToParse, out var atime, out var atext) && atime > 0)
-                return (TimeSpan.FromMilliseconds(atime), atext);
+                return (Ts(atime), atext);
 
             // if everything else fails...
             throw new Exception("Parsed fail, there was no result!");
         }
 
+        /// <summary>
+        /// Action for an individual token in the reminder text.
+        /// </summary>
+        /// <param name="tokenizer">The tokenizer instance</param>
+        /// <param name="s">The token</param>
+        /// <param name="time">The current time state</param>
+        /// <returns>A <see cref="ValueTuple{T1}"/>&lt;<see cref="Boolean"/>, <see cref="UInt64"/>&gt; containing
+        /// <c>true</c> to continue parsing execution or <c>false</c> to escape control flow. The returned value of
+        /// <c>time</c> is stored and used for the next token, or for the return value if control flow is escaped.</returns>
+        /// <exception cref="Exception"></exception>
         private static (bool cont, ulong time) _parseToken(StringTokenizer tokenizer, string s, ulong time)
         {
             // filler words
-            if (IsFillerWord(s))
+            if (DateLexer.IsFillerWord(s))
                 return (Continue, time);
 
             if (s == "tomorrow")
@@ -45,14 +72,14 @@ namespace ModCore.Logic
             // TODO maybe restore "next X" functionality?
 
             // read values like "5 seconds"
-            if (TryIsNumber(s, out var i))
+            if (DateLexer.TryIsNumber(s, out var i))
             {
                 // throw if tokens end early
                 if (!tokenizer.Next(out var s2))
                     throw new Exception($"Found length of time {i} but no unit to match it to");
                 
                 // ending words, so assume it's talking about minutes (e.g remindme in 5 to ...)
-                if (IsFinishingWord(s2))
+                if (DateLexer.IsFinishingWord(s2))
                     return (Break, i * (ulong)Unit.Minutes);
                 
                 // get the amount of ms that corresponds to the unit of time s2
@@ -68,70 +95,19 @@ namespace ModCore.Logic
                 return (Continue, time + (ulong) ts.TotalMilliseconds);
 
             // ending words, so break and make the rest into a message
-            if (IsFinishingWord(s))
+            if (DateLexer.IsFinishingWord(s))
                 return (Break, time);
 
             DebugWriteLine("####\n" +
-                           $"Unrecognized token: {s}" +
-                           $"In text: {tokenizer.String}" +
-                           $"At pos:  {new string('-', tokenizer.Index)}^" +
+                           $"Unrecognized token: {s}\n" +
+                           $"In text: {tokenizer.String}\n" +
+                           $"At pos:  {new string('-', tokenizer.Index-tokenizer.Current.Length)}^ (semi-accurate)\n" +
                            "####");
             
             // what to do with invalid tokens? break? continue? i guess break
             return (Break, time);
         }
 
-        private static bool IsFillerWord(string s) => s == "in" || s == "at";
-
-        private static bool IsFinishingWord(string s2) => s2 == "to";
-
-        private static bool TryIsNumber(string s, out uint i)
-        {
-            switch (s)
-            {
-                case "a":
-                case "an":
-                case "one":
-                    i = 1;
-                    return true;
-                case "two":
-                    i = 2;
-                    return true;
-                case "three":
-                    i = 3;
-                    return true;
-                case "four":
-                    i = 4;
-                    return true;
-                case "five":
-                    i = 5;
-                    return true;
-                case "six":
-                    i = 6;
-                    return true;
-                case "seven":
-                    i = 7;
-                    return true;
-                case "eight":
-                    i = 8;
-                    return true;
-                case "nine":
-                    i = 9;
-                    return true;
-                case "ten":
-                    i = 10;
-                    return true;
-                case "eleven":
-                    i = 11;
-                    return true;
-                case "twelve":
-                    i = 12;
-                    return true;
-                default:
-                    return uint.TryParse(s, out i);
-            }
-        }
-        
         /// <summary>
         /// Attempt to parse data in <c>in x to y</c> or <c>x ... y</c> format using NChronic <see cref="Parser"/>
         /// </summary>
@@ -377,9 +353,13 @@ namespace ModCore.Logic
         // ReSharper restore UnusedMember.Local
 
         [Conditional("DEBUG")]
-        private static void DebugWriteLine(string text)
-        {
-            Console.WriteLine(text);
-        }
+        private static void DebugWriteLine(string text) => Console.WriteLine(text);
+
+        /// <summary>
+        /// Turn a length of milliseconds into a <see cref="TimeSpan"/>
+        /// </summary>
+        /// <param name="time">The amount of milliseconds to convert</param>
+        /// <returns>The newly created <see cref="TimeSpan"/></returns>
+        private static TimeSpan Ts(double time) => TimeSpan.FromMilliseconds(time);
     }
 }
