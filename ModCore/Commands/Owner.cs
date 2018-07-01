@@ -19,6 +19,7 @@ namespace ModCore.Commands
 	{
         public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
+
         public Owner(SharedData shared, DatabaseContextBuilder db)
         {
             this.Shared = shared;
@@ -54,6 +55,20 @@ namespace ModCore.Commands
                 await ctx.SafeRespondAsync("Operation cancelled by user.");
             }
         }
+
+		[Command("apitoken"), Hidden]
+		public async Task ApiToken(CommandContext ctx)
+		{
+			if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
+			{
+				await ctx.SafeRespondAsync("You do not have permission to use this command!");
+				return;
+			}
+			int tk = new Random().Next(0, int.MaxValue);
+			await ctx.RespondAsync("Received a new token by DM!");
+			this.Shared.ModCore.SharedData.ApiToken = tk.ToString();
+			await ctx.Member.SendMessageAsync(tk.ToString());
+		}
 
         [Command("testupdate"), Aliases("t"), Hidden]
         public async Task ThrowAsync(CommandContext ctx)

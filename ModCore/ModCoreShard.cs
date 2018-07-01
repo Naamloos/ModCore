@@ -25,7 +25,7 @@ namespace ModCore
         public CommandsNextExtension Commands { get; private set; }
 
         public SharedData SharedData { get; set; }
-        internal Settings Settings { get; }
+		public Settings Settings { get; }
 
         public DatabaseContextBuilder Database { get; }
         

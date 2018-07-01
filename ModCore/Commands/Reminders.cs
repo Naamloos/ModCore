@@ -185,7 +185,7 @@ If in doubt, just try it! You can always clear the reminders later.
             }
 
             // reschedule timers
-            Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+            await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
             var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
             await ctx.SafeRespondAsync(
                 $"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text.BreakMentions()}");

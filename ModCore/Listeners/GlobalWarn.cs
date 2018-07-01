@@ -29,7 +29,7 @@ namespace ModCore.Listeners
 
             var prevowns = new List<ulong>();
             int count = 0;
-            var guilds = ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
+            var guilds = bot.SharedData.ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
             foreach (var b in bans)
             {
                 var g = guilds.First(x => x.Id == (ulong)b.GuildId);

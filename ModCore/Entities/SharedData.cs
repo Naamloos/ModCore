@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using ModCore.Api;
+using ModCore.CoreApi;
 
 namespace ModCore.Entities
 {
@@ -15,6 +16,9 @@ namespace ModCore.Entities
         public (ulong guild, ulong channel) StartNotify { get; internal set; }
         public List<ulong> BotManagers { get; internal set; }
 		public string DefaultPrefix { get; internal set; }
+		public string ApiToken = null;
+
+		public ModCore ModCore;
 
         public SharedData()
         {

@@ -38,6 +38,28 @@ namespace ModCore.Commands
 			this.StartTimes = starttimes;
 		}
 
+		[Command("about"), Description("About this bot.")]
+		public async Task AboutAsync(CommandContext ctx)
+		{
+			var eb = new DiscordEmbedBuilder()
+				.WithColor(new DiscordColor(0x007FFF))
+				.WithTitle("ModCore")
+				.WithDescription("A powerful moderating bot written on top of DSharpPlus")
+				.AddField("Special thanks to these contributors:",
+				"[uwx](https://github.com/uwx)\n" +
+				"[jcryer](https://github.com/jcryer)\n" +
+				"[Emzi0767](https://github.com/Emzi0767)\n" +
+				"[YourAverageBlackGuy](https://github.com/YourAverageBlackGuy)\n" +
+				"[DrCreo](https://github.com/DrCreo)\n" +
+				"[aexolate](https://github.com/aexolate)\n" +
+				"[Drake103](https://github.com/Drake103)\n")
+				.AddField("Contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/NaamloosDT/ModCore)")
+				.WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
+				.Build();
+
+			await ctx.RespondAsync(embed: eb);
+		}
+
 		[Command("ping"), Description("Check ModCore's API connection status."), CheckDisable]
 		public async Task PingAsync(CommandContext ctx)
 		{
@@ -73,274 +95,10 @@ namespace ModCore.Commands
 			var app = ctx.Client.CurrentApplication;
 			if (app.IsPublic != null && (bool)app.IsPublic)
 				await ctx.SafeRespondAsync(
-					$"Add ModCore to your server!\n<https://discordapp.com/oauth2/authorize?client_id={app.Id}&scope=bot>");
+					$"Add ModCore to your server!\nhttps://modcore.naamloos.me/");
 			else
 				await ctx.SafeRespondAsync("I'm sorry Mario, but this instance of ModCore has been set to private!");
 		}
-
-		[Group("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages), CheckDisable]
-		class Purge : BaseCommandModule
-		{
-			[GroupCommand, Description("Delete an amount of messages from the current channel.")]
-			public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Amount of messages to remove (max 100)")]int limit = 50,
-				[Description("Amount of messages to skip")]int skip = 0)
-			{
-				var i = 0;
-				var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, limit);
-				var deletThis = new List<DiscordMessage>();
-				foreach (var m in ms)
-				{
-					if (i < skip)
-						i++;
-					else
-						deletThis.Add(m);
-				}
-				if (deletThis.Any())
-					await ctx.Channel.DeleteMessagesAsync(deletThis, "Purged messages.");
-				var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
-				await Task.Delay(2000);
-				await resp.DeleteAsync("Purge command executed.");
-				await ctx.Message.DeleteAsync("Purge command executed.");
-
-				await ctx.LogActionAsync($"Purged messages.\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
-			}
-
-			[Command("user"), Description("Delete an amount of messages by an user."), Aliases("u", "pu"), CheckDisable]
-			public async Task PurgeUserAsync(CommandContext ctx, [Description("User to delete messages from")]DiscordUser user,
-			[Description("Amount of messages to remove (max 100)")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
-			{
-				var i = 0;
-				var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, limit);
-				var deletThis = new List<DiscordMessage>();
-				foreach (var m in ms)
-				{
-					if (user != null && m.Author.Id != user.Id) continue;
-					if (i < skip)
-						i++;
-					else
-						deletThis.Add(m);
-				}
-				if (deletThis.Any())
-					await ctx.Channel.DeleteMessagesAsync(deletThis,
-						$"Purged messages by {user?.Username}#{user?.Discriminator} (ID:{user?.Id})");
-				var resp = await ctx.SafeRespondAsync($"Latest messages by {user?.Mention} (ID:{user?.Id}) deleted.");
-				await Task.Delay(2000);
-				await resp.DeleteAsync("Purge command executed.");
-				await ctx.Message.DeleteAsync("Purge command executed.");
-
-				await ctx.LogActionAsync(
-					$"Purged messages.\nUser: {user?.Username}#{user?.Discriminator} (ID:{user?.Id})\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
-			}
-
-			[Command("regexp"), Description(
-			 "For power users! Delete messages from the current channel by regular expression match. " +
-			 "Pass a Regexp in ECMAScript ( /expression/flags ) format, or simply a regex string " +
-			 "in quotes."), Aliases("purgeregex", "pr", "r"), CheckDisable]
-			public async Task PurgeRegexpAsync(CommandContext ctx, [Description("Your regex")] string regexp,
-			[Description("Amount of messages to remove (max 100)")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
-			{
-				// TODO add a flag to disable CultureInvariant.
-				var regexOptions = RegexOptions.CultureInvariant;
-				// kept here for displaying in the result
-				var flags = "";
-
-				if (string.IsNullOrEmpty(regexp))
-				{
-					await ctx.SafeRespondAsync("RegExp is empty");
-					return;
-				}
-				var blockType = regexp[0];
-				if (blockType == '"' || blockType == '/')
-				{
-					// token structure
-					// "regexp" limit? skip?
-					// /regexp/ limit? skip?
-					// /regexp/ flags limit? skip? 
-					var tokens = Tokenize(SpaceReplacer.Replace(regexp, " ").Trim(), ' ', blockType);
-					regexp = tokens[0];
-					if (tokens.Count > 1)
-					{
-						// parse flags only in ECMAScript regexp literal
-						if (blockType == '/')
-						{
-							// if tokens[1] is a valid integer then it's `limit`. otherwise it's `flags`, and we remove it
-							// for the other bits.
-							flags = tokens[1];
-							if (!int.TryParse(flags, out var _))
-							{
-								// remove the flags element
-								tokens.RemoveAt(1);
-
-								if (flags.Contains('m'))
-								{
-									regexOptions |= RegexOptions.Multiline;
-								}
-								if (flags.Contains('i'))
-								{
-									regexOptions |= RegexOptions.IgnoreCase;
-								}
-								if (flags.Contains('s'))
-								{
-									regexOptions |= RegexOptions.Singleline;
-								}
-								if (flags.Contains('x'))
-								{
-									regexOptions |= RegexOptions.ExplicitCapture;
-								}
-								if (flags.Contains('r'))
-								{
-									regexOptions |= RegexOptions.RightToLeft;
-								}
-								// for debugging only
-								if (flags.Contains('c'))
-								{
-									regexOptions |= RegexOptions.Compiled;
-								}
-							}
-						}
-
-						if (int.TryParse(tokens[1], out var result))
-						{
-							limit = result;
-						}
-						else
-						{
-							await ctx.SafeRespondAsync(tokens[1] + " is not a valid int");
-							return;
-						}
-						if (tokens.Count > 2)
-						{
-							if (int.TryParse(tokens[2], out var res2))
-							{
-								skip = res2;
-							}
-							else
-							{
-								await ctx.SafeRespondAsync(tokens[2] + " is not a valid int");
-								return;
-							}
-						}
-					}
-				}
-				var regexCompiled = new Regex(regexp, regexOptions);
-
-				var i = 0;
-				var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, limit);
-				var deletThis = new List<DiscordMessage>();
-				foreach (var m in ms)
-				{
-					if (!regexCompiled.IsMatch(m.Content)) continue;
-
-					if (i < skip)
-						i++;
-					else
-						deletThis.Add(m);
-				}
-				var resultString =
-					$"Purged {deletThis.Count} messages by /{regexp.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
-				if (deletThis.Any())
-					await ctx.Channel.DeleteMessagesAsync(deletThis, resultString);
-				var resp = await ctx.SafeRespondAsync(resultString);
-				await Task.Delay(2000);
-				await resp.DeleteAsync("Purge command executed.");
-				await ctx.Message.DeleteAsync("Purge command executed.");
-
-				await ctx.LogActionAsync(
-					$"Purged {deletThis.Count} messages.\nRegex: ```\n{regexp}```\nFlags: {flags}\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
-			}
-
-			[Command("commands"), Description("Purge ModCore's messages."), Aliases("c", "self", "own"),
-		 RequirePermissions(Permissions.ManageMessages), CheckDisable]
-			public async Task CleanAsync(CommandContext ctx)
-			{
-				var gs = ctx.GetGuildSettings() ?? new GuildSettings();
-				var prefix = gs?.Prefix ?? "?>";
-				var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, 100);
-				var deletThis = ms.Where(m => m.Author.Id == ctx.Client.CurrentUser.Id || m.Content.StartsWith(prefix))
-					.ToList();
-				if (deletThis.Any())
-					await ctx.Channel.DeleteMessagesAsync(deletThis, "Cleaned up commands");
-				var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
-				await Task.Delay(2000);
-				await resp.DeleteAsync("Clean command executed.");
-				await ctx.Message.DeleteAsync("Clean command executed.");
-
-				await ctx.LogActionAsync();
-			}
-
-			[Command("bots"), Description("Purge messages from all bots in this channel"), Aliases("b", "bot"),
-		 RequirePermissions(Permissions.ManageMessages), CheckDisable]
-			public async Task PurgeBotsAsync(CommandContext ctx)
-			{
-				var gs = ctx.GetGuildSettings() ?? new GuildSettings();
-				var prefix = gs?.Prefix ?? "?>";
-				var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, 100);
-				var deletThis = ms.Where(m => m.Author.IsBot || m.Content.StartsWith(prefix))
-					.ToList();
-				if (deletThis.Any())
-					await ctx.Channel.DeleteMessagesAsync(deletThis, "Cleaned up commands");
-				var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
-				await Task.Delay(2000);
-				await resp.DeleteAsync("Purge bot command executed.");
-				await ctx.Message.DeleteAsync("Purge bot command executed.");
-
-				await ctx.LogActionAsync();
-			}
-
-			[Command("images"), Description("Purge messages with images or attachments on them."), Aliases("i", "imgs", "img"),
-		 RequirePermissions(Permissions.ManageMessages), CheckDisable]
-			public async Task PurgeImagesAsync(CommandContext ctx)
-			{
-				var ms = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, 100);
-				Regex ImageRegex = new Regex(@"\.(png|gif|jpg|jpeg|tiff|webp)");
-				var deleteThis = ms.Where(m => ImageRegex.IsMatch(m.Content) || m.Attachments.Any()).ToList();
-				if (deleteThis.Any())
-					await ctx.Channel.DeleteMessagesAsync(deleteThis, "Purged images");
-				var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
-				await Task.Delay(2000);
-				await resp.DeleteAsync("Image purge command executed.");
-				await ctx.Message.DeleteAsync("Image purge command executed.");
-
-				await ctx.LogActionAsync();
-			}
-		}
-
-
-		private static List<string> Tokenize(string value, char sep, char block)
-		{
-			var result = new List<string>();
-			var sb = new StringBuilder();
-			var insideBlock = false;
-			foreach (var c in value)
-			{
-				if (insideBlock && c == '\\')
-				{
-					continue;
-				}
-				if (c == block)
-				{
-					insideBlock = !insideBlock;
-				}
-				else if (c == sep && !insideBlock)
-				{
-					if (sb.IsNullOrWhitespace()) continue;
-					result.Add(sb.ToString().Trim());
-					sb.Clear();
-				}
-				else
-				{
-					sb.Append(c);
-				}
-			}
-			if (sb.ToString().Trim().Length > 0)
-			{
-				result.Add(sb.ToString().Trim());
-			}
-
-			return result;
-		}
-
-
 
 		[Command("ban"), Description("Bans a member."), Aliases("b"), RequirePermissions(Permissions.BanMembers), CheckDisable]
 		public async Task BanAsync(CommandContext ctx, [Description("Member to ban")] DiscordMember m,
@@ -421,199 +179,6 @@ namespace ModCore.Commands
 			await ctx.SafeRespondAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})");
 
 			await ctx.LogActionAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
-		}
-
-
-
-		[Group("globalwarn"), Aliases("gw", "gwarn", "globalw"), Description("Commands to add or remove globalwarns."),
-			RequireUserPermissions(Permissions.Administrator), RequireBotPermissions(Permissions.BanMembers), CheckDisable]
-		public class GlobalWarn : BaseCommandModule
-		{
-			private DatabaseContextBuilder Database { get; }
-
-			public GlobalWarn(DatabaseContextBuilder db)
-			{
-				this.Database = db;
-			}
-
-			[Command("add"), Description("Adds the specified user to a global watchlist."), CheckDisable]
-			public async Task AddAsync(CommandContext ctx, [Description("Member to warn about")]DiscordMember m,
-		   [RemainingText, Description("Reason to warn about this member")] string reason = "")
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				if (cfg.GlobalWarn.WarnLevel == GlobalWarnLevel.None || cfg.GlobalWarn.Enable)
-					await ctx.SafeRespondAsync("You do not have globalwarn enabled on this server.");
-
-				bool issuedBefore = false;
-				using (var db = this.Database.CreateContext())
-					issuedBefore = db.Bans.Any(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id);
-				if (issuedBefore)
-				{
-					await ctx.SafeRespondAsync("You have already warned about this user! Stop picking on them...");
-					return;
-				}
-				if (ctx.Member.Id == m.Id)
-				{
-					await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
-					return;
-				}
-
-				var ban = new DatabaseBan
-				{
-					GuildId = (long)ctx.Guild.Id,
-					UserId = (long)m.Id,
-					IssuedAt = DateTime.Now,
-					BanReason = reason
-				};
-				using (var db = this.Database.CreateContext())
-				{
-					db.Bans.Add(ban);
-					await db.SaveChangesAsync();
-				}
-
-				var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
-				var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-				await m.ElevatedMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}");
-				await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
-				await ctx.SafeRespondAsync($"Banned and issued global warn about user {m.DisplayName} (ID:{m.Id})");
-
-				await ctx.LogActionAsync($"Banned and issued global warn about user {m.DisplayName} (ID:{m.Id})\n{rstr}\n");
-				await GlobalWarnUpdateAsync(ctx, m, true);
-			}
-
-			[Command("remove"), Description("Removes the specified user from the global watchlist."), CheckDisable]
-			public async Task RemoveAsync(CommandContext ctx, [Description("Member to warn about")]DiscordMember m)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				if (cfg.GlobalWarn.WarnLevel == GlobalWarnLevel.None || cfg.GlobalWarn.Enable)
-					await ctx.SafeRespondAsync("You do not have globalwarn enabled on this server.");
-
-				bool issuedBefore = false;
-				using (var db = this.Database.CreateContext())
-					issuedBefore = db.Bans.Any(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id);
-				if (issuedBefore)
-				{
-					await ctx.SafeRespondAsync("You have already warned about this user! Stop picking on them...");
-					return;
-				}
-				using (var db = this.Database.CreateContext())
-				{
-					db.Bans.Remove(db.Bans.First(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id));
-					await db.SaveChangesAsync();
-				}
-
-				var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
-				await m.ElevatedMessageAsync($"You've been unbanned from {ctx.Guild.Name}.");
-				await ctx.Guild.UnbanMemberAsync(m, $"{ustr}");
-				await ctx.SafeRespondAsync($"Unbanned and retracted global warn about user {m.DisplayName} (ID:{m.Id})");
-
-				await ctx.LogActionAsync($"Unbanned and retracted global warn about user {m.DisplayName} (ID:{m.Id})\n");
-				await GlobalWarnUpdateAsync(ctx, m, false);
-			}
-
-			private async Task GlobalWarnUpdateAsync(CommandContext ctx, DiscordMember m, bool banNotify)
-			{
-				DatabaseBan[] bans;
-				using (var db = this.Database.CreateContext())
-				{
-					bans = db.Bans.Where(x => x.UserId == (long)m.Id).ToArray();
-
-					var prevowns = new List<ulong>();
-					int count = 0;
-					var guilds = ModCore.Shards.SelectMany(x => x.Client.Guilds.Values);
-					foreach (var b in bans)
-					{
-						var g = guilds.First(x => x.Id == (ulong)b.GuildId);
-						if (prevowns.Contains(g.Owner.Id))
-							continue;
-						count++;
-						prevowns.Add(g.Owner.Id);
-					}
-					if (banNotify)
-					{
-						if (count > 2)
-						{
-							foreach (DiscordGuild g in guilds)
-							{
-								try
-								{
-									var settings = g.GetGuildSettings(db) ?? new GuildSettings();
-									DiscordMember guildmember = await g.GetMemberAsync(m.Id);
-
-									if (guildmember != null && g.Id != ctx.Guild.Id && settings.GlobalWarn.Enable)
-									{
-										var embed = new DiscordEmbedBuilder()
-											.WithColor(DiscordColor.MidnightBlue)
-											.WithTitle($"WARNING: @{m.Username}#{m.Discriminator} - ID: {m.Id}");
-
-										var banString = new StringBuilder();
-										foreach (DatabaseBan ban in bans) banString.Append($"[{ban.GuildId} - {ban.BanReason}] ");
-										embed.AddField("Bans", banString.ToString());
-
-										if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Owner)
-										{
-											await g.Owner.ElevatedMessageAsync(embed: embed);
-										}
-										else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
-										{
-											await g.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).ElevatedMessageAsync(embed: embed);
-										}
-									}
-								}
-								catch
-								{
-									// TODO: Make SSG Proud
-								}
-							}
-						}
-					}
-					else
-					{
-						if (count >= 0)
-						{
-							foreach (DiscordGuild g in guilds)
-							{
-								try
-								{
-									var settings = g.GetGuildSettings(db) ?? new GuildSettings();
-									DiscordUser user = await ctx.Client.GetUserAsync(m.Id);
-
-									if (user != null && g.Id != ctx.Guild.Id && settings.GlobalWarn.Enable)
-									{
-										var embed = new DiscordEmbedBuilder()
-											.WithColor(DiscordColor.MidnightBlue)
-											.WithTitle($"INFORMATION: @{m.Username}#{m.Discriminator} - ID: {m.Id}")
-											.WithDescription($"User has been *unbanned*, with global warn removed, from {ctx.Guild.Name}.");
-
-										if (count == 0)
-										{
-											embed.Description += "\nHe is now banned on no guilds.";
-										}
-										else
-										{
-											var banString = new StringBuilder();
-											foreach (DatabaseBan ban in bans) banString.Append($"[{ban.GuildId} - {ban.BanReason}] ");
-											embed.AddField("Bans", banString.ToString());
-										}
-										if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.Owner)
-										{
-											await g.Owner.ElevatedMessageAsync(embed: embed);
-										}
-										else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
-										{
-											await g.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).ElevatedMessageAsync(embed: embed);
-										}
-									}
-								}
-								catch
-								{
-									// TODO: Make SSG Proud
-								}
-							}
-						}
-					}
-				}
-			}
 		}
 
 		[Command("mute"), Description("Mutes an user indefinitely. This will prevent them from speaking in chat. " +
@@ -766,7 +331,7 @@ namespace ModCore.Commands
 				await db.SaveChangesAsync();
 			}
 
-			Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+			await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
@@ -847,7 +412,7 @@ namespace ModCore.Commands
 				await db.SaveChangesAsync();
 			}
 
-			Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+			await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
@@ -882,7 +447,7 @@ namespace ModCore.Commands
 				await db.SaveChangesAsync();
 			}
 
-			Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+			await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
@@ -916,7 +481,7 @@ namespace ModCore.Commands
 				await db.SaveChangesAsync();
 			}
 
-			Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+			await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
@@ -972,96 +537,6 @@ namespace ModCore.Commands
 			else
 				await ctx.ElevatedRespondAsync(embed: pages.First().Embed);
 		}
-		[Group("selfrole"), Description("Commands to give or take selfroles."), RequireBotPermissions(Permissions.ManageRoles), CheckDisable]
-		public class SelfRole : BaseCommandModule
-		{
-			private DatabaseContextBuilder Database { get; }
-
-			public SelfRole(DatabaseContextBuilder db)
-			{
-				this.Database = db;
-			}
-
-			[Command("give"), Aliases("g"), Description("Gives the command callee a specified role, if " +
-																	 "ModCore has been configured to allow so."), CheckDisable]
-			public async Task GiveAsync(CommandContext ctx, [RemainingText, Description("Role you want to give to yourself")] DiscordRole role)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings(); ;
-				if (cfg.SelfRoles.Contains(role.Id))
-				{
-					if (ctx.Member.Roles.Any(x => x.Id == role.Id))
-					{
-						await ctx.SafeRespondAsync("You already have that role!");
-						return;
-					}
-					if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
-					{
-						await ctx.Member.GrantRoleAsync(role, "AutoRole granted.");
-						await ctx.SafeRespondAsync($"Granted you the role `{role.Name}`.");
-					}
-					else
-						await ctx.SafeRespondAsync("Can't grant you this role because that role is above my highest role!");
-				}
-				else
-				{
-					await ctx.SafeRespondAsync("You can't grant yourself that role!");
-				}
-			}
-
-			[Command("take"), Aliases("t"), Description("Removes a specified role from the command callee, if " +
-																	 "ModCore has been configured to allow so."), CheckDisable]
-			public async Task TakeAsync(CommandContext ctx, [RemainingText, Description("Role you want to take from yourself")] DiscordRole role)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings(); ;
-
-				if (cfg.SelfRoles.Contains(role.Id))
-				{
-					if (ctx.Member.Roles.All(x => x.Id != role.Id))
-					{
-						await ctx.SafeRespondAsync("You don't have that role!");
-						return;
-					}
-					if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
-					{
-						await ctx.Member.RevokeRoleAsync(role, "AutoRole revoke.");
-						await ctx.SafeRespondAsync($"Revoked your role: `{role.Name}`.");
-					}
-					else
-						await ctx.SafeRespondAsync("Can't take this role because that role is above my highest role!");
-				}
-				else
-				{
-					await ctx.SafeRespondAsync("You can't revoke that role!");
-				}
-			}
-
-			[Command("list"), Aliases("l"), Description("Lists all available selfroles, if any."), CheckDisable]
-			public async Task ListAsync(CommandContext ctx)
-			{
-				GuildSettings cfg;
-				cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				if (cfg.SelfRoles.Any())
-				{
-					var embed = new DiscordEmbedBuilder
-					{
-						Title = ctx.Guild.Name,
-						ThumbnailUrl = ctx.Guild.IconUrl,
-						Description = "Available SelfRoles:"
-					};
-					var roles = cfg.SelfRoles
-						.Select(ctx.Guild.GetRole)
-						.Where(x => x != null)
-						.Select(x => x.Mention);
-
-					embed.AddField("Available SelfRoles", string.Join(", ", roles), true);
-					await ctx.ElevatedRespondAsync(embed: embed);
-				}
-				else
-				{
-					await ctx.SafeRespondAsync("No available selfroles.");
-				}
-			}
-		}
 
 		[Command("announce"), Description("Announces a message to a channel, additionally mentioning a role.")]
 		[RequireBotPermissions(Permissions.ManageRoles), RequireUserPermissions(Permissions.MentionEveryone), CheckDisable]
@@ -1070,9 +545,9 @@ namespace ModCore.Commands
 		{
 			if (!role.IsMentionable)
 			{
-				await role.UpdateAsync(mentionable: true);
+				await role.ModifyAsync(mentionable: true);
 				await channel.SafeMessageAsync($"{role.Mention} {message}", ctx);
-				await role.UpdateAsync(mentionable: false);
+				await role.ModifyAsync(mentionable: false);
 				await ctx.Message.DeleteAsync();
 				await ctx.LogActionAsync($"Announced {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
 			}
@@ -1086,12 +561,12 @@ namespace ModCore.Commands
 
 		[Command("poll"), Description("Creates a reaction-based poll."), CheckDisable]
 		[RequireBotPermissions(Permissions.ManageMessages)]
-		public async Task PollAsync(CommandContext ctx, [Description("Question to ask")]string message, [Description("Reaction options")]params DiscordEmoji[] options)
+		public async Task PollAsync(CommandContext ctx, [Description("Question to ask")]string message, [Description("Time to run poll")]TimeSpan timespan, [Description("Reaction options")]params DiscordEmoji[] options)
 		{
 			await ctx.Message.DeleteAsync();
 			var m = await ctx.SafeRespondAsync($"**[Poll]**: {message}");
 			var intr = ctx.Client.GetInteractivity();
-			var responses = await intr.CreatePollAsync(m, options);
+			var responses = await intr.CreatePollAsync(m, options, timespan);
 			StringBuilder sb = new StringBuilder($"**[Poll]**: {message}");
 			foreach (var em in options)
 			{
@@ -1442,6 +917,69 @@ namespace ModCore.Commands
 						#endregion
 				}
 			}
+		}
+
+		[Command("distance")]
+		[Description("Counts the amount of messages until a specific Message")]
+		public async Task DistanceAsync(CommandContext ctx, DiscordMessage msg)
+		{
+			if(DateTimeOffset.Now.Subtract(msg.Timestamp).TotalDays > 1)
+			{
+				await ctx.RespondAsync("Yeah.. Can't do that for messages older than a day");
+				return;
+			}
+
+			var ms = new List<ulong>();
+			while (!ms.Contains(ctx.Message.Id))
+			{
+				var m = await ctx.Channel.GetMessagesAfterAsync(msg.Id, 100);
+				foreach(var mm in m)
+				{
+					if (!ms.Contains(mm.Id))
+						ms.Add(mm.Id);
+				}
+			}
+
+			await ctx.RespondAsync($"Counted {ms.Count} Messages.");
+		}
+
+		[Command("quote")]
+		[Description("Quotes a message")]
+		public async Task QuoteAsync(CommandContext ctx, DiscordChannel channel, ulong message)
+		{
+			var m = await channel.GetMessageAsync(message);
+			await QuoteAsync(ctx, m);
+		}
+
+		[Command("quote")]
+		[Description("Quotes a message")]
+		public async Task QuoteAsync(CommandContext ctx, [Description("Gets a previous message (by amount of \"^\"")]int up = 1)
+		{
+			if (up > 100)
+			{
+				await ctx.RespondAsync("Limited to 100 messages max and 1 message min!");
+				return;
+			}
+			var msgs = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, up + 1);
+			msgs = msgs.OrderBy(x => x.Timestamp).ToList();
+			var m = msgs[up];
+			await QuoteAsync(ctx, m);
+		}
+
+		[Command("quote")]
+		[Description("Quotes a message")]
+		public async Task QuoteAsync(CommandContext ctx, DiscordMessage message)
+		{
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Message by {message.Author.Username}#{message.Author.Discriminator}")
+				.WithDescription($"{message.Content}\n\n_(https://discordapp.com/channels/{message.Channel.GuildId}/{message.ChannelId}/{message.Id})_")
+				.WithFooter($" Quoted by {ctx.Member.Username}#{ctx.Member.Discriminator}. ID: {message.Id}.", ctx.Member.GetAvatarUrl(ImageFormat.Png))
+				.WithThumbnailUrl(message.Author.GetAvatarUrl(ImageFormat.Png))
+				.WithTimestamp(message.Timestamp)
+				.Build();
+
+			await ctx.Message.DeleteAsync();
+			await ctx.RespondAsync(embed: embed);
 		}
 	}
 }

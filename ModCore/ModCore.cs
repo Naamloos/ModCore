@@ -2,20 +2,25 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using ModCore.Api;
+using ModCore.CoreApi;
 using ModCore.Entities;
 using Newtonsoft.Json;
 
 namespace ModCore
 {
-    internal class ModCore
+    public class ModCore
     {
-        internal Settings Settings { get; private set; }
-        internal SharedData SharedData { get; private set; }
-        public static List<ModCoreShard> Shards { get; set; }
+		public Settings Settings { get; private set; }
+		public SharedData SharedData { get; private set; }
+		public List<ModCoreShard> Shards { get; set; }
         private CancellationTokenSource CTS { get; set; }
         private Perspective PerspectiveApi { get; set; }
 
@@ -44,10 +49,14 @@ namespace ModCore
                 Shards.Add(shard);
             }
 
-            foreach (var shard in Shards)
-                await shard.RunAsync();
+			foreach (var shard in Shards)
+			{
+				await shard.RunAsync();
+			}
 
-            await WaitForCancellation();
+			await BuildWebHost().RunAsync(CTS.Token);
+
+			await WaitForCancellation();
 
 			foreach (var shard in Shards)
 				await shard.DisconnectAndDispose();
@@ -70,6 +79,7 @@ namespace ModCore
                 BotManagers = Settings.BotManagers,
 				DefaultPrefix = Settings.DefaultPrefix
             };
+			SharedData.ModCore = this;
             if (args.Length == 2) {
                 SharedData.StartNotify = (ulong.Parse(args[0]), ulong.Parse(args[1]));
             }
@@ -80,5 +90,21 @@ namespace ModCore
             while (!CTS.IsCancellationRequested)
                 await Task.Delay(500);
         }
-    }
+
+		private IWebHost BuildWebHost()
+		{
+			var container = new CoreContainer
+			{
+				mcore = this
+			};
+
+			var mservice = new ServiceDescriptor(container.GetType(), container);
+
+			return WebHost.CreateDefaultBuilder(new string[0])
+				.UseStartup<Startup>()
+				.ConfigureServices(x => x.Add(mservice))
+				.UseUrls("http://0.0.0.0:6969")
+				.Build();
+		}
+	}
 }

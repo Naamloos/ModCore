@@ -16,7 +16,7 @@ namespace ModCore.Commands
 	[Group("config")]
 	[Aliases("cfg")]
 	[Description("Guild configuration options. Invoking without a subcommand will list current guild's settings.")]
-	[RequirePermissions(Permissions.ManageGuild)]
+	[RequireUserPermissions(Permissions.ManageGuild)]
 	public class Config : BaseCommandModule
 	{
 		public static DiscordEmoji CheckMark { get; } = DiscordEmoji.FromUnicode("✅");
