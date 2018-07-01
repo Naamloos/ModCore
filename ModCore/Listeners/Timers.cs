@@ -67,8 +67,6 @@ namespace ModCore.Listeners
 				{
 					db.Timers.Remove(tdata.DbTimer);
 					db.SaveChanges();
-
-					tdata.Shared.TimerData = null;
 				}
 			}
 			catch (Exception)
@@ -77,6 +75,7 @@ namespace ModCore.Listeners
 			}
 			finally
 			{
+				tdata.Shared.TimerData = null;
 				// release the lock
 				shared.TimerSempahore.Release();
 			}
