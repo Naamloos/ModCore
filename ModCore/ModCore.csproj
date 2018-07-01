@@ -10,6 +10,11 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DSharpPlusVersion>4.0.0-beta-00368</DSharpPlusVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE;RELEASE;NETCOREAPP;NETCOREAPP2_1</DefineConstants>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="DSharpPlus" Version="4.0.0-beta-00460" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-beta-00460" />
