@@ -84,22 +84,6 @@ namespace ModCore.Commands
 			             "empty to toggle.")]
 			public class Modules : BaseCommandModule
 			{
-				private delegate ref bool WithLinkfilter(GuildLinkfilterSettings lf);
-
-				private static async Task Toggle(CommandContext ctx, string r, WithLinkfilter func)
-				{
-					await ctx.WithGuildSettings(cfg =>
-					{
-						ref var cv = ref func(cfg.Linkfilter);
-
-						if (AugmentedBoolConverter.TryConvert(r, ctx, out var b)) cv = b;
-						else cv = !cv;
-
-						return ctx.ElevatedRespondAsync($"{(cv ? "Enabled" : "Disabled")} this module.");
-					});
-					await ctx.Message.CreateReactionAsync(CheckMark);
-				}
-
 				[Group("all"), Aliases("a", "0"), Description("Commands to manage all Linkfilter modules at once.")]
 				public class AllModules : BaseCommandModule
 				{
@@ -332,7 +316,7 @@ namespace ModCore.Commands
 			 Description("Sets a role to grant to new members.")]
 			public async Task SetRoleAsync(CommandContext ctx, [Description("Role to grant to new members")]DiscordRole role)
 			{
-				await ctx.WithGuildSettings(cfg => cfg.AutoRole.RoleId = (long) role.Id);
+				await ctx.WithGuildSettings(cfg => cfg.AutoRole.RoleId = role.Id);
 				await ctx.ElevatedRespondAsync("AutoRole role configured.");
 			}
 		}
@@ -405,7 +389,7 @@ namespace ModCore.Commands
 			[Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's JoinLog.")]
 			public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to send the JoinLogs to")]DiscordChannel channel)
 			{
-				await ctx.WithGuildSettings(cfg => cfg.JoinLog.ChannelId = (long) channel.Id);
+				await ctx.WithGuildSettings(cfg => cfg.JoinLog.ChannelId = channel.Id);
 				await ctx.SafeRespondAsync("JoinLog channel configured.");
 			}
 		}

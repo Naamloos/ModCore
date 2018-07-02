@@ -167,7 +167,7 @@ namespace ModCore.Entities
         /// Gets or sets the JoinLog channel ID.
         /// </summary>
         [JsonProperty("channel_id")]
-        public long ChannelId { get; set; }
+        public ulong ChannelId { get; set; }
     }
 
     /// <summary>
@@ -185,7 +185,7 @@ namespace ModCore.Entities
         /// Gets or sets the AutoRole role ID.
         /// </summary>
         [JsonProperty("role_id")]
-        public long RoleId { get; set; }
+        public ulong RoleId { get; set; }
     }
 
     /// <summary>

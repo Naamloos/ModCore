@@ -12,195 +12,159 @@ namespace ModCore.Listeners
 {
 	public static class JoinLog
 	{
-		private const string WelcomeRegex = "{{.*?}}";
+		private static readonly Regex WelcomeRegex = new Regex("{{(.*?)}}", RegexOptions.Compiled);
 
 		[AsyncListener(EventTypes.GuildMemberAdded)]
 		public static async Task LogNewMember(ModCoreShard bot, GuildMemberAddEventArgs e)
 		{
-			GuildSettings cfg = null;
+			GuildSettings cfg;
 			using (var db = bot.Database.CreateContext())
 				cfg = e.Guild.GetGuildSettings(db);
+
+			DiscordChannel c;
 			if (cfg.JoinLog.Enable)
 			{
 				var m = e.Member;
-				var c = (DiscordChannel)null;
-				try
+				c = e.Guild.GetChannel(cfg.JoinLog.ChannelId);
+				if (c != null)
 				{
-					c = e.Guild.GetChannel((ulong)cfg.JoinLog.ChannelId);
+					var embed = new DiscordEmbedBuilder()
+						.WithTitle("New member joined")
+						.WithDescription($"ID: ({m.Id})")
+						.WithAuthor($"{m.Username}#{m.Discriminator}",
+							icon_url: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
+						.AddField("Join Date", $"{m.JoinedAt.DateTime}")
+						.AddField("Register Date", $"{m.CreationTimestamp.DateTime}")
+						.WithColor(DiscordColor.Green);
+					await c.ElevatedMessageAsync(embed);
 				}
-				catch (Exception)
-				{
-					goto Welcome;
-				}
-				var embed = new DiscordEmbedBuilder()
-					.WithTitle("New member joined")
-					.WithDescription($"ID: ({m.Id})")
-					.WithAuthor($"{m.Username}#{m.Discriminator}", icon_url: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
-					.AddField("Join Date", $"{m.JoinedAt.DateTime.ToString()}")
-					.AddField("Register Date", $"{m.CreationTimestamp.DateTime.ToString()}")
-					.WithColor(DiscordColor.Green);
-				await c.ElevatedMessageAsync(embed: embed);
 			}
 
-			Welcome:
-			if (cfg.Welcome.Enable)
+			if (!cfg.Welcome.Enable)
+				return;
+
+			if (cfg.Welcome.ChannelId == 0)
+				return;
+
+			c = e.Guild.GetChannel(cfg.Welcome.ChannelId);
+			
+			if (c == null)
+				return;
+
+			var msg = cfg.Welcome.Message;
+			string attachment = null;
+			string embedtitle = null;
+			var isEmbed = false;
+
+			var match = WelcomeRegex.Matches(msg);
+
+			WelcomeRegex.Replace(msg, m =>
 			{
-				if (cfg.Welcome.ChannelId != 0)
+				var str = m.Groups[1].Value;
+
+				switch (str)
 				{
-					var c = (DiscordChannel)null;
-					try
-					{
-						c = e.Guild.GetChannel((ulong)cfg.Welcome.ChannelId);
-					}
-					catch (Exception)
-					{
-						return;
-					}
+					case "username":
+						return e.Member.Username;
 
-					string msg = cfg.Welcome.Message;
-					string attachment = "";
-					string embedtitle = "";
-					bool isembed = false;
+					case "discriminator":
+						return e.Member.Discriminator;
 
-					Regex rgx = new Regex(WelcomeRegex);
-					var match = rgx.Matches(msg);
-					foreach (Match m in match)
-					{
-						var str = m.Value.Remove(m.Value.Length - 2).Substring(2);
-						string replace = "";
-						bool notinswitch = true;
+					case "mention":
+						return e.Member.Mention;
 
-						switch (str)
-						{
-							case "username":
-								replace = e.Member.Username;
-								notinswitch = false;
-								break;
+					case "userid":
+						return e.Member.Id.ToString();
 
-							case "discriminator":
-								replace = e.Member.Discriminator;
-								notinswitch = false;
-								break;
+					case "guildname":
+						return e.Guild.Name;
 
-							case "mention":
-								replace = e.Member.Mention;
-								notinswitch = false;
-								break;
+					case "channelname":
+						return c.Name;
 
-							case "userid":
-								replace = e.Member.Id.ToString();
-								notinswitch = false;
-								break;
+					case "membercount":
+						return e.Guild.MemberCount.ToString();
 
-							case "guildname":
-								replace = e.Guild.Name;
-								notinswitch = false;
-								break;
+					case "prefix":
+						return cfg.Prefix ?? "?>";
 
-							case "channelname":
-								replace = c.Name;
-								notinswitch = false;
-								break;
+					case "owner-username":
+						return e.Guild.Owner.Username;
 
-							case "membercount":
-								replace = e.Guild.MemberCount.ToString();
-								notinswitch = false;
-								break;
+					case "owner-discriminator":
+						return e.Guild.Owner.Discriminator;
 
-							case "prefix":
-								replace = cfg.Prefix ?? "?>";
-								notinswitch = false;
-								break;
+					case "guild-icon-url":
+						return e.Guild.IconUrl;
 
-							case "owner-username":
-								replace = e.Guild.Owner.Username;
-								notinswitch = false;
-								break;
+					case "channel-count":
+						return e.Guild.Channels.Count.ToString();
 
-							case "owner-discriminator":
-								replace = e.Guild.Owner.Discriminator;
-								notinswitch = false;
-								break;
+					case "role-count":
+						return e.Guild.Roles.Count.ToString();
 
-							case "guild-icon-url":
-								replace = e.Guild.IconUrl;
-								notinswitch = false;
-								break;
+					case "isembed":
+						isEmbed = true;
+						return "";
 
-							case "channel-count":
-								replace = e.Guild.Channels.Count.ToString();
-								notinswitch = false;
-								break;
-
-							case "role-count":
-								replace = e.Guild.Roles.Count.ToString();
-								notinswitch = false;
-								break;
-						}
-
-						msg = msg.Replace(m.Value, replace);
-
-						if (notinswitch)
-						{
-							if (str.StartsWith("image:"))
-								attachment = str.Substring(6);
-							else if (str.StartsWith("embed-title:"))
-								embedtitle = str.Substring(12);
-							else if (str == "isembed")
-								isembed = true;
-						}
-					}
-
-					msg = rgx.Replace(msg, "");
-
-					if (!isembed)
-					{
-						await c.SendMessageAsync($"{msg}\n\n{attachment}");
-					}
-					else
-					{
-						var eb = new DiscordEmbedBuilder()
-							.WithDescription(msg);
-						if (embedtitle != "")
-							eb.WithTitle(embedtitle);
-						if (attachment != "")
-							eb.WithImageUrl(attachment);
-
-						await c.SendMessageAsync(embed: eb);
-					}
+					default:
+						if (str.StartsWith("image:"))
+							attachment = str.Substring("image:".Length);
+						else if (str.StartsWith("embed-title:"))
+							embedtitle = str.Substring("embed-title:".Length);
+						return "";
 				}
+			});
+
+			if (!isEmbed)
+			{
+				await c.SafeMessageAsync(privileged: false, s: $"{msg}\n\n{attachment}");
+			}
+			else
+			{
+				var embed = new DiscordEmbedBuilder()
+					.WithDescription(msg);
+				
+				if (!string.IsNullOrWhiteSpace(embedtitle))
+					embed.WithTitle(embedtitle);
+				if (!string.IsNullOrWhiteSpace(attachment))
+					embed.WithImageUrl(attachment);
+
+				await c.ElevatedMessageAsync(embed);
 			}
 		}
 
 		[AsyncListener(EventTypes.GuildMemberRemoved)]
 		public static async Task LogLeaveMember(ModCoreShard bot, GuildMemberRemoveEventArgs e)
 		{
-			GuildSettings cfg = null;
+			GuildSettings cfg;
 			using (var db = bot.Database.CreateContext())
 				cfg = e.Guild.GetGuildSettings(db);
-			if (cfg.JoinLog.Enable)
-			{
-				var m = e.Member;
-				var c = (DiscordChannel)null;
-				try
-				{
-					c = e.Guild.GetChannel((ulong)cfg.JoinLog.ChannelId);
-				}
-				catch (Exception)
-				{
-					return;
-				}
-				var embed = new DiscordEmbedBuilder()
-					.WithTitle("Member left")
-					.WithDescription($"ID: ({m.Id})")
-					.WithAuthor($"{m.Username}#{m.Discriminator}", icon_url: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl);
-				if (m.JoinedAt.DateTime == DateTime.MinValue)
-					embed.AddField("Join Date", $"{m.JoinedAt.DateTime.ToString()}");
-				embed.AddField("Leave Date", $"{DateTime.Now.ToString()}")
-				.AddField("Register Date", $"{m.CreationTimestamp.DateTime.ToString()}")
+			
+			if (!cfg.JoinLog.Enable)
+				return;
+
+			var m = e.Member;
+			var c = e.Guild.GetChannel(cfg.JoinLog.ChannelId);
+
+			if (c == null)
+				return;
+
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle("Member left")
+				.WithDescription($"ID: ({m.Id})")
+				.WithAuthor($"{m.Username}#{m.Discriminator}",
+					icon_url: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl);
+
+			if (m.JoinedAt.DateTime == DateTime.MinValue)
+				embed.AddField("Join Date", $"{m.JoinedAt.DateTime}");
+
+			embed
+				.AddField("Leave Date", $"{DateTime.Now}")
+				.AddField("Register Date", $"{m.CreationTimestamp.DateTime}")
 				.WithColor(DiscordColor.Red);
-				await c.ElevatedMessageAsync(embed: embed);
-			}
+
+			await c.ElevatedMessageAsync(embed);
 		}
 	}
 }
