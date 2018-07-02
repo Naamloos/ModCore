@@ -990,6 +990,20 @@ namespace ModCore.Commands
 		[Description("Requests a nickname change to the server staff")]
 		public async Task RequestNicknameChangeAsync(CommandContext ctx, [RemainingText] string nick)
 		{
+			if (nick == ctx.Member.Nickname)
+			{
+				await ctx.ElevatedRespondAsync("That's already your nickname.");
+				return;
+			}
+			if (nick == ctx.Member.Username)
+			{
+				await ctx.ElevatedRespondAsync("That's already your username.");
+				return;
+			}
+			
+			var yes = DiscordEmoji.FromName(ctx.Client, ":white_check_mark:");
+			var no = DiscordEmoji.FromName(ctx.Client, ":negative_squared_cross_mark:");
+
 			// attempt to automatically change the person's nickname if they can already change it on their own,
 			// and prompt them if we're not able to
 			if (ctx.Member.PermissionsIn(ctx.Channel).HasPermission(Permissions.ChangeNickname))
@@ -997,11 +1011,18 @@ namespace ModCore.Commands
 				if (ctx.Guild.CurrentMember.PermissionsIn(ctx.Channel).HasPermission(Permissions.ManageNicknames) && 
 				    ctx.Guild.CurrentMember.CanInteract(ctx.Member))
 				{
-					await ctx.Member.ModifyAsync(member => member.Nickname = nick);
+					await ctx.Member.ModifyAsync(member =>
+					{
+						member.Nickname = nick;
+						member.AuditLogReason = "Nickname change requested by " +
+						                        "@{reaction.User.Username}#{reaction.User.Discriminator} auto approved " +
+						                        "since they already have the Change Nickname permission";
+					});
+					await ctx.Message.CreateReactionAsync(yes);
 					return;
 				}
 
-				await ctx.RespondAsync("Do it yourself, you have the permission!");
+				await ctx.ElevatedRespondAsync("Do it yourself, you have the permission!");
 				return;
 			}
 
@@ -1010,7 +1031,7 @@ namespace ModCore.Commands
 				// don't change the member's nickname here, as that violates the hierarchy of permissions
 				if (!cfg.RequireNicknameChangeConfirmation)
 				{
-					await ctx.RespondAsync("The server owner has disabled nickname changing on this server.");
+					await ctx.ElevatedRespondAsync("The server owner has disabled nickname changing on this server.");
 					return;
 				}
 				
@@ -1019,8 +1040,8 @@ namespace ModCore.Commands
 				if (!ctx.Guild.CurrentMember.PermissionsIn(ctx.Channel).HasPermission(Permissions.ManageNicknames) ||
 				    !ctx.Guild.CurrentMember.CanInteract(ctx.Member))
 				{
-					await ctx.RespondAsync("Unable to process nickname change because the bot lacks the required " +
-					                       "permissions, or cannot action on this member.");
+					await ctx.ElevatedRespondAsync("Unable to process nickname change because the bot lacks the " +
+					                               "required permissions, or cannot action on this member.");
 					return;
 				}
 				
@@ -1034,12 +1055,12 @@ namespace ModCore.Commands
 						FooterText = "This message will self-destruct in 2 hours."
 					});
 
-				var yes = DiscordEmoji.FromName(ctx.Client, ":white_check_mark:");
-				var no = DiscordEmoji.FromName(ctx.Client, ":negative_squared_cross_mark:");
-				
 				// d#+ nightlies mean we can do this now, and hopefully it won't crash
 				await Task.WhenAll(message.CreateReactionAsync(yes), message.CreateReactionAsync(no));
 
+				await ctx.ElevatedRespondAsync(
+					"Your request to change username was placed, and should be actioned shortly.");
+				
 				var reaction = await this.Interactivity.WaitForMessageReactionAsync(
 					e => e == yes || e == no, message, timeoutoverride: TimeSpan.FromHours(2));
 
@@ -1049,12 +1070,30 @@ namespace ModCore.Commands
 
 					await message.DeleteAsync(
 						$"Request to change username accepted by @{reaction.User.Username}#{reaction.User.Discriminator}");
+					
+					await ctx.Member.SendMessageAsync($"Your name in {ctx.Guild.Name} was successfully changed to " +
+					                                  $"{Formatter.Sanitize(nick)}.");
+					
+					try
+					{
+						await ctx.Message.CreateReactionAsync(yes);
+					} catch { /* empty, message has been deleted */ }
 				}
 				else
 				{
 					await message.DeleteAsync(
 						$"Request to change username denied by @{reaction.User.Username}#{reaction.User.Discriminator}");
+					
+					await ctx.Member.SendMessageAsync(
+						$"Your request to change your username in {ctx.Guild.Name} was denied.");
+					
+					try
+					{
+						await ctx.Message.CreateReactionAsync(no);
+					} catch { /* empty, message has been deleted */ }
+					
 				}
+
 			});
 		}
 	}
