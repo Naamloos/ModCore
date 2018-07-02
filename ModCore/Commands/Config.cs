@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using ModCore.Commands.Base;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
@@ -54,28 +56,6 @@ namespace ModCore.Commands
 				: $"Prefix changed to: \"{prefix}\".");
 		}
 
-		[Group("suggestions"), Aliases("suggestion", "sugg", "sug", "s"), Description("Suggestions configuration commands.")]
-		public class Suggestions : BaseCommandModule
-		{
-			[Command("enable"), Aliases("on"), Description("Enables command suggestions for this guild.")]
-			public async Task EnableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.SpellingHelperEnabled = true;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("Enabled command suggestions.");
-			}
-
-			[Command("disable"), Aliases("off"), Description("Disables command suggestions for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.SpellingHelperEnabled = true;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("Disabled command suggestions.");
-			}
-		}
-
 		[Command("muterole"), Aliases("mr"),
 		 Description("Sets the role used to mute users. Invoking with no arguments will reset this setting.")]
 		public async Task MuteRole(CommandContext ctx,
@@ -86,27 +66,22 @@ namespace ModCore.Commands
 			await ctx.SafeRespondAsync(role == null ? "Muting disabled." : $"Mute role set to {role.Mention}.");
 		}
 
+		[Group("suggestions"), Aliases("suggestion", "sugg", "sug", "s"), Description("Suggestions configuration commands.")]
+		public class Suggestions : SimpleConfigModule
+		{
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.SpellingHelperEnabled;
+		}
 
 		[Group("linkfilter"), Aliases("inviteblocker", "invite", "ib", "filter", "lf"),
 		 Description("Linkfilter configuration commands.")]
-		public class Linkfilter : BaseCommandModule
+		public class Linkfilter : SimpleConfigModule
 		{
-			[Command("enable"), Aliases("on"), Description("Enables Linkfilter for this guild.")]
-			public async Task EnableAsync(CommandContext ctx)
-			{
-				await ctx.WithGuildSettings(cfg => cfg.Linkfilter.Enable = true);
-				await ctx.Message.CreateReactionAsync(CheckMark);
-			}
-
-			[Command("disable"), Aliases("off"), Description("Disables Linkfilter for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
-			{
-				await ctx.WithGuildSettings(cfg => cfg.Linkfilter.Enable = false);
-				await ctx.Message.CreateReactionAsync(CheckMark);
-			}
-
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.Linkfilter.Enable;
+			
 			[Group("modules"), Aliases("mod", "m", "s"),
-			 Description("Commands to toggle Linkfilter modules for this guild.")]
+			 Description("Commands to toggle Linkfilter modules for this guild.\n" +
+			             "You can enable/disable modules by using the module name and `enable`, `disable` or leave " +
+			             "empty to toggle.")]
 			public class Modules : BaseCommandModule
 			{
 				private delegate ref bool WithLinkfilter(GuildLinkfilterSettings lf);
@@ -174,96 +149,52 @@ namespace ModCore.Commands
 					}
 				}
 
-				private const string ToggleDesc = "Leave empty to toggle, " +
-												  "set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, " +
-												  "or set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
-					;
-
-				[Command("booters"), Aliases("booter", "boot", "ddos", "b", "1"),
+				[Group("booters"), Aliases("booter", "boot", "ddos", "b", "1"),
 				 Description("Toggle blocking booter/DDoS sites for this guild.")]
-				public async Task ToggleBlockBootersAsync(CommandContext ctx, [Description(ToggleDesc)] string r = "")
-					=> await Toggle(ctx, r, lf => ref lf.BlockBooters);
-
-				[Command("invites"), Aliases("invitelinks", "invite", "inv", "i", "2"),
+				public class Booters : LinkfilterConfigModule
+				{
+					protected override ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockBooters;
+				}
+				
+				[Group("invites"), Aliases("invitelinks", "invite", "inv", "i", "2"),
 				 Description("Toggle blocking invite links for this guild.")]
-				public async Task ToggleBlockInviteLinksAsync(CommandContext ctx,
-					[Description(ToggleDesc)] string r = "")
-					=> await Toggle(ctx, r, lf => ref lf.BlockInviteLinks);
+				public class InviteLinks : LinkfilterConfigModule
+				{
+					protected override ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockInviteLinks;
+				}
 
-				[Command("iploggers"), Aliases("iplogs", "ips", "ip", "3"),
+				[Group("iploggers"), Aliases("iplogs", "ips", "ip", "3"),
 				 Description("Toggle blocking IP logger sites for this guild.")]
-				public async Task ToggleBlockIpLoggersAsync(CommandContext ctx, [Description(ToggleDesc)] string r = "")
-					=> await Toggle(ctx, r, lf => ref lf.BlockIpLoggers);
+				public class IpLoggers : LinkfilterConfigModule
+				{
+					protected override ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockIpLoggers;
+				}
 
-				[Command("shocksites"), Aliases("shock", "shocks", "gore", "g", "4"),
+				[Group("shocksites"), Aliases("shock", "shocks", "gore", "g", "4"),
 				 Description("Toggle blocking shock/gore sites for this guild.")]
-				public async Task ToggleBlockShockSitesAsync(CommandContext ctx,
-					[Description(ToggleDesc)] string r = "")
-					=> await Toggle(ctx, r, lf => ref lf.BlockShockSites);
+				public class ShockSites : LinkfilterConfigModule
+				{
+					protected override ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockShockSites;
+				}
 
-				[Command("urlshortener"), Aliases("urlshorteners", "urlshort", "urls", "url", "u", "5"),
+				[Group("urlshorteners"), Aliases("urlshortener", "urlshort", "urls", "url", "u", "5"),
 				 Description("Toggle blocking URL shortener links for this guild.")]
-				public async Task ToggleBlockUrlShortenersAsync(CommandContext ctx,
-					[Description(ToggleDesc)] string r = "")
-					=> await Toggle(ctx, r, lf => ref lf.BlockUrlShorteners);
+				public class UrlShorteners : LinkfilterConfigModule
+				{
+					protected override ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockUrlShorteners;
+				}
 			}
 
 			[Group("user"), Aliases("usr", "u"), Description("User exemption management commands.")]
-			public class User : BaseCommandModule
+			public class User : ExemptModule<DiscordMember>
 			{
-				[Command("exempt"), Aliases("x"), Description("Exempts user from Linkfilter checks.")]
-				public async Task ExemptAsync(CommandContext ctx,
-					[RemainingText, Description("Member to exempt from Linkfilter checks")] DiscordMember mbr)
-				{
-					await ctx.WithGuildSettings(cfg =>
-					{
-						var ibx = cfg.Linkfilter.ExemptUserIds;
-						if (!ibx.Contains(mbr.Id))
-							ibx.Add(mbr.Id);
-					});
-					await ctx.Message.CreateReactionAsync(CheckMark);
-				}
-
-				[Command("unexempt"), Aliases("ux"), Description("Unexempts user from Linkfilter checks.")]
-				public async Task UnexemptAsync(CommandContext ctx,
-					[RemainingText, Description("Member to unexempt from Linkfilter checks")] DiscordMember mbr)
-				{
-					await ctx.WithGuildSettings(cfg =>
-					{
-						var ibx = cfg.Linkfilter.ExemptUserIds;
-						if (ibx.Contains(mbr.Id))
-							ibx.Remove(mbr.Id);
-					});
-					await ctx.Message.CreateReactionAsync(CheckMark);
-				}
+				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.Linkfilter.ExemptUserIds;
 			}
 
 			[Group("role"), Aliases("r"), Description("Role exemption management commands.")]
-			public class Role : BaseCommandModule
+			public class Role : ExemptModule<DiscordRole>
 			{
-				[Command("exempt"), Aliases("x"), Description("Exempts role from Linkfilter checks.")]
-				public async Task ExemptAsync(CommandContext ctx,
-					[RemainingText, Description("Role to exempt from Linkfilter checks")] DiscordRole rl)
-				{
-					await ctx.WithGuildSettings(cfg =>
-					{
-						var ibx = cfg.Linkfilter.ExemptRoleIds;
-						if (!ibx.Contains(rl.Id))
-							ibx.Add(rl.Id);
-					});
-				}
-
-				[Command("unexempt"), Aliases("ux"), Description("Unexempts role from Linkfilter checks.")]
-				public async Task UnexemptAsync(CommandContext ctx,
-					[RemainingText, Description("Role to unexempt from Linkfilter checks")] DiscordRole rl)
-				{
-					await ctx.WithGuildSettings(cfg =>
-					{
-						var ibx = cfg.Linkfilter.ExemptRoleIds;
-						if (ibx.Contains(rl.Id))
-							ibx.Remove(rl.Id);
-					});
-				}
+				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.Linkfilter.ExemptRoleIds;
 			}
 
 			[Group("guild"), Aliases("invite", "i"), Description("Invite target exemption management commands.")]
@@ -280,12 +211,7 @@ namespace ModCore.Commands
 						return;
 					}
 
-					await ctx.WithGuildSettings(cfg =>
-					{
-						var ibx = cfg.Linkfilter.ExemptInviteGuildIds;
-						if (!ibx.Contains(inv.Guild.Id))
-							ibx.Add(inv.Guild.Id);
-					});
+					await ctx.WithGuildSettings(cfg => cfg.Linkfilter.ExemptInviteGuildIds.Add(inv.Guild.Id));
 					await ctx.Message.CreateReactionAsync(CheckMark);
 				}
 
@@ -300,64 +226,25 @@ namespace ModCore.Commands
 						return;
 					}
 
-					await ctx.WithGuildSettings(cfg =>
-					{
-						var ibx = cfg.Linkfilter.ExemptInviteGuildIds;
-						if (ibx.Contains(inv.Guild.Id))
-							ibx.Remove(inv.Guild.Id);
-					});
+					await ctx.WithGuildSettings(cfg => cfg.Linkfilter.ExemptInviteGuildIds.Remove(inv.Guild.Id));
 					await ctx.Message.CreateReactionAsync(CheckMark);
 				}
 			}
 		}
 
 		[Group("rolestate"), Aliases("rs"), Description("Role State configuration commands.")]
-		public class RoleState : BaseCommandModule
+		public class RoleState : SimpleConfigModule
 		{
-			[Command("enable"), Aliases("on"), Description("Enables Role State for this guild.")]
-			public async Task EnableAsync(CommandContext ctx)
-			{
-				await ctx.WithGuildSettings(cfg => cfg.RoleState.Enable = true);
-				await ctx.SafeRespondAsync("Role State enabled.");
-			}
-
-			[Command("disable"), Aliases("off"), Description("Disables Role State for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
-			{
-				await ctx.WithGuildSettings(cfg => cfg.RoleState.Enable = false);
-				await ctx.SafeRespondAsync("Role State disabled.");
-			}
-
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.RoleState.Enable;
+			
 			[Group("role"), Aliases("r"), Description("Role exemption management commands.")]
-			public class Role : BaseCommandModule
+			public class Role : ExemptModule<DiscordRole>
 			{
-				[Command("ignore"), Aliases("x"), Description("Exempts role from being saved by Role State.")]
-				public async Task ExemptAsync(CommandContext ctx,
-					[RemainingText, Description("Role to exempt from being saved")] DiscordRole rl)
-				{
-					var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-					var ibx = cfg.RoleState.IgnoredRoleIds;
-					if (!ibx.Contains(rl.Id))
-						ibx.Add(rl.Id);
-					await ctx.SetGuildSettingsAsync(cfg);
-					await ctx.Message.CreateReactionAsync(CheckMark);
-				}
-
-				[Command("unignore"), Aliases("ux"), Description("Unexempts role from being saved by Role State.")]
-				public async Task UnexemptAsync(CommandContext ctx,
-					[RemainingText, Description("Role to unexempt from being saved")] DiscordRole rl)
-				{
-					var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-					var ibx = cfg.RoleState.IgnoredRoleIds;
-					if (ibx.Contains(rl.Id))
-						ibx.Remove(rl.Id);
-					await ctx.SetGuildSettingsAsync(cfg);
-					await ctx.Message.CreateReactionAsync(CheckMark);
-				}
+				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.RoleState.IgnoredRoleIds;
 			}
 
 			[Group("channel"), Aliases("c"), Description("Channel exemption management commands.")]
-			public class Channel : BaseCommandModule
+			public class Channel : ExemptModule<DiscordChannel>
 			{
 				private DatabaseContextBuilder Database { get; }
 
@@ -366,17 +253,10 @@ namespace ModCore.Commands
 					this.Database = db;
 				}
 
-				[Command("ignore"), Aliases("x"),
-				 Description("Exempts channel from having its overrides saved by Role State.")]
-				public async Task ExemptAsync(CommandContext ctx,
-					[RemainingText, Description("Channel to exempt from having its invites saved")] DiscordChannel chn)
-				{
-					var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-					var ibx = cfg.RoleState.IgnoredChannelIds;
-					if (!ibx.Contains(chn.Id))
-						ibx.Add(chn.Id);
-					await ctx.SetGuildSettingsAsync(cfg);
+				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.RoleState.IgnoredChannelIds;
 
+				protected override async Task AfterExemptAsync(CommandContext ctx, DiscordChannel chn)
+				{
 					using (var db = this.Database.CreateContext())
 					{
 						var chperms = db.RolestateOverrides.Where(xs =>
@@ -387,22 +267,10 @@ namespace ModCore.Commands
 							await db.SaveChangesAsync();
 						}
 					}
-
-					await ctx.Message.CreateReactionAsync(CheckMark);
 				}
 
-				[Command("unignore"), Aliases("ux"),
-				 Description("Unexempts channel from having its overrides saved by Role State.")]
-				public async Task UnexemptAsync(CommandContext ctx,
-					[RemainingText, Description("Channel to unexempt from having its invites saved")]
-					DiscordChannel chn)
+				protected override async Task AfterUnexemptAsync(CommandContext ctx, DiscordChannel chn)
 				{
-					var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-					var ibx = cfg.RoleState.IgnoredChannelIds;
-					if (ibx.Contains(chn.Id))
-						ibx.Remove(chn.Id);
-					await ctx.SetGuildSettingsAsync(cfg);
-
 					var os = chn.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToArray();
 					using (var db = this.Database.CreateContext())
 					{
@@ -419,94 +287,53 @@ namespace ModCore.Commands
 							await db.SaveChangesAsync();
 						}
 					}
-
-					await ctx.Message.CreateReactionAsync(CheckMark);
 				}
 			}
 		}
 
 		[Group("invisicop"), Aliases("ic"), Description("InvisiCop configuration commands.")]
-		public class InvisiCop : BaseCommandModule
+		public class InvisiCop : SimpleConfigModule
 		{
-			[Command("enable"), Aliases("on"), Description("Enables InvisiCop for this guild.")]
-			public async Task EnableAsync(CommandContext ctx)
-			{
-				await ctx.WithGuildSettings(cfg => cfg.InvisiCop.Enable = true);
-				await ctx.SafeRespondAsync("InvisiCop enabled.");
-			}
-
-			[Command("disable"), Aliases("off"), Description("Disables InvisiCop for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
-			{
-				await ctx.WithGuildSettings(cfg => cfg.InvisiCop.Enable = false);
-				await ctx.SafeRespondAsync("InvisiCop disabled.");
-			}
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.InvisiCop.Enable;
 		}
 
 		[Group("actionlog"), Aliases("al"), Description("ActionLog configuration commands.")]
-		public class ActionLog : BaseCommandModule
+		public class ActionLog : SimpleConfigModule
 		{
-			[Command("enable"), Aliases("on"), Description("Enables ActionLog for this guild.")]
-			public async Task EnableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.ActionLog.Enable = true;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync(
-					$"ActionLog enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config actionlog setwebhook`");
-			}
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.ActionLog.Enable;
+			
+			protected override Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
+				"ActionLog enabled.\n" +
+				"If you haven't done this yet, Please execute the `config actionlog setwebhook` command.");
 
-			[Command("disable"), Aliases("off"), Description("Disables ActionLog for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.ActionLog.Enable = false;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("ActionLog disabled.");
-			}
-
-			[Command("setwebhook"), Aliases("swh"),
+			[Command("setwebhook"), Aliases("webhook", "hook", "swh"),
 			 Description("Sets the webhook ID and token for this guild's action log.")]
 			public async Task SetWebhookAsync(CommandContext ctx, [Description("Webhook ID")]ulong id, [Description("Webhook token")]string token)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.ActionLog.WebhookId = id;
-				cfg.ActionLog.WebhookToken = token;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("ActionLog webhook configured.");
+				await ctx.WithGuildSettings(cfg =>
+				{
+					cfg.ActionLog.WebhookId = id;
+					cfg.ActionLog.WebhookToken = token;
+				});
+				await ctx.ElevatedRespondAsync("ActionLog webhook configured.");
 			}
 		}
 
 		[Group("autorole"), Aliases("ar"), Description("AutoRole configuration commands.")]
-		public class AutoRole : BaseCommandModule
+		public class AutoRole : SimpleConfigModule
 		{
-			[Command("enable"), Aliases("on"), Description("Enables AutoRole for this guild.")]
-			public async Task EnableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.AutoRole.Enable = true;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync(
-					$"AutoRole enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config autorole setrole`");
-			}
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.AutoRole.Enable;
 
-			[Command("disable"), Aliases("off"), Description("Disables AutoRole for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.AutoRole.Enable = false;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("AutoRole disabled.");
-			}
+			protected override Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
+					"AutoRole enabled.\n" +
+					"If you haven't done this yet, Please execute the `config autorole setrole` command.");
 
 			[Command("setrole"), Aliases("sr"),
 			 Description("Sets a role to grant to new members.")]
 			public async Task SetRoleAsync(CommandContext ctx, [Description("Role to grant to new members")]DiscordRole role)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.AutoRole.RoleId = (long)role.Id;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("AutoRole role configured.");
+				await ctx.WithGuildSettings(cfg => cfg.AutoRole.RoleId = (long) role.Id);
+				await ctx.ElevatedRespondAsync("AutoRole role configured.");
 			}
 		}
 
@@ -516,95 +343,69 @@ namespace ModCore.Commands
 			[Command("chat"), Aliases("c"), Description("Sets command error reporting for this guild (in chat).")]
 			public async Task ChatAsync(CommandContext ctx, [Description("New error verbosity")]string verbosity)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				var vb = CommandErrorVerbosity.None;
-				switch (verbosity)
-				{
-					case "none":
-						vb = CommandErrorVerbosity.None;
-						break;
-					case "name":
-						vb = CommandErrorVerbosity.Name;
-						break;
-					case "namedesc":
-						vb = CommandErrorVerbosity.NameDesc;
-						break;
-					case "exception":
-						vb = CommandErrorVerbosity.Exception;
-						break;
-					default:
-						await ctx.SafeRespondAsync(
-							"Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
-						return;
-				}
-				cfg.CommandError.Chat = vb;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync($"Error reporting verbosity in chat set to `{verbosity}`.");
+				if (!await TryGetVerbosity(ctx, verbosity, out var vb)) return;
+				
+				await ctx.WithGuildSettings(cfg => cfg.CommandError.Chat = vb);
+				await ctx.ElevatedRespondAsync($"Error reporting verbosity in chat set to `{verbosity}`.");
 			}
 
 			[Command("log"), Aliases("a"), Description("Sets command error reporting for this guild (in ActionLog).")]
 			public async Task ActionLogAsync(CommandContext ctx, [Description("New error verbosity")]string verbosity)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				var vb = CommandErrorVerbosity.None;
+				if (!await TryGetVerbosity(ctx, verbosity, out var vb)) return;
+				
+				await ctx.WithGuildSettings(cfg => cfg.CommandError.ActionLog = vb);
+				await ctx.ElevatedRespondAsync($"Error reporting verbosity in ActionLog set to `{verbosity}`.");
+			}
+
+			private static Task<bool> TryGetVerbosity(CommandContext ctx, string verbosity, out CommandErrorVerbosity vb)
+			{
 				switch (verbosity)
 				{
 					case "none":
 						vb = CommandErrorVerbosity.None;
-						break;
+						return Task.FromResult(true);
 					case "name":
 						vb = CommandErrorVerbosity.Name;
-						break;
+						return Task.FromResult(true);
 					case "namedesc":
 						vb = CommandErrorVerbosity.NameDesc;
-						break;
-					case "exception":
-						if (ctx.Client.CurrentApplication.Owner.Id == ctx.Member.Id)
-							vb = CommandErrorVerbosity.Exception;
-						else
-							await ctx.SafeRespondAsync(
-								"Unsupported verbosity level.\nSupported levels: `none`, `name`, `namedesc` or `exception`");
-						break;
+						return Task.FromResult(true);
+					case "exception" when ctx.Client.CurrentApplication.Owner.Id == ctx.Member.Id:
+						vb = CommandErrorVerbosity.Exception;
+						return Task.FromResult(true);
 					default:
-						await ctx.SafeRespondAsync(
-							"Unsupported verbosity level.\nSupported levels: `none`, `name`"
-							+ ((ctx.Client.CurrentApplication.Owner.Id == ctx.Member.Id) ? ", `namedesc` or `exception`" : "or`namedesc`"));
-						return;
+						vb = CommandErrorVerbosity.None;
+						
+						if (ctx.Client.CurrentApplication.Owner.Id == ctx.Member.Id)
+						{
+							return ctx.ElevatedRespondAsync(
+									"Unsupported verbosity level.\n" +
+									"Supported levels: `none`, `name`, `namedesc` or `exception`")
+								.ContinueWith(task => false);
+						}
+
+						return ctx.ElevatedRespondAsync(
+								"Unsupported verbosity level.\n" +
+								"Supported levels: `none`, `name` or `namedesc`")
+							.ContinueWith(task => false);
 				}
-				cfg.CommandError.ActionLog = vb;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync($"Error reporting verbosity in ActionLog set to `{verbosity}`.");
 			}
 		}
 
 		[Group("joinlog"), Aliases("j"), Description("JoinLog configuration commands.")]
-		public class JoinLog : BaseCommandModule
+		public class JoinLog : SimpleConfigModule
 		{
-			[Command("enable"), Aliases("on"), Description("Enables JoinLog for this guild.")]
-			public async Task EnableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.JoinLog.Enable = true;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync(
-					$"Joinlog enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config joinlog setchannel`");
-			}
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.JoinLog.Enable;
 
-			[Command("disable"), Aliases("off"), Description("Disables JoinLog for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.JoinLog.Enable = false;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("JoinLog disabled.");
-			}
+			protected override Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
+					"Joinlog enabled.\n" +
+					"If you haven't done this yet, Please execute `config joinlog setchannel` command");
 
 			[Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's JoinLog.")]
 			public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to send the JoinLogs to")]DiscordChannel channel)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.JoinLog.ChannelId = (long)channel.Id;
-				await ctx.SetGuildSettingsAsync(cfg);
+				await ctx.WithGuildSettings(cfg => cfg.JoinLog.ChannelId = (long) channel.Id);
 				await ctx.SafeRespondAsync("JoinLog channel configured.");
 			}
 		}
@@ -615,85 +416,50 @@ namespace ModCore.Commands
 			[Command("add"), Aliases("a"), Description("Adds roles to SelfRole list")]
 			public async Task AddSelfRoleAsync(CommandContext ctx, [Description("Role to allow for self-granting")]DiscordRole role)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				if (!cfg.SelfRoles.Contains(role.Id))
-				{
-					cfg.SelfRoles.Add(role.Id);
-				}
-				else
-				{
-					await ctx.SafeRespondAsync("This role has already been added!");
-					return;
-				}
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync($"Added role `{role.Name}` with ID `{role.Id}` to SelfRoles.");
+				await ctx.WithGuildSettings(cfg => 
+					ctx.SafeRespondAsync(cfg.SelfRoles.Add(role.Id)
+						? $"Added role `{role.Name}` with ID `{role.Id}` to SelfRoles." 
+						: "This role has already been added!"));
 			}
 
 			[Command("remove"), Aliases("r"), Description("Removes roles from SelfRole list")]
 			public async Task RemoveSelfRoleAsync(CommandContext ctx, [Description("Role to disallow from self-granting")]DiscordRole role)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				if (cfg.SelfRoles.Contains(role.Id))
-				{
-					cfg.SelfRoles.Remove(role.Id);
-				}
-				else
-				{
-					await ctx.SafeRespondAsync("This role isn't in SelfRoles!");
-					return;
-				}
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync($"Removed role `{role.Name}` with ID `{role.Id}` from SelfRoles.");
+				await ctx.WithGuildSettings(cfg =>
+					ctx.SafeRespondAsync(cfg.SelfRoles.Remove(role.Id)
+						? $"Removed role `{role.Name}` with ID `{role.Id}` from SelfRoles."
+						: "This role isn't in SelfRoles!"));
 			}
 		}
 
 		[Group("starboard"), Aliases("star"), Description("Starboard configuration commands.")]
-		public class Starboard : BaseCommandModule
+		public class Starboard : SimpleConfigModule
 		{
-			[Command("enable"), Aliases("on"), Description("Enables Starboard for this guild.")]
-			public async Task EnableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.Starboard.Enable = true;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync(
-					$"Starboard enabled.\nIf you haven't done this yet, Please execute `{cfg.Prefix}config starboard setchannel`");
-			}
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.Starboard.Enable;
 
-			[Command("disable"), Aliases("off"), Description("Disables Starboard for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
+			protected override Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
+				"Starboard enabled.\n" +
+				"If you haven't done this yet, Please execute `config starboard setchannel` command");
+			
+			[Group("allownsfw"), Aliases("nsfw"), Description("Sets whether or not to allow NSFW stars in this guild.")]
+			public class AllowNsfw : SimpleConfigModule
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.Starboard.Enable = false;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("Starboard disabled.");
-			}
-
-			[Command("allownsfw"), Aliases("nsfw"), Description("Sets whether or not to allow NSFW stars in this guild.")]
-			public async Task AllowNsfwAsync(CommandContext ctx, [Description("Whether NSFW stars should be allowed")]bool allow)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.Starboard.AllowNSFW = allow;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync($"Set allow NSFW to: {allow}.");
+				protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.Starboard.AllowNSFW;
 			}
 
 			[Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's Starboard.")]
 			public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to log stars to")]DiscordChannel channel)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.Starboard.ChannelId = (long)channel.Id;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("Starboard channel configured.");
+				await ctx.WithGuildSettings(cfg => cfg.Starboard.ChannelId = channel.Id);
+				await ctx.ElevatedRespondAsync("Starboard channel configured.");
 			}
 
 			[Command("setemoji"), Aliases("se"), Description("Sets the Starboard emoji for this guild.")]
 			public async Task SetEmojiAsync(CommandContext ctx, [Description("Starboard emoji")]DiscordEmoji emoji)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.Starboard.Emoji = new GuildEmoji { EmojiId = (long)emoji.Id, EmojiName = emoji.Name };
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync($"Starboard emoji set to {emoji}.");
+				await ctx.WithGuildSettings(cfg => 
+					cfg.Starboard.Emoji = new GuildEmoji { EmojiId = emoji.Id, EmojiName = emoji.Name });
+				await ctx.ElevatedRespondAsync($"Starboard emoji set to {emoji}.");
 			}
 		}
 
@@ -701,108 +467,103 @@ namespace ModCore.Commands
 		public class ReactionRole : BaseCommandModule
 		{
 			[Command("add"), Aliases("a"), Description("Add a reaction role to this guild.")]
-			public async Task AddAsync(CommandContext ctx, ulong msg_id, DiscordChannel chnl, DiscordRole role, DiscordEmoji emoji)
+			public async Task AddAsync(CommandContext ctx, ulong msgId, DiscordChannel chan, DiscordRole role, DiscordEmoji emoji)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				// Checks whether there's no existing reactionrole that has the same:
-				// Channel, Message AND Reaction or Role.
-				if(!cfg.ReactionRoles.Any(
-					x => (ulong)x.Channel_Id == chnl.Id && (ulong)x.Message_Id == msg_id 
-					&& ((ulong)x.Role_Id == role.Id || (ulong)x.Reaction.EmojiId == emoji.Id && x.Reaction.EmojiName == emoji.Name)))
+				await ctx.WithGuildSettings(async cfg =>
 				{
-					cfg.ReactionRoles.Add(new GuildReactionRole()
+					// Checks whether there's no existing reactionrole that has the same:
+					// Channel, Message AND Reaction or Role.
+					if (!cfg.ReactionRoles.Any(
+						x => x.ChannelId == chan.Id
+						     && x.MessageId == msgId
+						     && (x.RoleId == role.Id 
+						         || x.Reaction.EmojiId == emoji.Id 
+						         && x.Reaction.EmojiName == emoji.Name)
+						     ))
 					{
-						Channel_Id = (long)chnl.Id,
-						Message_Id = (long)msg_id,
-						Role_Id = (long)role.Id,
-						Reaction = new GuildEmoji()
+						cfg.ReactionRoles.Add(new GuildReactionRole
 						{
-							EmojiId = (long)emoji.Id,
-							EmojiName = emoji.Name
-						}
-					});
-					var msg = await chnl.GetMessageAsync(msg_id);
-					await msg.CreateReactionAsync(emoji);
-					await ctx.SetGuildSettingsAsync(cfg);
-					await ctx.SafeRespondAsync("New reactionrole added!");
-				}
-				else
-				{
-					await ctx.SafeRespondAsync("You can't do that! That message already has a reactionrole with that role or reaction!");
-				}
+							ChannelId = chan.Id,
+							MessageId = msgId,
+							RoleId = role.Id,
+							Reaction = new GuildEmoji
+							{
+								EmojiId = emoji.Id,
+								EmojiName = emoji.Name
+							}
+						});
+						var msg = await chan.GetMessageAsync(msgId);
+						await msg.CreateReactionAsync(emoji);
+						await ctx.ElevatedRespondAsync("New reactionrole added!");
+					}
+					else
+					{
+						await ctx.ElevatedRespondAsync(
+							"You can't do that! That message already has a reactionrole with that role or reaction!");
+					}
+				});
 			}
 
 			[Command("remove"), Aliases("r"), Description("Removes a reaction role from this guild.")]
-			public async Task RemoveAsync(CommandContext ctx, DiscordChannel chnl, ulong msg_id, DiscordRole role)
+			public async Task RemoveAsync(CommandContext ctx, DiscordChannel chnl, ulong msgId, DiscordRole role)
 			{
-				var cfg = ctx.GetGuildSettings();
-				if(cfg.ReactionRoles.Any(x => (ulong)x.Channel_Id == chnl.Id && (ulong)x.Message_Id == msg_id && (ulong)x.Role_Id == role.Id))
+				await ctx.WithGuildSettings(async cfg =>
 				{
-					cfg.ReactionRoles.RemoveAll(x => (ulong)x.Channel_Id == chnl.Id && (ulong)x.Message_Id == msg_id && (ulong)x.Role_Id == role.Id);
-					await ctx.SetGuildSettingsAsync(cfg);
-					await ctx.SafeRespondAsync("Removed reactionrole!");
-				}
-				else
-				{
-					await ctx.RespondAsync("No reaction was linked to that role!");
-				}
+					if (cfg.ReactionRoles.RemoveAll(x =>
+						    x.ChannelId == chnl.Id && x.MessageId == msgId && x.RoleId == role.Id) > 0)
+						await ctx.SafeRespondAsync("Removed reactionrole!");
+					else
+						await ctx.RespondAsync("No reaction was linked to that role!");
+				});
 			}
 		}
 
 		[Group("globalwarn"), Aliases("gw"), Description("GlobalWarn configuration commands.")]
-		public class GlobalWarn : BaseCommandModule
+		public class GlobalWarn : SimpleConfigModule
 		{
-			[Command("enable"), Aliases("on"), Description("Enables GlobalWarn for this guild.")]
-			public async Task EnableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.GlobalWarn.Enable = true;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("GlobalWarn enabled.");
-			}
-
-			[Command("disable"), Aliases("off"), Description("Disables GlobalWarn for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.GlobalWarn.Enable = false;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("GlobalWarn disabled.");
-			}
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.GlobalWarn.Enable;
 
 			[Command("changemode"), Aliases("cm"),
 			 Description("Sets the GlobalWarn mode.")]
 			public async Task SetRoleAsync(CommandContext ctx)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				await ctx.SafeRespondAsync("__**Available GlobalWarn modes:**__\n1. None\n2. Owner (Warns the Server Owner if someone on the GlobalWarn list joins the server)\n3. Joinlog (Sends the warning to the JoinLog channel)\n\nType an option.");
+				await ctx.SafeRespondAsync(@"__**Available GlobalWarn modes:**__
+1. None
+2. Owner (Warns the Server Owner if someone on the GlobalWarn list joins the server)
+3. Joinlog (Sends the warning to the JoinLog channel)
+
+Type an option.");
 				var iv = ctx.Client.GetInteractivity();
 
 				var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id &&
-				(xm.Content.ToLower() == "none" || xm.Content.ToLower() == "owner" || xm.Content.ToLower() == "joinlog" || xm.Content == "1" || xm.Content == "2" || xm.Content == "3"),
+					(xm.Content.ToLower() == "none" || xm.Content.ToLower() == "owner" || xm.Content.ToLower() == "joinlog" || xm.Content == "1" || xm.Content == "2" || xm.Content == "3"),
 				TimeSpan.FromSeconds(45));
 				if (msg == null)
 				{
 					await ctx.SafeRespondAsync("Operation aborted.");
 					return;
 				}
-				switch (msg.Message.Content)
+				
+				await ctx.WithGuildSettings(async cfg =>
 				{
-					case "none":
-					case "1":
-						cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.None;
-						break;
-					case "owner":
-					case "2":
-						cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.Owner;
-						break;
-					case "joinlog":
-					case "3":
-						cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.JoinLog;
-						break;
-				}
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("GlobalWarn mode configured to " + cfg.GlobalWarn.WarnLevel);
+					switch (msg.Message.Content)
+					{
+						case "none":
+						case "1":
+							cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.None;
+							break;
+						case "owner":
+						case "2":
+							cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.Owner;
+							break;
+						case "joinlog":
+						case "3":
+							cfg.GlobalWarn.WarnLevel = GlobalWarnLevel.JoinLog;
+							break;
+					}
+					
+					await ctx.ElevatedRespondAsync($"GlobalWarn mode configured to {cfg.GlobalWarn.WarnLevel}");
+				});
 			}
 		}
 
@@ -810,9 +571,9 @@ namespace ModCore.Commands
 		public class CommandSettings : BaseCommandModule
 		{
 			[Command("disable"), Aliases("d")]
-			public async Task DisableAsync(CommandContext ctx, [RemainingText]string cmd)
+			public async Task DisableAsync(CommandContext ctx, [RemainingText] string cmd)
 			{
-				string command = cmd.ToLower();
+				var command = cmd.ToLowerInvariant();
 				if (command.StartsWith("config"))
 				{
 					await ctx.RespondAsync("You can't disable configuration commands!");
@@ -825,9 +586,7 @@ namespace ModCore.Commands
 				}
 				if (ctx.CommandsNext.RegisteredCommands.Any(x => CheckCommand(command, x.Value)))
 				{
-					var stng = ctx.GetGuildSettings() ?? new GuildSettings();
-					stng.DisabledCommands.Add(command);
-					await ctx.SetGuildSettingsAsync(stng);
+					await ctx.WithGuildSettings(cfg => cfg.DisabledCommands.Add(command));
 					await ctx.RespondAsync($"Disabled command `{command}` from use in this guild!");
 				}
 				else
@@ -836,35 +595,33 @@ namespace ModCore.Commands
 				}
 			}
 
-			public static bool CheckCommand(string command, Command x)
+			public static bool CheckCommand(string command, Command cmd)
 			{
-				if (x.QualifiedName.StartsWith(command))
+				if (cmd.QualifiedName.StartsWith(command))
 					return true;
-				if (x is CommandGroup group)
-					return group.Children.Any(xx => CheckCommand(command, xx));
+				if (cmd is CommandGroup group)
+					return group.Children.Any(e => CheckCommand(command, e));
 				return false;
 			}
 
 			[Command("enable"), Aliases("e")]
 			public async Task EnableAsync(CommandContext ctx, [RemainingText]string cmd)
 			{
-				var command = cmd.ToLower();
-				var stng = ctx.GetGuildSettings() ?? new GuildSettings();
-				if(stng.DisabledCommands.Any(x => x == command))
+				var command = cmd.ToLowerInvariant();
+				await ctx.WithGuildSettings(async cfg =>
 				{
-					stng.DisabledCommands.RemoveAll(x => x == command);
-					await ctx.SetGuildSettingsAsync(stng);
-					await ctx.RespondAsync($"Enabled command `{command}` in this guild!");
-					return;
-				}
-				await ctx.RespondAsync("That command does not exist!");
+					if (cfg.DisabledCommands.RemoveWhere(x => x == command) > 0)
+						await ctx.ElevatedRespondAsync($"Enabled command `{command}` in this guild!");
+					else
+						await ctx.ElevatedRespondAsync("That command does not exist!");
+				});
 			}
 
 			[Command("list"), Aliases("l")]
 			public async Task ListAsync(CommandContext ctx)
 			{
 				var stng = ctx.GetGuildSettings() ?? new GuildSettings();
-				if(stng.DisabledCommands.Count == 0)
+				if (stng.DisabledCommands.Count == 0)
 				{
 					await ctx.RespondAsync("No commands were disabled!");
 					return;
@@ -874,28 +631,12 @@ namespace ModCore.Commands
 		}
 
 		[Group("welcome"), Aliases("w"), Description("Welcome message settings commands.")]
-		public class Welcome : BaseCommandModule
+		public class Welcome : SimpleConfigModule
 		{
-			[Command("enable"), Aliases("on"), Description("Enables welcome messages for this guild.")]
-			public async Task EnableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.Welcome.Enabled = true;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("Welcome messages enabled.");
-			}
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.Welcome.Enable;
 
-			[Command("disable"), Aliases("off"), Description("Disables welcome messages for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.Welcome.Enabled = false;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("Welcome messages disabled.");
-			}
-
-			[Command("set"), Aliases("setmessage")]
-			[Description(@"Sets welcome message.
+			[Command("set"), Aliases("setmessage"),
+			 Description(@"Sets welcome message.
 Welcome messages support a handful of tags that get parsed to their actual values:
 {{username}}, {{discriminator}}, {{mention}}, {{userid}},
 {{guildname}}, {{channelname}}, {{membercount}}, {{prefix}},
@@ -903,19 +644,15 @@ Welcome messages support a handful of tags that get parsed to their actual value
 {{attach:url}}, {{embed-title:title}}, {{isembed}}")]
 			public async Task SetMessageAsync(CommandContext ctx, string message)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.Welcome.Message = message;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("Set welcome message.");
+				await ctx.WithGuildSettings(cfg => cfg.Welcome.Message = message);
+				await ctx.ElevatedRespondAsync("Set the welcome message.");
 			}
 
 			[Command("setchannel"), Aliases("setc", "sc"), Description("Set channel to send welcome messages to.")]
 			public async Task SetChannel(CommandContext ctx, DiscordChannel channel)
 			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				cfg.Welcome.ChannelId = (long)channel.Id;
-				await ctx.SetGuildSettingsAsync(cfg);
-				await ctx.SafeRespondAsync("Set welcome message.");
+				await ctx.WithGuildSettings(cfg => cfg.Welcome.ChannelId = channel.Id);
+				await ctx.ElevatedRespondAsync($"Set welcome channel to {channel.Mention}.");
 			}
 		}
 
@@ -935,27 +672,21 @@ Welcome messages support a handful of tags that get parsed to their actual value
 			 "nicknamechange", "namechange", "nickchange",
 
 			 "nnf", "nncf", "ncf", "nf", "nnc", "nc", "n"), Description("Nickname change requests system settings.")]
-		public class NicknameChanging : BaseCommandModule
+		public class NicknameChanging : SimpleConfigModule
 		{
-			[Command("enable"), Aliases("on"), Description("Enables nickname change requests for this guild.")]
-			public async Task EnableAsync(CommandContext ctx, [Description("The channel where confirmations will go to. " +
-			                                                               "Anyone with access to this channel will be " +
-			                                                               "able to accept or deny nickname changes, so " +
-			                                                               "choose wisely!")] DiscordChannel confirmChannel)
-			{
-				await ctx.WithGuildSettings(cfg =>
-				{
-					cfg.RequireNicknameChangeConfirmation = true;
-					cfg.NicknameChangeConfirmationChannel = confirmChannel.Id;
-				});
-				await ctx.Message.CreateReactionAsync(CheckMark);
-			}
+			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.RequireNicknameChangeConfirmation;
 
-			[Command("disable"), Aliases("off"), Description("Disables nickname change requests for this guild.")]
-			public async Task DisableAsync(CommandContext ctx)
+			protected override Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
+				"Nickname change confirmations enabled.\n" +
+				"If you haven't done this yet, Please execute `config nicknamechange setchannel` command");
+
+			[Command("setchannel"), Aliases("set-channel", "channel", "chan", "sc"),
+			 Description("The channel where confirmations will go to. Anyone with access to this channel will be " +
+			             "able to approve or deny nickname change requests, so choose wisely!")]
+			public async Task SetChannel(CommandContext ctx, DiscordChannel channel)
 			{
-				await ctx.WithGuildSettings(cfg => cfg.RequireNicknameChangeConfirmation = false);
-				await ctx.Message.CreateReactionAsync(CheckMark);
+				await ctx.WithGuildSettings(cfg => cfg.NicknameChangeConfirmationChannel = channel.Id);
+				await ctx.ElevatedRespondAsync($"Set nickname request confirmation channel to {channel.Mention}.");
 			}
 		}
 	}

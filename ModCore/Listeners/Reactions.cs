@@ -21,10 +21,10 @@ namespace ModCore.Listeners
                 if (cfg == null)
                     return;
 
-				if (cfg.ReactionRoles.Any(x => (ulong)x.Channel_Id == e.Channel.Id && (ulong)x.Message_Id == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name))
+				if (cfg.ReactionRoles.Any(x => (ulong)x.ChannelId == e.Channel.Id && (ulong)x.MessageId == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name))
 				{
 					var rrid = (ulong)cfg.ReactionRoles.First(
-						x => (ulong)x.Channel_Id == e.Channel.Id && (ulong)x.Message_Id == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name).Role_Id;
+						x => (ulong)x.ChannelId == e.Channel.Id && (ulong)x.MessageId == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name).RoleId;
 					var rrrole = e.Channel.Guild.GetRole(rrid);
 					var mem = await e.Channel.Guild.GetMemberAsync(e.User.Id);
 					if(!mem.Roles.Any(x => x.Id == rrid))
@@ -117,10 +117,10 @@ namespace ModCore.Listeners
                 if (cfg == null)
                     return;
 
-				if (cfg.ReactionRoles.Any(x => (ulong)x.Channel_Id == e.Channel.Id && (ulong)x.Message_Id == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name))
+				if (cfg.ReactionRoles.Any(x => (ulong)x.ChannelId == e.Channel.Id && (ulong)x.MessageId == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name))
 				{
 					var rrid = (ulong)cfg.ReactionRoles.First(
-						x => (ulong)x.Channel_Id == e.Channel.Id && (ulong)x.Message_Id == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name).Role_Id;
+						x => (ulong)x.ChannelId == e.Channel.Id && (ulong)x.MessageId == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name).RoleId;
 					var rrrole = e.Channel.Guild.GetRole(rrid);
 					var mem = await e.Channel.Guild.GetMemberAsync(e.User.Id);
 					if (mem.Roles.Any(x => x.Id == rrid))

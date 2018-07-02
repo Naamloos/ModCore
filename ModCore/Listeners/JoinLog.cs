@@ -12,7 +12,7 @@ namespace ModCore.Listeners
 {
 	public static class JoinLog
 	{
-		const string WelcomeRegex = "{{.*?}}";
+		private const string WelcomeRegex = "{{.*?}}";
 
 		[AsyncListener(EventTypes.GuildMemberAdded)]
 		public static async Task LogNewMember(ModCoreShard bot, GuildMemberAddEventArgs e)
@@ -43,7 +43,7 @@ namespace ModCore.Listeners
 			}
 
 			Welcome:
-			if (cfg.Welcome.Enabled)
+			if (cfg.Welcome.Enable)
 			{
 				if (cfg.Welcome.ChannelId != 0)
 				{
