@@ -72,15 +72,16 @@ namespace ModCore
         private void InitializeSharedData(string[] args)
         {
             CTS = new CancellationTokenSource();
-            SharedData = new SharedData {
-                CTS = CTS,
-                ProcessStartTime = Process.GetCurrentProcess().StartTime,
-                Perspective = PerspectiveApi,
-                BotManagers = Settings.BotManagers,
-				DefaultPrefix = Settings.DefaultPrefix
-            };
-			SharedData.ModCore = this;
-            if (args.Length == 2) {
+	        SharedData = new SharedData
+	        {
+		        CTS = CTS,
+		        ProcessStartTime = Process.GetCurrentProcess().StartTime,
+		        Perspective = PerspectiveApi,
+		        BotManagers = Settings.BotManagers,
+		        DefaultPrefix = Settings.DefaultPrefix,
+		        ModCore = this
+	        };
+	        if (args.Length == 2) {
                 SharedData.StartNotify = (ulong.Parse(args[0]), ulong.Parse(args[1]));
             }
         }
