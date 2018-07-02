@@ -108,7 +108,13 @@ namespace ModCore.Entities
 
 		[JsonProperty("welcome")]
 		public WelcomeSettings Welcome { get; private set; } = new WelcomeSettings();
-	}
+
+	    [JsonProperty("nickconf")]
+	    public bool RequireNicknameChangeConfirmation { get; set; }
+	    
+	    [JsonProperty("nickchn")]
+	    public ulong NicknameChangeConfirmationChannel { get; set; }
+    }
 
     public class GuildStarboardSettings
     {

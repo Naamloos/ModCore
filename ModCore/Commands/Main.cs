@@ -10,6 +10,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using DSharpPlus.ModernEmbedBuilder;
 using Humanizer;
 using Humanizer.Localisation;
 using ModCore.Database;
@@ -980,6 +981,81 @@ namespace ModCore.Commands
 
 			await ctx.Message.DeleteAsync();
 			await ctx.RespondAsync(embed: embed);
+		}
+
+		[Command("nick")]
+		#if !DEBUG
+		[Cooldown(1, 60, CooldownBucketType.User)]
+		#endif
+		[Description("Requests a nickname change to the server staff")]
+		public async Task RequestNicknameChangeAsync(CommandContext ctx, [RemainingText] string nick)
+		{
+			// attempt to automatically change the person's nickname if they can already change it on their own,
+			// and prompt them if we're not able to
+			if (ctx.Member.PermissionsIn(ctx.Channel).HasPermission(Permissions.ChangeNickname))
+			{
+				if (ctx.Guild.CurrentMember.PermissionsIn(ctx.Channel).HasPermission(Permissions.ManageNicknames) && 
+				    ctx.Guild.CurrentMember.CanInteract(ctx.Member))
+				{
+					await ctx.Member.ModifyAsync(member => member.Nickname = nick);
+					return;
+				}
+
+				await ctx.RespondAsync("Do it yourself, you have the permission!");
+				return;
+			}
+
+			await ctx.WithGuildSettings(async cfg =>
+			{
+				// don't change the member's nickname here, as that violates the hierarchy of permissions
+				if (!cfg.RequireNicknameChangeConfirmation)
+				{
+					await ctx.RespondAsync("The server owner has disabled nickname changing on this server.");
+					return;
+				}
+				
+				// only say it's unable to process if BOTH the confirmation requirement is enabled and the bot doesn't
+				// have the permissions for it
+				if (!ctx.Guild.CurrentMember.PermissionsIn(ctx.Channel).HasPermission(Permissions.ManageNicknames) ||
+				    !ctx.Guild.CurrentMember.CanInteract(ctx.Member))
+				{
+					await ctx.RespondAsync("Unable to process nickname change because the bot lacks the required " +
+					                       "permissions, or cannot action on this member.");
+					return;
+				}
+				
+				var message = await ctx.Guild.GetChannel(cfg.NicknameChangeConfirmationChannel)
+					.SendMessageAsync(embed: new ModernEmbedBuilder
+					{
+						Title = "Nickname change confirmation",
+						Description =
+							$"Member {ctx.Member.Mention} ({ctx.Member.Id}) wants to change their nickname to " +
+							$"{Formatter.Sanitize(nick)}.",
+						FooterText = "This message will self-destruct in 2 hours."
+					});
+
+				var yes = DiscordEmoji.FromName(ctx.Client, ":white_check_mark:");
+				var no = DiscordEmoji.FromName(ctx.Client, ":negative_squared_cross_mark:");
+				
+				// d#+ nightlies mean we can do this now, and hopefully it won't crash
+				await Task.WhenAll(message.CreateReactionAsync(yes), message.CreateReactionAsync(no));
+
+				var reaction = await this.Interactivity.WaitForMessageReactionAsync(
+					e => e == yes || e == no, message, timeoutoverride: TimeSpan.FromHours(2));
+
+				if (reaction.Emoji == yes)
+				{
+					await ctx.Member.ModifyAsync(member => member.Nickname = nick);
+
+					await message.DeleteAsync(
+						$"Request to change username accepted by @{reaction.User.Username}#{reaction.User.Discriminator}");
+				}
+				else
+				{
+					await message.DeleteAsync(
+						$"Request to change username denied by @{reaction.User.Username}#{reaction.User.Discriminator}");
+				}
+			});
 		}
 	}
 }

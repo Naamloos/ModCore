@@ -1164,10 +1164,12 @@ namespace ModCore.Commands
 			}
 
 			[Command("set"), Aliases("setmessage")]
-			[Description("Sets welcome message.\nWelcome messages support a handful of tags that get parsed to their actual values:\n" +
-				"{{username}}, {{discriminator}}, {{mention}}, {{userid}},\n{{guildname}}, {{channelname}}, {{membercount}}, {{prefix}}," +
-				"\n{{owner-username}}, {{owner-discriminator}}, {{guild-icon-url}}, {{channel-count}}, {{role-count}}," +
-				"\n{{attach:url}}, {{embed-title:title}}, {{isembed}}")]
+			[Description(@"Sets welcome message.
+Welcome messages support a handful of tags that get parsed to their actual values:
+{{username}}, {{discriminator}}, {{mention}}, {{userid}},
+{{guildname}}, {{channelname}}, {{membercount}}, {{prefix}},
+{{owner-username}}, {{owner-discriminator}}, {{guild-icon-url}}, {{channel-count}}, {{role-count}},
+{{attach:url}}, {{embed-title:title}}, {{isembed}}")]
 			public async Task SetMessageAsync(CommandContext ctx, string message)
 			{
 				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
@@ -1183,6 +1185,48 @@ namespace ModCore.Commands
 				cfg.Welcome.ChannelId = (long)channel.Id;
 				await ctx.SetGuildSettingsAsync(cfg);
 				await ctx.SafeRespondAsync("Set welcome message.");
+			}
+		}
+
+		[Group("nameconfirm"), Aliases(
+			 "nicknamechangingconfirmation", "nickname-changing-confirmation", "namechangingconfirmation",
+			 "nickchangingconfirmation", "name-changing-confirmation", "nick-changing-confirmation",
+			 "nicknamechangeconfirmation", "nickname-change-confirmation", "namechangeconfirmation",
+			 "nickchangeconfirmation", "name-change-confirmation", "nick-change-confirmation",
+
+			 "nicknamechangingconfirm", "nickname-changing-confirm", "namechangingconfirm", "nickchangingconfirm",
+			 "name-changing-confirm", "nick-changing-confirm",
+			 "nicknamechangeconfirm", "nickname-change-confirm", "namechangeconfirm", "nickchangeconfirm",
+			 "name-change-confirm", "nick-change-confirm",
+
+			 "nicknameconfirmation", "nickname-confirmation", "nameconfirmation", "nickconfirmation",
+			 "nicknameconfirm", "nickname-confirm", "name-confirm", "nickconfirm", "nick-confirm",
+
+			 "nicknamechanging", "nickname-changing", "namechanging", "nickchanging", "name-changing", "nick-changing",
+			 "nicknamechange", "nickname-change", "namechange", "nickchange", "name-change", "nick-change",
+
+			 "nnf", "nncf", "ncf", "nf", "nnc", "nc", "n"), Description("Nickname change requests system settings.")]
+		public class NicknameChanging : BaseCommandModule
+		{
+			[Command("enable"), Aliases("on"), Description("Enables nickname change requests for this guild.")]
+			public async Task EnableAsync(CommandContext ctx, [Description("The channel where confirmations will go to. " +
+			                                                               "Anyone with access to this channel will be " +
+			                                                               "able to accept or deny nickname changes, so " +
+			                                                               "choose wisely!")] DiscordChannel confirmChannel)
+			{
+				await ctx.WithGuildSettings(cfg =>
+				{
+					cfg.RequireNicknameChangeConfirmation = true;
+					cfg.NicknameChangeConfirmationChannel = confirmChannel.Id;
+				});
+				await ctx.Message.CreateReactionAsync(CheckMark);
+			}
+
+			[Command("disable"), Aliases("off"), Description("Disables nickname change requests for this guild.")]
+			public async Task DisableAsync(CommandContext ctx)
+			{
+				await ctx.WithGuildSettings(cfg => cfg.RequireNicknameChangeConfirmation = false);
+				await ctx.Message.CreateReactionAsync(CheckMark);
 			}
 		}
 	}

@@ -306,6 +306,48 @@ namespace ModCore
         {
             return a.IndexOf(b, StringComparison.Ordinal);
         }
+        
+        /// <summary>
+        /// Checks if a given member can interact with another member (kick, ban, modify permissions).
+        /// Note that this only checks the role position and not the actual permission.
+        /// </summary>
+        /// <param name="this">this object</param>
+        /// <param name="target">the member to check against</param>
+        /// <returns>true if this member can interact with the target</returns>
+        /// <exception cref="ArgumentNullException">if target is null</exception>
+        public static bool CanInteract(this DiscordMember @this, DiscordMember target)
+        {
+            if (target == null) throw new ArgumentNullException(nameof(target));
+
+            var guild = @this.Guild;
+            if (guild != target.Guild)
+            {
+                throw new ArgumentException("Provided members must both be Member objects of the same Guild!",
+                    nameof(target));
+            }
+
+            if (guild.Owner == @this) return true;
+            if (guild.Owner == target) return false;
+
+            var issuerRole = @this.Roles.FirstOrDefault();
+            var targetRole = target.Roles.FirstOrDefault();
+            return issuerRole != null && (targetRole == null || issuerRole.CanInteract(targetRole));
+        }
+        
+        /// <summary>
+        /// Checks if a given role can interact with another role (kick, ban, modify permissions).
+        /// Note that this only checks the role position and not the actual permission.
+        /// </summary>
+        /// <param name="this">this object</param>
+        /// <param name="target">the role to check against</param>
+        /// <returns>true if this role can interact with the target</returns>
+        /// <exception cref="ArgumentNullException">if target is null</exception>
+        public static bool CanInteract(this DiscordRole @this, DiscordRole target)
+        {
+            if (target == null) throw new ArgumentNullException(nameof(target));
+            
+            return target.Position < @this.Position;
+        }
     }
 }
 
