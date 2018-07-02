@@ -15,35 +15,13 @@ namespace ModCore.Listeners
 		const string WelcomeRegex = "{{.*?}}";
 
 		[AsyncListener(EventTypes.GuildMemberAdded)]
-		public static async Task LogNewMember(ModCoreShard bot, GuildMemberAddEventArgs e)
+		public static async Task WelcomeNewMember(ModCoreShard bot, GuildMemberAddEventArgs e)
 		{
 			GuildSettings cfg = null;
 			using (var db = bot.Database.CreateContext())
 				cfg = e.Guild.GetGuildSettings(db);
-			if (cfg.JoinLog.Enable)
-			{
-				var m = e.Member;
-				var c = (DiscordChannel)null;
-				try
-				{
-					c = e.Guild.GetChannel((ulong)cfg.JoinLog.ChannelId);
-				}
-				catch (Exception)
-				{
-					goto Welcome;
-				}
-				var embed = new DiscordEmbedBuilder()
-					.WithTitle("New member joined")
-					.WithDescription($"ID: ({m.Id})")
-					.WithAuthor($"{m.Username}#{m.Discriminator}", icon_url: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
-					.AddField("Join Date", $"{m.JoinedAt.DateTime.ToString()}")
-					.AddField("Register Date", $"{m.CreationTimestamp.DateTime.ToString()}")
-					.WithColor(DiscordColor.Green);
-				await c.ElevatedMessageAsync(embed: embed);
-			}
 
-			Welcome:
-			if (cfg.Welcome.Enabled)
+			if (cfg != null && cfg.Welcome.Enabled)
 			{
 				if (cfg.Welcome.ChannelId != 0)
 				{
@@ -169,6 +147,35 @@ namespace ModCore.Listeners
 						await c.SendMessageAsync(embed: eb);
 					}
 				}
+			}
+		}
+
+		[AsyncListener(EventTypes.GuildMemberAdded)]
+		public static async Task LogNewMember(ModCoreShard bot, GuildMemberAddEventArgs e)
+		{
+			GuildSettings cfg = null;
+			using (var db = bot.Database.CreateContext())
+				cfg = e.Guild.GetGuildSettings(db);
+			if (cfg != null && cfg.JoinLog.Enable)
+			{
+				var m = e.Member;
+				var c = (DiscordChannel)null;
+				try
+				{
+					c = e.Guild.GetChannel((ulong)cfg.JoinLog.ChannelId);
+				}
+				catch (Exception)
+				{
+					return;
+				}
+				var embed = new DiscordEmbedBuilder()
+					.WithTitle("New member joined")
+					.WithDescription($"ID: ({m.Id})")
+					.WithAuthor($"{m.Username}#{m.Discriminator}", icon_url: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
+					.AddField("Join Date", $"{m.JoinedAt.DateTime.ToString()}")
+					.AddField("Register Date", $"{m.CreationTimestamp.DateTime.ToString()}")
+					.WithColor(DiscordColor.Green);
+				await c.ElevatedMessageAsync(embed: embed);
 			}
 		}
 
