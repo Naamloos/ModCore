@@ -1031,7 +1031,16 @@ namespace ModCore.Commands
 				// don't change the member's nickname here, as that violates the hierarchy of permissions
 				if (!cfg.RequireNicknameChangeConfirmation)
 				{
-					await ctx.ElevatedRespondAsync("The server owner has disabled nickname changing on this server.");
+					if (ctx.Member == ctx.Guild.Owner)
+					{
+						await ctx.ElevatedRespondAsync("Use the `config nickchange enable` command to enable nickname " +
+						                               "change requests.");
+					}
+					else
+					{
+						await ctx.ElevatedRespondAsync("The server owner has disabled nickname changing on this server.");
+					}
+
 					return;
 				}
 				
