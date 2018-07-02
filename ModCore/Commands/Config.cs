@@ -1109,8 +1109,8 @@ namespace ModCore.Commands
 			{
 				if (x.QualifiedName.StartsWith(command))
 					return true;
-				if (x is CommandGroup)
-					return (x as CommandGroup).Children.Any(xx => CheckCommand(command, xx));
+				if (x is CommandGroup group)
+					return group.Children.Any(xx => CheckCommand(command, xx));
 				return false;
 			}
 
