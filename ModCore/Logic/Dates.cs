@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using Chronic;
 using RayBotSharp.Utils;
 
@@ -94,7 +95,11 @@ namespace ModCore.Logic
                 return (Continue, time + ((ulong) tk * i));
             }
             
-            // read values like "5s"
+            // read compound values like "15h14min" or "5s"
+            if (TryParseCompound(s, out var j))
+                return (Continue, time + j);
+            
+            // read values like "15:14" as 15h14min
             if (TimeSpan.TryParse(s, out var ts))
                 return (Continue, time + (ulong) ts.TotalMilliseconds);
 
@@ -110,6 +115,34 @@ namespace ModCore.Logic
             
             // what to do with invalid tokens? break? continue? i guess break
             return (Break, time);
+        }
+
+        /// <summary>
+        /// Attempt to parse a length of time in a single word in <c>15h5m</c> format
+        /// </summary>
+        /// <param name="s">The token to parse</param>
+        /// <param name="time">The resulting time to set</param>
+        /// <returns>True if there was anything to parse, false otherwise</returns>
+        /// <exception cref="Exception">If an invalid unit is encountered</exception>
+        private static bool TryParseCompound(string s, out ulong time)
+        {
+            time = 0UL;
+            var re = new Regex("([0-9]+)([a-zA-Z]+)");
+            foreach (Match match in re.Matches(s))
+            {
+                var i = uint.Parse(match.Groups[1].Value);
+                var unit = match.Groups[2].Value;
+
+                // get the amount of ms that corresponds to the unit of time unit
+                if (!Enum.TryParse<Unit>(unit.Trim(), true, out var tk))
+                    throw new Exception($"Unknown amount of time '{i}' of '{unit}'. If you think this is an unaccounted-for scenario, notify the dev!");
+
+                // add N * MsValue
+                time += (ulong) tk * i;
+            }
+            
+            // we succeed if we matched/parsed anything, so the output is >0
+            return time != 0UL;
         }
 
         /// <summary>
