@@ -2,7 +2,7 @@
 {
     public class DateLexer
     {
-        public static bool IsFillerWord(string s) => s == "in" || s == "at";
+        public static bool IsFillerWord(string s) => s == "me" || s == "in" || s == "at";
 
         public static bool IsFinishingWord(string s2) => s2 == "to";
 
