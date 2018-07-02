@@ -1141,5 +1141,49 @@ namespace ModCore.Commands
 				// List disabled commands
 			}
 		}
+
+		[Group("welcome"), Aliases("w"), Description("Welcome message settings commands.")]
+		public class Welcome : BaseCommandModule
+		{
+			[Command("enable"), Aliases("on"), Description("Enables welcome messages for this guild.")]
+			public async Task EnableAsync(CommandContext ctx)
+			{
+				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+				cfg.Welcome.Enabled = true;
+				await ctx.SetGuildSettingsAsync(cfg);
+				await ctx.SafeRespondAsync("Welcome messages enabled.");
+			}
+
+			[Command("disable"), Aliases("off"), Description("Disables welcome messages for this guild.")]
+			public async Task DisableAsync(CommandContext ctx)
+			{
+				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+				cfg.Welcome.Enabled = false;
+				await ctx.SetGuildSettingsAsync(cfg);
+				await ctx.SafeRespondAsync("Welcome messages disabled.");
+			}
+
+			[Command("set"), Aliases("setmessage")]
+			[Description("Sets welcome message.\nWelcome messages support a handful of tags that get parsed to their actual values:\n" +
+				"{{username}}, {{discriminator}}, {{mention}}, {{userid}},\n{{guildname}}, {{channelname}}, {{membercount}}, {{prefix}}," +
+				"\n{{owner-username}}, {{owner-discriminator}}, {{guild-icon-url}}, {{channel-count}}, {{role-count}}," +
+				"\n{{attach:url}}, {{embed-title:title}}, {{isembed}}")]
+			public async Task SetMessageAsync(CommandContext ctx, string message)
+			{
+				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+				cfg.Welcome.Message = message;
+				await ctx.SetGuildSettingsAsync(cfg);
+				await ctx.SafeRespondAsync("Set welcome message.");
+			}
+
+			[Command("setchannel"), Aliases("setc", "sc"), Description("Set channel to send welcome messages to.")]
+			public async Task SetChannel(CommandContext ctx, DiscordChannel channel)
+			{
+				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+				cfg.Welcome.ChannelId = (long)channel.Id;
+				await ctx.SetGuildSettingsAsync(cfg);
+				await ctx.SafeRespondAsync("Set welcome message.");
+			}
+		}
 	}
 }

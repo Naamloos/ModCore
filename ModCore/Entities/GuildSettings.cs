@@ -97,9 +97,18 @@ namespace ModCore.Entities
 		[JsonProperty("reactionroles")]
 		public List<GuildReactionRole> ReactionRoles { get; private set; } = new List<GuildReactionRole>();
 
+		/// <summary>
+		/// Gets commands disabled in this guild.
+		/// </summary>
 		[JsonProperty("disabledcommands")]
 		public List<string> DisabledCommands { get; private set; } = new List<string>();
-    }
+
+		[JsonProperty("motd")]
+		public MotdSettings Motd { get; private set; } = new MotdSettings();
+
+		[JsonProperty("welcome")]
+		public WelcomeSettings Welcome { get; private set; } = new WelcomeSettings();
+	}
 
     public class GuildStarboardSettings
     {
@@ -414,5 +423,31 @@ namespace ModCore.Entities
 		/// </summary>
 		[JsonProperty("reaction")]
 		public GuildEmoji Reaction { get; set; }
+	}
+
+	/// <summary>
+	/// Represents settings for welcome messages.
+	/// </summary>
+	public class WelcomeSettings
+	{
+		[JsonProperty("enabled")]
+		public bool Enabled = false;
+
+		[JsonProperty("message")]
+		public string Message = "";
+
+		[JsonProperty("channel_id")]
+		public long ChannelId = 0;
+
+		[JsonProperty("is_embed")]
+		public bool IsEmbed = false;
+	}
+
+	/// <summary>
+	/// Represents MOTD settings.
+	/// </summary>
+	public class MotdSettings
+	{
+
 	}
 }
