@@ -71,7 +71,7 @@ namespace ModCore.Listeners
                         Title = "Command **" + attemptedName.Truncate(200) + "** not found",
                         Description = "Did you mean...",
                         Fields = ordered.Select(c =>
-                            new DuckField(c.qualifiedName.Truncate(256), c.description.Truncate(999))).ToList()
+                            new DuckField(c.qualifiedName.Truncate(256), c.description?.Truncate(999) ?? "<no desc>")).ToList()
 //                        {
 //                            (ordered[0].qualifiedName.Truncate(256), ordered[0].description.Truncate(999)),
 //                            (ordered[1].qualifiedName.Truncate(256), ordered[1].description.Truncate(999)),
