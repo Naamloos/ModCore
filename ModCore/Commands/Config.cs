@@ -1189,21 +1189,19 @@ Welcome messages support a handful of tags that get parsed to their actual value
 		}
 
 		[Group("nameconfirm"), Aliases(
-			 "nicknamechangingconfirmation", "nickname-changing-confirmation", "namechangingconfirmation",
-			 "nickchangingconfirmation", "name-changing-confirmation", "nick-changing-confirmation",
-			 "nicknamechangeconfirmation", "nickname-change-confirmation", "namechangeconfirmation",
-			 "nickchangeconfirmation", "name-change-confirmation", "nick-change-confirmation",
+			 "nicknamechangingconfirmation", "namechangingconfirmation",
+			 "nickchangingconfirmation", 
+			 "nicknamechangeconfirmation", "namechangeconfirmation",
+			 "nickchangeconfirmation",
 
-			 "nicknamechangingconfirm", "nickname-changing-confirm", "namechangingconfirm", "nickchangingconfirm",
-			 "name-changing-confirm", "nick-changing-confirm",
-			 "nicknamechangeconfirm", "nickname-change-confirm", "namechangeconfirm", "nickchangeconfirm",
-			 "name-change-confirm", "nick-change-confirm",
+			 "nicknamechangingconfirm", "namechangingconfirm", "nickchangingconfirm",
+			 "nicknamechangeconfirm", "namechangeconfirm", "nickchangeconfirm",
 
-			 "nicknameconfirmation", "nickname-confirmation", "nameconfirmation", "nickconfirmation",
-			 "nicknameconfirm", "nickname-confirm", "name-confirm", "nickconfirm", "nick-confirm",
+			 "nicknameconfirmation", "nameconfirmation", "nickconfirmation",
+			 "nicknameconfirm", "nickconfirm",
 
-			 "nicknamechanging", "nickname-changing", "namechanging", "nickchanging", "name-changing", "nick-changing",
-			 "nicknamechange", "nickname-change", "namechange", "nickchange", "name-change", "nick-change",
+			 "nicknamechanging", "namechanging", "nickchanging",
+			 "nicknamechange", "namechange", "nickchange",
 
 			 "nnf", "nncf", "ncf", "nf", "nnc", "nc", "n"), Description("Nickname change requests system settings.")]
 		public class NicknameChanging : BaseCommandModule
