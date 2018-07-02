@@ -15,7 +15,7 @@ using ModCore.Logic;
 
 namespace ModCore.Commands
 {
-    [Group("reminder"), Aliases("remindme"), Description("Commands for managing your reminders."), CheckDisable]
+    [Group("reminder"), Aliases("remindme", "remind"), Description("Commands for managing your reminders."), CheckDisable]
     public class Reminders : BaseCommandModule
 	{
         private const string ReminderTut = @"
