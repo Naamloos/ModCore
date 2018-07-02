@@ -1138,7 +1138,7 @@ namespace ModCore.Commands
 					await ctx.RespondAsync("No commands were disabled!");
 					return;
 				}
-				// List disabled commands
+				// TODO List disabled commands
 			}
 		}
 
