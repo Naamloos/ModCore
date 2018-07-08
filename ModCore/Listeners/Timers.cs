@@ -237,14 +237,12 @@ namespace ModCore.Listeners
 				if (nearest == null)
 				{
 					// there's no nearest timer
-					shared.TimerSempahore.Release();
 					return null;
 				}
 
 				if (tdata != null && tdata.DbTimer.Id == nearest.Id)
 				{
 					// it's the same timer
-					shared.TimerSempahore.Release();
 					return tdata;
 				}
 
