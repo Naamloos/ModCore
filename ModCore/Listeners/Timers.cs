@@ -29,23 +29,32 @@ namespace ModCore.Listeners
 
 				// lock timers
 				await shard.SharedData.TimerSempahore.WaitAsync();
-
-				var now = DateTimeOffset.UtcNow;
-				var past = timers.Where(xt => xt.DispatchAt <= now.AddSeconds(30)).ToArray();
-				if (past.Any())
+				try
 				{
-					foreach (var xt in past)
+					var now = DateTimeOffset.UtcNow;
+					var past = timers.Where(xt => xt.DispatchAt <= now.AddSeconds(30)).ToArray();
+					if (past.Any())
 					{
-						// dispatch past timers
-						_ = DispatchTimer(new TimerData(null, xt, shard.Client, shard.Database, shard.SharedData, null));
+						foreach (var xt in past)
+						{
+							// dispatch past timers
+							_ = DispatchTimer(new TimerData(null, xt, shard.Client, shard.Database, shard.SharedData, null));
+						}
+
+						db.Timers.RemoveRange(past);
+						await db.SaveChangesAsync();
 					}
-
-					db.Timers.RemoveRange(past);
-					await db.SaveChangesAsync();
 				}
-
-				// unlock the timers
-				shard.SharedData.TimerSempahore.Release();
+				catch (Exception ex)
+				{
+					ea.Client.DebugLogger.LogMessage(LogLevel.Error, "ModCore", 
+						$"Caught Exception in Timer Ready: {ex.GetType().ToString()}\n{ex.StackTrace}", DateTime.UtcNow);
+				}
+				finally
+				{
+					// unlock the timers
+					shard.SharedData.TimerSempahore.Release();
+				}
 
 				await RescheduleTimers(shard.Client, shard.Database, shard.SharedData);
 			}
@@ -69,9 +78,9 @@ namespace ModCore.Listeners
 					db.SaveChanges();
 				}
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
-
+				Console.WriteLine($"Caught Exception in Timer Callback: {ex.GetType().ToString()}\n{ex.StackTrace}");
 			}
 			finally
 			{
@@ -205,49 +214,59 @@ namespace ModCore.Listeners
 			// lock the timers
 			await shared.TimerSempahore.WaitAsync();
 
-			// set a new timer
-			DatabaseTimer[] timers = null;
-			bool force = false;
-
-			using (var db = database.CreateContext())
-			{
-				var ids = client.Guilds.Select(xg => (long)xg.Key).ToArray();
-				timers = db.Timers.Where(xt => ids.Contains(xt.GuildId))
-					.OrderBy(xt => xt.DispatchAt)
-					.ToArray();
-
-				if (shared.TimerData != null)
-					force = db.Timers.Count(xt => xt.Id == shared.TimerData.DbTimer.Id) == 0; // .Any() throws
-			}
-
-			var nearest = timers.FirstOrDefault();
-			if (nearest == null)
-			{
-				// there's no nearest timer
-				shared.TimerSempahore.Release();
-				return null;
-			}
-
 			var tdata = shared.TimerData;
-			if (tdata != null && tdata.DbTimer.Id == nearest.Id)
+
+			try
 			{
-				// it's the same timer
+				// set a new timer
+				DatabaseTimer[] timers = null;
+				bool force = false;
+
+				using (var db = database.CreateContext())
+				{
+					var ids = client.Guilds.Select(xg => (long)xg.Key).ToArray();
+					timers = db.Timers.Where(xt => ids.Contains(xt.GuildId))
+						.OrderBy(xt => xt.DispatchAt)
+						.ToArray();
+
+					if (shared.TimerData != null)
+						force = db.Timers.Count(xt => xt.Id == shared.TimerData.DbTimer.Id) == 0; // .Any() throws
+				}
+
+				var nearest = timers.FirstOrDefault();
+				if (nearest == null)
+				{
+					// there's no nearest timer
+					shared.TimerSempahore.Release();
+					return null;
+				}
+
+				if (tdata != null && tdata.DbTimer.Id == nearest.Id)
+				{
+					// it's the same timer
+					shared.TimerSempahore.Release();
+					return tdata;
+				}
+
+
+				if (CancelIfLaterThan(nearest.DispatchAt, shared, force))
+				{
+					var cts = new CancellationTokenSource();
+					var t = Task.Delay(nearest.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
+					tdata = new TimerData(t, nearest, client, database, shared, cts);
+					_ = t.ContinueWith(TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
+					shared.TimerData = tdata;
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Caught Exception in Timer Reschedule: {ex.GetType().ToString()}\n{ex.StackTrace}");
+			}
+			finally
+			{
+				// release the lock
 				shared.TimerSempahore.Release();
-				return tdata;
 			}
-
-
-			if (CancelIfLaterThan(nearest.DispatchAt, shared, force))
-			{
-				var cts = new CancellationTokenSource();
-				var t = Task.Delay(nearest.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-				tdata = new TimerData(t, nearest, client, database, shared, cts);
-				_ = t.ContinueWith(TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
-				shared.TimerData = tdata;
-			}
-
-			// release the lock
-			shared.TimerSempahore.Release();
 
 			return tdata;
 		}
@@ -257,15 +276,24 @@ namespace ModCore.Listeners
 			// lock the timers
 			await shared.TimerSempahore.WaitAsync();
 
-			// remove the requested timer
-			using (var db = database.CreateContext())
+			try
 			{
-				db.Timers.Remove(timer);
-				await db.SaveChangesAsync();
+				// remove the requested timer
+				using (var db = database.CreateContext())
+				{
+					db.Timers.Remove(timer);
+					await db.SaveChangesAsync();
+				}
 			}
-
-			// release the lock
-			shared.TimerSempahore.Release();
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Caught Exception in Timer Unschedule: {ex.GetType().ToString()}\n{ex.StackTrace}");
+			}
+			finally
+			{
+				// release the lock
+				shared.TimerSempahore.Release();
+			}
 
 			// trigger a reschedule
 			return await RescheduleTimers(shard, database, shared);
@@ -276,15 +304,24 @@ namespace ModCore.Listeners
 			// lock the timers
 			await shared.TimerSempahore.WaitAsync();
 
-			// remove the requested timers
-			using (var db = database.CreateContext())
+			try
 			{
-				db.Timers.RemoveRange(timers);
-				await db.SaveChangesAsync();
+				// remove the requested timers
+				using (var db = database.CreateContext())
+				{
+					db.Timers.RemoveRange(timers);
+					await db.SaveChangesAsync();
+				}
 			}
-
-			// release the lock
-			shared.TimerSempahore.Release();
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Caught Exception in Timer Unschedule: {ex.GetType().ToString()}\n{ex.StackTrace}");
+			}
+			finally
+			{
+				// release the lock
+				shared.TimerSempahore.Release();
+			}
 
 			// trigger a reschedule
 			return await RescheduleTimers(shard, database, shared);
