@@ -56,8 +56,6 @@ namespace ModCore.Listeners
 			string embedtitle = null;
 			var isEmbed = false;
 
-			var match = WelcomeRegex.Matches(msg);
-
 			WelcomeRegex.Replace(msg, m =>
 			{
 				var str = m.Groups[1].Value;
