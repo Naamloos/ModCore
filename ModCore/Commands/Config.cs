@@ -49,7 +49,7 @@ namespace ModCore.Commands
 			if (prefix?.Length > 20)
 				prefix = prefix.Substring(0, 21);
 
-			await ctx.WithGuildSettings(cfg => { cfg.Prefix = prefix; });
+			await ctx.WithGuildSettings(cfg => cfg.Prefix = prefix);
 
 			await ctx.SafeRespondAsync(prefix == null
 				? "Prefix restored to default."
@@ -76,6 +76,8 @@ namespace ModCore.Commands
 		 Description("Linkfilter configuration commands.")]
 		public class Linkfilter : SimpleConfigModule
 		{
+			// TODO add wizard for this...
+			
 			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.Linkfilter.Enable;
 			
 			[Group("modules"), Aliases("mod", "m", "s"),
@@ -170,13 +172,13 @@ namespace ModCore.Commands
 			}
 
 			[Group("user"), Aliases("usr", "u"), Description("User exemption management commands.")]
-			public class User : ExemptModule<DiscordMember>
+			public class User : ExemptMemberModule
 			{
 				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.Linkfilter.ExemptUserIds;
 			}
 
 			[Group("role"), Aliases("r"), Description("Role exemption management commands.")]
-			public class Role : ExemptModule<DiscordRole>
+			public class Role : ExemptRoleModule
 			{
 				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.Linkfilter.ExemptRoleIds;
 			}
@@ -222,20 +224,17 @@ namespace ModCore.Commands
 			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.RoleState.Enable;
 			
 			[Group("role"), Aliases("r"), Description("Role exemption management commands.")]
-			public class Role : ExemptModule<DiscordRole>
+			public class Role : ExemptRoleModule
 			{
 				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.RoleState.IgnoredRoleIds;
 			}
 
 			[Group("channel"), Aliases("c"), Description("Channel exemption management commands.")]
-			public class Channel : ExemptModule<DiscordChannel>
+			public class Channel : ExemptChannelModule
 			{
 				private DatabaseContextBuilder Database { get; }
 
-				public Channel(DatabaseContextBuilder db)
-				{
-					this.Database = db;
-				}
+				public Channel(DatabaseContextBuilder db) => this.Database = db;
 
 				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.RoleState.IgnoredChannelIds;
 
