@@ -87,8 +87,6 @@ namespace ModCore.Entities
         public long ChannelId { get; set; }
     }
 
-
-
     /// <summary>
     /// Represents timer action type.
     /// </summary>
@@ -99,7 +97,7 @@ namespace ModCore.Entities
         Unban = 2, // Temp ban unban action
         Unmute = 3, // Temp mute unmute action
         Pin = 4, // Timed pin action
-        Unpin = 5 // Temporary pin unpin action
+        Unpin = 5, // Temporary pin unpin action
     }
 
     /// <summary>

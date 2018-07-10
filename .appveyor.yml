@@ -21,10 +21,6 @@ install:
 #  - Debug
 #  - Release
 
-environment:
-  lf_webhook:
-    secure: 4lwb0Sro3Im5GqSJhMnoQJplQgveO/X4mOqzY11VUZ1g5s5CBD652iwX4LU2s4+6oNeE3H9Ha1hfVOE47uYavGj7d6P+BMEr0A9tw4DyYAcYVnZbQeoI6zbsWIfJnLcDXthKPbuq94u9djSOmVLXkVwR5LBcs365C1CUoi7exFlnbFGLxk233rktzcWkrxyu
-
 before_build:
 - cmd: nuget sources add -Name dsp-myget -Source https://www.myget.org/F/dsharpplus-nightly/api/v3/index.json
 - cmd: nuget restore
@@ -33,7 +29,7 @@ build: off
 
 build_script:
 - cmd: dotnet build ModCore.sln -v Minimal -c Release
-- cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\ModCore\bin\Release\netcoreapp2.0\*.dll"
+- cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\ModCore\bin\Release\netcoreapp2.1\*.dll"
 - cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\download.ps1"
 - cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\update.sh"
 - cmd: 7z a ModCore.zip "%APPVEYOR_BUILD_FOLDER%\Update Scripts\update.bat"
@@ -41,13 +37,10 @@ build_script:
 artifacts:
   - path: ModCore.zip
     name: ModCore Release Build
-
-# i dont think i need this cuz it just read from the appveyor settings menu
-#notifications:
-#- provider: Slack
-#  incoming_webhook: '{lf_webhook}'
-#  channel: modcore
-#  on_build_success: true
-#  on_build_failure: true
-#  on_build_status_changed: false
-#
+    
+notifications:
+  - provider: Slack
+    on_build_success: true
+    on_build_failure: true
+    incoming_webhook:
+      secure: 4lwb0Sro3Im5GqSJhMnoQJplQgveO/X4mOqzY11VUZ3CJiP7JUf/h7xU8NWFpOjIkhUdRKHjxeAMQJP0Jv3EUKnaJCM9+NLlnQpozj4UXRJjUnkMSZhp+UuMieCFeyngvbJc/fknnGaqNZtUMskmYJ3GS9h08wQs8IFsiDElqr1C/Uhyx+7HwrGKgIh+9Vgq

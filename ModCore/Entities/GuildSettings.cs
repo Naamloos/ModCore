@@ -114,6 +114,9 @@ namespace ModCore.Entities
 	    
 	    [JsonProperty("nickchn")]
 	    public ulong NicknameChangeConfirmationChannel { get; set; }
+
+		[JsonProperty("jailrole")]
+		public long JailRole { get; set; }
     }
 
     public class GuildStarboardSettings
