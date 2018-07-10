@@ -70,7 +70,7 @@ namespace ModCore.Entities
         /// Gets the SelfRoles for this guild. SelfRoles are roles members can grant themselves.
         /// </summary>
         [JsonProperty("selfroles")]
-        public List<ulong> SelfRoles { get; private set; } = new List<ulong>();
+        public HashSet<ulong> SelfRoles { get; private set; } = new HashSet<ulong>();
 
         /// <summary>
         /// Gets the Starboard settings for this guild. Starboard lets users star messages they like.
@@ -85,11 +85,11 @@ namespace ModCore.Entities
         [JsonProperty]
         public GuildGlobalWarnSettings GlobalWarn { get; private set; } = new GuildGlobalWarnSettings();
 
-        /// <summary>
-        /// Gets whether spelling helper is enabled or disabled for this guild.
-        /// </summary>
-        [JsonProperty("spellhelp")]
-        public bool SpellingHelperEnabled { get; set; }
+	    /// <summary>
+	    /// Gets whether spelling helper is enabled or disabled for this guild.
+	    /// </summary>
+	    [JsonProperty("spellhelp")]
+	    public bool SpellingHelperEnabled;
 
 		/// <summary>
 		/// Gets the list of Reaction Roles for this guild.
@@ -101,7 +101,7 @@ namespace ModCore.Entities
 		/// Gets commands disabled in this guild.
 		/// </summary>
 		[JsonProperty("disabledcommands")]
-		public List<string> DisabledCommands { get; private set; } = new List<string>();
+		public HashSet<string> DisabledCommands { get; private set; } = new HashSet<string>();
 
 		[JsonProperty("motd")]
 		public MotdSettings Motd { get; private set; } = new MotdSettings();
@@ -110,7 +110,7 @@ namespace ModCore.Entities
 		public WelcomeSettings Welcome { get; private set; } = new WelcomeSettings();
 
 	    [JsonProperty("nickconf")]
-	    public bool RequireNicknameChangeConfirmation { get; set; }
+	    public bool RequireNicknameChangeConfirmation;
 	    
 	    [JsonProperty("nickchn")]
 	    public ulong NicknameChangeConfirmationChannel { get; set; }
@@ -125,7 +125,7 @@ namespace ModCore.Entities
         /// Gets or sets the Starboard channel ID.
         /// </summary>
         [JsonProperty("channel_id")]
-        public long ChannelId { get; set; }
+        public ulong ChannelId { get; set; }
 
         /// <summary>
         /// Gets or sets the starboard emoji.
@@ -133,23 +133,23 @@ namespace ModCore.Entities
         [JsonProperty("emoji")]
         public GuildEmoji Emoji { get; set; } = new GuildEmoji();
 
-        /// <summary>
-        /// Gets or sets whether starboard should be enabled.
-        /// </summary>
-        [JsonProperty("enabled")]
-        public bool Enable { get; set; }
+	    /// <summary>
+	    /// Gets or sets whether starboard should be enabled.
+	    /// </summary>
+	    [JsonProperty("enabled")]
+	    public bool Enable;
 
         [JsonProperty("minimum")]
         public int Minimum { get; set; } = 3;
 
-        [JsonProperty("allow_nsfw")]
-        public bool AllowNSFW { get; set; }
+	    [JsonProperty("allow_nsfw")] 
+	    public bool AllowNSFW;
     }
 
     public class GuildEmoji
     {
         [JsonProperty("id")]
-        public long EmojiId { get; set; }
+        public ulong EmojiId { get; set; }
 
         [JsonProperty("name")]
         public string EmojiName { get; set; } = "⭐";
@@ -160,17 +160,17 @@ namespace ModCore.Entities
     /// </summary>
     public class GuildJoinLogSettings
     {
-        /// <summary>
-        /// Gets or sets whether JoinLog should be enabled.
-        /// </summary>
-        [JsonProperty("enabled")]
-        public bool Enable { get; set; }
+	    /// <summary>
+	    /// Gets or sets whether JoinLog should be enabled.
+	    /// </summary>
+	    [JsonProperty("enabled")] 
+	    public bool Enable;
 
         /// <summary>
         /// Gets or sets the JoinLog channel ID.
         /// </summary>
         [JsonProperty("channel_id")]
-        public long ChannelId { get; set; }
+        public ulong ChannelId { get; set; }
     }
 
     /// <summary>
@@ -178,17 +178,17 @@ namespace ModCore.Entities
     /// </summary>
     public class GuildAutoRoleSettings
     {
-        /// <summary>
-        /// Gets or sets whether AutoRole should be enabled.
-        /// </summary>
-        [JsonProperty("enables")]
-        public bool Enable { get; set; }
+	    /// <summary>
+	    /// Gets or sets whether AutoRole should be enabled.
+	    /// </summary>
+	    [JsonProperty("enables")] 
+	    public bool Enable;
 
         /// <summary>
         /// Gets or sets the AutoRole role ID.
         /// </summary>
         [JsonProperty("role_id")]
-        public long RoleId { get; set; }
+        public ulong RoleId { get; set; }
     }
 
     /// <summary>
@@ -196,11 +196,11 @@ namespace ModCore.Entities
     /// </summary>
     public class GuildActionLogSettings
     {
-        /// <summary>
-        /// Gets or sets whether the ActionLog should be enabled.
-        /// </summary>
-        [JsonProperty("enabled")]
-        public bool Enable { get; set; }
+	    /// <summary>
+	    /// Gets or sets whether the ActionLog should be enabled.
+	    /// </summary>
+	    [JsonProperty("enabled")]
+	    public bool Enable;
 
         /// <summary>
         /// Gets or sets the ActionLog's webhook ID.
@@ -243,11 +243,11 @@ namespace ModCore.Entities
     /// </summary>
     public class GuildLinkfilterSettings
     {
-        /// <summary>
-        /// Gets or sets whether Linkfilter™ should be enabled.
-        /// </summary>
-        [JsonProperty("enabled")]
-        public bool Enable { get; set; }
+	    /// <summary>
+	    /// Gets or sets whether Linkfilter™ should be enabled.
+	    /// </summary>
+	    [JsonProperty("enabled")]
+	    public bool Enable;
 
         /// <summary>
         /// Gets or sets the number of invites after which the user gets automatically banned for ads. Set to 0 to disable automatic bans.
@@ -259,22 +259,22 @@ namespace ModCore.Entities
         /// Gets the list of roles which are exempt from Invite Checks.
         /// </summary>
         [JsonProperty("exempt_role_ids")]
-        public List<ulong> ExemptRoleIds { get; private set; } = new List<ulong>();
+        public HashSet<ulong> ExemptRoleIds { get; private set; } = new HashSet<ulong>();
 
         /// <summary>
         /// Gets the list of users who are exempt from Invite Blocker.
         /// </summary>
         [JsonProperty("exempt_user_ids")]
-        public List<ulong> ExemptUserIds { get; private set; } = new List<ulong>();
+        public HashSet<ulong> ExemptUserIds { get; private set; } = new HashSet<ulong>();
 
         /// <summary>
         /// Gets the list of guilds which are exempt from being flagged for ads.
         /// </summary>
         [JsonProperty("exempt_invite_guild_ids")]
-        public List<ulong> ExemptInviteGuildIds { get; private set; } = new List<ulong>();
+        public HashSet<ulong> ExemptInviteGuildIds { get; private set; } = new HashSet<ulong>();
         
         /// <summary>
-        /// Gets the list of guilds which are exempt from being flagged for ads.
+        /// TODO wtf does this do
         /// </summary>
         [JsonProperty("custom_link_filters")]
         public List<string> CustomLinkFilters { get; private set; } = new List<string>();
@@ -316,12 +316,13 @@ namespace ModCore.Entities
     /// </summary>
     public class GuildInvisiCopSettings
     {
-        /// <summary>
-        /// Gets or sets whether InvisiCop should be enabled.
-        /// </summary>
-        [JsonProperty("enabled")]
-        public bool Enable { get; set; }
+	    /// <summary>
+	    /// Gets or sets whether InvisiCop should be enabled.
+	    /// </summary>
+	    [JsonProperty("enabled")]
+	    public bool Enable;
 
+	    // TODO these are not configurable
         /// <summary>
         /// Gets the list of roles which are exempt from InvisiCop checks.
         /// </summary>
@@ -340,33 +341,33 @@ namespace ModCore.Entities
     /// </summary>
     public class GuildRoleStateConfig
     {
-        /// <summary>
-        /// Gets or sets whether Role State should be enabled.
-        /// </summary>
-        [JsonProperty("enabled")]
-        public bool Enable { get; set; }
+	    /// <summary>
+	    /// Gets or sets whether Role State should be enabled.
+	    /// </summary>
+	    [JsonProperty("enabled")] 
+	    public bool Enable;
 
         /// <summary>
         /// Gets the list of roles which are ignored by Role State. These roles won't be saved or restored.
         /// </summary>
         [JsonProperty("ignored_role_ids")]
-        public List<ulong> IgnoredRoleIds { get; private set; } = new List<ulong>();
+        public HashSet<ulong> IgnoredRoleIds { get; private set; } = new HashSet<ulong>();
 
         /// <summary>
         /// Gets the list of channels which are ignored by Role State. Overwrites for these channels won't be saved or 
         /// restored.
         /// </summary>
         [JsonProperty("ignored_channel_ids")]
-        public List<ulong> IgnoredChannelIds { get; private set; } = new List<ulong>();
+        public HashSet<ulong> IgnoredChannelIds { get; private set; } = new HashSet<ulong>();
     }
 
     public class GuildGlobalWarnSettings
     {
-        /// <summary>
-        /// Gets or sets whether GlobalWarn should be enabled.
-        /// </summary>
-        [JsonProperty("enabled")]
-        public bool Enable { get; set; }
+	    /// <summary>
+	    /// Gets or sets whether GlobalWarn should be enabled.
+	    /// </summary>
+	    [JsonProperty("enabled")] 
+	    public bool Enable;
 
         /// <summary>
         /// Gets or sets the GlobalWarn 
@@ -413,19 +414,19 @@ namespace ModCore.Entities
 		/// Channel message is in.
 		/// </summary>
 		[JsonProperty("channel_id")]
-		public long Channel_Id { get; set; }
+		public ulong ChannelId { get; set; }
 
 		/// <summary>
 		/// Message reaction is on.
 		/// </summary>
 		[JsonProperty("message_id")]
-		public long Message_Id { get; set; }
+		public ulong MessageId { get; set; }
 
 		/// <summary>
 		/// Role to grant.
 		/// </summary>
 		[JsonProperty("role_id")]
-		public long Role_Id { get; set; }
+		public ulong RoleId { get; set; }
 
 		/// <summary>
 		/// Reaction to grant role on.
@@ -440,16 +441,16 @@ namespace ModCore.Entities
 	public class WelcomeSettings
 	{
 		[JsonProperty("enabled")]
-		public bool Enabled = false;
+		public bool Enable;
 
 		[JsonProperty("message")]
-		public string Message = "";
+		public string Message { get; set; } = "";
 
 		[JsonProperty("channel_id")]
-		public long ChannelId = 0;
+		public ulong ChannelId { get; set; }
 
 		[JsonProperty("is_embed")]
-		public bool IsEmbed = false;
+		public bool IsEmbed { get; set; }
 	}
 
 	/// <summary>

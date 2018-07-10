@@ -295,3 +295,6 @@ settings.json
 HansenStuff
 HansenTest
 ModCore/Commands/HansTest.cs
+/ModCore/NotCore.csproj
+/NotCore.sln
+/RemoveMeLater/
