@@ -32,9 +32,7 @@ namespace ModCore.CoreApi.Controllers
 			// allow cross-domain shit for w/e reason
 			Response.Headers.Add("Access-Control-Allow-Origin", "*");
 
-			if (core.SharedData.ApiToken == token)
-				return true;
-			return false;
+			return core.SharedData.ApiToken == token;
 		}
 
 		// GET ping
@@ -62,12 +60,12 @@ namespace ModCore.CoreApi.Controllers
 			}
 
 			var arl = new ApiRoleList();
-			var guildsfound = core.Shards.SelectMany(x => x.Client.Guilds.Values.Where(g => g.Id == gid));
-			if(guildsfound.Count() > 0)
+			var guildsfound = core.Shards.SelectMany(x => x.Client.Guilds.Values.Where(g => g.Id == gid)).ToArray();
+			if (guildsfound.Length > 0)
 			{
-				foreach (var r in guildsfound.First().Roles)
+				foreach (var r in guildsfound[0].Roles)
 				{
-					arl.Roles.Add(new ApiRole() { RoleId = r.Id, RoleName = r.Name });
+					arl.Roles.Add(new ApiRole { RoleId = r.Id, RoleName = r.Name });
 				}
 				Response.ContentType = "application/json";
 				return JsonConvert.SerializeObject(arl);
