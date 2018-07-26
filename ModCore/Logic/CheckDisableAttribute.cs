@@ -13,17 +13,26 @@ namespace ModCore.Logic
 	/// <summary>
 	/// Defines that usage of this command is restricted to the owner of the bot.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = false)]
 	public sealed class CheckDisableAttribute : CheckBaseAttribute
 	{
 		public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
 		{
+			if (ctx.Member.IsOwner || ctx.User.Id == ctx.Client.CurrentApplication.Owner.Id) return true;
+			
 			// don't use GetGuildSettings here
+			// TODO i wrote this a long time ago, and forgot why not to do that.
 			using (var db = Program.ModCore.CreateGlobalContext())
 			{
 				var stg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id)?.GetSettings();
-				if (stg?.DisabledCommands == null || stg?.DisabledCommands?.Count == 0) return true;
+				if ((stg?.DisabledCommands?.Count ?? 0) == 0) return true;
 			
+				foreach (var commandPart in CommandParts(ctx.Command))
+				{
+					var cmd = db.CommandIds.Find(commandPart);
+					if (cmd == null || !stg.DisabledCommands.Contains(cmd.Id)) continue;
+				}
+				
 				foreach (var disabledCommand in stg.DisabledCommands)
 				{
 					var cmd = db.CommandIds.Find(disabledCommand);
@@ -35,6 +44,20 @@ namespace ModCore.Logic
 			}
 
 			return true;
+		}
+
+		private static IEnumerable<string> CommandParts(Command c)
+		{
+			var l = new List<string>();
+			while (true)
+			{
+				l.Add(c.Name.ToLowerInvariant());
+				c = c.Parent;
+				if (c == null) break;
+			}
+
+			l.Reverse();
+			return l;
 		}
 	}
 }

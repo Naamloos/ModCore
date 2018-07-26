@@ -580,7 +580,7 @@ Type an option.");
                     {
                         using (var db = Database.CreateContext())
 					    {
-						    cfg.DisabledCommands.Add(db.CommandIds.FirstOrDefault(e => e.Command == command).Id);
+						    cfg.DisabledCommands.Add(db.CommandIds.Find(command).Id);
 					    }
                     });
 					await ctx.SafeRespondAsync($"Disabled command `{command}` from use in this guild!");
@@ -609,7 +609,7 @@ Type an option.");
 					short id = 0; 
 					using (var db = Database.CreateContext())
 					{
-						id = db.CommandIds.FirstOrDefault(e => e.Command == command).Id;
+						id = db.CommandIds.Find(command).Id;
 					}
 
 					if (cfg.DisabledCommands.RemoveWhere(x => x == id) > 0)

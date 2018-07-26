@@ -256,9 +256,9 @@ namespace ModCore.Database
 
             model.Entity<DatabaseCommandId>(e =>
             {
-                e.HasIndex(t => t.Id).HasName("index_id").IsUnique(true);
-                e.HasKey(t => t.Id).HasName("id");
-                e.HasAlternateKey(t => t.Command).HasName("command_qualified");
+                e.HasIndex(t => t.Id).HasName("index_id").IsUnique();
+                e.HasKey(t => t.Command).HasName("command_qualified");
+                e.HasAlternateKey(t => t.Id).HasName("id");
                 
                 e.ToTable("mcore_cmd_state");
 
