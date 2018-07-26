@@ -143,26 +143,25 @@ namespace ModCore.Listeners
 
 		public static async Task DescribeCommandErrorAsync(Exception ex, string cmd, CommandContext ctx)
 		{
-			if(ex.GetType() == typeof(ChecksFailedException))
+			if (ex is ChecksFailedException checksFailed)
 			{
 				var reasons = new List<string>();
 
-				var ext = (DSharpPlus.CommandsNext.Exceptions.ChecksFailedException)ex;
-				var failed = ext.FailedChecks;
+				var failed = checksFailed.FailedChecks;
 
-				if(failed.Any(x => x.GetType() == typeof(RequireUserPermissionsAttribute)))
+				if(failed.Any(x => x is RequireUserPermissionsAttribute))
 					reasons.Add("you don't have the right permissions to execute this command");
-				if (failed.Any(x => x.GetType() == typeof(RequireRolesAttribute)))
+				if (failed.Any(x => x is RequireRolesAttribute))
 					reasons.Add("you don't have the right roles to execute this command");
-				if (failed.Any(x => x.GetType() == typeof(RequirePrefixesAttribute)))
+				if (failed.Any(x => x is RequirePrefixesAttribute))
 					reasons.Add("you can't execute this command with that prefix");
-				if (failed.Any(x => x.GetType() == typeof(RequirePermissionsAttribute)))
+				if (failed.Any(x => x is RequirePermissionsAttribute))
 					reasons.Add("one of us doesn't have the right permissions to execute this command");
-				if (failed.Any(x => x.GetType() == typeof(RequireOwnerAttribute)))
+				if (failed.Any(x => x is RequireOwnerAttribute))
 					reasons.Add("you don't own this bot");
-				if (failed.Any(x => x.GetType() == typeof(RequireNsfwAttribute)))
+				if (failed.Any(x => x is RequireNsfwAttribute))
 					reasons.Add("this command can only be executed in NSFW channels");
-				if (failed.Any(x => x.GetType() == typeof(RequireBotPermissionsAttribute)))
+				if (failed.Any(x => x is RequireBotPermissionsAttribute))
 					reasons.Add("I don't have the right permissions to execute this command");
 
 				var response = $"I couldn't execute `{cmd}` because ";
