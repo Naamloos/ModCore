@@ -17,9 +17,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Chronic-netstandard" Version="0.3.2.4" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-beta-00479" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-beta-00479" />
-    <PackageReference Include="DSharpPlus.WebSocket.WebSocket4NetCore" Version="4.0.0-beta-00479" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-beta-00486" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-beta-00486" />
+    <PackageReference Include="DSharpPlus.WebSocket.WebSocket4NetCore" Version="4.0.0-beta-00486" />
     <PackageReference Include="F23.StringSimilarity" Version="3.0.0" />
     <PackageReference Include="HSNXT.DSharpPlus.CommandsNext.Extended" Version="2.0.130" />
     <PackageReference Include="HSNXT.DSharpPlus.ModernEmbedBuilder" Version="2.0.116" />
