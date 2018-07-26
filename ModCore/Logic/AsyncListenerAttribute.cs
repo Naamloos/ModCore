@@ -17,6 +17,7 @@ namespace ModCore.Logic
 
         public void Register(ModCoreShard bot, DiscordClient client, MethodInfo listener)
         {
+            // TODO redo this with linq expressions
             // nope, there's no cleaner way to do this. sorry
             Task OnEventWithArgs(object e)
             {
