@@ -630,6 +630,13 @@ Type an option.");
 				}
 				// TODO List disabled commands
 			}
+			
+			[Group("notify"), Aliases("warn", "not", "log", "n", "w", "l"), 
+			 Description("Whether or not to send a message in chat when someone tries to execute a disabled command.")]
+			public class Notify : SimpleConfigModule
+			{
+				protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.NotifyDisabledCommand;
+			}
 		}
 
 		[Group("welcome"), Aliases("w"), Description("Welcome message settings commands.")]

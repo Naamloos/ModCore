@@ -44,7 +44,6 @@ namespace ModCore.Logic
 					var cmd = await db.CommandIds.FindAsync(commandPart);
 					if (cmd == null || !stg.DisabledCommands.Contains(cmd.Id)) continue;
 					
-					await ctx.RespondAsync("Sorry! that command has been disabled in this guild.");
 					return false;
 				}
 			}

@@ -23,55 +23,20 @@ namespace ModCore.Listeners
         [AsyncListener(EventTypes.CommandErrored)]
         public static async Task CommandError(ModCoreShard bot, CommandErrorEventArgs e)
         {
-            var cfg = e.Context.GetGuildSettings();
-            var ce = cfg.CommandError;
+            var cfg = e.Context.GetGuildSettings() ?? new GuildSettings();
             var ctx = e.Context;
 
-            if (e.Exception is CommandNotFoundException commandNotFound)
-            {
-                // return instead of proceeding, since qualifiedName below this will throw
-                // (since there is no Command obj) 
-                if (!cfg.SpellingHelperEnabled) return;
-                
-                // TODO: this only gives the first invalid token, so "a b" will just recognize as "a".
-                //       it should probably take into consideration all the tokens.
-                var attemptedName = commandNotFound.CommandName;
-                try
-                {
-                    // TODO: i intended on using the library for more than just this,
-                    //       but i ended up using it like this, so can probably just copy code from that lib 
-                    //       instead of nugetting it
-                    var leveshtein = new Levenshtein(); // lower is better
+            if (await NotifyCommandDisabled(e, cfg, ctx)) return;
+            
+            if (await NotifyCommandNotFound(bot, e, cfg, ctx)) return;
 
-                    var ordered = bot.SharedData.Commands
-                        .Where(c => !(c.cmd is CommandGroup group) || group.IsExecutableWithoutSubcommands)
-                        .Select(c => (qualifiedName: c.cmd.QualifiedName, description: c.cmd.Description))
-                        .OrderBy(c => leveshtein.Distance(attemptedName, c.qualifiedName))
-                        .DistinctBy(c => c.qualifiedName).Take(5).ToArray();
+            await NotifyCommandErrored(e, cfg, ctx);
+        }
 
-                    await new ModernEmbedBuilder
-                    {
-                        Title = "Command **" + attemptedName.Truncate(200) + "** not found",
-                        Description = "Did you mean...",
-                        Fields = ordered.Select(c =>
-                            new DuckField(c.qualifiedName.Truncate(256), c.description?.Truncate(999) ?? "<no desc>")).ToList()
-//                        {
-//                            (ordered[0].qualifiedName.Truncate(256), ordered[0].description.Truncate(999)),
-//                            (ordered[1].qualifiedName.Truncate(256), ordered[1].description.Truncate(999)),
-//                            (ordered[2].qualifiedName.Truncate(256), ordered[2].description.Truncate(999)),
-//                        }
-                    }.Send(ctx.Channel);
-                }
-                catch (Exception ex)
-                {
-                    e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "CommandErrored", ex.ToString(),
-                        DateTime.Now);
-                }
-                return;
-            }
-
+        private static async Task NotifyCommandErrored(CommandErrorEventArgs e, GuildSettings cfg, CommandContext ctx)
+        {
             var qualifiedName = e.Command.QualifiedName;
-            switch (ce.Chat)
+            switch (cfg.CommandError.Chat)
             {
                 default:
                 case CommandErrorVerbosity.None:
@@ -81,7 +46,7 @@ namespace ModCore.Listeners
                     await ctx.SafeRespondAsync($"**Command {qualifiedName} Errored!**");
                     break;
                 case CommandErrorVerbosity.NameDesc:
-					await DescribeCommandErrorAsync(e.Exception, qualifiedName, ctx);
+                    await DescribeCommandErrorAsync(e.Exception, qualifiedName, ctx);
                     break;
                 case CommandErrorVerbosity.Exception:
                     var stream = new MemoryStream();
@@ -96,7 +61,7 @@ namespace ModCore.Listeners
 
             if (cfg.ActionLog.Enable)
             {
-                switch (ce.ActionLog)
+                switch (cfg.CommandError.ActionLog)
                 {
                     default:
                     case CommandErrorVerbosity.None:
@@ -122,7 +87,64 @@ namespace ModCore.Listeners
             }
         }
 
-		public static async Task DescribeCommandErrorAsync(Exception ex, string cmd, CommandContext ctx)
+        private static async Task<bool> NotifyCommandNotFound(ModCoreShard bot, CommandErrorEventArgs e, 
+            GuildSettings cfg, CommandContext ctx)
+        {
+            if (!(e.Exception is CommandNotFoundException commandNotFound)) return false;
+            
+            // return instead of proceeding, since qualifiedName below this will throw
+            // (since there is no Command obj) 
+            if (!cfg.SpellingHelperEnabled) return true;
+
+            // TODO: this only gives the first invalid token, so "a b" will just recognize as "a".
+            //       it should probably take into consideration all the tokens.
+            var attemptedName = commandNotFound.CommandName;
+            try
+            {
+                // TODO: i intended on using the library for more than just this,
+                //       but i ended up using it like this, so can probably just copy code from that lib 
+                //       instead of nugetting it
+                var leveshtein = new Levenshtein(); // lower is better
+
+                var ordered = bot.SharedData.Commands
+                    .Where(c => !(c.cmd is CommandGroup group) || @group.IsExecutableWithoutSubcommands)
+                    .Select(c => (qualifiedName: c.cmd.QualifiedName, description: c.cmd.Description))
+                    .OrderBy(c => leveshtein.Distance(attemptedName, c.qualifiedName))
+                    .DistinctBy(c => c.qualifiedName).Take(5).ToArray();
+
+                await new ModernEmbedBuilder
+                {
+                    Title = "Command **" + attemptedName.Truncate(200) + "** not found",
+                    Description = "Did you mean...",
+                    Fields = ordered.Select(c =>
+                        new DuckField(c.qualifiedName.Truncate(256), c.description?.Truncate(999) ?? "<no desc>")).ToList()
+                }.Send(ctx.Channel);
+            }
+            catch (Exception ex)
+            {
+                e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "CommandErrored", ex.ToString(),
+                    DateTime.Now);
+            }
+
+            return true;
+
+        }
+
+        private static async Task<bool> NotifyCommandDisabled(CommandErrorEventArgs e, GuildSettings cfg,
+            CommandContext ctx)
+        {
+            if (!(e.Exception is ChecksFailedException checksFailed) ||
+                !checksFailed.FailedChecks.Any(x => x is CheckDisableAttribute)) return false;
+
+            if (cfg.NotifyDisabledCommand)
+            {
+                await ctx.ElevatedRespondAsync("Sorry! that command has been disabled in this guild.");
+            }
+            
+            return true;
+        }
+
+        public static async Task DescribeCommandErrorAsync(Exception ex, string cmd, CommandContext ctx)
 		{
 			if (ex is ChecksFailedException checksFailed)
 			{
@@ -130,7 +152,7 @@ namespace ModCore.Listeners
 
 				var failed = checksFailed.FailedChecks;
 
-				if(failed.Any(x => x is RequireUserPermissionsAttribute))
+				if (failed.Any(x => x is RequireUserPermissionsAttribute))
 					reasons.Add("you don't have the right permissions to execute this command");
 				if (failed.Any(x => x is RequireRolesAttribute))
 					reasons.Add("you don't have the right roles to execute this command");

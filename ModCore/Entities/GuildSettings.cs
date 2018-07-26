@@ -103,6 +103,12 @@ namespace ModCore.Entities
 	    [JsonProperty("disablcommands2")]
 	    public HashSet<short> DisabledCommands { get; private set; } = new HashSet<short>();
 
+	    /// <summary>
+	    /// Gets or sets whether or not to show a message when a disabled command is attempted to be executed
+	    /// </summary>
+	    [JsonProperty("disverbose")]
+	    public bool NotifyDisabledCommand = true;
+	    
 		[JsonProperty("motd")]
 		public MotdSettings Motd { get; private set; } = new MotdSettings();
 
@@ -119,7 +125,7 @@ namespace ModCore.Entities
 		public long JailRole { get; set; }
     }
 
-    public class GuildStarboardSettings
+	public class GuildStarboardSettings
     {
         /// <summary>
         /// Gets or sets the Starboard channel ID.
@@ -223,11 +229,11 @@ namespace ModCore.Entities
         [JsonProperty("chatverbosity")]
         public CommandErrorVerbosity Chat { get; set; } = CommandErrorVerbosity.None;
 
-        /// <summary>
-        /// Gets or sets the command error verbosity for the action log (if enabled)
-        /// </summary>
-        [JsonProperty("actionverbosity")]
-        public CommandErrorVerbosity ActionLog { get; set; } = CommandErrorVerbosity.None;
+	    /// <summary>
+	    /// Gets or sets the command error verbosity for the action log (if enabled)
+	    /// </summary>
+	    [JsonProperty("actionverbosity")]
+	    public CommandErrorVerbosity ActionLog { get; set; } = CommandErrorVerbosity.None;
     }
 
     public enum CommandErrorVerbosity
