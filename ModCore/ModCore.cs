@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Api;
 using ModCore.CoreApi;
+using ModCore.Database;
 using ModCore.Entities;
 using Newtonsoft.Json;
 
@@ -21,6 +22,8 @@ namespace ModCore
 		public Settings Settings { get; private set; }
 		public SharedData SharedData { get; private set; }
 		public List<ModCoreShard> Shards { get; set; }
+	    
+	    private DatabaseContextBuilder GlobalContextBuilder { get; set; }
         private CancellationTokenSource CTS { get; set; }
         private Perspective PerspectiveApi { get; set; }
 
@@ -37,6 +40,7 @@ namespace ModCore
 
             var input = File.ReadAllText("settings.json", new UTF8Encoding(false));
             Settings = JsonConvert.DeserializeObject<Settings>(input);
+	        GlobalContextBuilder = Settings.Database.CreateContextBuilder();
             PerspectiveApi = new Perspective(Settings.PerspectiveToken);
 
             Shards = new List<ModCoreShard>();
@@ -107,5 +111,10 @@ namespace ModCore
 				.UseUrls("http://0.0.0.0:6969")
 				.Build();
 		}
+	    
+	    public DatabaseContext CreateGlobalContext()
+	    {
+		    return GlobalContextBuilder.CreateContext();
+	    }
 	}
 }
