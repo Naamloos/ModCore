@@ -13,6 +13,7 @@ namespace ModCore.Logic.Utils
         /// Tries to find, through enterprise-level heuristic analysis, a valid mute role. If not found, creates one.
         /// </summary>
         /// <param name="guild"></param>
+        /// <param name="callee"></param>
         /// <param name="member"></param>
         /// <returns></returns>
         public static async Task<(DiscordRole Role, string Message)> SetupMuteRole(DiscordGuild guild,
