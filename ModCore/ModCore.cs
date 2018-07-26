@@ -2,18 +2,23 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus.CommandsNext;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Api;
 using ModCore.CoreApi;
 using ModCore.Database;
 using ModCore.Entities;
+using ModCore.Listeners;
 using Newtonsoft.Json;
+using Startup = ModCore.CoreApi.Startup;
 
 namespace ModCore
 {
@@ -46,19 +51,24 @@ namespace ModCore
             Shards = new List<ModCoreShard>();
             InitializeSharedData(args);
 
-            for (var i = 0; i < Settings.ShardCount; i++)
+	        // cnext data that is consistent across shards, so it's fine to share it
+	        for (var i = 0; i < Settings.ShardCount; i++)
             {
                 var shard = new ModCoreShard(Settings, i, SharedData);
                 shard.Initialize();
                 Shards.Add(shard);
+	            if (i == 0)
+	            {
+		            SharedData.Initialize(shard);
+	            }
             }
 
-			foreach (var shard in Shards)
-			{
-				await shard.RunAsync();
-			}
+	        await InitializeDatabaseAsync();
 
-			await BuildWebHost().RunAsync(CTS.Token);
+	        foreach (var shard in Shards)
+		        await shard.RunAsync();
+
+	        await BuildWebHost().RunAsync(CTS.Token);
 
 			await WaitForCancellation();
 
@@ -90,6 +100,27 @@ namespace ModCore
             }
         }
 
+	    private async Task InitializeDatabaseAsync()
+	    {
+		    // add command id mappings if they don't already exist
+		    var modifications = new List<string>();
+		    using (var db = this.CreateGlobalContext())
+		    {
+			    foreach (var (name, _) in SharedData.Commands)
+			    {
+				    if (db.CommandIds.FirstOrDefault(e => e.Command == name) != null) continue;
+				    Console.WriteLine($"Registering new command in db: {name}");
+				    
+				    modifications.Add(name);
+				    await db.CommandIds.AddAsync(new DatabaseCommandId()
+				    {
+					    Command = name
+				    });
+			    }                
+			    await db.SaveChangesAsync();
+		    }
+            
+	    }
         public async Task WaitForCancellation()
         {
             while (!CTS.IsCancellationRequested)

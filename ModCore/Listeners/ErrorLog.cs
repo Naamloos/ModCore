@@ -20,21 +20,6 @@ namespace ModCore.Listeners
 {
     public class ErrorLog
     {
-        internal static IEnumerable<(string name, Command cmd)> CommandSelector(KeyValuePair<string, Command> c)
-        {
-            return CommandSelector(c.Value);
-        }
-
-        private static IEnumerable<(string, Command)> CommandSelector(Command c)
-        {
-            var arr = new[] {(c.QualifiedName, c)};
-            if (c is CommandGroup group)
-            {
-                return arr.Concat(group.Children.SelectMany(CommandSelector));
-            }
-            return arr;
-        }
-
         [AsyncListener(EventTypes.CommandErrored)]
         public static async Task CommandError(ModCoreShard bot, CommandErrorEventArgs e)
         {
@@ -53,16 +38,12 @@ namespace ModCore.Listeners
                 var attemptedName = commandNotFound.CommandName;
                 try
                 {
-                    // TODO cache this somewhere instead of calculating it all the time also defined in
-                    // ModCore#InitializeDatabaseAsync.
-                    var commands = bot.Commands.RegisteredCommands.SelectMany(CommandSelector);
-
                     // TODO: i intended on using the library for more than just this,
                     //       but i ended up using it like this, so can probably just copy code from that lib 
                     //       instead of nugetting it
                     var leveshtein = new Levenshtein(); // lower is better
 
-                    var ordered = commands
+                    var ordered = bot.SharedData.Commands
                         .Where(c => !(c.cmd is CommandGroup group) || group.IsExecutableWithoutSubcommands)
                         .Select(c => (qualifiedName: c.cmd.QualifiedName, description: c.cmd.Description))
                         .OrderBy(c => leveshtein.Distance(attemptedName, c.qualifiedName))
