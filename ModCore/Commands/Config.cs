@@ -635,6 +635,8 @@ Type an option.");
 			 Description("Whether or not to send a message in chat when someone tries to execute a disabled command.")]
 			public class Notify : SimpleConfigModule
 			{
+				protected override string CurrentModuleName => "notify on disabled command call";
+				
 				protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.NotifyDisabledCommand;
 			}
 		}
