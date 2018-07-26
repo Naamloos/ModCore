@@ -576,11 +576,11 @@ Type an option.");
 				}
 				if (ctx.CommandsNext.RegisteredCommands.Any(x => CheckCommand(command, x.Value)))
 				{
-                    await ctx.WithGuildSettings(cfg =>
+                    await ctx.WithGuildSettings(async cfg =>
                     {
                         using (var db = Database.CreateContext())
 					    {
-						    cfg.DisabledCommands.Add(db.CommandIds.Find(command).Id);
+						    cfg.DisabledCommands.Add((await db.CommandIds.FindAsync(command)).Id);
 					    }
                     });
 					await ctx.SafeRespondAsync($"Disabled command `{command}` from use in this guild!");
@@ -609,7 +609,7 @@ Type an option.");
 					short id = 0; 
 					using (var db = Database.CreateContext())
 					{
-						id = db.CommandIds.Find(command).Id;
+						id = (await db.CommandIds.FindAsync(command)).Id;
 					}
 
 					if (cfg.DisabledCommands.RemoveWhere(x => x == id) > 0)
