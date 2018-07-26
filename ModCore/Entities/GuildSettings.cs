@@ -101,7 +101,7 @@ namespace ModCore.Entities
 	    /// Gets the disabled command ids for this guild.
 	    /// </summary>
 	    [JsonProperty("disablcommands2")]
-	    public List<short> DisabledCommands { get; private set; } = new List<short>();
+	    public HashSet<short> DisabledCommands { get; private set; } = new HashSet<short>();
 
 		[JsonProperty("motd")]
 		public MotdSettings Motd { get; private set; } = new MotdSettings();
