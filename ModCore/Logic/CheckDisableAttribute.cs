@@ -5,23 +5,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Database;
 
 namespace ModCore.Logic
 {
+	/// <inheritdoc />
 	/// <summary>
 	/// Defines that usage of this command is restricted to the owner of the bot.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
 	public sealed class CheckDisableAttribute : CheckBaseAttribute
 	{
-		public async override Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+		public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
 		{
-			var stg = ctx.GetGuildSettings();
-			if (stg?.DisabledCommands != null && stg.DisabledCommands.Any(x => ctx.Command.QualifiedName.StartsWith(x.ToLower())))
+			// don't use GetGuildSettings here
+			using (var db = Program.ModCore.CreateGlobalContext())
 			{
-				await ctx.RespondAsync("Sorry! that command has been disabled in this guild.");
-				return false;
+				var stg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id)?.GetSettings();
+				if (stg?.DisabledCommands == null || stg?.DisabledCommands?.Count == 0) return true;
+			
+				foreach (var disabledCommand in stg.DisabledCommands)
+				{
+					var cmd = db.CommandIds.Find(disabledCommand);
+					if (cmd == null || !ctx.Command.QualifiedName.StartsWith(cmd.Command)) continue;
+					
+					await ctx.RespondAsync("Sorry! that command has been disabled in this guild.");
+					return false;
+				}
 			}
+
 			return true;
 		}
 	}

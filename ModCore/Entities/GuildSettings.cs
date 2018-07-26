@@ -97,11 +97,11 @@ namespace ModCore.Entities
 		[JsonProperty("reactionroles")]
 		public List<GuildReactionRole> ReactionRoles { get; private set; } = new List<GuildReactionRole>();
 
-		/// <summary>
-		/// Gets commands disabled in this guild.
-		/// </summary>
-		[JsonProperty("disabledcommands")]
-		public HashSet<string> DisabledCommands { get; private set; } = new HashSet<string>();
+	    /// <summary>
+	    /// Gets the disabled command ids for this guild.
+	    /// </summary>
+	    [JsonProperty("disablcommands2")]
+	    public List<short> DisabledCommands { get; private set; } = new List<short>();
 
 		[JsonProperty("motd")]
 		public MotdSettings Motd { get; private set; } = new MotdSettings();

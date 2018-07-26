@@ -20,7 +20,7 @@ namespace ModCore.Listeners
 {
     public class ErrorLog
     {
-        private static IEnumerable<(string name, Command cmd)> CommandSelector(KeyValuePair<string, Command> c)
+        internal static IEnumerable<(string name, Command cmd)> CommandSelector(KeyValuePair<string, Command> c)
         {
             return CommandSelector(c.Value);
         }
@@ -53,6 +53,8 @@ namespace ModCore.Listeners
                 var attemptedName = commandNotFound.CommandName;
                 try
                 {
+                    // TODO cache this somewhere instead of calculating it all the time also defined in
+                    // ModCore#InitializeDatabaseAsync.
                     var commands = bot.Commands.RegisteredCommands.SelectMany(CommandSelector);
 
                     // TODO: i intended on using the library for more than just this,

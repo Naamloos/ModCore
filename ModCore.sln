@@ -19,6 +19,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{0E
 		db_schema_v1_to_v2.sql = db_schema_v1_to_v2.sql
 		starboard.sql = starboard.sql
 		tags.sql = tags.sql
+		commandDisable.sql = commandDisable.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Update Scripts", "Update Scripts", "{7C345330-F8B6-47AF-AB01-6F6BFAB00AA5}"

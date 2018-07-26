@@ -553,24 +553,37 @@ Type an option.");
 		[Group("commandsettings"), Aliases("cs"), Description("Command settings commands.")]
 		public class CommandSettings : BaseCommandModule
 		{
+			public DatabaseContextBuilder Database { get; }
+
+			public CommandSettings(DatabaseContextBuilder db)
+			{
+				this.Database = db;
+			}
+			
 			[Command("disable"), Aliases("d")]
 			public async Task DisableAsync(CommandContext ctx, [RemainingText] string cmd)
 			{
 				var command = cmd.ToLowerInvariant();
 				if (command.StartsWith("config"))
 				{
-					await ctx.RespondAsync("You can't disable configuration commands!");
+					await ctx.ElevatedRespondAsync("You can't disable configuration commands!");
 					return;
 				}
 				if (command.StartsWith("owner"))
 				{
-					await ctx.RespondAsync("You can't disable owner commands!");
+					await ctx.ElevatedRespondAsync("You can't disable owner commands!");
 					return;
 				}
 				if (ctx.CommandsNext.RegisteredCommands.Any(x => CheckCommand(command, x.Value)))
 				{
-					await ctx.WithGuildSettings(cfg => cfg.DisabledCommands.Add(command));
-					await ctx.RespondAsync($"Disabled command `{command}` from use in this guild!");
+                    await ctx.WithGuildSettings(cfg =>
+                    {
+                        using (var db = Database.CreateContext())
+					    {
+						    cfg.DisabledCommands.Add(db.CommandIds.FirstOrDefault(e => e.Command == command).Id);
+					    }
+                    });
+					await ctx.SafeRespondAsync($"Disabled command `{command}` from use in this guild!");
 				}
 				else
 				{
@@ -593,8 +606,14 @@ Type an option.");
 				var command = cmd.ToLowerInvariant();
 				await ctx.WithGuildSettings(async cfg =>
 				{
-					if (cfg.DisabledCommands.RemoveWhere(x => x == command) > 0)
-						await ctx.ElevatedRespondAsync($"Enabled command `{command}` in this guild!");
+					short id = 0; 
+					using (var db = Database.CreateContext())
+					{
+						id = db.CommandIds.FirstOrDefault(e => e.Command == command).Id;
+					}
+
+					if (cfg.DisabledCommands.RemoveWhere(x => x == id) > 0)
+						await ctx.SafeRespondAsync($"Enabled command `{command}` in this guild!");
 					else
 						await ctx.ElevatedRespondAsync("That command does not exist!");
 				});
@@ -603,10 +622,10 @@ Type an option.");
 			[Command("list"), Aliases("l")]
 			public async Task ListAsync(CommandContext ctx)
 			{
-				var stng = ctx.GetGuildSettings() ?? new GuildSettings();
-				if (stng.DisabledCommands.Count == 0)
+				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
+				if (cfg.DisabledCommands.Count == 0)
 				{
-					await ctx.RespondAsync("No commands were disabled!");
+					await ctx.ElevatedRespondAsync("No commands are currently disabled!");
 					return;
 				}
 				// TODO List disabled commands
