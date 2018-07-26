@@ -550,7 +550,7 @@ Type an option.");
 			}
 		}
 
-		[Group("commandsettings"), Aliases("cs"), Description("Command settings commands.")]
+		[Group("commandsettings"), Aliases("commands", "cmds", "cs", "c"), Description("Command settings commands.")]
 		public class CommandSettings : BaseCommandModule
 		{
 			public DatabaseContextBuilder Database { get; }
