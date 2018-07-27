@@ -116,7 +116,7 @@ namespace ModCore
 				    {
 					    Command = name
 				    });
-			    }                
+			    }
 			    await db.SaveChangesAsync();
 		    }
             
