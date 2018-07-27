@@ -9,7 +9,10 @@ namespace ModCore.Commands.Base
 {
     public abstract class SimpleConfigModule : BaseCommandModule
     {
-        private string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+        protected virtual string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+        protected virtual string EnabledState => "Enabled";
+        protected virtual string DisabledState => "Disabled";
 
         [GroupCommand, Description("Sets whether this module is enabled or not.")]
         public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
@@ -35,7 +38,7 @@ namespace ModCore.Commands.Base
             // if toggling, tell the user what the new value is
             if (!enableOrDisable.HasValue)
                 await ctx.ElevatedRespondAsync(
-                    $"**{(resultingVariable ? "Enabled" : "Disabled")}** the {CurrentModuleName} module.");
+                    $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
             
             await ctx.Message.CreateReactionAsync(Config.CheckMark);
         }

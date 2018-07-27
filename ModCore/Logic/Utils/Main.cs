@@ -13,6 +13,7 @@ namespace ModCore.Logic.Utils
         /// Tries to find, through enterprise-level heuristic analysis, a valid mute role. If not found, creates one.
         /// </summary>
         /// <param name="guild"></param>
+        /// <param name="callee"></param>
         /// <param name="member"></param>
         /// <returns></returns>
         public static async Task<(DiscordRole Role, string Message)> SetupMuteRole(DiscordGuild guild,
@@ -22,16 +23,7 @@ namespace ModCore.Logic.Utils
             var candidateRoles = new List<DiscordRole>();
             foreach (var role in guild.Roles)
             {
-                foreach (var channel in textChannels)
-                {
-                    if (PermissionsFor(channel, member, role).HasPermission(Permissions.SendMessages))
-                    {
-                        goto mast;
-                    }
-                }
-                candidateRoles.Add(role);
-                mast:
-                ;
+                AddPotentialCandidate(member, textChannels, role, candidateRoles);
             }
 
             var lastRole = candidateRoles.OrderByDescending(e => e.Position).FirstOrDefault();
@@ -75,6 +67,17 @@ namespace ModCore.Logic.Utils
                     "ModCore automatic mute role channel overwrite");
             }
             return (arole, "automatically created it");
+        }
+
+        private static void AddPotentialCandidate(DiscordMember member, IEnumerable<DiscordChannel> textChannels, DiscordRole role,
+            ICollection<DiscordRole> candidateRoles)
+        {
+            if (textChannels.Any(channel => PermissionsFor(channel, member, role).HasPermission(Permissions.SendMessages)))
+            {
+                return;
+            }
+
+            candidateRoles.Add(role);
         }
 
         public static Permissions PermissionsFor(DiscordChannel chan, DiscordMember mbr,
