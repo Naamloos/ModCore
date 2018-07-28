@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using ModCore.Entities;
 
 namespace ModCore.Database
@@ -265,15 +266,24 @@ namespace ModCore.Database
                 var prop = e.Property(t => t.Id)
                     .HasColumnName("id")
                     .HasColumnType("smallint")
-                    .ValueGeneratedOnAdd();
+                    .ValueGeneratedOnAdd()
 
-                if (this.Provider == DatabaseProvider.Sqlite)
-                {
-                    prop.HasAnnotation("Sqlite:Autoincrement", true);
-                }
+                    .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn)
+                    .HasAnnotation("Npgsql:ValueGeneratedOnAdd", true)
+                    .HasAnnotation("Sqlite:Autoincrement", true);
+                    
+                if (this.Provider != DatabaseProvider.Sqlite)
+                    prop.HasDefaultValueSql("NEXT VALUE FOR mcore_shared.mcore_cmd_ids");
                 
                 e.Property(t => t.Command).HasColumnName("command_qualified");
             });
+
+            if (this.Provider != DatabaseProvider.Sqlite)
+            {
+                model.HasSequence<short>("mcore_cmd_ids", schema: "mcore_shared")
+                    .StartsAt(0)
+                    .IncrementsBy(1);
+            }
         }
     }
 }
