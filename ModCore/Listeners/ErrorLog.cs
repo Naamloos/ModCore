@@ -13,8 +13,8 @@ using F23.StringSimilarity;
 using Humanizer;
 using ModCore.Entities;
 using ModCore.Logic;
-using MoreLinq;
 using System.Text;
+using ModCore.Logic.Extensions;
 
 namespace ModCore.Listeners
 {

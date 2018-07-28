@@ -11,7 +11,7 @@ using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
 
-namespace ModCore
+namespace ModCore.Logic.Extensions
 {
     public static class Extensions
     {
@@ -32,11 +32,11 @@ namespace ModCore
             return ctx;
         }
 
-		public static string BreakMentions(this string input)
-		{
-			input = input.Replace("@", "@\u200B");
-			return input;
-		}
+        public static string BreakMentions(this string input)
+        {
+            input = input.Replace("@", "@\u200B");
+            return input;
+        }
 
         /// <summary>
         /// Executes a synchronous function on the GuildSettings object, that can mutate it.
@@ -349,10 +349,9 @@ namespace ModCore
             return target.Position < @this.Position;
         }
     }
-}
 
-#region MoreLINQ
-#region License and Terms
+    #region MoreLINQ
+    #region License and Terms
 // MoreLINQ - Extensions to LINQ to Objects
 // Copyright (c) 2008 Jonathan Skeet. All rights reserved.
 // 
@@ -367,10 +366,8 @@ namespace ModCore
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#endregion
+    #endregion
 
-namespace MoreLinq
-{
     internal static class MoreEnumerable
     {
         /// <summary>
@@ -430,5 +427,6 @@ namespace MoreLinq
             }
         }
     }
+
+    #endregion
 }
-#endregion

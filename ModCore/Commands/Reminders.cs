@@ -12,6 +12,7 @@ using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Listeners;
 using ModCore.Logic;
+using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands
 {

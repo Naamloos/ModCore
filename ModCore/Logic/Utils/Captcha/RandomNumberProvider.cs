@@ -203,7 +203,7 @@
 using System;
 using System.Security.Cryptography;
 
-namespace DNTCaptcha.Core.Providers
+namespace ModCore.Logic.Utils.Captcha
 {
     /// <summary>
     /// Provides methods for generating cryptographically-strong random numbers.

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using DNTCaptcha.Core.Providers;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
@@ -13,6 +12,8 @@ using ModCore.Commands.Base;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
+using ModCore.Logic.Extensions;
+using ModCore.Logic.Utils.Captcha;
 
 namespace ModCore.Commands
 {

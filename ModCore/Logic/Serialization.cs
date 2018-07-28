@@ -9,7 +9,7 @@ namespace ModCore.Logic
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            if (!(value is BitSet bitset))
+            if (!(value is BitSet.BitSet bitset))
             {
                 writer.WriteNull();
                 return;
@@ -24,12 +24,12 @@ namespace ModCore.Logic
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return reader.TokenType == JsonToken.Null ? null : new BitSet(JArray.Load(reader).Values<byte>());
+            return reader.TokenType == JsonToken.Null ? null : new BitSet.BitSet(JArray.Load(reader).Values<byte>());
         }
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof(BitSet).IsAssignableFrom(objectType);
+            return typeof(BitSet.BitSet).IsAssignableFrom(objectType);
         }
     }
 

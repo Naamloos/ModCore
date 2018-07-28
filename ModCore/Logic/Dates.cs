@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Chronic;
-using RayBotSharp.Utils;
+using ModCore.Logic.Utils;
 
 namespace ModCore.Logic
 {

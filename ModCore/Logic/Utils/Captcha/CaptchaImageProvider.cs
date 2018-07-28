@@ -207,7 +207,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
 
-namespace DNTCaptcha.Core.Providers
+namespace ModCore.Logic.Utils.Captcha
 {
     /// <summary>
     /// The default captcha image provider

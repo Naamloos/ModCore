@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ModCore.Logic
+namespace ModCore.Logic.BitSet
 {
     public partial class BitSet : IList<byte>, IReadOnlyList<byte>
     {

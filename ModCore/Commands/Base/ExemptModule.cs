@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using ModCore.Entities;
+using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands.Base
 {

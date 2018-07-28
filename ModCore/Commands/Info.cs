@@ -9,6 +9,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using ModCore.Entities;
 using ModCore.Logic;
+using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands
 {

@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
+using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands
 {

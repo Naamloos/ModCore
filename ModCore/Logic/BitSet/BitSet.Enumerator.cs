@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace ModCore.Logic
+namespace ModCore.Logic.BitSet
 {
     public partial class BitSet
     {
