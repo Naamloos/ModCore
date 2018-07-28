@@ -59,7 +59,7 @@ namespace ModCore.Commands
 				.WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
 				.Build();
 
-			await ctx.RespondAsync(embed: eb);
+			await ctx.ElevatedRespondAsync(embed: eb);
 		}
 
 		[Command("ping"), Description("Check ModCore's API connection status."), CheckDisable]

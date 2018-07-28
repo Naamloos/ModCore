@@ -34,7 +34,7 @@ namespace ModCore.Commands
 
 			var cs = code.Substring(cs1, cs2 - cs1);
 
-			msg = await ctx.RespondAsync("", embed: new DiscordEmbedBuilder()
+			msg = await ctx.ElevatedRespondAsync(embed: new DiscordEmbedBuilder()
 				.WithColor(new DiscordColor("#FF007F"))
 				.WithDescription("Evaluating...")
 				.Build()).ConfigureAwait(false);

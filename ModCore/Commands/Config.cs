@@ -495,9 +495,9 @@ namespace ModCore.Commands
 				{
 					if (cfg.ReactionRoles.RemoveAll(x =>
 						    x.ChannelId == chnl.Id && x.MessageId == msgId && x.RoleId == role.Id) > 0)
-						await ctx.SafeRespondAsync("Removed reactionrole!");
+						await ctx.ElevatedRespondAsync("Removed reactionrole!");
 					else
-						await ctx.RespondAsync("No reaction was linked to that role!");
+						await ctx.ElevatedRespondAsync("No reaction was linked to that role!");
 				});
 			}
 		}

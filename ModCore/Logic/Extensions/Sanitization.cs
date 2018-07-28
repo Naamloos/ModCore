@@ -12,7 +12,7 @@ namespace ModCore.Logic.Extensions
     public static class Sanitization
     {
         // make sure to replace all backslashes preceding @mention so they can't add an extra backslash to escape our escape
-        public static readonly Regex EscapeEveryoneMention = new Regex(@"\\*@(everyone|here)");
+        private static readonly Regex EscapeEveryoneMention = new Regex(@"\\*@(everyone|here)");
         
         public static Task<DiscordMessage> SafeRespondAsync(this CommandContext ctx, string s) 
             => ctx.RespondAsync(Sanitize(s, IsPrivileged(ctx)));
@@ -64,11 +64,11 @@ namespace ModCore.Logic.Extensions
             if (privileged)
                 return s.ToString(CultureInfo.InvariantCulture);
             var escapedParameters = s.GetArguments()
-                .Select<object, object>(e => Sanitize(FormattableString.Invariant($"{e}"), privileged: false));
+                .Select<object, object>(e => Sanitize(ToStringInvariant(e), privileged: false));
             return string.Format(s.Format, escapedParameters.ToArray());
         }
 
-        public static string Sanitize(string s, bool privileged)
+        private static string Sanitize(string s, bool privileged)
         {
             return privileged ? s : EscapeEveryoneMention.Replace(s, @"\@$1");
         }
@@ -78,5 +78,7 @@ namespace ModCore.Logic.Extensions
         
         public static bool IsPrivileged(DiscordMember m, DiscordChannel chan) 
             => m.PermissionsIn(chan).HasPermission(Permissions.MentionEveryone);
+        
+        private static string ToStringInvariant(object e) => string.Format(CultureInfo.InvariantCulture, "{0}", e);
     }
 }
