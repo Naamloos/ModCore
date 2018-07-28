@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 
-namespace ModCore.Logic
+namespace ModCore.Logic.Extensions
 {
     public static class Sanitization
     {
@@ -15,14 +17,26 @@ namespace ModCore.Logic
         public static Task<DiscordMessage> SafeRespondAsync(this CommandContext ctx, string s) 
             => ctx.RespondAsync(Sanitize(s, IsPrivileged(ctx)));
 
-		public static Task<DiscordMessage> SafeModifyAsync(this CommandContext ctx, DiscordMessage m, string s)
-			=> m.ModifyAsync(Sanitize(s, IsPrivileged(ctx)));
+        public static Task<DiscordMessage> SafeModifyAsync(this CommandContext ctx, DiscordMessage m, string s)
+            => m.ModifyAsync(Sanitize(s, IsPrivileged(ctx)));
 
-		public static Task<DiscordMessage> SafeMessageAsync(this DiscordChannel channel, string s, bool privileged) 
+        public static Task<DiscordMessage> SafeMessageAsync(this DiscordChannel channel, string s, bool privileged) 
             => channel.SendMessageAsync(Sanitize(s, privileged));
         
         public static Task<DiscordMessage> SafeMessageAsync(this DiscordChannel channel, string s, CommandContext ctx) 
             => channel.SendMessageAsync(Sanitize(s, IsPrivileged(ctx)));
+
+        public static Task<DiscordMessage> SafeRespondAsync(this CommandContext ctx, FormattableString s) 
+            => ctx.RespondAsync(SanitizeFormat(s, IsPrivileged(ctx)));
+
+        public static Task<DiscordMessage> SafeModifyAsync(this CommandContext ctx, DiscordMessage m, FormattableString s)
+            => m.ModifyAsync(SanitizeFormat(s, IsPrivileged(ctx)));
+
+        public static Task<DiscordMessage> SafeMessageAsync(this DiscordChannel channel, FormattableString s, bool privileged) 
+            => channel.SendMessageAsync(SanitizeFormat(s, privileged));
+        
+        public static Task<DiscordMessage> SafeMessageAsync(this DiscordChannel channel, FormattableString s, CommandContext ctx) 
+            => channel.SendMessageAsync(SanitizeFormat(s, IsPrivileged(ctx)));
 
         public static Task<DiscordMessage> ElevatedRespondAsync(this CommandContext ctx, string s) 
             => ctx.RespondAsync(s);
@@ -44,6 +58,15 @@ namespace ModCore.Logic
 
         public static Task<DiscordMessage> ElevatedMessageAsync(this DiscordMember m, DiscordEmbed embed) 
             => m.SendMessageAsync(embed: embed);
+
+        private static string SanitizeFormat(FormattableString s, bool privileged)
+        {
+            if (privileged)
+                return s.ToString(CultureInfo.InvariantCulture);
+            var escapedParameters = s.GetArguments()
+                .Select<object, object>(e => Sanitize(FormattableString.Invariant($"{e}"), privileged: false));
+            return string.Format(s.Format, escapedParameters.ToArray());
+        }
 
         public static string Sanitize(string s, bool privileged)
         {
