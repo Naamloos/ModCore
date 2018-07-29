@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
 using ModCore.Entities;
+using Npgsql;
 
 namespace ModCore.Database
 {
@@ -17,7 +18,20 @@ namespace ModCore.Database
     {
         public DatabaseContext CreateDbContext(string[] args)
         {
-            return new DatabaseContext(DatabaseProvider.Sqlite, "Data Source=example.db");
+            return new DatabaseContext(DatabaseProvider.PostgreSql, 
+                new NpgsqlConnectionStringBuilder
+                {
+                    Host = "localhost",
+                    Port = 5439,
+                    Database = "modcore",
+                    Username = "postgres",
+                    Password = null,
+        
+                    SslMode = SslMode.Prefer,
+                    TrustServerCertificate = true,
+        
+                    Pooling = false
+                }.ConnectionString);
         }
     }
 }

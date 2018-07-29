@@ -263,7 +263,7 @@ namespace ModCore.Database
                 
                 e.ToTable("mcore_cmd_state");
 
-                var prop = e.Property(t => t.Id)
+                /*var prop = */e.Property(t => t.Id)
                     .HasColumnName("id")
                     .HasColumnType("smallint")
                     .ValueGeneratedOnAdd()
@@ -272,18 +272,21 @@ namespace ModCore.Database
                     .HasAnnotation("Npgsql:ValueGeneratedOnAdd", true)
                     .HasAnnotation("Sqlite:Autoincrement", true);
                     
-                if (this.Provider != DatabaseProvider.Sqlite)
-                    prop.HasDefaultValueSql("NEXT VALUE FOR mcore_shared.mcore_cmd_ids");
+                /*if (this.Provider == DatabaseProvider.PostgreSql)
+                    prop.HasDefaultValueSql("nextval('\"mcore_cmd_ids\"')");*/
                 
                 e.Property(t => t.Command).HasColumnName("command_qualified");
             });
 
-            if (this.Provider != DatabaseProvider.Sqlite)
+            //http://www.npgsql.org/efcore/value-generation.html
+            /*if (this.Provider == DatabaseProvider.PostgreSql)
             {
-                model.HasSequence<short>("mcore_cmd_ids", schema: "mcore_shared")
+                model.HasSequence<long>("mcore_cmd_ids")
                     .StartsAt(0)
-                    .IncrementsBy(1);
-            }
+                    .IncrementsBy(1)
+                    .HasMin(0)
+                    .HasMax(long.MaxValue);
+            }*/
         }
     }
 }
