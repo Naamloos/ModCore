@@ -40,10 +40,16 @@ namespace ModCore.Listeners
             {
                 default:
                 case CommandErrorVerbosity.None:
+                    #if DEBUG
+                    Console.WriteLine($"Oopsie woopsie! {e.Exception}");
+                    #endif
                     break;
 
                 case CommandErrorVerbosity.Name:
                     await ctx.SafeRespondAsync($"**Command {qualifiedName} Errored!**");
+                    #if DEBUG
+                    Console.WriteLine($"Oopsie woopsie! {e.Exception}");
+                    #endif
                     break;
                 case CommandErrorVerbosity.NameDesc:
                     await DescribeCommandErrorAsync(e.Exception, qualifiedName, ctx);
