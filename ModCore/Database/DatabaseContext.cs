@@ -67,10 +67,14 @@ namespace ModCore.Database
             // > test the bot (obviously)
             
             // TODO https://stackoverflow.com/questions/2878272/when-should-i-use-primary-key-or-index
-            // the use of indexes here makes sense, however, should we add [Key] to the .Id properties?
+            // the use of indices here makes sense, however, should we add [Key] to the .Id properties?
             
             // TODO change index_id in DatabaseCommandId to somethign less likely to conflict, like
             // mcore_cmd_state_index_id
+            
+            // https://www.learnentityframeworkcore.com/configuration/data-annotation-attributes
+            // this site is GOLD for finding out the data annotation equivalents to fluent API methods, and finding out 
+            // whether or not they even exist
             
             model.Entity<DatabaseInfo>(e => // done
             {
