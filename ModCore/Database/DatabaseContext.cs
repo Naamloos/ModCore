@@ -1,7 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ModCore.Entities;
+using ModCore.Logic.EntityFramework;
 
 namespace ModCore.Database
 {
@@ -52,6 +58,78 @@ namespace ModCore.Database
 
         protected override void OnModelCreating(ModelBuilder model)
         {
+            var entityTypes = model.Model.GetEntityTypes();
+            Parallel.ForEach(entityTypes, entityType =>
+            {
+                // property => attribute type => attribute object
+                var items = entityType.ClrType
+                    .GetProperties()
+                    .Select(prop =>
+                        Attribute.GetCustomAttributes(prop, typeof(EfPropertyProcessorBaseAttribute))//TODO inherit?
+                            .Cast<EfPropertyProcessorBaseAttribute>()
+                            .Select(attr => (prop, attr))
+                            .GroupBy(mapping => mapping.attr.GetType())
+                            .ToArray()
+                    )
+                    .ToArray();
+
+                // both matches and entity are lazily loaded to avoid computing then when no actual matching attributes
+                // exist.
+                MultiValueDictionary<EfIndirectProcessorBaseAttribute, EfPropertyDefinition> matches = null;
+                EntityTypeBuilder entity = null;
+                
+                foreach (var prop in entityType.ClrType.GetProperties())
+                {
+                    //TODO inherit?
+                    var attrs = Attribute.GetCustomAttributes(prop, typeof(EfPropertyBaseAttribute));
+                    
+                    foreach (var attr in attrs)
+                    {
+                        if (entity == null)
+                            entity = model.Entity(entityType.ClrType);
+
+                        var definition = new EfPropertyDefinition
+                        {
+                            // TODO don't include these in the dictionary, for efficiency
+                            Model = model,
+                            Entity = entity,
+                            EntityType = entityType,
+                            //
+                            Property = prop,
+                            Source = attr,
+                        };
+                        switch (attr)
+                        {
+                            case EfPropertyProcessorBaseAttribute processor:
+                                processor.Process(definition);
+                                break;
+                            case EfIndirectProcessorBaseAttribute indirectProcessor:
+                                if (indirectProcessor.PropertyMatches(definition))
+                                {
+                                    if (matches == null)
+                                        matches = new MultiValueDictionary<EfIndirectProcessorBaseAttribute, EfPropertyDefinition>();
+                                    matches.Add(indirectProcessor, definition);
+                                }
+                                break;
+                        }
+                    }
+                }
+
+                if (matches != null)
+                {
+                    lock (model)
+                    {
+                        foreach (var (attr, defs) in matches)
+                        {
+                            attr.Process(defs);
+                        }
+                    }
+                }
+            });
+            
+            
+            
+            
             model.Entity<DatabaseInfo>(e =>
             {
                 e.ToTable("mcore_database_info");
