@@ -3,7 +3,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>latest</LangVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <!-- In order to make the build process copy all referenced dll files from NuGet
          packages from the cache folder into the build output, set this property inside a <PropertyGroup>: -->
