@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ModCore.Entities;
+using ModCore.Logic;
 using ModCore.Logic.EntityFramework;
 
 namespace ModCore.Database
@@ -73,10 +74,10 @@ namespace ModCore.Database
                     )
                     .ToArray();
 
-                // both matches and entity are lazily loaded to avoid computing then when no actual matching attributes
+                // both matches and ctx are lazily loaded to avoid computing then when no actual matching attributes
                 // exist.
-                MultiValueDictionary<EfIndirectProcessorBaseAttribute, EfPropertyDefinition> matches = null;
-                EntityTypeBuilder entity = null;
+                MultiValueDictionaryMetadata<EfIndirectProcessorBaseAttribute, EfProcessorContext, IList<EfPropertyDefinition>> matches = null;
+                EfProcessorContext ctx = null;
                 
                 foreach (var prop in entityType.ClrType.GetProperties())
                 {
@@ -85,32 +86,36 @@ namespace ModCore.Database
                     
                     foreach (var attr in attrs)
                     {
-                        if (entity == null)
-                            entity = model.Entity(entityType.ClrType);
+                        if (ctx == null)
+                        {
+                            ctx = new EfProcessorContext
+                            {
+                                Model = model,
+                                Entity = model.Entity(entityType.ClrType),
+                                EntityType = entityType,
+                            };
+                        }
 
                         var definition = new EfPropertyDefinition
                         {
-                            // TODO don't include these in the dictionary, for efficiency
-                            Model = model,
-                            Entity = entity,
-                            EntityType = entityType,
-                            //
                             Property = prop,
                             Source = attr,
                         };
                         switch (attr)
                         {
                             case EfPropertyProcessorBaseAttribute processor:
-                                processor.Process(definition);
+                                processor.Process(ctx, definition);
                                 break;
                             case EfIndirectProcessorBaseAttribute indirectProcessor:
-                                if (indirectProcessor.PropertyMatches(definition))
+                                if (indirectProcessor.PropertyMatches(ctx, definition))
                                 {
                                     if (matches == null)
-                                        matches = new MultiValueDictionary<EfIndirectProcessorBaseAttribute, EfPropertyDefinition>();
-                                    matches.Add(indirectProcessor, definition);
+                                        matches = new MultiValueDictionaryMetadata<EfIndirectProcessorBaseAttribute, EfProcessorContext, IList<EfPropertyDefinition>>();
+                                    matches.Add(indirectProcessor, ctx, definition);
                                 }
                                 break;
+                            case EfPropertyBaseAttribute otherBaseAttr:
+                                
                         }
                     }
                 }
