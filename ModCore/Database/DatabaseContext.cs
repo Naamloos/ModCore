@@ -61,6 +61,11 @@ namespace ModCore.Database
         {
             model.BuildCustomAttributes();
             
+            // TODO: at the end of moving all of these to annotations
+            // > add a new EF migration, don't apply it, generate a script for it, theoretically there should be nothing
+            //   changed, otherwise we messed up
+            // > test the bot (obviously)
+            
             model.Entity<DatabaseInfo>(e =>
             {
                 e.ToTable("mcore_database_info");
