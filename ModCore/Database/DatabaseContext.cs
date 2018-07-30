@@ -66,7 +66,13 @@ namespace ModCore.Database
             //   changed, otherwise we messed up
             // > test the bot (obviously)
             
-            model.Entity<DatabaseInfo>(e =>
+            // TODO https://stackoverflow.com/questions/2878272/when-should-i-use-primary-key-or-index
+            // the use of indexes here makes sense, however, should we add [Key] to the .Id properties?
+            
+            // TODO change index_id in DatabaseCommandId to somethign less likely to conflict, like
+            // mcore_cmd_state_index_id
+            
+            model.Entity<DatabaseInfo>(e => // done
             {
                 e.ToTable("mcore_database_info");
 
