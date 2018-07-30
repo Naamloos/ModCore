@@ -60,32 +60,27 @@ namespace ModCore.Database
         protected override void OnModelCreating(ModelBuilder model)
         {
             var entityTypes = model.Model.GetEntityTypes();
+            var modelChangeLock = new object();
+            
             Parallel.ForEach(entityTypes, entityType =>
             {
-                // property => attribute type => attribute object
-                var items = entityType.ClrType
-                    .GetProperties()
-                    .Select(prop =>
-                        Attribute.GetCustomAttributes(prop, typeof(EfPropertyProcessorBaseAttribute))//TODO inherit?
-                            .Cast<EfPropertyProcessorBaseAttribute>()
-                            .Select(attr => (prop, attr))
-                            .GroupBy(mapping => mapping.attr.GetType())
-                            .ToArray()
-                    )
-                    .ToArray();
-
-                // both matches and ctx are lazily loaded to avoid computing then when no actual matching attributes
+                // matches, ctx and the tally are lazily loaded to avoid computing when no actual matching attributes
                 // exist.
-                MultiValueDictionaryMetadata<EfIndirectProcessorBaseAttribute, EfProcessorContext, IList<EfPropertyDefinition>> matches = null;
+                MultiValueDictionary<EfIndirectProcessorBaseAttribute, EfPropertyDefinition> matches = null;
                 EfProcessorContext ctx = null;
+                ISet<Type> uniqueAttributeTally = null;
                 
                 foreach (var prop in entityType.ClrType.GetProperties())
                 {
-                    //TODO inherit?
+                    //TODO does this actually include types inheriting that type?
                     var attrs = Attribute.GetCustomAttributes(prop, typeof(EfPropertyBaseAttribute));
+                    
+                    // note to self: we don't restart the tally for every new property, that ruins the entire point, we
+                    // have AttributeUsage.AllowMultiple for that
                     
                     foreach (var attr in attrs)
                     {
+                        // lazily initialize the context (so we don't do model.Entity when we don't need to)
                         if (ctx == null)
                         {
                             ctx = new EfProcessorContext
@@ -96,37 +91,60 @@ namespace ModCore.Database
                             };
                         }
 
+                        // this is better kept local
                         var definition = new EfPropertyDefinition
                         {
                             Property = prop,
                             Source = attr,
                         };
+
+                        // we need the EfPropertyBaseAttribute value, but we can't do that inside the switch block, so
+                        // we're using pattern matching here
+                        if (!(attr is EfPropertyBaseAttribute baseAttr))
+                            continue;
+
+                        if (!baseAttr.CanHaveMultiple)
+                        {
+                            if (uniqueAttributeTally == null)
+                            {
+                                // lazily initialize the tally
+                                // if there is no tally, there is no need to check if it contains the type
+                                uniqueAttributeTally = new HashSet<Type> {baseAttr.GetType()};
+                            }
+                            else if (!uniqueAttributeTally.Add(baseAttr.GetType()))
+                            {
+                                throw new EfAttributeException(
+                                    $"The property {prop} contains multiple instances of {baseAttr.GetType()}");
+                            }
+                        }
+                        
                         switch (attr)
                         {
                             case EfPropertyProcessorBaseAttribute processor:
-                                processor.Process(ctx, definition);
+                                lock (modelChangeLock)
+                                {
+                                    processor.Process(ctx, definition);
+                                }
                                 break;
                             case EfIndirectProcessorBaseAttribute indirectProcessor:
                                 if (indirectProcessor.PropertyMatches(ctx, definition))
                                 {
                                     if (matches == null)
-                                        matches = new MultiValueDictionaryMetadata<EfIndirectProcessorBaseAttribute, EfProcessorContext, IList<EfPropertyDefinition>>();
-                                    matches.Add(indirectProcessor, ctx, definition);
+                                        matches = new MultiValueDictionary<EfIndirectProcessorBaseAttribute, EfPropertyDefinition>();
+                                    matches.Add(indirectProcessor, definition);
                                 }
                                 break;
-                            case EfPropertyBaseAttribute otherBaseAttr:
-                                
                         }
                     }
                 }
 
                 if (matches != null)
                 {
-                    lock (model)
+                    lock (modelChangeLock)
                     {
                         foreach (var (attr, defs) in matches)
                         {
-                            attr.Process(defs);
+                            attr.Process(ctx, defs);
                         }
                     }
                 }
