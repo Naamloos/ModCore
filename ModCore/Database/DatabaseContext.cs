@@ -76,6 +76,10 @@ namespace ModCore.Database
             // this site is GOLD for finding out the data annotation equivalents to fluent API methods, and finding out 
             // whether or not they even exist
             
+            // TODO is cmd state index_id even necessary? isn't it duplicate, since we already have a key?
+            // is the alternate key needed? i guess making id an alternate key makes it unique, which is
+            // important.
+            
             model.Entity<DatabaseInfo>(e => // done
             {
                 e.ToTable("mcore_database_info");
