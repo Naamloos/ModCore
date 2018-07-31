@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ModCore.Database;
 
 namespace ModCore.Logic.EntityFramework
 {
@@ -10,6 +11,8 @@ namespace ModCore.Logic.EntityFramework
         public ModelBuilder Model { get; internal set; }
         public EntityTypeBuilder Entity { get; internal set; }
         public IMutableEntityType EntityType { get; internal set; }
+        public IEfCustomContext DatabaseContext { get; internal set; }
+        
         public Type ClrType => EntityType.ClrType;
     }
 }

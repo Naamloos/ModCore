@@ -26,12 +26,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using ModCore.Database;
 
 namespace ModCore.Logic.EntityFramework
 {
     public static class EfExtension
     {
-        public static ModelBuilder BuildCustomAttributes(this ModelBuilder model)
+        public static ModelBuilder BuildCustomAttributes(this ModelBuilder model, IEfCustomContext dbContext)
         {
             var entityTypes = model.Model.GetEntityTypes();
             var modelChangeLock = new object();
@@ -62,6 +63,7 @@ namespace ModCore.Logic.EntityFramework
                                 Model = model,
                                 Entity = model.Entity(entityType.ClrType),
                                 EntityType = entityType,
+                                DatabaseContext = dbContext,
                             };
                         }
 

@@ -12,7 +12,7 @@ using ModCore.Logic.EntityFramework;
 
 namespace ModCore.Database
 {
-    public class DatabaseContext : DbContext
+    public class DatabaseContext : DbContext, IEfCustomContext
     {
         public virtual DbSet<DatabaseInfo> Info { get; set; }
         public virtual DbSet<DatabaseGuildConfig> GuildConfig { get; set; }
@@ -26,7 +26,7 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseTag> Tags { get; set; }
         public virtual DbSet<DatabaseCommandId> CommandIds { get; set; }
 
-        private DatabaseProvider Provider { get; }
+        public DatabaseProvider Provider { get; }
         private string ConnectionString { get; }
         
         public DatabaseContext(DatabaseProvider provider, string cstring)
@@ -59,7 +59,7 @@ namespace ModCore.Database
 
         protected override void OnModelCreating(ModelBuilder model)
         {
-            model.BuildCustomAttributes();
+            model.BuildCustomAttributes(this);
             
             // TODO: at the end of moving all of these to annotations
             // > add a new EF migration, don't apply it, generate a script for it, theoretically there should be nothing
@@ -155,7 +155,7 @@ namespace ModCore.Database
                 e.Property(t => t.PermsDeny).HasColumnName("perms_deny");
             });
 
-            model.Entity<DatabaseRolestateRoles>(e =>
+            model.Entity<DatabaseRolestateRoles>(e => // done
             {
                 e.ToTable("mcore_rolestate_roles");
 
@@ -175,7 +175,7 @@ namespace ModCore.Database
                     e.Ignore(t => t.RoleIds);
             });
 
-            model.Entity<DatabaseWarning>(e =>
+            model.Entity<DatabaseWarning>(e => // done
             {
                 e.ToTable("mcore_warnings");
 
@@ -196,7 +196,7 @@ namespace ModCore.Database
                     .HasColumnName("warning_text");
             });
 
-            model.Entity<DatabaseTimer>(e =>
+            model.Entity<DatabaseTimer>(e => // done
             {
                 e.ToTable("mcore_timers");
 
