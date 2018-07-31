@@ -117,7 +117,7 @@ namespace ModCore.Database
                     .HasColumnType("jsonb");
             });
 
-            model.Entity<DatabaseModNote>(e =>
+            model.Entity<DatabaseModNote>(e => // done
             {
                 e.ToTable("mcore_modnotes");
 
@@ -134,7 +134,7 @@ namespace ModCore.Database
                 e.Property(t => t.MemberId).HasColumnName("member_id");
             });
 
-            model.Entity<DatabaseRolestateOverride>(e =>
+            model.Entity<DatabaseRolestateOverride>(e => // done
             {
                 e.ToTable("mcore_rolestate_overrides");
 
