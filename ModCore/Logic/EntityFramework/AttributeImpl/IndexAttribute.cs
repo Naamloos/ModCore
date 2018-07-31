@@ -24,6 +24,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
@@ -41,12 +42,14 @@ namespace ModCore.Logic.EntityFramework.AttributeImpl
         {
             public string IndexName { get; }
             public bool IsUnique { get; }
+            public bool IsLocal { get; }
             public string[] PropertyNames { get; }
 
             public IndexParam(IndexAttribute indexAttr, params PropertyInfo[] properties)
             {
                 this.IndexName = indexAttr.Name;
                 this.IsUnique = indexAttr.IsUnique;
+                this.IsLocal = indexAttr.IsLocal;
                 this.PropertyNames = properties.Select(prop => prop.Name).ToArray();
             }
         }
@@ -67,6 +70,12 @@ namespace ModCore.Logic.EntityFramework.AttributeImpl
         public bool IsUnique { get; set; }
 
         /// <summary>
+        /// Gets or sets a value to indicate whether to append the enclosing table's name to this index's name, along
+        /// with a delimiter. Has no effect if no name is set.
+        /// </summary>
+        public bool IsLocal { get; set; }
+
+        /// <summary>
         /// Initializes a new IndexAttribute instance for an index with the given name and column order, but with no uniqueness specified.
         /// </summary>
         /// <param name="name">The index name.</param>
@@ -82,29 +91,41 @@ namespace ModCore.Logic.EntityFramework.AttributeImpl
         public override void Process(EfProcessorContext ctx, IReadOnlyCollection<EfPropertyDefinition> properties)
         {
             var indexParams = properties
-                .Select(def => (prop: def.Property, index: def.Source as IndexAttribute))
-                .GroupBy(item => item.index.Name)
+                .Select(def => (prop: def.Property, attr: def.Source as IndexAttribute))
+                .GroupBy(item => item.attr.Name)
                 .Select(group =>
                 {
                     var first = group.First();
                     if (group.Key == null)
                     {
-                        return new IndexParam(first.index, first.prop);
+                        return new IndexParam(first.attr, first.prop);
                     }
 
                     return new IndexParam(
-                        group.First().index,
-                        group.OrderBy(item => item.index.Order).Select(item => item.prop).ToArray());
+                        first.attr,
+                        group.OrderBy(item => item.attr.Order).Select(item => item.prop).ToArray());
                 });
+
+            string prefix = null;
             
             foreach (var indexParam in indexParams)
             {
                 var indexBuilder = ctx.Entity
                     .HasIndex(indexParam.PropertyNames)
                     .IsUnique(indexParam.IsUnique);
-                if (indexParam.IndexName != "")
+                if (indexParam.IndexName != null)
                 {
-                    indexBuilder.HasName(indexParam.IndexName);
+                    if (indexParam.IsLocal && prefix == null)
+                    {
+                        prefix = ctx.ClrType.GetCustomAttribute<TableAttribute>()?.Name
+                                 ?? throw new EfAttributeException("");
+                        
+                        indexBuilder.HasName($"{prefix}_{indexParam.IndexName}");
+                    }
+                    else
+                    {
+                        indexBuilder.HasName(indexParam.IndexName);
+                    }
                 }
             }
         }
