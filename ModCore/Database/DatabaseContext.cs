@@ -220,7 +220,7 @@ namespace ModCore.Database
                     .HasColumnType("jsonb");
             });
 
-            model.Entity<DatabaseStarData>(e =>
+            model.Entity<DatabaseStarData>(e => // done
             {
                 e.ToTable("mcore_stars");
 
@@ -243,7 +243,7 @@ namespace ModCore.Database
                 e.Property(t => t.ChannelId).HasColumnName("channel_id");
             });
 
-            model.Entity<DatabaseBan>(e =>
+            model.Entity<DatabaseBan>(e => // done
             {
                 e.ToTable("mcore_bans");
 
@@ -260,7 +260,7 @@ namespace ModCore.Database
                 e.Property(t => t.BanReason).HasColumnName("ban_reason");
             });
 
-            model.Entity<DatabaseTag>(e =>
+            model.Entity<DatabaseTag>(e => // done
             {
                 e.HasIndex(t => new { t.ChannelId, t.Name })
                     .HasName("mcore_tags_channel_id_tag_name_key")
