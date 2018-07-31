@@ -10,7 +10,7 @@ namespace ModCore.Database
         [Column("id")]
         public int Id { get; set; }
         
-        [Index("mcore_database_info_meta_key_key", IsUnique = true)]
+        [Index("meta_key_key", IsUnique = true, IsLocal = true)]
         [Column("meta_key")]
         [Required]
         public string MetaKey { get; set; }
