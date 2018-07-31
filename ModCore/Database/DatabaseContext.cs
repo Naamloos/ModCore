@@ -99,7 +99,7 @@ namespace ModCore.Database
                     .HasColumnName("meta_value");
             });
 
-            model.Entity<DatabaseGuildConfig>(e =>
+            model.Entity<DatabaseGuildConfig>(e => // done
             {
                 e.ToTable("mcore_guild_config");
 
