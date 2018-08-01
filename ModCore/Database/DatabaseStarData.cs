@@ -8,16 +8,16 @@ namespace ModCore.Database
     {
         #region Index
         [Index("member_id_guild_id_key", IsUnique = true, IsLocal = true)]
-        [Column("stargazer_id")]
-        public long StargazerId { get; set; } // Member that starred
-        
-        [Index("member_id_guild_id_key", IsUnique = true, IsLocal = true)]
         [Column("message_id")]
         public long MessageId { get; set; } // Message Id
         
         [Index("member_id_guild_id_key", IsUnique = true, IsLocal = true)]
         [Column("channel_id")]
         public long ChannelId { get; set; } // Channel this was sent in
+        
+        [Index("member_id_guild_id_key", IsUnique = true, IsLocal = true)]
+        [Column("stargazer_id")]
+        public long StargazerId { get; set; } // Member that starred
         #endregion
         
         [Column("id")]

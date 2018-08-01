@@ -9,6 +9,7 @@ namespace ModCore.Database
     [Table("mcore_cmd_state")]
     public class DatabaseCommandId
     {
+        [Column("id")]
         [AlternateKey("id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn)]

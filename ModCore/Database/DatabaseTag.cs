@@ -5,7 +5,7 @@ using ModCore.Logic.EntityFramework.AttributeImpl;
 
 namespace ModCore.Database
 {
-    [Table("modcore_tags")]
+    [Table("mcore_tags")]
     public class DatabaseTag
     {
         #region Index
