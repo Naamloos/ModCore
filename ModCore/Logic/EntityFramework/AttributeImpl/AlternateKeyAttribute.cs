@@ -26,7 +26,7 @@ namespace ModCore.Logic.EntityFramework.AttributeImpl
         public override void Process(EfProcessorContext ctx, EfPropertyDefinition definition)
         {
             var k = ctx.Entity.HasAlternateKey(definition.Property.Name);
-            if (_name != null) k.HasName(_name);
+            if (_name != null) k.HasName(_name); // TODO i dont think this matters
         }
     }
 }
