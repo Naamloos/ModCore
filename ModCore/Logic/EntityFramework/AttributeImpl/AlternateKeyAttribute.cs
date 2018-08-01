@@ -8,7 +8,7 @@ namespace ModCore.Logic.EntityFramework.AttributeImpl
     /// <inheritdoc />
     /// <summary>
     /// Represents an attribute that is placed on a property to indicate that the property is an alternate key in the
-    /// model. This will make its properties be unique and read-only.
+    /// model. This will make it unique and read-only.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class AlternateKeyAttribute : EfPropertyProcessorBaseAttribute
