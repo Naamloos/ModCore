@@ -113,14 +113,16 @@ namespace ModCore.Listeners
 				var leveshtein = new Levenshtein(); // lower is better
 
 				// TODO: add checks
-				var preorder = bot.SharedData.Commands.Select(x => x.cmd).ToList();
-				foreach (var c in preorder)
+				var everything = bot.SharedData.Commands.Select(x => x.cmd).ToList();
+				var some_of_them = new List<Command>();
+
+				for(int i = 0; i < everything.Count(); i++)
 				{
-					if (!await CanExecute(c, ctx))
-						preorder.Remove(c);
+					if (await CanExecute(everything[i], ctx))
+						some_of_them.Add(everything[i]);
 				}
 
-				var ordered = preorder
+				var ordered = some_of_them
 					.Where(c => !(c is CommandGroup group) || @group.IsExecutableWithoutSubcommands)
 					.Select(c => (qualifiedName: c.QualifiedName, description: c.Description))
 					.OrderBy(c => leveshtein.Distance(attemptedName, c.qualifiedName))
