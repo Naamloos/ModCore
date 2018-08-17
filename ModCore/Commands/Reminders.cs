@@ -129,6 +129,54 @@ If in doubt, just try it! You can always clear the reminders later.
                 await ctx.ElevatedRespondAsync(embed: pages.First().Embed);
         }
 
+		[Command("about"), Description("Reminds you about a specific message")]
+		public async Task AboutAsync(CommandContext ctx, DiscordMessage message, [RemainingText]string when)
+		{
+			await ctx.TriggerTypingAsync();
+
+			var (duration, text) = Dates.ParseTime(when);
+
+			if (duration > TimeSpan.FromDays(365)) // 1 year is the maximum
+			{
+				await ctx.ElevatedRespondAsync("Maximum allowed time span to set a reminder is 1 year.");
+				return;
+			}
+
+			string content = message.Content;
+			if (content.Length > 50)
+			{
+				content.Remove(50);
+				content += "...";
+			}
+
+			text = $"**{message.Author.Username}#{message.Author.Discriminator}:**\n{content}\n\n({message.Id})\n{message.JumpLink}";
+
+			var now = DateTimeOffset.UtcNow;
+			var dispatchAt = now + duration;
+
+			// create a new timer
+			var reminder = new DatabaseTimer
+			{
+				GuildId = (long)ctx.Guild.Id,
+				ChannelId = (long)ctx.Channel.Id,
+				UserId = (long)ctx.User.Id,
+				DispatchAt = dispatchAt.LocalDateTime,
+				ActionType = TimerActionType.Reminder
+			};
+			reminder.SetData(new TimerReminderData { ReminderText = text });
+			using (var db = this.Database.CreateContext())
+			{
+				db.Timers.Add(reminder);
+				await db.SaveChangesAsync();
+			}
+
+			// reschedule timers
+			await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+			var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
+			await ctx.SafeRespondAsync(
+				$"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following message:\n\n{content}\n\n({message.Id})");
+		}
+
         [Command("set"), Description(ReminderTut), CheckDisable]
         public async Task SetAsync(CommandContext ctx, [Description("When the reminder is to be sent"), RemainingText] string dataToParse)
         {

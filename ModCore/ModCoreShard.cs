@@ -101,6 +101,7 @@ namespace ModCore
 
             // set the converters
             this.Commands.RegisterConverter(new AugmentedBoolConverter());
+			this.Commands.RegisterConverter(new CustomDiscordMessageConverter());
 
             // register commands
             this.Commands.RegisterCommands(Assembly.GetExecutingAssembly());
