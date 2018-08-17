@@ -149,7 +149,7 @@ namespace ModCore.Listeners
 			if (cmd.Parent != null)
 				return await CanExecute(cmd.Parent, ctx).ConfigureAwait(false);
 
-			var fchecks = await cmd.RunChecksAsync(ctx, false).ConfigureAwait(false);
+			var fchecks = await cmd.RunChecksAsync(ctx, true).ConfigureAwait(false);
 			if (fchecks.Any())
 				return false;
 			return true;
