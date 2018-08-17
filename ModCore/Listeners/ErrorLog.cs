@@ -113,10 +113,10 @@ namespace ModCore.Listeners
                 var leveshtein = new Levenshtein(); // lower is better
 
                 var ordered = bot.SharedData.Commands
-                    .Where(c => !(c.cmd is CommandGroup group) || @group.IsExecutableWithoutSubcommands)
+                    .Where(c => (!(c.cmd is CommandGroup group) || @group.IsExecutableWithoutSubcommands) && (c.cmd.RunChecksAsync(ctx,true))
                     .Select(c => (qualifiedName: c.cmd.QualifiedName, description: c.cmd.Description))
                     .OrderBy(c => leveshtein.Distance(attemptedName, c.qualifiedName))
-                    .DistinctBy(c => c.qualifiedName).Take(5).ToArray();
+                    .DistinctBy(c => c.qualifiedName).Take(1).ToArray();
 
                 await new ModernEmbedBuilder
                 {
