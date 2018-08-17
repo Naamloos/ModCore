@@ -147,7 +147,7 @@ namespace ModCore.Listeners
 		private static async Task<bool> CanExecute(Command cmd, CommandContext ctx)
 		{
 			if (cmd.Parent != null)
-				return await this.CanExecute(cmd.Parent, ctx).ConfigureAwait(false);
+				return await CanExecute(cmd.Parent, ctx).ConfigureAwait(false);
 
 			var fchecks = await cmd.RunChecksAsync(ctx, false).ConfigureAwait(false);
 			if (fchecks.Any())
