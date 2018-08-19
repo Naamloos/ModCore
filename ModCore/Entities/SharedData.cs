@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using ModCore.Api;
 using ModCore.CoreApi;
@@ -17,9 +18,13 @@ namespace ModCore.Entities
         public TimerData TimerData { get; internal set; }
         public Perspective Perspective { get; internal set; }
 		public Strawpoll Strawpoll { get; internal set; }
+		public DiscordBots DiscordBots { get; internal set; }
+		public BotsDiscordPl BotsDiscordPl { get; internal set; }
         public (ulong guild, ulong channel) StartNotify { get; internal set; }
         public List<ulong> BotManagers { get; internal set; }
         public string DefaultPrefix { get; internal set; }
+		public int ReadysReceived { get; internal set; } = 0;
+		public List<Permissions> AllPerms { get; internal set; } = new List<Permissions>();
 
         /// <summary>
         /// Every command, top-level or not, along with full qualified name.
@@ -57,5 +62,5 @@ namespace ModCore.Entities
                 }
             }
         }
-    }
+	}
 }

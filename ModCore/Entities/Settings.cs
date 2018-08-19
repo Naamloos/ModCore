@@ -28,7 +28,19 @@ namespace ModCore.Entities
 
 		[JsonProperty("bot_managers")]
 		public List<ulong> BotManagers { get; private set; } = new List<ulong>();
-    }
+
+		[JsonProperty("bot_id")]
+		public ulong BotId { get; private set; } = 359828546719449109;
+
+		[JsonProperty("dbl_token")]
+		public string DblToken { get; private set; }
+
+		[JsonProperty("bot_discord_pl_token")]
+		public string BotDiscordPlToken { get; private set; }
+
+		[JsonProperty("bot_lists_enabled")]
+		public bool BotListsEnabled { get; private set; } = false;
+	}
 
     public struct DatabaseSettings
     {

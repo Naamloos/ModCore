@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
@@ -29,6 +31,8 @@ namespace ModCore
 		public Settings Settings { get; }
 
         public DatabaseContextBuilder Database { get; }
+
+		public ModCore Parent;
         
         public ModCoreShard(Settings settings, int id, SharedData sharedData)
         {
@@ -105,6 +109,22 @@ namespace ModCore
 
             // register commands
             this.Commands.RegisterCommands(Assembly.GetExecutingAssembly());
+
+			foreach(var c in this.Commands.RegisteredCommands)
+			{
+				var reqperm = c.Value.ExecutionChecks.Where(x => x.GetType() == typeof(RequirePermissionsAttribute));
+				foreach(RequirePermissionsAttribute att in reqperm)
+				{
+					if (!SharedData.AllPerms.Contains(att.Permissions))
+						SharedData.AllPerms.Add(att.Permissions);
+				}
+				var requsrperm = c.Value.ExecutionChecks.Where(x => x.GetType() == typeof(RequireBotPermissionsAttribute));
+				foreach (RequireBotPermissionsAttribute att in requsrperm)
+				{
+					if(!SharedData.AllPerms.Contains(att.Permissions))
+						SharedData.AllPerms.Add(att.Permissions);
+				}
+			}
 
             // Update the SocketStartTime
             this.Client.SocketOpened += async () =>

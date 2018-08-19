@@ -26,6 +26,21 @@ namespace ModCore.CoreApi.Controllers
 			return "ModCore API";
 		}
 
+		[HttpGet("invite")]
+		public string Invite()
+		{
+			var perms = DSharpPlus.Permissions.None;
+			foreach(var p in this.core.SharedData.AllPerms)
+			{
+				Console.WriteLine(p);
+				perms = perms | p;
+			}
+			var permsvalue = (long)perms;
+
+			Response.Redirect($"https://discordapp.com/oauth2/authorize?client_id=359828546719449109&scope=bot&permissions={permsvalue}");
+			return "Redirecting to generated invite...";
+		}
+
 		[HttpGet("token/{token}")]
 		public bool Token(string token)
 		{

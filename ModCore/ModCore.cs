@@ -32,6 +32,8 @@ namespace ModCore
         private CancellationTokenSource CTS { get; set; }
         private Perspective PerspectiveApi { get; set; }
 		private Strawpoll Strawpoll { get; set; }
+		private DiscordBots BotList1 { get; set; }
+		private BotsDiscordPl BotList2 { get; set; }
 
         internal async Task InitializeAsync(string[] args)
         {
@@ -49,6 +51,8 @@ namespace ModCore
 	        GlobalContextBuilder = Settings.Database.CreateContextBuilder();
             PerspectiveApi = new Perspective(Settings.PerspectiveToken);
 			Strawpoll = new Strawpoll();
+			BotList1 = new DiscordBots(Settings.DblToken, Settings.BotId, Settings.BotListsEnabled);
+			BotList2 = new BotsDiscordPl(Settings.ShardCount, Settings.BotDiscordPlToken, Settings.BotId, Settings.BotListsEnabled);
 
             Shards = new List<ModCoreShard>();
             InitializeSharedData(args);
@@ -96,7 +100,9 @@ namespace ModCore
 		        BotManagers = Settings.BotManagers,
 		        DefaultPrefix = Settings.DefaultPrefix,
 		        ModCore = this,
-				Strawpoll = this.Strawpoll
+				Strawpoll = this.Strawpoll,
+				DiscordBots = this.BotList1,
+				BotsDiscordPl = this.BotList2
 	        };
 	        if (args.Length == 2) {
                 SharedData.StartNotify = (ulong.Parse(args[0]), ulong.Parse(args[1]));
