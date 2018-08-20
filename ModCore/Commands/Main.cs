@@ -10,7 +10,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using DSharpPlus.ModernEmbedBuilder;
+using HSNXT.DSharpPlus.ModernEmbedBuilder;
 using Humanizer;
 using Humanizer.Localisation;
 using ModCore.Database;
@@ -807,7 +807,7 @@ namespace ModCore.Commands
 						if (case9b?.Message?.Content != null)
 						{
 							if (embed.Author == null)
-								embed.WithAuthor(icon_url: case9b.Message.Content);
+								embed.WithAuthor(iconUrl: case9b.Message.Content);
 							else
 								embed.Author.IconUrl = case9b.Message.Content;
 							await case9b.Message.DeleteAsync();
@@ -1105,5 +1105,33 @@ namespace ModCore.Commands
 			await ctx.RespondAsync($"{title}:\n{poll}");
 		}
 		#endif
+
+		// TODO: use database timer system??
+		// TODO: multiple winners
+		[Command("giveaway")]
+		[Description("Creates a giveaway")]
+		[RequireUserPermissions(Permissions.ManageGuild)]
+		[RequireBotPermissions(Permissions.ManageMessages | Permissions.AddReactions)]
+		[Cooldown(1, 600, CooldownBucketType.Channel)]
+		public async Task GiveawayAsync(CommandContext ctx, string prize, TimeSpan time_alive)
+		{
+			await ctx.Message.DeleteAsync();
+			var trophy = DiscordEmoji.FromName(ctx.Client, ":trophy:");
+			var gaw = await ctx.RespondAsync($"Hey! {ctx.Member.Mention} is giving away {prize}!\nReact with {trophy.ToString()} to join in!");
+			await gaw.CreateReactionAsync(trophy);
+
+			await Task.Delay(time_alive);
+
+			var members = (await gaw.GetReactionsAsync(trophy)).ToList();
+			members.RemoveAll(x => x.Id == ctx.Client.CurrentUser.Id);
+
+			var winnerindex = new Random().Next(0, members.Count() - 1);
+			var winner = members[winnerindex];
+
+			var tada = DiscordEmoji.FromName(ctx.Client, ":tada:");
+			await gaw.ModifyAsync($"{tada.ToString()}{tada.ToString()} " +
+				$"{winner.Mention}, you won! Contact {ctx.Member.Mention} for your price! " +
+				$"{trophy.ToString()}{trophy.ToString()}");
+		}
 	}
 }

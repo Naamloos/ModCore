@@ -33,7 +33,7 @@ namespace ModCore.Listeners
 						.WithTitle("New member joined")
 						.WithDescription($"ID: ({m.Id})")
 						.WithAuthor($"{m.Username}#{m.Discriminator}",
-							icon_url: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
+							iconUrl: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
 						.AddField("Join Date", $"{m.JoinedAt.DateTime}")
 						.AddField("Register Date", $"{m.CreationTimestamp.DateTime}")
 						.WithColor(DiscordColor.Green);
@@ -153,7 +153,7 @@ namespace ModCore.Listeners
 				.WithTitle("Member left")
 				.WithDescription($"ID: ({m.Id})")
 				.WithAuthor($"{m.Username}#{m.Discriminator}",
-					icon_url: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl);
+					iconUrl: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl);
 
 			if (m.JoinedAt.DateTime == DateTime.MinValue)
 				embed.AddField("Join Date", $"{m.JoinedAt.DateTime}");

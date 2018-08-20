@@ -8,13 +8,13 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
-using DSharpPlus.ModernEmbedBuilder;
 using F23.StringSimilarity;
 using Humanizer;
 using ModCore.Entities;
 using ModCore.Logic;
 using System.Text;
 using ModCore.Logic.Extensions;
+using HSNXT.DSharpPlus.ModernEmbedBuilder;
 
 namespace ModCore.Listeners
 {

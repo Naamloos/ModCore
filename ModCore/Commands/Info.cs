@@ -81,7 +81,7 @@ namespace ModCore.Commands
                     $"Joined at: {g.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}");
                 if (!string.IsNullOrEmpty(g.IconHash))
                     embed.WithThumbnailUrl(g.IconUrl);
-                embed.WithAuthor($"Owner: {g.Owner.Username}#{g.Owner.Discriminator}", icon_url: string.IsNullOrEmpty(g.Owner.AvatarHash) ? null : g.Owner.AvatarUrl);
+                embed.WithAuthor($"Owner: {g.Owner.Username}#{g.Owner.Discriminator}", iconUrl: string.IsNullOrEmpty(g.Owner.AvatarHash) ? null : g.Owner.AvatarUrl);
                 var cs = new StringBuilder();
                 #region channel list string builder
                 foreach (var c in g.Channels)

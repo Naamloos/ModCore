@@ -208,7 +208,7 @@ namespace ModCore.Listeners
         {
             var e = new DiscordEmbedBuilder()
                 .WithAuthor($"{m.Author.Username}#{m.Author.Discriminator}",
-                icon_url: (string.IsNullOrEmpty(m.Author.AvatarHash) ? m.Author.DefaultAvatarUrl : m.Author.AvatarUrl))
+				iconUrl: (string.IsNullOrEmpty(m.Author.AvatarHash) ? m.Author.DefaultAvatarUrl : m.Author.AvatarUrl))
                 .WithDescription(m.Content.Truncate(1000));
 
             // This is shit code kek
