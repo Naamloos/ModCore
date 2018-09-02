@@ -25,6 +25,7 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseBan> Bans { get; set; }
         public virtual DbSet<DatabaseTag> Tags { get; set; }
         public virtual DbSet<DatabaseCommandId> CommandIds { get; set; }
+        public virtual DbSet<DatabaseUserData> UserDatas { get; set; }
 
         public DatabaseProvider Provider { get; }
         private string ConnectionString { get; }

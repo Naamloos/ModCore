@@ -125,6 +125,21 @@ namespace ModCore.Entities
 		public long JailRole { get; set; }
     }
 
+    public class GuildChangeLogSettings
+    {
+        [JsonProperty("log_channel")]
+        public long LogChannel = 0;
+
+        [JsonProperty("log_nickname")]
+        public bool LogNickname = false;
+
+        [JsonProperty("log_avatar")]
+        public bool LogAvatar = false;
+
+        [JsonProperty("log_username")]
+        public bool LogRoles = false;
+    }
+
 	public class GuildStarboardSettings
     {
         /// <summary>
