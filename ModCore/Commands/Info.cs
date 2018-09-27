@@ -69,7 +69,7 @@ namespace ModCore.Commands
         {
             await ctx.SafeRespondAsync("The following embed might flood this channel. Do you want to proceed?");
             var m = await Interactivity.WaitForMessageAsync(x => x.Content.ToLower() == "yes" || x.Content.ToLower() == "no");
-            if (m?.Message?.Content == "yes")
+            if (m?.Message?.Content.ToLowerInvariant() == "yes")
             {
                 #region yes
                 var g = ctx.Guild;

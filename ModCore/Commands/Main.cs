@@ -281,7 +281,7 @@ namespace ModCore.Commands
 
 			if (m == null)
 				await ctx.SafeRespondAsync("Timed out.");
-			else if (m.Message.Content == "yes")
+			else if (m.Message.Content.ToLowerInvariant() == "yes")
 			{
 				await ctx.SafeRespondAsync("Thanks for using ModCore. Leaving this guild.");
 				await ctx.LogActionAsync("Left your server. Thanks for using ModCore.");
