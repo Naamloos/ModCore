@@ -1,6 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using ModCore.Database;
 using ModCore.Entities;
@@ -71,11 +73,14 @@ namespace ModCore.Listeners
 
             if (roleids != null)
             {
-                var roles = roleids.RoleIds
+                var roles = (List<DiscordRole>)(roleids.RoleIds
                     .Select(xid => (ulong)xid)
                     .Except(rs.IgnoredRoleIds)
                     .Select(xid => gld.GetRole(xid))
-                    .Where(xr => xr != null);
+                    .Where(xr => xr != null));
+
+                var highestself = ea.Guild.CurrentMember.Roles.Select(x => x.Position).Max();
+                roles.RemoveAll(x => x.Position > highestself);
 
                 if (roles.Any())
                     await ea.Member.ReplaceRolesAsync(roles, "Restoring Role State.");
