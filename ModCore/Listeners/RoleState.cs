@@ -46,6 +46,26 @@ namespace ModCore.Listeners
                     }
                 }
 
+                var nickstate = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
+                ea.Client.DebugLogger.LogMessage(LogLevel.Debug, "ModCore", $"Do nickname shites: {ea.Member.Nickname}", System.DateTime.Now);
+                if (nickstate == null) // no nickstate, create it
+                {
+                    ea.Client.DebugLogger.LogMessage(LogLevel.Debug, "ModCore", "Create nickname shites", System.DateTime.Now);
+                    nickstate = new DatabaseRolestateNick
+                    {
+                        GuildId = (long)ea.Guild.Id,
+                        MemberId = (long)ea.Member.Id,
+                        Nickname = ea.Member.Nickname
+                    };
+                    await db.RolestateNicks.AddAsync(nickstate);
+                }
+                else // nickstate exists, update it
+                {
+                    ea.Client.DebugLogger.LogMessage(LogLevel.Debug, "ModCore", "Update nickname shites", System.DateTime.Now);
+                    nickstate.Nickname = ea.Member.Nickname;
+                    db.RolestateNicks.Update(nickstate);
+                }
+
                 // at this point, channel overrides do not exist
                 await db.SaveChangesAsync();
             }
@@ -59,6 +79,7 @@ namespace ModCore.Listeners
             GuildRoleStateConfig rs = null;
             DatabaseRolestateRoles roleids = null;
             DatabaseRolestateOverride[] chperms = null;
+            DatabaseRolestateNick nick = null;
 
             using (var db = shard.Database.CreateContext())
             {
@@ -69,21 +90,23 @@ namespace ModCore.Listeners
 
                 roleids = db.RolestateRoles.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
                 chperms = db.RolestateOverrides.Where(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id).ToArray();
+                nick = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
             }
 
-            if (roleids != null)
+            if (roleids?.RoleIds != null)
             {
-                var roles = (List<DiscordRole>)(roleids.RoleIds
+                var oroles = roleids.RoleIds
                     .Select(xid => (ulong)xid)
                     .Except(rs.IgnoredRoleIds)
                     .Select(xid => gld.GetRole(xid))
-                    .Where(xr => xr != null));
+                    .Where(xr => xr != null);
+                    var roles = (List<DiscordRole>)oroles;
 
-                var highestself = ea.Guild.CurrentMember.Roles.Select(x => x.Position).Max();
-                roles.RemoveAll(x => x.Position > highestself);
+                    var highestself = ea.Guild.CurrentMember.Roles.Select(x => x.Position).Max();
+                    roles.RemoveAll(x => x.Position > highestself);
 
-                if (roles.Any())
-                    await ea.Member.ReplaceRolesAsync(roles, "Restoring Role State.");
+                    if (roles.Any())
+                        await ea.Member.ReplaceRolesAsync(roles, "Restoring Role State.");
             }
             else
             {
@@ -106,6 +129,13 @@ namespace ModCore.Listeners
 
                     await chn.AddOverwriteAsync(ea.Member, (Permissions)chperm.PermsAllow, (Permissions)chperm.PermsDeny, "Restoring Role State");
                 }
+            }
+
+            if(nick != null)
+            {
+                ea.Client.DebugLogger.LogMessage(LogLevel.Debug, "ModCore", $"Set new old nick: {nick.Nickname}", System.DateTime.Now);
+                var m = await ea.Guild.GetMemberAsync(ea.Member.Id);
+                await m.ModifyAsync(x => x.Nickname = nick.Nickname);
             }
         }
 
@@ -137,6 +167,19 @@ namespace ModCore.Listeners
                     .Select(xid => (long)xid)
                     .ToArray();
                 db.RolestateRoles.Update(roleids);
+
+                var nick = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
+                if(nick == null)
+                {
+                    nick = new DatabaseRolestateNick
+                    {
+                        GuildId = (long)ea.Guild.Id,
+                        MemberId = (long)ea.Member.Id,
+                    };
+                }
+                nick.Nickname = ea.NicknameAfter;
+                db.RolestateNicks.Update(nick);
+
                 await db.SaveChangesAsync();
             }
         }
@@ -233,6 +276,10 @@ namespace ModCore.Listeners
         [AsyncListener(EventTypes.GuildAvailable)]
         public static async Task OnGuildAvailable(ModCoreShard shard, GuildCreateEventArgs ea)
         {
+            // Ensure full member cache?
+            if(ea.Guild.MemberCount < 10000)
+                await ea.Guild.GetAllMembersAsync();
+
             using (var db = shard.Database.CreateContext())
             {
                 var cfg = ea.Guild.GetGuildSettings(db);

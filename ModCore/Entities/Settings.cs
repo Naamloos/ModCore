@@ -40,6 +40,12 @@ namespace ModCore.Entities
 
 		[JsonProperty("bot_lists_enabled")]
 		public bool BotListsEnabled { get; private set; } = false;
+
+		[JsonProperty("botlist_pw_enable")]
+		public bool BotListPwEnable { get; private set; } = false;
+
+		[JsonProperty("botlist_org_enable")]
+		public bool BotListOrgEnable { get; private set; } = false;
 	}
 
     public struct DatabaseSettings

@@ -19,6 +19,7 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseModNote> Modnotes { get; set; }
         public virtual DbSet<DatabaseRolestateOverride> RolestateOverrides { get; set; }
         public virtual DbSet<DatabaseRolestateRoles> RolestateRoles { get; set; }
+        public virtual DbSet<DatabaseRolestateNick> RolestateNicks { get; set; }
         public virtual DbSet<DatabaseWarning> Warnings { get; set; }
         public virtual DbSet<DatabaseTimer> Timers { get; set; }
         public virtual DbSet<DatabaseStarData> StarDatas { get; set; }

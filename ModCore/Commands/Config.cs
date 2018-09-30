@@ -230,6 +230,12 @@ namespace ModCore.Commands
 				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.RoleState.IgnoredRoleIds;
 			}
 
+            [Group("nickname"), Aliases("n", "nick"), Description("Whether to enable or disable nickname recovery")]
+            public class Nick : SimpleConfigModule
+            {
+                protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.RoleState.Nickname;
+            }
+
 			[Group("channel"), Aliases("c"), Description("Channel exemption management commands.")]
 			public class Channel : ExemptChannelModule
 			{

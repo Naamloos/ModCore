@@ -51,8 +51,8 @@ namespace ModCore
 	        GlobalContextBuilder = Settings.Database.CreateContextBuilder();
             PerspectiveApi = new Perspective(Settings.PerspectiveToken);
 			Strawpoll = new Strawpoll();
-			BotList1 = new DiscordBots(Settings.DblToken, Settings.BotId, Settings.BotListsEnabled);
-			BotList2 = new BotsDiscordPl(Settings.ShardCount, Settings.BotDiscordPlToken, Settings.BotId, Settings.BotListsEnabled);
+			BotList1 = new DiscordBots(Settings.DblToken, Settings.BotId, Settings.BotListOrgEnable);
+			BotList2 = new BotsDiscordPl(Settings.ShardCount, Settings.BotDiscordPlToken, Settings.BotId, Settings.BotListPwEnable);
 
             Shards = new List<ModCoreShard>();
             InitializeSharedData(args);

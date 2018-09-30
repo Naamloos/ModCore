@@ -380,6 +380,12 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("ignored_channel_ids")]
         public HashSet<ulong> IgnoredChannelIds { get; private set; } = new HashSet<ulong>();
+
+        /// <summary>
+        /// Restores nicknames on rejoin
+        /// </summary>
+        [JsonProperty("nickname")]
+        public bool Nickname;
     }
 
     public class GuildGlobalWarnSettings
