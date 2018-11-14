@@ -959,7 +959,7 @@ namespace ModCore.Commands
 		{
 			var embed = new DiscordEmbedBuilder()
 				.WithTitle($"Message by {message.Author.Username}#{message.Author.Discriminator}")
-				.WithDescription($"{message.Content}\n\n_(https://discordapp.com/channels/{message.Channel.GuildId}/{message.ChannelId}/{message.Id})_")
+				.WithDescription($"{message.Content}\n\n_([jump](https://discordapp.com/channels/{message.Channel.GuildId}/{message.ChannelId}/{message.Id}))_")
 				.WithFooter($" Quoted by {ctx.Member.Username}#{ctx.Member.Discriminator}. ID: {message.Id}.", ctx.Member.GetAvatarUrl(ImageFormat.Png))
 				.WithThumbnailUrl(message.Author.GetAvatarUrl(ImageFormat.Png))
 				.WithTimestamp(message.Timestamp)
