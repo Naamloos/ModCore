@@ -1,8 +1,8 @@
 <h1 align="center"> ModCore </h1>
   <p align="center">
   <a href="https://modcore.naamloos.me/info/invite" target="_blank"><img src="https://img.shields.io/badge/Invite-brightgreen.svg" alt="Invite Full"></a>
-    <a href="https://github.com/NaamloosDT/ModCore/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/NaamloosDT/ModCore.svg" alt="Github Stars"></a>
-    <a href="https://github.com/NaamloosDT/ModCore/issues" target="_blank"><img src="https://img.shields.io/github/issues/NaamloosDT/ModCore.svg" alt="Github Issues"></a>
+    <a href="https://github.com/TeamModCore/ModCore/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/TeamModCore/ModCore.svg" alt="Github Stars"></a>
+    <a href="https://github.com/TeamModCore/ModCore/issues" target="_blank"><img src="https://img.shields.io/github/issues/TeamModCore/ModCore.svg" alt="Github Issues"></a>
     <a href="https://ci.appveyor.com/project/NaamloosDT/modcore" target="_blank"><img src="https://ci.appveyor.com/api/projects/status/q1ac6j6qjxvpmm8s?svg=true" alt="Appveyor"></a>
   </p>
 
