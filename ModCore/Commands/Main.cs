@@ -1133,5 +1133,20 @@ namespace ModCore.Commands
 				$"{winner.Mention}, you won! Contact {ctx.Member.Mention} for your price! " +
 				$"{trophy.ToString()}{trophy.ToString()}");
 		}
-	}
+
+        [Command("exec")]
+        [Description("Executes (multiple) commands")]
+        public async Task ExecAsync(CommandContext ctx, [RemainingText]string cmds)
+        {
+            string splitter = @"(?!\\);";
+
+            var split = Regex.Split(cmds, splitter);
+            foreach (var s in split)
+            {
+                Console.WriteLine(s);
+                var p = ctx.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
+                await ctx.CommandsNext.SudoAsync(ctx.User, ctx.Channel, $"db!{s}");
+            }
+        }
+    }
 }
