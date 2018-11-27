@@ -1144,7 +1144,7 @@ namespace ModCore.Commands
             foreach (var s in split)
             {
                 var p = ctx.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
-                await ctx.CommandsNext.SudoAsync(ctx.User, ctx.Channel, $"db!{s.Replace("\\;", ";")}");
+                await ctx.CommandsNext.SudoAsync(ctx.User, ctx.Channel, $"{p}{s.Replace("\\;", ";")}");
             }
         }
     }

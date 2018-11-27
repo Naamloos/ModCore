@@ -15,7 +15,7 @@ namespace ModCore.Database
         [Column("user_id")]
         public long UserId { get; set; }
         
-        [Column("issued_at", TypeName = "timestamptz")]
+        [NotMapped]
         public DateTime IssuedAt { get; set; }
         
         [Column("ban_reason")]
