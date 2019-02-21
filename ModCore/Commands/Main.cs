@@ -1143,8 +1143,13 @@ namespace ModCore.Commands
             var split = Regex.Split(cmds, splitter);
             foreach (var s in split)
             {
+                Console.WriteLine(s);
                 var p = ctx.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
+<<<<<<< HEAD
                 await ctx.CommandsNext.SudoAsync(ctx.User, ctx.Channel, $"{p}{s.Replace("\\;", ";")}");
+=======
+                await ctx.CommandsNext.SudoAsync(ctx.User, ctx.Channel, $"db!{s}");
+>>>>>>> parent of a2bb505... Update EFCore & fix joiner escape
             }
         }
     }
