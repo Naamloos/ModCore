@@ -1,4 +1,4 @@
-<p align="center"><img src="https://i.imgur.com/FP6KQtX.png" width="200px" height="200px"></p>
+<center><img src="https://i.imgur.com/FP6KQtX.png" width="250px" height="250px"></center>
 <h1 align="center"> ModCore </h1>
   <p align="center">
   <a href="https://modcore.naamloos.me/info/invite" target="_blank"><img src="https://img.shields.io/badge/Invite-brightgreen.svg" alt="Invite Full"></a>
