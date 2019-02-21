@@ -10,7 +10,9 @@
 
 Commands
 ---------
-*Command listing is available at the [Wiki.](https://github.com/NaamloosDT/ModCore/wiki/Command-Listing)*
+*Command listing is available at the [Naamloos.me.](https://modcore.naamloos.me/info/permissions)*
+
+This list is just a placeholder, for when I set up the full listing.
 
 Setup
 ---------
