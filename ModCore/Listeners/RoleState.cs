@@ -277,8 +277,11 @@ namespace ModCore.Listeners
         public static async Task OnGuildAvailable(ModCoreShard shard, GuildCreateEventArgs ea)
         {
             // Ensure full member cache?
-            if(ea.Guild.MemberCount < 10000)
-                await ea.Guild.GetAllMembersAsync();
+
+            ////if(ea.Guild.MemberCount < 10000)
+            ////    await ea.Guild.GetAllMembersAsync();
+
+            // haha lets not
 
             using (var db = shard.Database.CreateContext())
             {
