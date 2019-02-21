@@ -44,7 +44,7 @@ namespace ModCore.Commands
 		public async Task AboutAsync(CommandContext ctx)
 		{
 			var eb = new DiscordEmbedBuilder()
-				.WithColor(new DiscordColor(0x007FFF))
+				.WithColor(new DiscordColor("#C1272D"))
 				.WithTitle("ModCore")
 				.WithDescription("A powerful moderating bot written on top of DSharpPlus")
 				.AddField("Special thanks to these contributors:",

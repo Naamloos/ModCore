@@ -32,7 +32,7 @@ namespace ModCore
 
         public DatabaseContextBuilder Database { get; }
 
-		public ModCore Parent;
+		public ModCore Parent => SharedData.ModCore;
         
         public ModCoreShard(Settings settings, int id, SharedData sharedData)
         {

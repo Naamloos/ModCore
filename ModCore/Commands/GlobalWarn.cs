@@ -137,7 +137,7 @@ namespace ModCore.Commands
 								if (guildmember != null && g.Id != ctx.Guild.Id && settings.GlobalWarn.Enable)
 								{
 									var embed = new DiscordEmbedBuilder()
-										.WithColor(DiscordColor.MidnightBlue)
+										.WithColor(new DiscordColor("#C1272D"))
 										.WithTitle($"WARNING: @{m.Username}#{m.Discriminator} - ID: {m.Id}");
 
 									var banString = new StringBuilder();
@@ -175,7 +175,7 @@ namespace ModCore.Commands
 								if (user != null && g.Id != ctx.Guild.Id && settings.GlobalWarn.Enable)
 								{
 									var embed = new DiscordEmbedBuilder()
-										.WithColor(DiscordColor.MidnightBlue)
+										.WithColor(new DiscordColor("#C1272D"))
 										.WithTitle($"INFORMATION: @{m.Username}#{m.Discriminator} - ID: {m.Id}")
 										.WithDescription($"User has been *unbanned*, with global warn removed, from {ctx.Guild.Name}.");
 

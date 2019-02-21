@@ -42,7 +42,7 @@ namespace ModCore.Listeners
             if (settings.GlobalWarn.Enable && count > 2)
             {
                 var embed = new DiscordEmbedBuilder()
-                    .WithColor(DiscordColor.MidnightBlue)
+                    .WithColor(new DiscordColor("#C1272D"))
                     .WithTitle($"@{e.Member.Username}#{e.Member.Discriminator} - ID: {e.Member.Id}");
 
                 var BanString = new StringBuilder();

@@ -48,7 +48,7 @@ namespace ModCore.Commands
 					channel =
 						ctx.Guild.Channels.FirstOrDefault(e => e.Name == "modcore-setup") ??
 						await ctx.Guild.CreateChannelAsync("modcore-setup", ChannelType.Text, null, null, null,
-							null, null, "modcore setup channel creation");
+							null, null, null, "modcore setup channel creation");
 				}
 				catch
 				{
@@ -78,7 +78,7 @@ namespace ModCore.Commands
 						logChannel =
 							ctx.Guild.Channels.FirstOrDefault(e => e.Name == "modlog") ??
 							await ctx.Guild.CreateChannelAsync("modlog", ChannelType.Text, null, null, null,
-								null, null, "ModCore Logging channel.");
+								null, null, null, "ModCore Logging channel.");
 					}
 					catch
 					{

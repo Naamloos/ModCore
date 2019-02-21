@@ -48,6 +48,14 @@ namespace ModCore
 
             var input = File.ReadAllText("settings.json", new UTF8Encoding(false));
             Settings = JsonConvert.DeserializeObject<Settings>(input);
+
+            if(Settings.ShardCount < 1)
+            {
+                Console.WriteLine("You need at least one shard to operate!");
+                Console.ReadKey();
+                return;
+            }
+
 	        GlobalContextBuilder = Settings.Database.CreateContextBuilder();
             PerspectiveApi = new Perspective(Settings.PerspectiveToken);
 			Strawpoll = new Strawpoll();
@@ -118,7 +126,9 @@ namespace ModCore
 			    foreach (var (name, _) in SharedData.Commands)
 			    {
 				    if (db.CommandIds.FirstOrDefault(e => e.Command == name) != null) continue;
-				    Console.WriteLine($"Registering new command in db: {name}");
+                    
+                    this.Shards.FirstOrDefault().Client.DebugLogger.LogMessage(DSharpPlus.LogLevel.Info, "ModCore",
+                        $"Registering new command in db: {name}", DateTime.Now);
 				    
 				    modifications.Add(name);
 				    await db.CommandIds.AddAsync(new DatabaseCommandId()

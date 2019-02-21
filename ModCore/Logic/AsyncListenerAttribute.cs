@@ -197,6 +197,7 @@ namespace ModCore.Logic
                     bot.Commands.CommandErrored += OnEventWithArgs;
                     break;
             }
+            client.DebugLogger.LogMessage(LogLevel.Info, "ModCore", $"Registered Event with EventType {this.Target}", DateTime.Now);
         }
     }
 }

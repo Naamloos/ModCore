@@ -12,22 +12,26 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readmes", "Readmes", "{D298
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{0E482483-DAA8-43BC-BC9D-3E13CC99DF49}"
-	ProjectSection(SolutionItems) = preProject
-		bans.sql = bans.sql
-		commandDisable.sql = commandDisable.sql
-		dataAnnotations.sql = dataAnnotations.sql
-		db_schema_v1.sql = db_schema_v1.sql
-		db_schema_v1_to_v2.sql = db_schema_v1_to_v2.sql
-		starboard.sql = starboard.sql
-		tags.sql = tags.sql
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Update Scripts", "Update Scripts", "{7C345330-F8B6-47AF-AB01-6F6BFAB00AA5}"
 	ProjectSection(SolutionItems) = preProject
 		Update Scripts\download.ps1 = Update Scripts\download.ps1
 		Update Scripts\update.bat = Update Scripts\update.bat
 		Update Scripts\update.sh = Update Scripts\update.sh
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL", "SQL", "{0BEAFF54-307D-430C-898B-48739A87823D}"
+	ProjectSection(SolutionItems) = preProject
+		SQL\bans.sql = SQL\bans.sql
+		SQL\botmanager.sql = SQL\botmanager.sql
+		SQL\commandDisable.sql = SQL\commandDisable.sql
+		SQL\dataAnnotations.sql = SQL\dataAnnotations.sql
+		SQL\db_schema_v1.sql = SQL\db_schema_v1.sql
+		SQL\db_schema_v1_to_v2.sql = SQL\db_schema_v1_to_v2.sql
+		SQL\rolestate_nick.sql = SQL\rolestate_nick.sql
+		SQL\starboard.sql = SQL\starboard.sql
+		SQL\starboard_migration.sql = SQL\starboard_migration.sql
+		SQL\tags.sql = SQL\tags.sql
+		SQL\userdata.sql = SQL\userdata.sql
 	EndProjectSection
 EndProject
 Global
