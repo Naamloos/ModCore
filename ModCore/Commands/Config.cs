@@ -67,20 +67,7 @@ namespace ModCore.Commands
 			await ctx.SafeRespondAsync(role == null ? "Muting disabled." : $"Mute role set to {role.Mention}.");
 		}
 
-        [Group("updates"), Aliases("ud"), Description("User updates settings commands.")]
-        public class UserUpdating : SimpleConfigModule
-        {
-            protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.LogUpdates;
-
-            [Command("setchannel"), Aliases("setc", "sc"), Description("Set channel to send user updates to.")]
-            public async Task SetChannel(CommandContext ctx, DiscordChannel channel)
-            {
-                await ctx.WithGuildSettings(cfg => cfg.UpdateChannel = channel.Id);
-                await ctx.ElevatedRespondAsync($"Set user update log channel to {channel.Mention}.");
-            }
-        }
-
-        [Group("suggestions"), Aliases("suggestion", "sugg", "sug", "s"), Description("Suggestions configuration commands.")]
+		[Group("suggestions"), Aliases("suggestion", "sugg", "sug", "s"), Description("Suggestions configuration commands.")]
 		public class Suggestions : SimpleConfigModule
 		{
 			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.SpellingHelperEnabled;

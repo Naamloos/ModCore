@@ -123,12 +123,6 @@ namespace ModCore.Entities
 
 		[JsonProperty("jailrole")]
 		public long JailRole { get; set; }
-
-        [JsonProperty("updatechn")]
-        public ulong UpdateChannel { get; set; }
-
-        [JsonProperty("logupdates")]
-        public bool LogUpdates;
     }
 
     public class GuildChangeLogSettings

@@ -39,7 +39,7 @@ namespace ModCore.Commands
         public async Task ListGivenAsync(CommandContext ctx, [Description("User to show stardata information about.")] DiscordMember member)
         {
             var embed = new DiscordEmbedBuilder()
-                .WithColor(new DiscordColor("#C1272D"))
+                .WithColor(DiscordColor.MidnightBlue)
                 .WithTitle($"{member.DisplayName} - {member.Username}#{member.Discriminator}");
 
             using (var db = Database.CreateContext())
