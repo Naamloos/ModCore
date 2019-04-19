@@ -69,7 +69,7 @@ namespace ModCore.Commands
         {
             await ctx.SafeRespondAsync("The following embed might flood this channel. Do you want to proceed?");
             var m = await Interactivity.WaitForMessageAsync(x => x.Content.ToLower() == "yes" || x.Content.ToLower() == "no");
-            if (m?.Message?.Content.ToLowerInvariant() == "yes")
+            if (m.Result?.Content.ToLowerInvariant() == "yes")
             {
                 #region yes
                 var g = ctx.Guild;
@@ -86,19 +86,19 @@ namespace ModCore.Commands
                 #region channel list string builder
                 foreach (var c in g.Channels)
                 {
-                    switch (c.Type)
+                    switch (c.Value.Type)
                     {
                         case ChannelType.Text:
-                            cs.Append($"[`#{c.Name} (💬)`]");
+                            cs.Append($"[`#{c.Value.Name} (💬)`]");
                             break;
                         case ChannelType.Voice:
-                            cs.Append($"`[{c.Name} (🔈)]`");
+                            cs.Append($"`[{c.Value.Name} (🔈)]`");
                             break;
                         case ChannelType.Category:
-                            cs.Append($"`[{c.Name.ToUpper()} (📁)]`");
+                            cs.Append($"`[{c.Value.Name.ToUpper()} (📁)]`");
                             break;
                         default:
-                            cs.Append($"`[{c.Name} (❓)]`");
+                            cs.Append($"`[{c.Value.Name} (❓)]`");
                             break;
                     }
                 }
@@ -109,7 +109,7 @@ namespace ModCore.Commands
                 #region role list string builder
                 foreach (var r in g.Roles)
                 {
-                    rs.Append($"[`{r.Name}`] ");
+                    rs.Append($"[`{r.Value.Name}`] ");
                 }
                 #endregion
                 embed.AddField("Roles", rs.ToString());
@@ -118,7 +118,7 @@ namespace ModCore.Commands
                 #region emoji list string builder
                 foreach (var e in g.Emojis)
                 {
-                    es.Append($"[`{e.Name}`] ");
+                    es.Append($"[`{e.Value.Name}`] ");
                 }
                 #endregion
                 embed.AddField("Emotes", es.ToString());

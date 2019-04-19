@@ -45,7 +45,7 @@ namespace ModCore.Listeners
                 if (cfg.Starboard.Enable && e.Emoji == em)
                 {
                     long sbmid = 0;
-                    var c = e.Channel.Guild.Channels.First(x => x.Id == (ulong)cfg.Starboard.ChannelId);
+                    var c = e.Channel.Guild.Channels.First(x => x.Key == (ulong)cfg.Starboard.ChannelId).Value;
                     if (c.Id == e.Channel.Id) // star on starboard entry
                     {
                         if (db.StarDatas.Any(x => (ulong)x.StarboardMessageId == e.Message.Id))
@@ -137,7 +137,7 @@ namespace ModCore.Listeners
 
                 if (cfg.Starboard.Enable && e.Emoji == em)
                 {
-                    var c = e.Channel.Guild.Channels.First(x => x.Id == (ulong)cfg.Starboard.ChannelId);
+                    var c = e.Channel.Guild.Channels.First(x => x.Key == (ulong)cfg.Starboard.ChannelId).Value;
                     if (c.Id == e.Channel.Id)
                     {
                         if (db.StarDatas.Any(x => (ulong)x.StarboardMessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id))
@@ -193,7 +193,7 @@ namespace ModCore.Listeners
 
                 if (cfg.Starboard.Enable)
                 {
-                    var c = e.Channel.Guild.Channels.First(x => x.Id == (ulong)cfg.Starboard.ChannelId);
+                    var c = e.Channel.Guild.Channels.First(x => x.Key == (ulong)cfg.Starboard.ChannelId).Value;
                     if (db.StarDatas.Any(x => (ulong)x.MessageId == e.Message.Id))
                     {
                         await (await c.GetMessageAsync((ulong)db.StarDatas.First(x => (ulong)x.MessageId == e.Message.Id).StarboardMessageId)).DeleteAsync();

@@ -7,6 +7,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.EventHandling;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
@@ -230,8 +231,8 @@ namespace ModCore.Commands
                 else
                 {
                     string tags = string.Join("\n", list.Select(x => x.Name));
-                    var p = this.Interactivity.GeneratePagesInEmbeds(tags);
-                    await this.Interactivity.SendPaginatedMessage(ctx.Channel, ctx.Member, p);
+                    var p = this.Interactivity.GeneratePagesInEmbed(tags, SplitType.Line);
+                    await this.Interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.Member, p, new PaginationEmojis(ctx.Client));
                 }
             }
         }

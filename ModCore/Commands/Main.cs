@@ -10,7 +10,8 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using HSNXT.DSharpPlus.ModernEmbedBuilder;
+using DSharpPlus.Interactivity.Enums;
+using DSharpPlus.Interactivity.EventHandling;
 using Humanizer;
 using Humanizer.Localisation;
 using ModCore.Database;
@@ -279,9 +280,9 @@ namespace ModCore.Commands
 			var m = await interactivity.WaitForMessageAsync(
 				x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
-			if (m == null)
+			if (m.Result == null)
 				await ctx.SafeRespondAsync("Timed out.");
-			else if (m.Message.Content.ToLowerInvariant() == "yes")
+			else if (m.Result.Content.ToLowerInvariant() == "yes")
 			{
 				await ctx.SafeRespondAsync("Thanks for using ModCore. Leaving this guild.");
 				await ctx.LogActionAsync("Left your server. Thanks for using ModCore.");
@@ -521,7 +522,7 @@ namespace ModCore.Commands
 					$"{reason}");
 				if (cembed.Fields.Count < 10) continue;
 				page++;
-				pages.Add(new Page { Embed = cembed.Build() });
+				pages.Add(new Page("", cembed));
 				cembed = new DiscordEmbedBuilder
 				{
 					Title = "Banned users",
@@ -532,10 +533,10 @@ namespace ModCore.Commands
 				};
 			}
 			if (cembed.Fields.Count > 0)
-				pages.Add(new Page { Embed = cembed.Build() });
+				pages.Add(new Page("", cembed));
 
 			if (pages.Count > 1)
-				await interactivity.SendPaginatedMessage(ctx.Channel, ctx.User, pages);
+				await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages.ToArray(), new PaginationEmojis(ctx.Client));
 			else
 				await ctx.ElevatedRespondAsync(embed: pages.First().Embed);
 		}
@@ -568,18 +569,13 @@ namespace ModCore.Commands
 			await ctx.Message.DeleteAsync();
 			var m = await ctx.SafeRespondAsync($"**[Poll]**: {message}");
 			var intr = ctx.Client.GetInteractivity();
-			var responses = await intr.CreatePollAsync(m, options, timespan);
+			var responses = await intr.DoPollAsync(m, options, PollBehaviour.DeleteEmojis, timespan);
 			StringBuilder sb = new StringBuilder($"**[Poll]**: {message}");
-			foreach (var em in options)
+			foreach (var em in responses)
 			{
 				sb.AppendLine();
-				sb.Append(em.ToString() + ": ");
-				if (responses.Reactions.Keys.Contains(em))
-					sb.Append(responses.Reactions[em]);
-				else
-					sb.Append(0);
+				sb.Append($"{em.Emoji.ToString()}: {em.Total}");
 			}
-			await m.DeleteAllReactionsAsync("Remove polling reactions");
 			await ctx.SafeModifyAsync(m, sb.ToString());
 		}
 
@@ -621,15 +617,15 @@ namespace ModCore.Commands
 			{
 				await msg.ModifyAsync("", menu);
 				var response = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-				if (response == null)
+				if (response.Result == null)
 				{
 					await msg.ModifyAsync("Message building timed out.", null);
 					return;
 				}
 
-				await response.Message.DeleteAsync();
+				await response.Result.DeleteAsync();
 
-				switch (response.Message.Content.ToLower())
+				switch (response.Result.Content.ToLower())
 				{
 					default:
 						#region Invalid Response
@@ -641,10 +637,10 @@ namespace ModCore.Commands
 						#region Set Content
 						await msg.ModifyAsync("What would you like to set the Content to?", null);
 						var case0 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case0?.Message?.Content != null)
+						if (!case0.TimedOut)
 						{
-							content = case0.Message.Content;
-							await case0.Message.DeleteAsync();
+							content = case0.Result.Content;
+							await case0.Result.DeleteAsync();
 							await msg.ModifyAsync($"Content set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -654,10 +650,10 @@ namespace ModCore.Commands
 						#region Set Title
 						await msg.ModifyAsync("What would you like to set the Title to?", null);
 						var case1 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case1?.Message?.Content != null)
+						if (!case1.TimedOut)
 						{
-							embed.WithTitle(case1.Message.Content);
-							await case1.Message.DeleteAsync();
+							embed.WithTitle(case1.Result.Content);
+							await case1.Result.DeleteAsync();
 							await msg.ModifyAsync($"Title set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -667,10 +663,10 @@ namespace ModCore.Commands
 						#region Set Description
 						await msg.ModifyAsync("What would you like to set the Description to?", null);
 						var case2 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case2?.Message?.Content != null)
+						if (!case2.TimedOut)
 						{
-							embed.WithDescription(case2.Message.Content);
-							await case2.Message.DeleteAsync();
+							embed.WithDescription(case2.Result.Content);
+							await case2.Result.DeleteAsync();
 							await msg.ModifyAsync($"Description set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -680,10 +676,10 @@ namespace ModCore.Commands
 						#region Set Image
 						await msg.ModifyAsync("What would you like to set the Image URL to?", null);
 						var case3 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case3?.Message?.Content != null)
+						if (!case3.TimedOut)
 						{
-							embed.WithImageUrl(case3.Message.Content);
-							await case3.Message.DeleteAsync();
+							embed.WithImageUrl(case3.Result.Content);
+							await case3.Result.DeleteAsync();
 							await msg.ModifyAsync($"Image URL set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -693,10 +689,10 @@ namespace ModCore.Commands
 						#region Set Thumbnail
 						await msg.ModifyAsync("What would you like to set the Thumbnail Image URL to?", null);
 						var case4 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case4?.Message?.Content != null)
+						if (!case4.TimedOut)
 						{
-							embed.WithThumbnailUrl(case4.Message.Content);
-							await case4.Message.DeleteAsync();
+							embed.WithThumbnailUrl(case4.Result.Content);
+							await case4.Result.DeleteAsync();
 							await msg.ModifyAsync($"Thumbnail Image URL set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -707,18 +703,18 @@ namespace ModCore.Commands
 						// Do some fancy pancy timestamp parsing
 						await msg.ModifyAsync("What would you like to set the Timestamp to?", null);
 						var case5 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case5?.Message?.Content != null)
+						if (!case5.TimedOut)
 						{
-							var ts = await new DateTimeOffsetConverter().ConvertAsync(case5.Message.Content, ctx);
+							var ts = await new DateTimeOffsetConverter().ConvertAsync(case5.Result.Content, ctx);
 							if (ts.HasValue)
 							{
 								embed.WithTimestamp(ts.Value);
-								await case5.Message.DeleteAsync();
+								await case5.Result.DeleteAsync();
 								await msg.ModifyAsync($"Timestamp set.", null);
 							}
 							else
 							{
-								await case5.Message.DeleteAsync();
+								await case5.Result.DeleteAsync();
 								await msg.ModifyAsync($"Invalid timestamp.", null);
 							}
 						}
@@ -729,10 +725,10 @@ namespace ModCore.Commands
 						#region Set Url
 						await msg.ModifyAsync("What would you like to set the URL to?", null);
 						var case6 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case6?.Message?.Content != null)
+						if (!case6.TimedOut)
 						{
-							embed.WithUrl(case6.Message.Content);
-							await case6.Message.DeleteAsync();
+							embed.WithUrl(case6.Result.Content);
+							await case6.Result.DeleteAsync();
 							await msg.ModifyAsync($"URL set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -742,10 +738,10 @@ namespace ModCore.Commands
 						#region Set Color
 						await msg.ModifyAsync("What would you like to set the Color to? (HTML)", null);
 						var case7 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case7?.Message?.Content != null)
+						if (!case7.TimedOut)
 						{
-							embed.WithColor(new DiscordColor(case7.Message.Content));
-							await case7.Message.DeleteAsync();
+							embed.WithColor(new DiscordColor(case7.Result.Content));
+							await case7.Result.DeleteAsync();
 							await msg.ModifyAsync($"Color set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -755,13 +751,13 @@ namespace ModCore.Commands
 						#region Set Footer Text
 						await msg.ModifyAsync("What would you like to set the Footer text to?", null);
 						var case8 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case8?.Message?.Content != null)
+						if (!case8.TimedOut)
 						{
 							if (embed.Footer == null)
-								embed.WithFooter(case8.Message.Content);
+								embed.WithFooter(case8.Result.Content);
 							else
-								embed.Footer.Text = case8.Message.Content;
-							await case8.Message.DeleteAsync();
+								embed.Footer.Text = case8.Result.Content;
+							await case8.Result.DeleteAsync();
 							await msg.ModifyAsync($"Footer text set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -771,14 +767,14 @@ namespace ModCore.Commands
 						#region Set Footer Icon
 						await msg.ModifyAsync("What would you like to set the Footer icon URL to?", null);
 						var case8b = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case8b?.Message?.Content != null)
+						if (!case8b.TimedOut)
 						{
 							if (embed.Footer == null)
-								embed.WithFooter(null, case8b.Message.Content);
+								embed.WithFooter(null, case8b.Result.Content);
 							else
-								embed.Footer.IconUrl = case8b.Message.Content;
+								embed.Footer.IconUrl = case8b.Result.Content;
 
-							await case8b.Message.DeleteAsync();
+							await case8b.Result.DeleteAsync();
 							await msg.ModifyAsync($"Footer icon set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -788,13 +784,13 @@ namespace ModCore.Commands
 						#region Set Author Name
 						await msg.ModifyAsync("What would you like to set the Author name to?", null);
 						var case9 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case9?.Message?.Content != null)
+						if (!case9.TimedOut)
 						{
 							if (embed.Author == null)
-								embed.WithAuthor(case9.Message.Content);
+								embed.WithAuthor(case9.Result.Content);
 							else
-								embed.Author.Name = case9.Message.Content;
-							await case9.Message.DeleteAsync();
+								embed.Author.Name = case9.Result.Content;
+							await case9.Result.DeleteAsync();
 							await msg.ModifyAsync($"Author name set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -804,13 +800,13 @@ namespace ModCore.Commands
 						#region Set Author Icon
 						await msg.ModifyAsync("What would you like to set the Author Icon URL to?", null);
 						var case9b = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case9b?.Message?.Content != null)
+						if (!case9b.TimedOut)
 						{
 							if (embed.Author == null)
-								embed.WithAuthor(iconUrl: case9b.Message.Content);
+								embed.WithAuthor(iconUrl: case9b.Result.Content);
 							else
-								embed.Author.IconUrl = case9b.Message.Content;
-							await case9b.Message.DeleteAsync();
+								embed.Author.IconUrl = case9b.Result.Content;
+							await case9b.Result.DeleteAsync();
 							await msg.ModifyAsync($"Author Icon set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -820,13 +816,13 @@ namespace ModCore.Commands
 						#region Set Author Icon
 						await msg.ModifyAsync("What would you like to set the Author URL to?", null);
 						var case9c = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case9c?.Message?.Content != null)
+						if (!case9c.TimedOut)
 						{
 							if (embed.Author == null)
-								embed.WithAuthor(url: case9c.Message.Content);
+								embed.WithAuthor(url: case9c.Result.Content);
 							else
-								embed.Author.Url = case9c.Message.Content;
-							await case9c.Message.DeleteAsync();
+								embed.Author.Url = case9c.Result.Content;
+							await case9c.Result.DeleteAsync();
 							await msg.ModifyAsync($"Author URL set.", null);
 						}
 						await Task.Delay(TimeSpan.FromSeconds(2));
@@ -838,26 +834,26 @@ namespace ModCore.Commands
 
 						await msg.ModifyAsync("What should the field title be?", null);
 						var case10a = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case10a?.Message?.Content == null)
+						if (case10a.TimedOut)
 							break;
-						field.Item1 = case10a.Message.Content;
-						await case10a.Message.DeleteAsync();
+						field.Item1 = case10a.Result.Content;
+						await case10a.Result.DeleteAsync();
 
 						await msg.ModifyAsync("What should the field content be?", null);
 						var case10b = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case10b?.Message?.Content == null)
+						if (case10b.TimedOut)
 							break;
-						field.Item2 = case10b.Message.Content;
-						await case10b.Message.DeleteAsync();
+						field.Item2 = case10b.Result.Content;
+						await case10b.Result.DeleteAsync();
 
 						await msg.ModifyAsync("Should the field be inline?", null);
 						var case10c = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case10c?.Message?.Content == null)
+						if (case10c.TimedOut)
 							break;
 						var bcv = new AugmentedBoolConverter();
-						var inl = await bcv.ConvertAsync(case10c.Message.Content, ctx);
+						var inl = await bcv.ConvertAsync(case10c.Result.Content, ctx);
 						field.Item3 = (inl.HasValue? inl.Value : false);
-						await case10c.Message.DeleteAsync();
+						await case10c.Result.DeleteAsync();
 
 						embed.AddField(field.Item1, field.Item2, field.Item3);
 						await msg.ModifyAsync("Field added.", null);
@@ -876,20 +872,20 @@ namespace ModCore.Commands
 						// Remember to pick a channel to send to first!!
 						await msg.ModifyAsync("What channel do you want to send this message to?", null);
 						var case12 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
-						if (case12?.Message?.Content != null)
+						if (!case12.TimedOut)
 						{
 							var dcc = new DiscordChannelConverter();
-							var channel = await dcc.ConvertAsync(case12.Message.Content, ctx);
+							var channel = await dcc.ConvertAsync(case12.Result.Content, ctx);
 							if (channel.HasValue)
 							{
 								await channel.Value.SendMessageAsync(content, embed: embed.Build());
-								await case12.Message.DeleteAsync();
+								await case12.Result.DeleteAsync();
 								await msg.ModifyAsync("Message sent.", null);
 								return;
 							}
 							else
 							{
-								await case12.Message.DeleteAsync();
+								await case12.Result.DeleteAsync();
 								await msg.ModifyAsync("Invalid channel.", null);
 							}
 						}
@@ -1041,14 +1037,11 @@ namespace ModCore.Commands
 				}
 				
 				var message = await ctx.Guild.GetChannel(cfg.NicknameChangeConfirmationChannel)
-					.SendMessageAsync(embed: new ModernEmbedBuilder
-					{
-						Title = "Nickname change confirmation",
-						Description =
-							$"Member {ctx.Member.Mention} ({ctx.Member.Id}) wants to change their nickname to " +
-							$"{Formatter.Sanitize(nick)}.",
-						FooterText = "This message will self-destruct in 2 hours."
-					});
+					.SendMessageAsync(embed: new DiscordEmbedBuilder()
+                    .WithTitle("Nickname change confirmation")
+                    .WithDescription($"Member {ctx.Member.Mention} ({ctx.Member.Id}) wants to change their nickname to " +
+                            $"{Formatter.Sanitize(nick)}.")
+                    .WithFooter("This message will self-destruct in 2 hours."));
 
 				// d#+ nightlies mean we can do this now, and hopefully it won't crash
 				await Task.WhenAll(message.CreateReactionAsync(yes), message.CreateReactionAsync(no));
@@ -1056,8 +1049,10 @@ namespace ModCore.Commands
 				await ctx.ElevatedRespondAsync(
 					"Your request to change username was placed, and should be actioned shortly.");
 				
-				var reaction = await this.Interactivity.WaitForMessageReactionAsync(
-					e => e == yes || e == no, message, timeoutoverride: TimeSpan.FromHours(2));
+                // TODO: y'all gotta mess with dem timeout shit, else we'll get sum nasty errors
+				var res = await this.Interactivity.WaitForReactionAsync(
+					e => (e.Emoji == yes || e.Emoji == no) && e.Message == message, timeoutoverride: TimeSpan.FromHours(2));
+                var reaction = res.Result;
 
 				if (reaction.Emoji == yes)
 				{
@@ -1138,13 +1133,23 @@ namespace ModCore.Commands
         [Description("Executes (multiple) commands")]
         public async Task ExecAsync(CommandContext ctx, [RemainingText]string cmds)
         {
+            // TODO big ol testes
             string splitter = @"(?!\\);";
 
             var split = Regex.Split(cmds, splitter);
             foreach (var s in split)
             {
                 var p = ctx.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
-                await ctx.CommandsNext.SudoAsync(ctx.User, ctx.Channel, $"{p}{s.Replace("\\;", ";")}");
+                //await ctx.CommandsNext.SudoAsync(ctx.User, ctx.Channel, $"{p}{}");
+                var cmdraw = s.Replace("\\;", ";").Split(' ').ToList();
+                var cmd = cmdraw[0];
+                cmdraw.RemoveAt(0);
+                var args = String.Join(' ', cmdraw);
+
+                var cmdobj = ctx.CommandsNext.FindCommand(cmd, out args);
+
+                var fctx = ctx.CommandsNext.CreateFakeContext(ctx.User, ctx.Channel, s.Replace("\\;", ";"), p, cmdobj);
+                await ctx.CommandsNext.ExecuteCommandAsync(fctx);
             }
         }
     }

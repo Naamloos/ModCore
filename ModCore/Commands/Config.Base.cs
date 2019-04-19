@@ -26,18 +26,21 @@ namespace ModCore.Commands
 					"Welcome to ModCore! Looks like you haven't configured your guild yet." +
 					"Would you like to go through a quick setup? (Y/N)");
 
-				var message = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
+				var res = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
 					TimeSpan.FromSeconds(40));
-				if (!message.Message.Content.EqualsIgnoreCase("y") &&
-					!message.Message.Content.EqualsIgnoreCase("yes") &&
-					!message.Message.Content.EqualsIgnoreCase("ya") &&
-					!message.Message.Content.EqualsIgnoreCase("ja") &&
-					!message.Message.Content.EqualsIgnoreCase("da"))
+
+                var message = res.TimedOut ? null : res.Result;
+
+				if (!message.Content.EqualsIgnoreCase("y") &&
+					!message.Content.EqualsIgnoreCase("yes") &&
+					!message.Content.EqualsIgnoreCase("ya") &&
+					!message.Content.EqualsIgnoreCase("ja") &&
+					!message.Content.EqualsIgnoreCase("da"))
 				{
 					await ctx.SafeRespondAsync(
 						"OK, I won't bother you anymore. Just execute this command again if you need help configuring.");
 					await t0.DeleteAsync("modcore cleanup after itself: welcome message");
-					await message.Message.DeleteAsync(
+					await message.DeleteAsync(
 						"modcore cleanup after itself: user response to welcome message");
 					return;
 				}
@@ -46,9 +49,8 @@ namespace ModCore.Commands
 				try
 				{
 					channel =
-						ctx.Guild.Channels.FirstOrDefault(e => e.Name == "modcore-setup") ??
-						await ctx.Guild.CreateChannelAsync("modcore-setup", ChannelType.Text, null, null, null,
-							null, null, "modcore setup channel creation");
+						ctx.Guild.Channels.FirstOrDefault(e => e.Value.Name == "modcore-setup").Value ??
+						await ctx.Guild.CreateChannelAsync("modcore-setup", ChannelType.Text, reason: "modcore setup channel creation");
 				}
 				catch
 				{
@@ -66,9 +68,11 @@ namespace ModCore.Commands
 					"OK, now, can you create a webhook for ModCore and give me its URL?\n" +
 					"If you don't know what that is, simply say no and I'll make one for you.");
 
-				var message2 = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
+				var res2 = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
 					TimeSpan.FromSeconds(40));
-				var mContent = message2.Message.Content;
+                var message2 = res2.TimedOut ? null : res2.Result;
+
+				var mContent = message2.Content;
 				if (!mContent.Contains("discordapp.com/api/webhooks/"))
 				{
 					await channel.ElevatedMessageAsync("Alright, I'll make a webhook for you then. Sit tight...");
@@ -76,9 +80,8 @@ namespace ModCore.Commands
 					try
 					{
 						logChannel =
-							ctx.Guild.Channels.FirstOrDefault(e => e.Name == "modlog") ??
-							await ctx.Guild.CreateChannelAsync("modlog", ChannelType.Text, null, null, null,
-								null, null, "ModCore Logging channel.");
+							ctx.Guild.Channels.FirstOrDefault(e => e.Value.Name == "modlog").Value ??
+							await ctx.Guild.CreateChannelAsync("modlog", ChannelType.Text, reason: "ModCore Logging channel.");
 					}
 					catch
 					{
@@ -277,7 +280,7 @@ namespace ModCore.Commands
 			    
 			    var msg = await this.Interactivity
 				    .WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && xm.Content.ToUpperInvariant() == captcha, TimeSpan.FromSeconds(45));
-			    if (msg == null)
+			    if (msg.Result == null)
 			    {
 				    await ctx.SafeRespondAsync("Operation aborted.");
 				    return;

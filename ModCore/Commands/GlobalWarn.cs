@@ -150,7 +150,7 @@ namespace ModCore.Commands
 									}
 									else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
 									{
-										await g.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).ElevatedMessageAsync(embed: embed);
+										await g.Channels.First(x => x.Key == (ulong)settings.JoinLog.ChannelId).Value.ElevatedMessageAsync(embed: embed);
 									}
 								}
 							}
@@ -195,7 +195,7 @@ namespace ModCore.Commands
 									}
 									else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
 									{
-										await g.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).ElevatedMessageAsync(embed: embed);
+										await g.Channels.First(x => x.Key == (ulong)settings.JoinLog.ChannelId).Value.ElevatedMessageAsync(embed: embed);
 									}
 								}
 							}

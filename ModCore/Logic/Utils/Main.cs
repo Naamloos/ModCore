@@ -20,11 +20,11 @@ namespace ModCore.Logic.Utils
         public static async Task<(DiscordRole Role, string Message)> SetupMuteRole(DiscordGuild guild,
             DiscordMember callee, DiscordMember member)
         {
-            var textChannels = guild.Channels.Where(e => e.Type == ChannelType.Text).ToArray();
+            var textChannels = guild.Channels.Where(e => e.Value.Type == ChannelType.Text).Select(e => e.Value).ToArray();
             var candidateRoles = new List<DiscordRole>();
             foreach (var role in guild.Roles)
             {
-                AddPotentialCandidate(member, textChannels, role, candidateRoles);
+                AddPotentialCandidate(member, textChannels, role.Value, candidateRoles);
             }
 
             var lastRole = candidateRoles.OrderByDescending(e => e.Position).FirstOrDefault();
@@ -39,26 +39,26 @@ namespace ModCore.Logic.Utils
             foreach (var role in guild.Roles)
             {
                 if (channels.All(e => e.overwrites.Any(ew =>
-                    ew.Type == OverwriteType.Role && ew.Id == role.Id &&
+                    ew.Type == OverwriteType.Role && ew.Id == role.Value.Id &&
                     ew.Deny.HasPermission(Permissions.SendMessages))))
                 {
-                    return (role, $"using existing role {role.Name} since has override to not speak in any channel");
+                    return (role.Value, $"using existing role {role.Value.Name} since has override to not speak in any channel");
                 }
             }
             foreach (var role in guild.Roles)
             {
-                if (role.CheckPermission(Permissions.SendMessages) != PermissionLevel.Unset ||
-                    !role.Name.ToLowerInvariant().Contains("mute")) continue;
+                if (role.Value.CheckPermission(Permissions.SendMessages) != PermissionLevel.Unset ||
+                    !role.Value.Name.ToLowerInvariant().Contains("mute")) continue;
 
                 foreach (var (channel, overwrites) in channels)
                 {
                     // don't tamper with existing overwrites
-                    if (overwrites.Any(e => e.Id == role.Id)) continue;
+                    if (overwrites.Any(e => e.Id == role.Value.Id)) continue;
 
-                    await channel.AddOverwriteAsync(role, Permissions.None, Permissions.SendMessages,
+                    await channel.AddOverwriteAsync(role.Value, Permissions.None, Permissions.SendMessages,
                         "ModCore automatic mute role channel overwrite for preexisting role");
                 }
-                return (role, $"using existing role `{role.Name}`");
+                return (role.Value, $"using existing role `{role.Value.Name}`");
             }
             var arole = await guild.CreateRoleAsync("ModCore Chat Mute", null, null, false, false,
                 "ModCore automatic mute role configuration");
@@ -148,7 +148,7 @@ namespace ModCore.Logic.Utils
 
         public static async Task GuaranteeMuteRoleDeniedEverywhere(DiscordGuild guild, DiscordRole role)
         {
-            var textChannels = guild.Channels.Where(e => e.Type == ChannelType.Text).ToArray();
+            var textChannels = guild.Channels.Where(e => e.Value.Type == ChannelType.Text).Select(e => e.Value).ToArray();
             foreach (var channel in textChannels)
             {
                 var roleOverwrite =

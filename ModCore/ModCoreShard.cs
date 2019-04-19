@@ -9,6 +9,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.Net.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
@@ -78,9 +79,8 @@ namespace ModCore
 
             this.Interactivity = Client.UseInteractivity(new InteractivityConfiguration
             {
-                PaginationBehavior = TimeoutBehaviour.DeleteReactions,
-                PaginationTimeout = TimeSpan.FromSeconds(30),
-                Timeout = TimeSpan.FromSeconds(30)
+                PollBehaviour = PollBehaviour.DeleteEmojis,
+                Timeout = TimeSpan.FromSeconds(15)
             });
 
             // Add the instances we need to dependencies

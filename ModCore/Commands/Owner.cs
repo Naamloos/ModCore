@@ -67,11 +67,11 @@ namespace ModCore.Commands
             var interactivity = ctx.Services.GetService<InteractivityExtension>();
             var m = await interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
-            if (m == null)
+            if (m.TimedOut)
             {
                 await ctx.SafeRespondAsync("Timed out.");
             }
-            else if (InteractivityUtil.Confirm(m))
+            else if (InteractivityUtil.Confirm(m.Result))
             {
                 await ctx.SafeRespondAsync("Shutting down.");
                 cts.Cancel(false);
@@ -115,7 +115,11 @@ namespace ModCore.Commands
                 await ctx.SafeRespondAsync("You do not have permission to use this command!");
                 return;
             }
-            await ctx.CommandsNext.SudoAsync(m, ctx.Channel, command);
+
+            var cmdobj = ctx.CommandsNext.FindCommand(command, out string args);
+            var p = ctx.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
+            var fctx = ctx.CommandsNext.CreateFakeContext(m, ctx.Channel, command, p, cmdobj);
+            await ctx.CommandsNext.ExecuteCommandAsync(fctx);
         }
 
         [Command("sudoowner"), Aliases("so"), Hidden]
@@ -126,7 +130,11 @@ namespace ModCore.Commands
                 await ctx.SafeRespondAsync("You do not have permission to use this command!");
                 return;
             }
-            await ctx.CommandsNext.SudoAsync(ctx.Guild.Owner, ctx.Channel, command);
+
+            var cmdobj = ctx.CommandsNext.FindCommand(command, out string args);
+            var p = ctx.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
+            var fctx = ctx.CommandsNext.CreateFakeContext(ctx.Guild.Owner, ctx.Channel, command, p, cmdobj);
+            await ctx.CommandsNext.ExecuteCommandAsync(fctx);
         }
 
         [Command("update"), Aliases("u"), Hidden]

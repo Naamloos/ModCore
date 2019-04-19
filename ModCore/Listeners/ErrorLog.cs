@@ -14,7 +14,6 @@ using ModCore.Entities;
 using ModCore.Logic;
 using System.Text;
 using ModCore.Logic.Extensions;
-using HSNXT.DSharpPlus.ModernEmbedBuilder;
 
 namespace ModCore.Listeners
 {
@@ -128,13 +127,16 @@ namespace ModCore.Listeners
 					.OrderBy(c => leveshtein.Distance(attemptedName, c.qualifiedName))
 					.DistinctBy(c => c.qualifiedName).Take(1).ToArray();
 
-				await new ModernEmbedBuilder
-				{
-					Title = "Command **" + attemptedName.Truncate(200) + "** not found",
-					Description = "Did you mean...",
-					Fields = ordered.Select(c =>
-						new DuckField(c.qualifiedName.Truncate(256), c.description?.Truncate(999) ?? "<no desc>")).ToList()
-				}.Send(ctx.Channel);
+                var embed = new DiscordEmbedBuilder()
+                    .WithTitle("Command **" + attemptedName.Truncate(200) + "** not found")
+                    .WithDescription("Did you mean...");
+
+                foreach(var c in ordered)
+                {
+                    embed.AddField(c.qualifiedName.Truncate(256), c.description?.Truncate(999) ?? "<no desc>");
+                }
+
+                await ctx.RespondAsync(embed: embed);
 			}
 			catch (Exception ex)
 			{

@@ -6,6 +6,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.EventHandling;
 using Humanizer;
 using Humanizer.Localisation;
 using ModCore.Database;
@@ -110,7 +111,7 @@ If in doubt, just try it! You can always clear the reminders later.
                     $"{note}");
                 if (cembed.Fields.Count < 5) continue;
                 page++;
-                pages.Add(new Page {Embed = cembed.Build()});
+                pages.Add(new Page("", cembed));
                 cembed = new DiscordEmbedBuilder
                 {
                     Title = $"{emoji} Your currently set reminders:",
@@ -121,10 +122,10 @@ If in doubt, just try it! You can always clear the reminders later.
                 };
             }
             if (cembed.Fields.Count > 0)
-                pages.Add(new Page {Embed = cembed.Build()});
+                pages.Add(new Page("", cembed));
 
             if (pages.Count > 1)
-                await interactivity.SendPaginatedMessage(ctx.Channel, ctx.User, pages);
+                await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages.ToArray(), new PaginationEmojis(ctx.Client));
             else
                 await ctx.ElevatedRespondAsync(embed: pages.First().Embed);
         }
@@ -263,11 +264,11 @@ If in doubt, just try it! You can always clear the reminders later.
 
             var m = await this.Interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
-            if (m == null)
+            if (m.TimedOut)
             {
                 await ctx.SafeRespondAsync("Timed out.");
             }
-            else if (InteractivityUtil.Confirm(m))
+            else if (InteractivityUtil.Confirm(m.Result))
             {
                 await ctx.SafeRespondAsync("Brace for impact!");
                 await ctx.TriggerTypingAsync();

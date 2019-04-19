@@ -10,7 +10,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using HSNXT.DSharpPlus.ModernEmbedBuilder;
 using Humanizer;
 using Humanizer.Localisation;
 using ModCore.Database;

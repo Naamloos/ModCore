@@ -65,7 +65,7 @@ namespace ModCore.CoreApi.Controllers
 			{
 				foreach (var r in guildsfound[0].Roles)
 				{
-					arl.Roles.Add(new ApiRole { RoleId = r.Id, RoleName = r.Name });
+					arl.Roles.Add(new ApiRole { RoleId = r.Key, RoleName = r.Value.Name });
 				}
 				Response.ContentType = "application/json";
 				return JsonConvert.SerializeObject(arl);

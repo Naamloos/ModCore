@@ -112,10 +112,10 @@ namespace ModCore.Listeners
             {
                 var ar = cfg.AutoRole;
 
-                if (ar.Enable && ea.Guild.Roles.Count(x => x.Id == (ulong)ar.RoleId) > 0)
+                if (ar.Enable && ea.Guild.Roles.Count(x => x.Value.Id == (ulong)ar.RoleId) > 0)
                 {
-                    var role = ea.Guild.Roles.First(x => x.Id == (ulong)ar.RoleId);
-                    await ea.Member.GrantRoleAsync(role, "AutoRole");
+                    var role = ea.Guild.Roles.First(x => x.Value.Id == (ulong)ar.RoleId);
+                    await ea.Member.GrantRoleAsync(role.Value, "AutoRole");
                 }
             }
 
@@ -296,21 +296,21 @@ namespace ModCore.Listeners
 
                 foreach (var chn in ea.Guild.Channels)
                 {
-                    if (rs.IgnoredChannelIds.Contains(chn.Id))
+                    if (rs.IgnoredChannelIds.Contains(chn.Key))
                         continue;
 
-                    if (!prms.ContainsKey((long)chn.Id))
+                    if (!prms.ContainsKey((long)chn.Key))
                     {
                         any = true;
 
-                        var os = chn.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member");
+                        var os = chn.Value.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member");
                         if (!os.Any())
                             continue;
 
                         await db.RolestateOverrides.AddRangeAsync(os.Select(xo => new DatabaseRolestateOverride
                         {
-                            ChannelId = (long)chn.Id,
-                            GuildId = (long)chn.Guild.Id,
+                            ChannelId = (long)chn.Value.Id,
+                            GuildId = (long)chn.Value.Guild.Id,
                             MemberId = (long)xo.Id,
                             PermsAllow = (long)xo.Allowed,
                             PermsDeny = (long)xo.Denied
@@ -318,8 +318,8 @@ namespace ModCore.Listeners
                     }
                     else
                     {
-                        var cps = prms[(long)chn.Id];
-                        var os = chn.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
+                        var cps = prms[(long)chn.Value.Id];
+                        var os = chn.Value.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
                         var osids = os.Keys.ToArray();
 
                         var del = cps.Keys.Except(osids);
@@ -332,7 +332,7 @@ namespace ModCore.Listeners
                         if (any |= add.Any())
                             await db.RolestateOverrides.AddRangeAsync(add.Select(xid => new DatabaseRolestateOverride
                             {
-                                ChannelId = (long)chn.Id,
+                                ChannelId = (long)chn.Key,
                                 GuildId = (long)ea.Guild.Id,
                                 MemberId = xid,
                                 PermsAllow = (long)os[xid].Allowed,

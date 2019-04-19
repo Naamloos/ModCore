@@ -19,7 +19,7 @@ namespace ModCore.Logic
 					count = 1;
 
 				if (count > 100)
-					return Optional<DiscordMessage>.FromNoValue();
+					return default;
 
 				var msgs = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, count);
 				return msgs.Last();

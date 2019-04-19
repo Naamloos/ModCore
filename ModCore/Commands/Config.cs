@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -8,7 +9,6 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using ModCore.Commands.Base;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
@@ -68,9 +68,47 @@ namespace ModCore.Commands
 		}
 
         [Group("updates"), Aliases("ud"), Description("User updates settings commands.")]
-        public class UserUpdating : SimpleConfigModule
+        public class UserUpdating : BaseCommandModule
         {
-            protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.LogUpdates;
+            ref bool GetSetting(GuildSettings cfg) => ref cfg.LogUpdates;
+
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
 
             [Command("setchannel"), Aliases("setc", "sc"), Description("Set channel to send user updates to.")]
             public async Task SetChannel(CommandContext ctx, DiscordChannel channel)
@@ -81,20 +119,96 @@ namespace ModCore.Commands
         }
 
         [Group("suggestions"), Aliases("suggestion", "sugg", "sug", "s"), Description("Suggestions configuration commands.")]
-		public class Suggestions : SimpleConfigModule
-		{
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.SpellingHelperEnabled;
-		}
+		public class Suggestions : BaseCommandModule
+        {
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.SpellingHelperEnabled;
+
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+        }
 
 		[Group("linkfilter"), Aliases("inviteblocker", "invite", "ib", "filter", "lf"),
 		 Description("Linkfilter configuration commands.")]
-		public class Linkfilter : SimpleConfigModule
-		{
+		public class Linkfilter : BaseCommandModule
+        {
 			// TODO add wizard for this...
 			
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.Linkfilter.Enable;
-			
-			[Group("modules"), Aliases("mod", "m", "s"),
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.Linkfilter.Enable;
+
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+
+            [Group("modules"), Aliases("mod", "m", "s"),
 			 Description("Commands to toggle Linkfilter modules for this guild.\n" +
 			             "You can enable/disable modules by using the module name and `enable`, `disable` or leave " +
 			             "empty to toggle.")]
@@ -151,51 +265,295 @@ namespace ModCore.Commands
 
 				[Group("booters"), Aliases("booter", "boot", "ddos", "b", "1"),
 				 Description("Toggle blocking booter/DDoS sites for this guild.")]
-				public class Booters : LinkfilterConfigModule
-				{
-					protected override ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockBooters;
-				}
+				public class Booters : BaseCommandModule
+                {
+					ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockBooters;
+                    ref bool GetSetting(GuildSettings cfg) => ref GetSetting(cfg.Linkfilter);
+                    string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+                    string EnabledState => "Enabled";
+                    string DisabledState => "Disabled";
+
+                    [GroupCommand, Description("Sets whether this module is enabled or not.")]
+                    public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                        "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                        "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                        )] bool? enableOrDisable = null)
+                    {
+                        // we can't access ref inside an async method, so make a copy
+                        var resultingVariable = false;
+
+                        await ctx.WithGuildSettings(cfg =>
+                        {
+                            ref var configVariable = ref GetSetting(cfg);
+
+                            resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                        });
+
+                        if (resultingVariable)
+                            await AfterEnable(ctx);
+                        else
+                            await AfterDisable(ctx);
+
+                        // if toggling, tell the user what the new value is
+                        if (!enableOrDisable.HasValue)
+                            await ctx.ElevatedRespondAsync(
+                                $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                        await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                    }
+
+                    Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+                    Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+                }
 				
 				[Group("invites"), Aliases("invitelinks", "invite", "inv", "i", "2"),
 				 Description("Toggle blocking invite links for this guild.")]
-				public class InviteLinks : LinkfilterConfigModule
-				{
-					protected override ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockInviteLinks;
-				}
+				public class InviteLinks : BaseCommandModule
+                {
+					ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockInviteLinks;
+                    ref bool GetSetting(GuildSettings cfg) => ref GetSetting(cfg.Linkfilter);
+                    string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+                    string EnabledState => "Enabled";
+                    string DisabledState => "Disabled";
+
+                    [GroupCommand, Description("Sets whether this module is enabled or not.")]
+                    public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                        "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                        "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                        )] bool? enableOrDisable = null)
+                    {
+                        // we can't access ref inside an async method, so make a copy
+                        var resultingVariable = false;
+
+                        await ctx.WithGuildSettings(cfg =>
+                        {
+                            ref var configVariable = ref GetSetting(cfg);
+
+                            resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                        });
+
+                        if (resultingVariable)
+                            await AfterEnable(ctx);
+                        else
+                            await AfterDisable(ctx);
+
+                        // if toggling, tell the user what the new value is
+                        if (!enableOrDisable.HasValue)
+                            await ctx.ElevatedRespondAsync(
+                                $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                        await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                    }
+
+                    Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+                    Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+                }
 
 				[Group("iploggers"), Aliases("iplogs", "ips", "ip", "3"),
 				 Description("Toggle blocking IP logger sites for this guild.")]
-				public class IpLoggers : LinkfilterConfigModule
-				{
-					protected override ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockIpLoggers;
-				}
+				public class IpLoggers : BaseCommandModule
+                {
+					ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockIpLoggers;
+                    ref bool GetSetting(GuildSettings cfg) => ref GetSetting(cfg.Linkfilter);
+                    string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+                    string EnabledState => "Enabled";
+                    string DisabledState => "Disabled";
+
+                    [GroupCommand, Description("Sets whether this module is enabled or not.")]
+                    public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                        "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                        "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                        )] bool? enableOrDisable = null)
+                    {
+                        // we can't access ref inside an async method, so make a copy
+                        var resultingVariable = false;
+
+                        await ctx.WithGuildSettings(cfg =>
+                        {
+                            ref var configVariable = ref GetSetting(cfg);
+
+                            resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                        });
+
+                        if (resultingVariable)
+                            await AfterEnable(ctx);
+                        else
+                            await AfterDisable(ctx);
+
+                        // if toggling, tell the user what the new value is
+                        if (!enableOrDisable.HasValue)
+                            await ctx.ElevatedRespondAsync(
+                                $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                        await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                    }
+
+                    Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+                    Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+                }
 
 				[Group("shocksites"), Aliases("shock", "shocks", "gore", "g", "4"),
 				 Description("Toggle blocking shock/gore sites for this guild.")]
-				public class ShockSites : LinkfilterConfigModule
-				{
-					protected override ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockShockSites;
-				}
+				public class ShockSites : BaseCommandModule
+                {
+					ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockShockSites;
+                    ref bool GetSetting(GuildSettings cfg) => ref GetSetting(cfg.Linkfilter);
+                    string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+                    string EnabledState => "Enabled";
+                    string DisabledState => "Disabled";
+
+                    [GroupCommand, Description("Sets whether this module is enabled or not.")]
+                    public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                        "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                        "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                        )] bool? enableOrDisable = null)
+                    {
+                        // we can't access ref inside an async method, so make a copy
+                        var resultingVariable = false;
+
+                        await ctx.WithGuildSettings(cfg =>
+                        {
+                            ref var configVariable = ref GetSetting(cfg);
+
+                            resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                        });
+
+                        if (resultingVariable)
+                            await AfterEnable(ctx);
+                        else
+                            await AfterDisable(ctx);
+
+                        // if toggling, tell the user what the new value is
+                        if (!enableOrDisable.HasValue)
+                            await ctx.ElevatedRespondAsync(
+                                $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                        await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                    }
+
+                    Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+                    Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+                }
 
 				[Group("urlshorteners"), Aliases("urlshortener", "urlshort", "urls", "url", "u", "5"),
 				 Description("Toggle blocking URL shortener links for this guild.")]
-				public class UrlShorteners : LinkfilterConfigModule
-				{
-					protected override ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockUrlShorteners;
-				}
+				public class UrlShorteners : BaseCommandModule
+                {
+					ref bool GetSetting(GuildLinkfilterSettings lf) => ref lf.BlockUrlShorteners;
+                    ref bool GetSetting(GuildSettings cfg) => ref GetSetting(cfg.Linkfilter);
+                    string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+                    string EnabledState => "Enabled";
+                    string DisabledState => "Disabled";
+
+                    [GroupCommand, Description("Sets whether this module is enabled or not.")]
+                    public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                        "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                        "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                        )] bool? enableOrDisable = null)
+                    {
+                        // we can't access ref inside an async method, so make a copy
+                        var resultingVariable = false;
+
+                        await ctx.WithGuildSettings(cfg =>
+                        {
+                            ref var configVariable = ref GetSetting(cfg);
+
+                            resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                        });
+
+                        if (resultingVariable)
+                            await AfterEnable(ctx);
+                        else
+                            await AfterDisable(ctx);
+
+                        // if toggling, tell the user what the new value is
+                        if (!enableOrDisable.HasValue)
+                            await ctx.ElevatedRespondAsync(
+                                $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                        await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                    }
+
+                    Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+                    Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+                }
 			}
 
 			[Group("user"), Aliases("usr", "u"), Description("User exemption management commands.")]
-			public class User : ExemptMemberModule
-			{
-				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.Linkfilter.ExemptUserIds;
-			}
+			public class User : BaseCommandModule
+            {
+				ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.Linkfilter.ExemptUserIds;
+
+                [Command("exempt"), Aliases("ignore", "x", "i"), Description("Exempts a member from this module.")]
+                public Task ExemptAsync(CommandContext ctx,
+                    [RemainingText, Description("Who to exempt from this module")] DiscordMember obj)
+                    => BaseExemptAsync(ctx, obj);
+
+                [Command("unexempt"), Aliases("unignore", "ux", "u"), Description("Unexempts a member from this module.")]
+                public Task UnexemptAsync(CommandContext ctx,
+                    [RemainingText, Description("Who to unexempt from this module")] DiscordMember obj)
+                    => BaseExemptAsync(ctx, obj);
+
+                async Task BaseExemptAsync(CommandContext ctx, DiscordMember obj)
+                {
+                    await ctx.WithGuildSettings(cfg => GetExemptionList(cfg).Add(obj.Id));
+                    await AfterExemptAsync(ctx, obj);
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                public async Task BaseUnexemptAsync(CommandContext ctx, DiscordMember obj)
+                {
+                    await ctx.WithGuildSettings(cfg => GetExemptionList(cfg).Remove(obj.Id));
+                    await AfterUnexemptAsync(ctx, obj);
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                Task AfterExemptAsync(CommandContext ctx, DiscordMember obj) => Task.CompletedTask;
+                Task AfterUnexemptAsync(CommandContext ctx, DiscordMember obj) => Task.CompletedTask;
+            }
 
 			[Group("role"), Aliases("r"), Description("Role exemption management commands.")]
-			public class Role : ExemptRoleModule
-			{
-				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.Linkfilter.ExemptRoleIds;
-			}
+			public class Role : BaseCommandModule
+            {
+				ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.Linkfilter.ExemptRoleIds;
+
+                [Command("exempt"), Aliases("ignore", "x", "i"), Description("Exempts a role from this module.")]
+                public Task ExemptAsync(CommandContext ctx,
+                    [RemainingText, Description("What role to exempt from this module")] DiscordRole obj)
+                    => BaseExemptAsync(ctx, obj);
+
+                [Command("unexempt"), Aliases("unignore", "ux", "u"), Description("Unexempts a role from this module.")]
+                public Task UnexemptAsync(CommandContext ctx,
+                    [RemainingText, Description("What role to unexempt from this module")] DiscordRole obj)
+                    => BaseExemptAsync(ctx, obj);
+
+                async Task BaseExemptAsync(CommandContext ctx, DiscordRole obj)
+                {
+                    await ctx.WithGuildSettings(cfg => GetExemptionList(cfg).Add(obj.Id));
+                    await AfterExemptAsync(ctx, obj);
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                public async Task BaseUnexemptAsync(CommandContext ctx, DiscordRole obj)
+                {
+                    await ctx.WithGuildSettings(cfg => GetExemptionList(cfg).Remove(obj.Id));
+                    await AfterUnexemptAsync(ctx, obj);
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                Task AfterExemptAsync(CommandContext ctx, DiscordRole obj) => Task.CompletedTask;
+                Task AfterUnexemptAsync(CommandContext ctx, DiscordRole obj) => Task.CompletedTask;
+            }
 
 			[Group("guild"), Aliases("invite", "i"), Description("Invite target exemption management commands.")]
 			public class Guild : BaseCommandModule
@@ -233,32 +591,159 @@ namespace ModCore.Commands
 		}
 
 		[Group("rolestate"), Aliases("rs"), Description("Role State configuration commands.")]
-		public class RoleState : SimpleConfigModule
-		{
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.RoleState.Enable;
-			
-			[Group("role"), Aliases("r"), Description("Role exemption management commands.")]
-			public class Role : ExemptRoleModule
-			{
-				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.RoleState.IgnoredRoleIds;
-			}
+		public class RoleState : BaseCommandModule
+        {
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.RoleState.Enable;
+
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+
+            [Group("role"), Aliases("r"), Description("Role exemption management commands.")]
+			public class Role : BaseCommandModule
+            {
+				ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.RoleState.IgnoredRoleIds;
+
+                [Command("exempt"), Aliases("ignore", "x", "i"), Description("Exempts a role from this module.")]
+                public Task ExemptAsync(CommandContext ctx,
+                    [RemainingText, Description("What role to exempt from this module")] DiscordRole obj)
+                    => BaseExemptAsync(ctx, obj);
+
+                [Command("unexempt"), Aliases("unignore", "ux", "u"), Description("Unexempts a role from this module.")]
+                public Task UnexemptAsync(CommandContext ctx,
+                    [RemainingText, Description("What role to unexempt from this module")] DiscordRole obj)
+                    => BaseExemptAsync(ctx, obj);
+
+                async Task BaseExemptAsync(CommandContext ctx, DiscordRole obj)
+                {
+                    await ctx.WithGuildSettings(cfg => GetExemptionList(cfg).Add(obj.Id));
+                    await AfterExemptAsync(ctx, obj);
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                public async Task BaseUnexemptAsync(CommandContext ctx, DiscordRole obj)
+                {
+                    await ctx.WithGuildSettings(cfg => GetExemptionList(cfg).Remove(obj.Id));
+                    await AfterUnexemptAsync(ctx, obj);
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                Task AfterExemptAsync(CommandContext ctx, DiscordRole obj) => Task.CompletedTask;
+                Task AfterUnexemptAsync(CommandContext ctx, DiscordRole obj) => Task.CompletedTask;
+            }
 
             [Group("nickname"), Aliases("n", "nick"), Description("Whether to enable or disable nickname recovery")]
-            public class Nick : SimpleConfigModule
+            public class Nick : BaseCommandModule
             {
-                protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.RoleState.Nickname;
+                ref bool GetSetting(GuildSettings cfg) => ref cfg.RoleState.Nickname;
+
+                string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+                string EnabledState => "Enabled";
+                string DisabledState => "Disabled";
+
+                [GroupCommand, Description("Sets whether this module is enabled or not.")]
+                public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                    "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                    "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                    )] bool? enableOrDisable = null)
+                {
+                    // we can't access ref inside an async method, so make a copy
+                    var resultingVariable = false;
+
+                    await ctx.WithGuildSettings(cfg =>
+                    {
+                        ref var configVariable = ref GetSetting(cfg);
+
+                        resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                    });
+
+                    if (resultingVariable)
+                        await AfterEnable(ctx);
+                    else
+                        await AfterDisable(ctx);
+
+                    // if toggling, tell the user what the new value is
+                    if (!enableOrDisable.HasValue)
+                        await ctx.ElevatedRespondAsync(
+                            $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+                Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
             }
 
 			[Group("channel"), Aliases("c"), Description("Channel exemption management commands.")]
-			public class Channel : ExemptChannelModule
-			{
-				private DatabaseContextBuilder Database { get; }
+			public class Channel : BaseCommandModule
+            {
+                [Command("exempt"), Aliases("ignore", "x", "i"), Description("Exempts a channel from this module.")]
+                public Task ExemptAsync(CommandContext ctx,
+                    [RemainingText, Description("What channel to exempt from this module")] DiscordChannel obj)
+                    => BaseExemptAsync(ctx, obj);
+
+                [Command("unexempt"), Aliases("unignore", "ux", "u"), Description("Unexempts a channel from this module.")]
+                public Task UnexemptAsync(CommandContext ctx,
+                    [RemainingText, Description("What channel to unexempt from this module")] DiscordChannel obj)
+                    => BaseExemptAsync(ctx, obj);
+
+                async Task BaseExemptAsync(CommandContext ctx, DiscordChannel obj)
+                {
+                    await ctx.WithGuildSettings(cfg => GetExemptionList(cfg).Add(obj.Id));
+                    await AfterExemptAsync(ctx, obj);
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                public async Task BaseUnexemptAsync(CommandContext ctx, DiscordChannel obj)
+                {
+                    await ctx.WithGuildSettings(cfg => GetExemptionList(cfg).Remove(obj.Id));
+                    await AfterUnexemptAsync(ctx, obj);
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                private DatabaseContextBuilder Database { get; }
 
 				public Channel(DatabaseContextBuilder db) => this.Database = db;
 
-				protected override ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.RoleState.IgnoredChannelIds;
+				ISet<ulong> GetExemptionList(GuildSettings cfg) => cfg.RoleState.IgnoredChannelIds;
 
-				protected override async Task AfterExemptAsync(CommandContext ctx, DiscordChannel chn)
+				async Task AfterExemptAsync(CommandContext ctx, DiscordChannel chn)
 				{
 					using (var db = this.Database.CreateContext())
 					{
@@ -272,7 +757,7 @@ namespace ModCore.Commands
 					}
 				}
 
-				protected override async Task AfterUnexemptAsync(CommandContext ctx, DiscordChannel chn)
+				async Task AfterUnexemptAsync(CommandContext ctx, DiscordChannel chn)
 				{
 					var os = chn.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToArray();
 					using (var db = this.Database.CreateContext())
@@ -295,17 +780,91 @@ namespace ModCore.Commands
 		}
 
 		[Group("invisicop"), Aliases("ic"), Description("InvisiCop configuration commands.")]
-		public class InvisiCop : SimpleConfigModule
-		{
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.InvisiCop.Enable;
-		}
+		public class InvisiCop : BaseCommandModule
+        {
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.InvisiCop.Enable;
+
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+        }
 
 		[Group("actionlog"), Aliases("al"), Description("ActionLog configuration commands.")]
-		public class ActionLog : SimpleConfigModule
-		{
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.ActionLog.Enable;
-			
-			protected override Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
+		public class ActionLog : BaseCommandModule
+        {
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.ActionLog.Enable;
+
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+            "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+            "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+        )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
 				"ActionLog enabled.\n" +
 				"If you haven't done this yet, Please execute the `config actionlog setwebhook` command.");
 
@@ -323,11 +882,47 @@ namespace ModCore.Commands
 		}
 
 		[Group("autorole"), Aliases("ar"), Description("AutoRole configuration commands.")]
-		public class AutoRole : SimpleConfigModule
-		{
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.AutoRole.Enable;
+		public class AutoRole : BaseCommandModule
+        {
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.AutoRole.Enable;
 
-			protected override Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
 					"AutoRole enabled.\n" +
 					"If you haven't done this yet, Please execute the `config autorole setrole` command.");
 
@@ -397,11 +992,47 @@ namespace ModCore.Commands
 		}
 
 		[Group("joinlog"), Aliases("j"), Description("JoinLog configuration commands.")]
-		public class JoinLog : SimpleConfigModule
-		{
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.JoinLog.Enable;
+		public class JoinLog : BaseCommandModule
+        {
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.JoinLog.Enable;
 
-			protected override Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
 					"Joinlog enabled.\n" +
 					"If you haven't done this yet, Please execute `config joinlog setchannel` command");
 
@@ -436,19 +1067,92 @@ namespace ModCore.Commands
 		}
 
 		[Group("starboard"), Aliases("star"), Description("Starboard configuration commands.")]
-		public class Starboard : SimpleConfigModule
-		{
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.Starboard.Enable;
+		public class Starboard : BaseCommandModule
+        {
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.Starboard.Enable;
 
-			protected override Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
 				"Starboard enabled.\n" +
 				"If you haven't done this yet, Please execute `config starboard setchannel` command");
 			
 			[Group("allownsfw"), Aliases("nsfw"), Description("Sets whether or not to allow NSFW stars in this guild.")]
-			public class AllowNsfw : SimpleConfigModule
-			{
-				protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.Starboard.AllowNSFW;
-			}
+			public class AllowNsfw : BaseCommandModule
+            {
+				ref bool GetSetting(GuildSettings cfg) => ref cfg.Starboard.AllowNSFW;
+                string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+                string EnabledState => "Enabled";
+                string DisabledState => "Disabled";
+
+                [GroupCommand, Description("Sets whether this module is enabled or not.")]
+                public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                    "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                    "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                    )] bool? enableOrDisable = null)
+                {
+                    // we can't access ref inside an async method, so make a copy
+                    var resultingVariable = false;
+
+                    await ctx.WithGuildSettings(cfg =>
+                    {
+                        ref var configVariable = ref GetSetting(cfg);
+
+                        resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                    });
+
+                    if (resultingVariable)
+                        await AfterEnable(ctx);
+                    else
+                        await AfterDisable(ctx);
+
+                    // if toggling, tell the user what the new value is
+                    if (!enableOrDisable.HasValue)
+                        await ctx.ElevatedRespondAsync(
+                            $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+                Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+            }
 
 			[Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's Starboard.")]
 			public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to log stars to")]DiscordChannel channel)
@@ -522,11 +1226,49 @@ namespace ModCore.Commands
 		}
 
 		[Group("globalwarn"), Aliases("gw"), Description("GlobalWarn configuration commands.")]
-		public class GlobalWarn : SimpleConfigModule
-		{
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.GlobalWarn.Enable;
+		public class GlobalWarn : BaseCommandModule
+        {
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.GlobalWarn.Enable;
 
-			[Command("changemode"), Aliases("cm"),
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+
+            [Command("changemode"), Aliases("cm"),
 			 Description("Sets the GlobalWarn mode.")]
 			public async Task SetRoleAsync(CommandContext ctx)
 			{
@@ -541,7 +1283,7 @@ Type an option.");
 				var msg = await iv.WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id &&
 					(xm.Content.ToLower() == "none" || xm.Content.ToLower() == "owner" || xm.Content.ToLower() == "joinlog" || xm.Content == "1" || xm.Content == "2" || xm.Content == "3"),
 				TimeSpan.FromSeconds(45));
-				if (msg == null)
+				if (msg.Result == null)
 				{
 					await ctx.SafeRespondAsync("Operation aborted.");
 					return;
@@ -549,7 +1291,7 @@ Type an option.");
 				
 				await ctx.WithGuildSettings(async cfg =>
 				{
-					switch (msg.Message.Content)
+					switch (msg.Result.Content)
 					{
 						case "none":
 						case "1":
@@ -653,20 +1395,94 @@ Type an option.");
 			
 			[Group("notify"), Aliases("warn", "not", "log", "n", "w", "l"), 
 			 Description("Whether or not to send a message in chat when someone tries to execute a disabled command.")]
-			public class Notify : SimpleConfigModule
-			{
-				protected override string CurrentModuleName => "notify on disabled command call";
+			public class Notify : BaseCommandModule
+            {
+				string CurrentModuleName => "notify on disabled command call";
 				
-				protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.NotifyDisabledCommand;
-			}
+				ref bool GetSetting(GuildSettings cfg) => ref cfg.NotifyDisabledCommand;
+
+                string EnabledState => "Enabled";
+                string DisabledState => "Disabled";
+
+                [GroupCommand, Description("Sets whether this module is enabled or not.")]
+                public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                    "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                    "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                    )] bool? enableOrDisable = null)
+                {
+                    // we can't access ref inside an async method, so make a copy
+                    var resultingVariable = false;
+
+                    await ctx.WithGuildSettings(cfg =>
+                    {
+                        ref var configVariable = ref GetSetting(cfg);
+
+                        resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                    });
+
+                    if (resultingVariable)
+                        await AfterEnable(ctx);
+                    else
+                        await AfterDisable(ctx);
+
+                    // if toggling, tell the user what the new value is
+                    if (!enableOrDisable.HasValue)
+                        await ctx.ElevatedRespondAsync(
+                            $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                }
+
+                Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+                Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+            }
 		}
 
 		[Group("welcome"), Aliases("w"), Description("Welcome message settings commands.")]
-		public class Welcome : SimpleConfigModule
-		{
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.Welcome.Enable;
+		public class Welcome : BaseCommandModule
+        {
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.Welcome.Enable;
 
-			[Command("set"), Aliases("setmessage"),
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+
+            [Command("set"), Aliases("setmessage"),
 			 Description(@"Sets welcome message.
 Welcome messages support a handful of tags that get parsed to their actual values:
 {{username}}, {{discriminator}}, {{mention}}, {{userid}},
@@ -703,11 +1519,47 @@ Welcome messages support a handful of tags that get parsed to their actual value
 			 "nicknamechange", "namechange", "nickchange",
 
 			 "nnf", "nncf", "ncf", "nf", "nnc", "nc", "n"), Description("Nickname change requests system settings.")]
-		public class NicknameChanging : SimpleConfigModule
-		{
-			protected override ref bool GetSetting(GuildSettings cfg) => ref cfg.RequireNicknameChangeConfirmation;
+		public class NicknameChanging : BaseCommandModule
+        {
+			ref bool GetSetting(GuildSettings cfg) => ref cfg.RequireNicknameChangeConfirmation;
 
-			protected override Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
 				"Nickname change confirmations enabled.\n" +
 				"If you haven't done this yet, Please execute `config nicknamechange setchannel` command");
 

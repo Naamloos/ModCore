@@ -55,7 +55,7 @@ namespace ModCore.Listeners
                 }
                 else if (settings.GlobalWarn.WarnLevel == GlobalWarnLevel.JoinLog)
                 {
-                    await e.Guild.Channels.First(x => x.Id == (ulong)settings.JoinLog.ChannelId).ElevatedMessageAsync(embed: embed);
+                    await e.Guild.Channels.First(x => x.Key == (ulong)settings.JoinLog.ChannelId).Value.ElevatedMessageAsync(embed: embed);
                 }
             }
         }
