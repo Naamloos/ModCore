@@ -208,10 +208,10 @@ namespace ModCore.Commands
 			var mute = ctx.Guild.GetRole(b);
 			if (b == 0 || mute == null)
 			{
-				var setupStatus = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
-				mute = setupStatus.Role;
-				guildSettings.MuteRoleId = setupStatus.Role.Id;
-				await ctx.SafeRespondAsync("Mute role is not configured or missing, " + setupStatus.Message);
+				var (Role, Message) = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
+				mute = Role;
+				guildSettings.MuteRoleId = Role.Id;
+				await ctx.SafeRespondAsync("Mute role is not configured or missing, " + Message);
 				await ctx.SetGuildSettingsAsync(guildSettings);
 			}
 			await Utils.GuaranteeMuteRoleDeniedEverywhere(ctx.Guild, mute);
@@ -370,10 +370,10 @@ namespace ModCore.Commands
 			var mute = ctx.Guild.GetRole(b);
 			if (b == 0 || mute == null)
 			{
-				var setupStatus = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
-				mute = setupStatus.Role;
-				guildSettings.MuteRoleId = setupStatus.Role.Id;
-				await ctx.SafeRespondAsync("Mute role is not configured or missing, " + setupStatus.Message);
+				var (Role, Message) = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
+				mute = Role;
+				guildSettings.MuteRoleId = Role.Id;
+				await ctx.SafeRespondAsync("Mute role is not configured or missing, " + Message);
 				await ctx.SetGuildSettingsAsync(guildSettings);
 			}
 			await Utils.GuaranteeMuteRoleDeniedEverywhere(ctx.Guild, mute);
@@ -1151,6 +1151,29 @@ namespace ModCore.Commands
                 var fctx = ctx.CommandsNext.CreateFakeContext(ctx.User, ctx.Channel, s.Replace("\\;", ";"), p, cmdobj);
                 await ctx.CommandsNext.ExecuteCommandAsync(fctx);
             }
+        }
+
+        [Command("snipe")]
+        [Description("Snipes last deleted message")]
+        public async Task SnipeAsync(CommandContext ctx)
+        {
+            if (this.Shared.DeletedMessages.ContainsKey(ctx.Channel.Id))
+            {
+                var m = this.Shared.DeletedMessages[ctx.Channel.Id];
+
+                var content = m.Content;
+                if (content.Length > 500)
+                    content = content.Substring(0, 500) + "...";
+
+                var embed = new DiscordEmbedBuilder().WithAuthor($"{m.Author.Username}#{m.Author.Discriminator}", iconUrl: m.Author.GetAvatarUrl(ImageFormat.Png));
+
+                if(!string.IsNullOrEmpty(m.Content))
+                    embed.WithDescription(m.Content);
+
+                await ctx.RespondAsync(embed: embed);
+                return;
+            }
+            await ctx.RespondAsync("No message to snipe!");
         }
     }
 }

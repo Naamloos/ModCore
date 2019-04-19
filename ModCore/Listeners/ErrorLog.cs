@@ -131,9 +131,9 @@ namespace ModCore.Listeners
                     .WithTitle("Command **" + attemptedName.Truncate(200) + "** not found")
                     .WithDescription("Did you mean...");
 
-                foreach(var c in ordered)
+                foreach(var (qualifiedName, description) in ordered)
                 {
-                    embed.AddField(c.qualifiedName.Truncate(256), c.description?.Truncate(999) ?? "<no desc>");
+                    embed.AddField(qualifiedName.Truncate(256), description?.Truncate(999) ?? "<no desc>");
                 }
 
                 await ctx.RespondAsync(embed: embed);

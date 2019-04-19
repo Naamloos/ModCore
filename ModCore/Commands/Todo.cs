@@ -172,8 +172,10 @@ namespace ModCore.Commands
         {
             using (var db = Database.CreateContext())
             {
-                var udata = new DatabaseUserData();
-                udata.UserId = (long)ctx.Member.Id;
+                var udata = new DatabaseUserData
+                {
+                    UserId = (long)ctx.Member.Id
+                };
                 if (db.UserDatas.Any(x => x.UserId == (long)ctx.Member.Id))
                     udata = db.UserDatas.First(x => x.UserId == (long)ctx.Member.Id);
 

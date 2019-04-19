@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using ModCore.Api;
 using ModCore.CoreApi;
 using ModCore.Listeners;
@@ -25,6 +27,7 @@ namespace ModCore.Entities
         public string DefaultPrefix { get; internal set; }
 		public int ReadysReceived { get; internal set; } = 0;
 		public List<Permissions> AllPerms { get; internal set; } = new List<Permissions>();
+        public ConcurrentDictionary<ulong, DiscordMessage> DeletedMessages = new ConcurrentDictionary<ulong, DiscordMessage>();
 
         /// <summary>
         /// Every command, top-level or not, along with full qualified name.
