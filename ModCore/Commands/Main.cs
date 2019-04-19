@@ -1175,5 +1175,19 @@ namespace ModCore.Commands
             }
             await ctx.RespondAsync("No message to snipe!");
         }
+
+        [Command("cooldown")]
+        [Description("Sets a custom message cooldown")]
+        [RequirePermissions(Permissions.ManageChannels)]
+        public async Task CooldownAsync(CommandContext ctx, int cooldown)
+        {
+            if (cooldown <= 21600 && cooldown >= 0)
+            {
+                await ctx.Channel.ModifyAsync(x => x.PerUserRateLimit = cooldown);
+                await ctx.RespondAsync($"Set cooldown to {cooldown} seconds.");
+                return;
+            }
+            await ctx.RespondAsync($"Invalid cooldown: {cooldown}");
+        }
     }
 }
