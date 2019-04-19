@@ -12,6 +12,8 @@ namespace ModCore.Listeners
         [AsyncListener(EventTypes.MessageDeleted)]
         public static async Task MessageSniped(ModCoreShard bot, MessageDeleteEventArgs e)
         {
+            await Task.Yield();
+
             if(!string.IsNullOrEmpty(e.Message.Content) || e.Message.Embeds.Count > 0)
             {
                 if (bot.SharedData.DeletedMessages.ContainsKey(e.Channel.Id))

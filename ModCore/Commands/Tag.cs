@@ -232,7 +232,7 @@ namespace ModCore.Commands
                 {
                     string tags = string.Join("\n", list.Select(x => x.Name));
                     var p = this.Interactivity.GeneratePagesInEmbed(tags, SplitType.Line);
-                    await this.Interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.Member, p, new PaginationEmojis(ctx.Client));
+                    await this.Interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.Member, p, new PaginationEmojis());
                 }
             }
         }

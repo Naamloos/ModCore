@@ -99,8 +99,9 @@ namespace ModCore.Listeners
                     .Select(xid => (ulong)xid)
                     .Except(rs.IgnoredRoleIds)
                     .Select(xid => gld.GetRole(xid))
-                    .Where(xr => xr != null);
-                    var roles = (List<DiscordRole>)oroles;
+                    .Where(xr => xr != null).ToList();
+
+                    var roles = oroles;
 
                     var highestself = ea.Guild.CurrentMember.Roles.Select(x => x.Position).Max();
                     roles.RemoveAll(x => x.Position > highestself);

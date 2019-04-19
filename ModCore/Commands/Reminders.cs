@@ -125,7 +125,7 @@ If in doubt, just try it! You can always clear the reminders later.
                 pages.Add(new Page("", cembed));
 
             if (pages.Count > 1)
-                await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages.ToArray(), new PaginationEmojis(ctx.Client));
+                await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages.ToArray(), new PaginationEmojis());
             else
                 await ctx.ElevatedRespondAsync(embed: pages.First().Embed);
         }
