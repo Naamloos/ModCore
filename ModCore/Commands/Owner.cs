@@ -34,7 +34,7 @@ namespace ModCore.Commands
 	    [Command("dbtest"), Hidden]
 	    public async Task DbTestAsync(CommandContext ctx, [RemainingText] string s)
 	    {
-	        if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
+	        if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
 	        {
 	            await ctx.SafeRespondAsync("You do not have permission to use this command!");
 	            return;
@@ -55,7 +55,7 @@ namespace ModCore.Commands
 	    [Command("exit"), Aliases("e"), Hidden]
         public async Task ExitAsync(CommandContext ctx)
         {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
+            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
                 await ctx.SafeRespondAsync("You do not have permission to use this command!");
                 return;
@@ -85,7 +85,7 @@ namespace ModCore.Commands
 		[Command("apitoken"), Hidden]
 		public async Task ApiToken(CommandContext ctx)
 		{
-			if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
+			if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
 			{
 				await ctx.SafeRespondAsync("You do not have permission to use this command!");
 				return;
@@ -99,7 +99,7 @@ namespace ModCore.Commands
         [Command("testupdate"), Aliases("t"), Hidden]
         public async Task ThrowAsync(CommandContext ctx)
         {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
+            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
                 await ctx.SafeRespondAsync("You do not have permission to use this command!");
                 return;
@@ -110,7 +110,7 @@ namespace ModCore.Commands
         [Command("sudo"), Aliases("s"), Hidden]
         public async Task SudoAsync(CommandContext ctx, [Description("Member to sudo")]DiscordMember m, [Description("Command to sudo"), RemainingText]string command)
         {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
+            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
                 await ctx.SafeRespondAsync("You do not have permission to use this command!");
                 return;
@@ -125,7 +125,7 @@ namespace ModCore.Commands
         [Command("sudoowner"), Aliases("so"), Hidden]
         public async Task SudoOwnerAsync(CommandContext ctx, [RemainingText, Description("Command to sudo")]string command)
         {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
+            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
                 await ctx.SafeRespondAsync("You do not have permission to use this command!");
                 return;
@@ -140,7 +140,7 @@ namespace ModCore.Commands
         [Command("update"), Aliases("u"), Hidden]
         public async Task UpdateAsync(CommandContext ctx)
         {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
+            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
                 await ctx.SafeRespondAsync("You do not have permission to use this command!");
                 return;
@@ -192,7 +192,7 @@ namespace ModCore.Commands
         [Command("botmanagers"), Aliases("bm"), Hidden]
         public async Task BotManagersAsync(CommandContext ctx)
         {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && ctx.Client.CurrentApplication.Owner != ctx.User)
+            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
                 await ctx.SafeRespondAsync("You do not have permission to use this command!");
                 return;

@@ -969,13 +969,13 @@ namespace ModCore.Commands
 					case "namedesc":
 						vb = CommandErrorVerbosity.NameDesc;
 						return Task.FromResult(true);
-					case "exception" when ctx.Client.CurrentApplication.Owner.Id == ctx.Member.Id:
+					case "exception" when ctx.Client.CurrentApplication.Owners.Select(x =>x.Id).Contains(ctx.Member.Id):
 						vb = CommandErrorVerbosity.Exception;
 						return Task.FromResult(true);
 					default:
 						vb = CommandErrorVerbosity.None;
 						
-						if (ctx.Client.CurrentApplication.Owner.Id == ctx.Member.Id)
+						if (ctx.Client.CurrentApplication.Owners.Select(x => x.Id).Contains(ctx.Member.Id))
 						{
 							return ctx.ElevatedRespondAsync(
 									"Unsupported verbosity level.\n" +

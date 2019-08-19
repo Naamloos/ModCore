@@ -73,8 +73,10 @@ namespace ModCore.Logic
 
             if (s == "tomorrow")
                 return (Continue, time + (ulong) Unit.Day);
-            
+
             // TODO maybe restore "next X" functionality?
+            if (DateTime.TryParse(s, out var dt))
+                return (Continue, (ulong)dt.Subtract(DateTime.Now).TotalMilliseconds);
 
             // read values like "5 seconds"
             if (DateLexer.TryIsNumber(s, out var i))
@@ -94,7 +96,7 @@ namespace ModCore.Logic
                 // return N * MsValue
                 return (Continue, time + ((ulong) tk * i));
             }
-            
+
             // read compound values like "15h14min" or "5s"
             if (TryParseCompound(s, out var j))
                 return (Continue, time + j);

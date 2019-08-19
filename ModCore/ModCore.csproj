@@ -18,10 +18,10 @@
   <ItemGroup>
     <PackageReference Include="Chronic-netstandard" Version="0.3.2.4" />
     <PackageReference Include="DiscordBotsList.Api" Version="1.1.0" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00594" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00594" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00594" />
-    <PackageReference Include="DSharpPlus.WebSocket.WebSocket4NetCore" Version="4.0.0-nightly-00594" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00624" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00624" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00624" />
+    <PackageReference Include="DSharpPlus.WebSocket.WebSocket4NetCore" Version="4.0.0-nightly-00624" />
     <PackageReference Include="F23.StringSimilarity" Version="3.0.0" />
     <PackageReference Include="Humanizer.Core" Version="2.4.2" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.9" />

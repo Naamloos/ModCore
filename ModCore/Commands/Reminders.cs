@@ -150,7 +150,7 @@ If in doubt, just try it! You can always clear the reminders later.
 				content += "...";
 			}
 
-			text = $"**{message.Author.Username}#{message.Author.Discriminator}:**\n{content}\n\n({message.Id})\n{message.JumpLink}";
+			text = $"**{message.Author.Username}#{message.Author.Discriminator}:**\n{content}\n\n({message.Id})\n{Shared.Emojis.JumpLink.ToString()} {message.JumpLink}";
 
 			var now = DateTimeOffset.UtcNow;
 			var dispatchAt = now + duration;

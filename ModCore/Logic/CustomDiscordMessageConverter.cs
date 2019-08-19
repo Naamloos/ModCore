@@ -26,7 +26,7 @@ namespace ModCore.Logic
 			}
 			else
 			{
-				var conv = new DiscordMessageConverter();
+				var conv = new DiscordMessageConverter() as IArgumentConverter<DiscordMessage>;
 				return await conv.ConvertAsync(value, ctx);
 			}
 		}

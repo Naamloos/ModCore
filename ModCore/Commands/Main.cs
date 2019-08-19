@@ -705,7 +705,8 @@ namespace ModCore.Commands
 						var case5 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
 						if (!case5.TimedOut)
 						{
-							var ts = await new DateTimeOffsetConverter().ConvertAsync(case5.Result.Content, ctx);
+                            var dtoc = new DateTimeOffsetConverter() as IArgumentConverter<DateTimeOffset>;
+							var ts = await dtoc.ConvertAsync(case5.Result.Content, ctx);
 							if (ts.HasValue)
 							{
 								embed.WithTimestamp(ts.Value);
@@ -874,7 +875,7 @@ namespace ModCore.Commands
 						var case12 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
 						if (!case12.TimedOut)
 						{
-							var dcc = new DiscordChannelConverter();
+							var dcc = new DiscordChannelConverter() as IArgumentConverter<DiscordChannel>;
 							var channel = await dcc.ConvertAsync(case12.Result.Content, ctx);
 							if (channel.HasValue)
 							{
@@ -955,7 +956,7 @@ namespace ModCore.Commands
 		{
 			var embed = new DiscordEmbedBuilder()
 				.WithTitle($"Message by {message.Author.Username}#{message.Author.Discriminator}")
-				.WithDescription($"{message.Content}\n\n_([jump](https://discordapp.com/channels/{message.Channel.GuildId}/{message.ChannelId}/{message.Id}))_")
+				.WithDescription($"{message.Content}\n\n[{this.Shared.Emojis.JumpLink.ToString()}](https://discordapp.com/channels/{message.Channel.GuildId}/{message.ChannelId}/{message.Id})")
 				.WithFooter($" Quoted by {ctx.Member.Username}#{ctx.Member.Discriminator}. ID: {message.Id}.", ctx.Member.GetAvatarUrl(ImageFormat.Png))
 				.WithThumbnailUrl(message.Author.GetAvatarUrl(ImageFormat.Png))
 				.WithTimestamp(message.Timestamp)

@@ -19,7 +19,7 @@ namespace ModCore.Logic
 		public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
 		{
 #if !HSN_DEBUG_ALWAYS_COMMAND_CHECK
-			if (ctx.Member.IsOwner || ctx.User.Id == ctx.Client.CurrentApplication.Owner.Id) return true;
+			if (ctx.Member.IsOwner || ctx.Client.CurrentApplication.Owners.Select(x => x.Id).Contains(ctx.User.Id)) return true;
 #endif
 			
 			// don't use GetGuildSettings here

@@ -28,6 +28,7 @@ namespace ModCore.Entities
 		public int ReadysReceived { get; internal set; } = 0;
 		public List<Permissions> AllPerms { get; internal set; } = new List<Permissions>();
         public ConcurrentDictionary<ulong, DiscordMessage> DeletedMessages = new ConcurrentDictionary<ulong, DiscordMessage>();
+        public MCoreEmojis Emojis;
 
         /// <summary>
         /// Every command, top-level or not, along with full qualified name.
@@ -46,6 +47,7 @@ namespace ModCore.Entities
         public void Initialize(ModCoreShard shard)
         {
             Commands = shard.Commands.RegisteredCommands.SelectMany(SelectCommandsFromDict).Distinct().ToArray();
+            Emojis = MCoreEmojis.LoadEmojis(shard.Client);
         }
 
         private static IEnumerable<(string name, Command cmd)> SelectCommandsFromDict(KeyValuePair<string, Command> c)
