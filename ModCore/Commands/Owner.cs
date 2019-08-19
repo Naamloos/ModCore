@@ -137,57 +137,57 @@ namespace ModCore.Commands
             await ctx.CommandsNext.ExecuteCommandAsync(fctx);
         }
 
-        [Command("update"), Aliases("u"), Hidden]
-        public async Task UpdateAsync(CommandContext ctx)
-        {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-            {
-                await ctx.SafeRespondAsync("You do not have permission to use this command!");
-                return;
-            }
-            var m = await ctx.SafeRespondAsync($"Running update script...");
-            const string fn = "update";
-            if (File.Exists("update.sh"))
-            {
-                const string file = fn + ".sh";
-                var proc = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "nohup",
-                        Arguments = $"bash {file} {Process.GetCurrentProcess().Id} {ctx.Guild.Id} {ctx.Channel.Id}",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    }
-                };
-                proc.Start();
-                await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
-            }
-            else if (File.Exists("update.bat"))
-            {
-                const string file = fn + ".bat";
-                var proc = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = file,
-                        Arguments = $"{ctx.Guild.Id} {ctx.Channel.Id}",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
-                    }
-                };
-                proc.Start();
-                await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
-            }
-            else
-            {
-                await m.ModifyAsync("**‼ Your update script has not been found. ‼**\n\nPlease place `update.sh` (Linux) or `update.bat` (Windows) in your ModCore directory.");
-                return;
-            }
-            this.Shared.CTS.Cancel();
-        }
+        //[Command("update"), Aliases("u"), Hidden]
+        //public async Task UpdateAsync(CommandContext ctx)
+        //{
+        //    if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
+        //    {
+        //        await ctx.SafeRespondAsync("You do not have permission to use this command!");
+        //        return;
+        //    }
+        //    var m = await ctx.SafeRespondAsync($"Running update script...");
+        //    const string fn = "update";
+        //    if (File.Exists("update.sh"))
+        //    {
+        //        const string file = fn + ".sh";
+        //        var proc = new Process
+        //        {
+        //            StartInfo = new ProcessStartInfo
+        //            {
+        //                FileName = "nohup",
+        //                Arguments = $"bash {file} {Process.GetCurrentProcess().Id} {ctx.Guild.Id} {ctx.Channel.Id}",
+        //                UseShellExecute = false,
+        //                RedirectStandardOutput = true,
+        //                CreateNoWindow = true
+        //            }
+        //        };
+        //        proc.Start();
+        //        await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
+        //    }
+        //    else if (File.Exists("update.bat"))
+        //    {
+        //        const string file = fn + ".bat";
+        //        var proc = new Process
+        //        {
+        //            StartInfo = new ProcessStartInfo
+        //            {
+        //                FileName = file,
+        //                Arguments = $"{ctx.Guild.Id} {ctx.Channel.Id}",
+        //                UseShellExecute = false,
+        //                RedirectStandardOutput = true,
+        //                CreateNoWindow = true
+        //            }
+        //        };
+        //        proc.Start();
+        //        await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
+        //    }
+        //    else
+        //    {
+        //        await m.ModifyAsync("**‼ Your update script has not been found. ‼**\n\nPlease place `update.sh` (Linux) or `update.bat` (Windows) in your ModCore directory.");
+        //        return;
+        //    }
+        //    this.Shared.CTS.Cancel();
+        //}
 
         [Command("botmanagers"), Aliases("bm"), Hidden]
         public async Task BotManagersAsync(CommandContext ctx)
