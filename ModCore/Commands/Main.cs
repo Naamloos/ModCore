@@ -48,6 +48,7 @@ namespace ModCore.Commands
 				.WithColor(new DiscordColor("#C1272D"))
 				.WithTitle("ModCore")
 				.WithDescription("A powerful moderating bot written on top of DSharpPlus")
+                .AddField("Main developer", "[Naamloos](https://github.com/Naamloos)")
 				.AddField("Special thanks to these contributors:",
 				"[uwx](https://github.com/uwx)\n" +
 				"[jcryer](https://github.com/jcryer)\n" +
@@ -56,7 +57,7 @@ namespace ModCore.Commands
 				"[DrCreo](https://github.com/DrCreo)\n" +
 				"[aexolate](https://github.com/aexolate)\n" +
 				"[Drake103](https://github.com/Drake103)\n")
-				.AddField("Contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/NaamloosDT/ModCore)")
+				.AddField("Contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
 				.WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
 				.Build();
 
@@ -98,7 +99,7 @@ namespace ModCore.Commands
 			var app = ctx.Client.CurrentApplication;
 			if (app.IsPublic != null && (bool)app.IsPublic)
 				await ctx.SafeRespondAsync(
-					$"Add ModCore to your server!\n<https://modcore.naamloos.me/info/invite>");
+					$"Add ModCore to your server!\n<https://modcore.naamloos.dev/info/invite>");
 			else
 				await ctx.SafeRespondAsync("I'm sorry Mario, but this instance of ModCore has been set to private!");
 		}
