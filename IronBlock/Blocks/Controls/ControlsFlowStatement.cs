@@ -1,0 +1,45 @@
+using Microsoft.CodeAnalysis;
+using System;
+using System.Threading.Tasks;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+
+namespace IronBlock.Blocks.Controls
+{
+    public class ControlsFlowStatement : IBlock
+    {
+        public override async Task<object> EvaluateAsync(Context context)
+        {
+            var flow = this.Fields.Get("FLOW");
+            if (flow == "CONTINUE")
+            {
+                context.EscapeMode = EscapeMode.Continue;
+                return null;
+            }
+
+            if (flow == "BREAK")
+            {
+                context.EscapeMode = EscapeMode.Break;
+                return null;
+            }
+
+            throw new NotSupportedException($"{flow} flow is not supported");
+        }
+
+		public override SyntaxNode Generate(Context context)
+		{
+			var flow = this.Fields.Get("FLOW");
+			if (flow == "CONTINUE")
+			{
+				return ContinueStatement();
+			}
+
+			if (flow == "BREAK")
+			{
+				return BreakStatement();
+			}
+
+			throw new NotSupportedException($"{flow} flow is not supported");
+		}
+	}
+
+}
