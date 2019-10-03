@@ -10,7 +10,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query.Expressions;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
@@ -256,8 +256,8 @@ namespace ModCore.Commands
 	        }
 	    }
 
-		private static Task<List<T>> QueryAsync<T>(IQueryable<T> set, string query) where T : class 
-			=> set.FromSql(query).ToListAsync();
+        private static Task<List<T>> QueryAsync<T>(DbSet<T> set, string query) where T : class
+            => set.FromSqlRaw(query).ToListAsync();
 		
 		private class BoxingList : IList, IList<object>, IReadOnlyList<object>
 		{

@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Api;
 using ModCore.CoreApi;
