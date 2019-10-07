@@ -1,42 +1,45 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
     <LangVersion>latest</LangVersion>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <!-- In order to make the build process copy all referenced dll files from NuGet
-         packages from the cache folder into the build output, set this property inside a <PropertyGroup>: -->
+    <RestoreAdditionalProjectSources>
+      https://nuget.emzi0767.com/api/v3/index.json
+    </RestoreAdditionalProjectSources>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DSharpPlusVersion>4.0.0-beta-00368</DSharpPlusVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>RELEASE;NETCOREAPP;NETCOREAPP2_1</DefineConstants>
+    <DefineConstants>RELEASE;NETCOREAPP;NETCOREAPP3_0</DefineConstants>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Chronic-netstandard" Version="0.3.2.4" />
-    <PackageReference Include="DiscordBotsList.Api" Version="1.1.0" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00624" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00624" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00624" />
-    <PackageReference Include="DSharpPlus.WebSocket.WebSocket4NetCore" Version="4.0.0-nightly-00624" />
+    <PackageReference Include="DiscordBotsList.Api" Version="1.3.0" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-*" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-*" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-*" />
+    <PackageReference Include="DSharpPlus.WebSocket.WebSocket4NetCore" Version="4.0.0-nightly-*" />
     <PackageReference Include="F23.StringSimilarity" Version="3.0.0" />
-    <PackageReference Include="Humanizer.Core" Version="2.4.2" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.9" />
+    <PackageReference Include="Humanizer.Core" Version="2.7.9" />
     <PackageReference Include="Microsoft.CodeAnalysis.Scripting" Version="2.8.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.3" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.3" />
-    <PackageReference Include="Microsoft.Experimental.Collections" Version="1.0.3-alpha" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.1" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.1" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.4.3" />
-    <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Experimental.Collections" Version="1.0.6-e190117-3" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.0.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.7.0" />
+    <PackageReference Include="System.Drawing.Common" Version="4.6.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
+   
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IronBlock\IronBlock.csproj" />

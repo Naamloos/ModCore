@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Rewrite.Internal.IISUrlRewrite;
 using ModCore.Entities;
 using ModCore.Logic.EntityFramework.AttributeImpl;
 

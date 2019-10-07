@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Data.OData.Query.SemanticAst;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using ModCore.Api;
 using ModCore.CoreApi;
 using ModCore.Database;
@@ -136,7 +136,7 @@ namespace ModCore
                 await Task.Delay(500);
         }
 
-		private IWebHost BuildWebHost()
+		private IHost BuildWebHost()
 		{
 			var container = new CoreContainer
 			{
@@ -145,10 +145,13 @@ namespace ModCore
 
 			var mservice = new ServiceDescriptor(container.GetType(), container);
 
-			return WebHost.CreateDefaultBuilder(new string[0])
-				.UseStartup<Startup>()
-				.ConfigureServices(x => x.Add(mservice))
-				.UseUrls("http://0.0.0.0:6969")
+			return new HostBuilder()
+				.UseContentRoot(Directory.GetCurrentDirectory())
+				.ConfigureWebHostDefaults(webBuilder => {
+					webBuilder.UseStartup<Startup>()
+						.ConfigureServices(x => x.Add(mservice))
+						.UseUrls("http://0.0.0.0:6969");
+				})
 				.Build();
 		}
 	    

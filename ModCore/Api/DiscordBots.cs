@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using DiscordBotsList.Api;
+using DiscordBotsList.Api.Objects;
 
 namespace ModCore.Api
 {

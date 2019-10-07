@@ -25,6 +25,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Collections.Extensions;
 using Microsoft.EntityFrameworkCore;
 using ModCore.Database;
 
