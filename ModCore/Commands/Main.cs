@@ -61,11 +61,11 @@ namespace ModCore.Commands
                     "[Drake103](https://github.com/Drake103) and " +
                     "[Izumemori](https://github.com/Izumemori)")
                 .AddField("Environment", 
-                    $"*OS Version:* {System.Runtime.InteropServices.RuntimeInformation.OSDescription}" +
-                    $"\n*Framework Version:* {Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName}" +
-                    $"\n*DSharpPlus version:* {ctx.Client.VersionString}" +
-                    $"\n*Server count:* {this.Shared.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()}" +
-                    $"\n*Shard count:* {this.Shared.ModCore.Shards.Count}")
+                    $"*OS:* {System.Runtime.InteropServices.RuntimeInformation.OSDescription}" +
+                    $"\n*Framework:* {Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName}" +
+                    $"\n*DSharpPlus:* {ctx.Client.VersionString}" +
+                    $"\n*Servers:* {this.Shared.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()}" +
+                    $"\n*Shards:* {this.Shared.ModCore.Shards.Count}")
 				.AddField("Contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
 				.WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
 				.Build();
