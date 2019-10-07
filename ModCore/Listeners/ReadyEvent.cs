@@ -13,10 +13,8 @@ namespace ModCore.Listeners
 		[AsyncListener(EventTypes.Ready)]
 		public static async Task BotListUpdate(ModCoreShard bot, ReadyEventArgs e)
 		{
-			await bot.SharedData.BotsDiscordPl.UpdateShardAsync(bot.ShardId, e.Client.Guilds.Count);
-			bot.SharedData.ReadysReceived++;
-			if (bot.SharedData.ReadysReceived == bot.SharedData.ModCore.Shards.Count)
-				await bot.SharedData.DiscordBots.UpdateGuildCount(bot.SharedData.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum());
+            // No.
+            await Task.Yield();
 		}
 	}
 }

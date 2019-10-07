@@ -20,8 +20,6 @@ namespace ModCore.Entities
         public TimerData TimerData { get; internal set; }
         public Perspective Perspective { get; internal set; }
 		public Strawpoll Strawpoll { get; internal set; }
-		public DiscordBots DiscordBots { get; internal set; }
-		public BotsDiscordPl BotsDiscordPl { get; internal set; }
         public (ulong guild, ulong channel) StartNotify { get; internal set; }
         public List<ulong> BotManagers { get; internal set; }
         public string DefaultPrefix { get; internal set; }
