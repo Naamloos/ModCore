@@ -292,7 +292,8 @@ namespace ModCore.Listeners
                 var rs = cfg.RoleState;
 
                 var chperms = db.RolestateOverrides.Where(xs => xs.GuildId == (long)ea.Guild.Id);
-                var prms = chperms.GroupBy(xs => xs.ChannelId).ToDictionary(xg => xg.Key, xg => xg.ToDictionary(xs => xs.MemberId, xs => xs));
+                var prms = chperms.AsEnumerable().GroupBy(xs => xs.ChannelId).ToDictionary(xg => xg.Key, xg => xg.ToDictionary(xs => xs.MemberId, xs => xs));
+
                 var any = false;
 
                 foreach (var chn in ea.Guild.Channels)
