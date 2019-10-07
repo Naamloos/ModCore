@@ -78,6 +78,11 @@ namespace ModCore.Listeners
             var db = bot.SharedData.ModCore.CreateGlobalContext();
             var gst = e.Guild.GetGuildSettings(db);
 
+            if(gst == null)
+            {
+                return;
+            }
+
             if (gst.LogUpdates)
             {
                 var log = e.Guild.GetChannel(gst.UpdateChannel);

@@ -22,8 +22,13 @@ namespace ModCore.Listeners
 			using (var db = bot.Database.CreateContext())
 				cfg = e.Guild.GetGuildSettings(db);
 
+            if(cfg == null)
+            {
+                return;
+            }
+
 			DiscordChannel c;
-			if (cfg != null || cfg.JoinLog.Enable)
+			if (cfg.JoinLog.Enable)
 			{
 				var m = e.Member;
 				c = e.Guild.GetChannel(cfg.JoinLog.ChannelId);
@@ -41,7 +46,7 @@ namespace ModCore.Listeners
 				}
 			}
 
-			if (cfg == null || !cfg.Welcome.Enable)
+			if (!cfg.Welcome.Enable)
 				return;
 
 			if (cfg.Welcome.ChannelId == 0)
