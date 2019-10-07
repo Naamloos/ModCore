@@ -96,7 +96,8 @@ namespace ModCore
 		        BotManagers = Settings.BotManagers,
 		        DefaultPrefix = Settings.DefaultPrefix,
 		        ModCore = this,
-				Strawpoll = this.Strawpoll
+				Strawpoll = this.Strawpoll,
+                BotLists = new BotLists(Settings)
 	        };
 	        if (args.Length == 2) {
                 SharedData.StartNotify = (ulong.Parse(args[0]), ulong.Parse(args[1]));

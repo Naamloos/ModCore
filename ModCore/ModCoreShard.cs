@@ -142,6 +142,7 @@ namespace ModCore
         private async Task Client_Ready(ReadyEventArgs e)
         {
             await Client.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
+            SharedData.BotLists.StartBotStatUpdater(SharedData); // this method only lets itself run once.
         }
 
         public Task RunAsync() =>

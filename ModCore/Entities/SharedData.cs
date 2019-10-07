@@ -27,6 +27,7 @@ namespace ModCore.Entities
 		public List<Permissions> AllPerms { get; internal set; } = new List<Permissions>();
         public ConcurrentDictionary<ulong, DiscordMessage> DeletedMessages = new ConcurrentDictionary<ulong, DiscordMessage>();
         public MCoreEmojis Emojis;
+        public BotLists BotLists;
 
         /// <summary>
         /// Every command, top-level or not, along with full qualified name.

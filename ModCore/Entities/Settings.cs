@@ -39,6 +39,7 @@ namespace ModCore.Entities
 		public string BotDiscordPlToken { get; private set; }
 
 		[JsonProperty("bot_lists_enabled")]
+        [Obsolete("I just use the separate enablers now.")]
 		public bool BotListsEnabled { get; private set; } = false;
 
 		[JsonProperty("botlist_pw_enable")]
