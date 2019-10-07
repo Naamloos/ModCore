@@ -122,7 +122,7 @@ namespace ModCore.Listeners
 				var data = timer.GetData<TimerReminderData>();
 				var emoji = DiscordEmoji.FromName(client, ":alarm_clock:");
 				var user = (ulong)timer.UserId;
-				var msg = $"{emoji} <@!{user}>, you wanted to be reminded of the following:\n\n{data.ReminderText}";
+				var msg = $"{emoji} <@!{user}>, you wanted to be reminded of the following:\n\n{data.ReminderText.BreakMentions()}";
 				await chn.SafeMessageUnformattedAsync(msg, false);
 				// ALWAYS filter stuff so i set it to false. No need to @everyone in a reminder.
 			}
