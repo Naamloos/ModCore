@@ -61,7 +61,7 @@ namespace ModCore.Commands
                     "[Drake103](https://github.com/Drake103) and " +
                     "[Izumemori](https://github.com/Izumemori)")
                 .AddField("Environment", 
-                    $"*OS:* {System.Runtime.InteropServices.RuntimeInformation.OSDescription}" +
+                    $"*OS:* {Environment.OSVersion.VersionString}" +
                     $"\n*Framework:* {Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName}" +
                     $"\n*DSharpPlus:* {ctx.Client.VersionString}" +
                     $"\n*Servers:* {this.Shared.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()}" +
