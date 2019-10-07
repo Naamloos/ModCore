@@ -50,18 +50,19 @@ namespace ModCore.Commands
 				.WithDescription("A powerful moderating bot written on top of DSharpPlus")
                 .AddField("Main developer", "[Naamloos](https://github.com/Naamloos)")
 				.AddField("Special thanks to these contributors:",
-				"[uwx](https://github.com/uwx)\n" +
-				"[jcryer](https://github.com/jcryer)\n" +
-				"[Emzi0767](https://github.com/Emzi0767)\n" +
-				"[YourAverageBlackGuy](https://github.com/YourAverageBlackGuy)\n" +
-				"[DrCreo](https://github.com/DrCreo)\n" +
-				"[aexolate](https://github.com/aexolate)\n" +
-                "[Drake103](https://github.com/Drake103)\n" +
-                "[Izumemori](https://github.com/Izumemori)\n")
-                .AddField("Environment", $"OS Version: {Environment.OSVersion}" +
-                $"\nDSharpPlus version: {ctx.Client.VersionString}" +
-                $"\nServer count: {this.Shared.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()}" +
-                $"\nShard count: {this.Shared.ModCore.Shards.Count}")
+				"[uwx](https://github.com/uwx), " +
+				"[jcryer](https://github.com/jcryer), " +
+				"[Emzi0767](https://github.com/Emzi0767), " +
+				"[YourAverageBlackGuy](https://github.com/YourAverageBlackGuy), " +
+				"[DrCreo](https://github.com/DrCreo), " +
+				"[aexolate](https://github.com/aexolate), " +
+                "[Drake103](https://github.com/Drake103) and " +
+                "[Izumemori](https://github.com/Izumemori)")
+                .AddField("Environment", 
+                  $"*OS Version:* {Environment.OSVersion}" +
+                $"\n*DSharpPlus version:* {ctx.Client.VersionString}" +
+                $"\n*Server count:* {this.Shared.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()}" +
+                $"\n*Shard count:* {this.Shared.ModCore.Shards.Count}")
 				.AddField("Contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
 				.WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
 				.Build();
