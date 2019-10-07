@@ -260,17 +260,17 @@ If in doubt, just try it! You can always clear the reminders later.
         {
             await ctx.TriggerTypingAsync();
 
-            await ctx.SafeRespondAsync("Are you sure you want to clear all your active reminders? This action cannot be undone!");
+            await ctx.SafeRespondUnformattedAsync("Are you sure you want to clear all your active reminders? This action cannot be undone!");
 
             var m = await this.Interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
             if (m.TimedOut)
             {
-                await ctx.SafeRespondAsync("Timed out.");
+                await ctx.SafeRespondUnformattedAsync("Timed out.");
             }
             else if (InteractivityUtil.Confirm(m.Result))
             {
-                await ctx.SafeRespondAsync("Brace for impact!");
+                await ctx.SafeRespondUnformattedAsync("Brace for impact!");
                 await ctx.TriggerTypingAsync();
                 using (var db = this.Database.CreateContext())
                 {
@@ -280,13 +280,13 @@ If in doubt, just try it! You can always clear the reminders later.
                     await Timers.UnscheduleTimersAsync(timers, ctx.Client, this.Database, this.Shared);
 
 
-                    await ctx.SafeRespondAsync("Alright, cleared " + count + " timers.");
+                    await ctx.SafeRespondUnformattedAsync("Alright, cleared " + count + " timers.");
                 }
 
             }
             else
             {
-                await ctx.SafeRespondAsync("Never mind then, maybe next time.");
+                await ctx.SafeRespondUnformattedAsync("Never mind then, maybe next time.");
             }
         }
 

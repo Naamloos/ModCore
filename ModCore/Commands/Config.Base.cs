@@ -22,7 +22,7 @@ namespace ModCore.Commands
 		{
 			await ctx.IfGuildSettingsAsync(async () =>
 			{
-				var t0 = await ctx.SafeRespondAsync(
+				var t0 = await ctx.SafeRespondUnformattedAsync(
 					"Welcome to ModCore! Looks like you haven't configured your guild yet." +
 					"Would you like to go through a quick setup? (Y/N)");
 
@@ -37,7 +37,7 @@ namespace ModCore.Commands
 					!message.Content.EqualsIgnoreCase("ja") &&
 					!message.Content.EqualsIgnoreCase("da"))
 				{
-					await ctx.SafeRespondAsync(
+					await ctx.SafeRespondUnformattedAsync(
 						"OK, I won't bother you anymore. Just execute this command again if you need help configuring.");
 					await t0.DeleteAsync("modcore cleanup after itself: welcome message");
 					await message.DeleteAsync(
@@ -54,7 +54,7 @@ namespace ModCore.Commands
 				}
 				catch
 				{
-					await ctx.SafeRespondAsync("Unfortunately, I wasn't able to create the modcore setup channel.\n" +
+					await ctx.SafeRespondUnformattedAsync("Unfortunately, I wasn't able to create the modcore setup channel.\n" +
 										   "Could you kindly create a channel called `modcore-setup` and re-run the command?\n" +
 										   "I'll set up the rest for you. This will help keep the setup process away from prying eyes.");
 					return;
@@ -85,7 +85,7 @@ namespace ModCore.Commands
 					}
 					catch
 					{
-						await ctx.SafeRespondAsync("Unfortunately, I wasn't able to create the modcore logging channel.\n" +
+						await ctx.SafeRespondUnformattedAsync("Unfortunately, I wasn't able to create the modcore logging channel.\n" +
 											   "Could you kindly create a channel called `modlog` and re-run the command?\n" +
 											   "I'll set up the rest for you. This is to setup a channel for the actionlog to post into.");
 						return;
@@ -109,7 +109,7 @@ namespace ModCore.Commands
 					cfg.ActionLog.WebhookToken = tokens[1];
 					await ctx.SetGuildSettingsAsync(cfg);
 				}
-				await ctx.SafeRespondAsync(
+				await ctx.SafeRespondUnformattedAsync(
 						"Webhook configured. Looks like you're all set! ModCore has been set up.");
 
 			},
@@ -266,7 +266,7 @@ namespace ModCore.Commands
 			    var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong)xc.GuildId == ctx.Guild.Id);
 			    if (cfg == null)
 			    {
-				    await ctx.SafeRespondAsync("This guild is not configured.");
+				    await ctx.SafeRespondUnformattedAsync("This guild is not configured.");
 				    return;
 			    }
 
@@ -282,7 +282,7 @@ namespace ModCore.Commands
 				    .WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && xm.Content.ToUpperInvariant() == captcha, TimeSpan.FromSeconds(45));
 			    if (msg.Result == null)
 			    {
-				    await ctx.SafeRespondAsync("Operation aborted.");
+				    await ctx.SafeRespondUnformattedAsync("Operation aborted.");
 				    return;
 			    }
 
@@ -290,7 +290,7 @@ namespace ModCore.Commands
 			    await db.SaveChangesAsync();
 		    }
 
-		    await ctx.SafeRespondAsync("Configuration reset.");
+		    await ctx.SafeRespondUnformattedAsync("Configuration reset.");
 	    }
 	    
 	    private string GetUniqueKey(int maxSize)

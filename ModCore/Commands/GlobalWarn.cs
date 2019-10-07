@@ -36,19 +36,19 @@ namespace ModCore.Commands
 		{
 			var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
 			if (cfg.GlobalWarn.WarnLevel == GlobalWarnLevel.None || cfg.GlobalWarn.Enable)
-				await ctx.SafeRespondAsync("You do not have globalwarn enabled on this server.");
+				await ctx.SafeRespondUnformattedAsync("You do not have globalwarn enabled on this server.");
 
 			bool issuedBefore = false;
 			using (var db = this.Database.CreateContext())
 				issuedBefore = db.Bans.Any(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id);
 			if (issuedBefore)
 			{
-				await ctx.SafeRespondAsync("You have already warned about this user! Stop picking on them...");
+				await ctx.SafeRespondUnformattedAsync("You have already warned about this user! Stop picking on them...");
 				return;
 			}
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
@@ -80,14 +80,14 @@ namespace ModCore.Commands
 		{
 			var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
 			if (cfg.GlobalWarn.WarnLevel == GlobalWarnLevel.None || cfg.GlobalWarn.Enable)
-				await ctx.SafeRespondAsync("You do not have globalwarn enabled on this server.");
+				await ctx.SafeRespondUnformattedAsync("You do not have globalwarn enabled on this server.");
 
 			bool issuedBefore = false;
 			using (var db = this.Database.CreateContext())
 				issuedBefore = db.Bans.Any(x => x.GuildId == (long)ctx.Guild.Id && x.UserId == (long)m.Id);
 			if (issuedBefore)
 			{
-				await ctx.SafeRespondAsync("You have already warned about this user! Stop picking on them...");
+				await ctx.SafeRespondUnformattedAsync("You have already warned about this user! Stop picking on them...");
 				return;
 			}
 			using (var db = this.Database.CreateContext())

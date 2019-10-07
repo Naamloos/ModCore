@@ -86,7 +86,7 @@ namespace ModCore.Commands
 			var sup = DateTimeOffset.Now.Subtract(st.SocketStartTime);
 
 			// Needs improvement
-			await ctx.SafeRespondAsync(
+			await ctx.SafeRespondUnformattedAsync(
 				$"Program uptime: {string.Format("{0} days, {1}", bup.ToString("dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
 				$"Socket uptime: {string.Format("{0} days, {1}", sup.ToString("dd"), sup.ToString(@"hh\:mm\:ss"))}");
 		}
@@ -101,7 +101,7 @@ namespace ModCore.Commands
 				await ctx.SafeRespondAsync(
 					$"Add ModCore to your server!\n<https://modcore.naamloos.dev/info/invite>");
 			else
-				await ctx.SafeRespondAsync("I'm sorry Mario, but this instance of ModCore has been set to private!");
+				await ctx.SafeRespondUnformattedAsync("I'm sorry Mario, but this instance of ModCore has been set to private!");
 		}
 
 		[Command("ban"), Description("Bans a member."), Aliases("b"), RequirePermissions(Permissions.BanMembers), CheckDisable]
@@ -110,7 +110,7 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
@@ -130,14 +130,14 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == id)
 			{
-				await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
 			await ctx.Guild.BanMemberAsync(id, 7, $"{ustr}{rstr}");
-			await ctx.SafeRespondAsync("User hackbanned successfully.");
+			await ctx.SafeRespondUnformattedAsync("User hackbanned successfully.");
 
 			await ctx.LogActionAsync($"Hackbanned ID: {id}\n{rstr}");
 		}
@@ -149,7 +149,7 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
@@ -171,7 +171,7 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
@@ -194,14 +194,14 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
 			var guildSettings = ctx.GetGuildSettings() ?? new GuildSettings();
 			if (guildSettings == null)
 			{
-				await ctx.SafeRespondAsync("Guild is not configured, please configure and rerun");
+				await ctx.SafeRespondUnformattedAsync("Guild is not configured, please configure and rerun");
 				return;
 			}
 
@@ -212,7 +212,7 @@ namespace ModCore.Commands
 				var (Role, Message) = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
 				mute = Role;
 				guildSettings.MuteRoleId = Role.Id;
-				await ctx.SafeRespondAsync("Mute role is not configured or missing, " + Message);
+				await ctx.SafeRespondUnformattedAsync("Mute role is not configured or missing, " + Message);
 				await ctx.SetGuildSettingsAsync(guildSettings);
 			}
 			await Utils.GuaranteeMuteRoleDeniedEverywhere(ctx.Guild, mute);
@@ -236,14 +236,14 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
 			var gcfg = ctx.GetGuildSettings() ?? new GuildSettings();
 			if (gcfg == null)
 			{
-				await ctx.SafeRespondAsync(
+				await ctx.SafeRespondUnformattedAsync(
 					"Guild is not configured. Adjust this guild's configuration and re-run this command.");
 				return;
 			}
@@ -252,7 +252,7 @@ namespace ModCore.Commands
 			var mute = ctx.Guild.GetRole(b);
 			if (b == 0 || mute == null)
 			{
-				await ctx.SafeRespondAsync(
+				await ctx.SafeRespondUnformattedAsync(
 					"Mute role is not configured or missing. Set a correct role and re-run this command.");
 				return;
 			}
@@ -277,20 +277,20 @@ namespace ModCore.Commands
 		public async Task LeaveAsync(CommandContext ctx)
 		{
 			var interactivity = this.Interactivity;
-			await ctx.SafeRespondAsync("Are you sure you want to remove modcore from your guild?");
+			await ctx.SafeRespondUnformattedAsync("Are you sure you want to remove modcore from your guild?");
 			var m = await interactivity.WaitForMessageAsync(
 				x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
 			if (m.Result == null)
-				await ctx.SafeRespondAsync("Timed out.");
+				await ctx.SafeRespondUnformattedAsync("Timed out.");
 			else if (m.Result.Content.ToLowerInvariant() == "yes")
 			{
-				await ctx.SafeRespondAsync("Thanks for using ModCore. Leaving this guild.");
+				await ctx.SafeRespondUnformattedAsync("Thanks for using ModCore. Leaving this guild.");
 				await ctx.LogActionAsync("Left your server. Thanks for using ModCore.");
 				await ctx.Guild.LeaveAsync();
 			}
 			else
-				await ctx.SafeRespondAsync("Operation canceled by user.");
+				await ctx.SafeRespondUnformattedAsync("Operation canceled by user.");
 		}
 
 		[Command("tempban"), Aliases("tb"), Description(
@@ -302,7 +302,7 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
@@ -355,14 +355,14 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
 			var guildSettings = ctx.GetGuildSettings() ?? new GuildSettings();
 			if (guildSettings == null)
 			{
-				await ctx.SafeRespondAsync(
+				await ctx.SafeRespondUnformattedAsync(
 					"Guild is not configured. Adjust this guild's configuration and re-run this command.");
 				return;
 			}
@@ -374,7 +374,7 @@ namespace ModCore.Commands
 				var (Role, Message) = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
 				mute = Role;
 				guildSettings.MuteRoleId = Role.Id;
-				await ctx.SafeRespondAsync("Mute role is not configured or missing, " + Message);
+				await ctx.SafeRespondUnformattedAsync("Mute role is not configured or missing, " + Message);
 				await ctx.SetGuildSettingsAsync(guildSettings);
 			}
 			await Utils.GuaranteeMuteRoleDeniedEverywhere(ctx.Guild, mute);
@@ -382,7 +382,7 @@ namespace ModCore.Commands
 			var timer = Timers.FindNearestTimer(TimerActionType.Unmute, m.Id, 0, ctx.Guild.Id, this.Database);
 			if (timer != null)
 			{
-				await ctx.SafeRespondAsync("This member was already muted! Please try to unmute them first!");
+				await ctx.SafeRespondUnformattedAsync("This member was already muted! Please try to unmute them first!");
 				return;
 			}
 
@@ -498,7 +498,7 @@ namespace ModCore.Commands
 			var bans = await ctx.Guild.GetBansAsync();
 			if (bans.Count == 0)
 			{
-				await ctx.SafeRespondAsync("No user is banned.");
+				await ctx.SafeRespondUnformattedAsync("No user is banned.");
 				return;
 			}
 
@@ -557,7 +557,7 @@ namespace ModCore.Commands
 			}
 			else
 			{
-				await ctx.Channel.SafeMessageAsync("You can't announce to that role because it is mentionable!", true);
+				await ctx.Channel.SafeMessageUnformattedAsync("You can't announce to that role because it is mentionable!", true);
 				await ctx.LogActionAsync(
 					$"Failed announcement\nMessage: {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
 			}
@@ -577,7 +577,7 @@ namespace ModCore.Commands
 				sb.AppendLine();
 				sb.Append($"{em.Emoji.ToString()}: {em.Total}");
 			}
-			await ctx.SafeModifyAsync(m, sb.ToString());
+			await ctx.SafeModifyUnformattedAsync(m, sb.ToString());
 		}
 
 		[Command("buildmessage"), Description("Builds a message for you, complete with embeds."), CheckDisable]

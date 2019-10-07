@@ -33,7 +33,7 @@ namespace ModCore.Commands
 			{
 				if (ctx.Member.Roles.Any(x => x.Id == role.Id))
 				{
-					await ctx.SafeRespondAsync("You already have that role!");
+					await ctx.SafeRespondUnformattedAsync("You already have that role!");
 					return;
 				}
 				if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
@@ -42,11 +42,11 @@ namespace ModCore.Commands
 					await ctx.SafeRespondAsync($"Granted you the role `{role.Name}`.");
 				}
 				else
-					await ctx.SafeRespondAsync("Can't grant you this role because that role is above my highest role!");
+					await ctx.SafeRespondUnformattedAsync("Can't grant you this role because that role is above my highest role!");
 			}
 			else
 			{
-				await ctx.SafeRespondAsync("You can't grant yourself that role!");
+				await ctx.SafeRespondUnformattedAsync("You can't grant yourself that role!");
 			}
 		}
 
@@ -60,7 +60,7 @@ namespace ModCore.Commands
 			{
 				if (ctx.Member.Roles.All(x => x.Id != role.Id))
 				{
-					await ctx.SafeRespondAsync("You don't have that role!");
+					await ctx.SafeRespondUnformattedAsync("You don't have that role!");
 					return;
 				}
 				if (ctx.Guild.CurrentMember.Roles.Any(x => x.Position >= role.Position))
@@ -69,11 +69,11 @@ namespace ModCore.Commands
 					await ctx.SafeRespondAsync($"Revoked your role: `{role.Name}`.");
 				}
 				else
-					await ctx.SafeRespondAsync("Can't take this role because that role is above my highest role!");
+					await ctx.SafeRespondUnformattedAsync("Can't take this role because that role is above my highest role!");
 			}
 			else
 			{
-				await ctx.SafeRespondAsync("You can't revoke that role!");
+				await ctx.SafeRespondUnformattedAsync("You can't revoke that role!");
 			}
 		}
 
@@ -100,7 +100,7 @@ namespace ModCore.Commands
 			}
 			else
 			{
-				await ctx.SafeRespondAsync("No available selfroles.");
+				await ctx.SafeRespondUnformattedAsync("No available selfroles.");
 			}
 		}
 	}

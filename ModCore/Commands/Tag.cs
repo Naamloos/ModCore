@@ -62,7 +62,7 @@ namespace ModCore.Commands
                 }
                 catch (Exception)
                 {
-                    await ctx.SafeRespondAsync("No such tag exists!");
+                    await ctx.SafeRespondUnformattedAsync("No such tag exists!");
                 }
             }
         }
@@ -77,7 +77,7 @@ namespace ModCore.Commands
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id);
                     if (tag.OwnerId != (long)ctx.Member.Id)
-                        await ctx.SafeRespondAsync("That tag already exists for this channel and you don't own it!");
+                        await ctx.SafeRespondUnformattedAsync("That tag already exists for this channel and you don't own it!");
                     else
                     {
                         tag.Contents = contents;
@@ -120,7 +120,7 @@ namespace ModCore.Commands
                     }
                     else
                     {
-                        await ctx.SafeRespondAsync("You don't own that tag!");
+                        await ctx.SafeRespondUnformattedAsync("You don't own that tag!");
                     }
                 }
                 else
@@ -208,7 +208,7 @@ namespace ModCore.Commands
                 }
                 catch (Exception)
                 {
-                    await ctx.SafeRespondAsync("No such tag exists!");
+                    await ctx.SafeRespondUnformattedAsync("No such tag exists!");
                 }
             }
         }
@@ -226,7 +226,7 @@ namespace ModCore.Commands
 				var list = db.Tags.Where(x => x.ChannelId == chan);
 				if (list.Count() < 1)
                 {
-                    await ctx.SafeRespondAsync("This channel has no tags!");
+                    await ctx.SafeRespondUnformattedAsync("This channel has no tags!");
                 }
                 else
                 {
@@ -248,7 +248,7 @@ namespace ModCore.Commands
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id);
                     if (tag.OwnerId != (long)ctx.Member.Id)
-                        await ctx.SafeRespondAsync("You don't own that tag!");
+                        await ctx.SafeRespondUnformattedAsync("You don't own that tag!");
                     else
                     {
                         tag.OwnerId = (long)newowner.Id;

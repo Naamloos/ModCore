@@ -35,7 +35,7 @@ namespace ModCore.Commands
 			}
 			if (deletThis.Any())
 				await ctx.Channel.DeleteMessagesAsync(deletThis, "Purged messages.");
-			var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
+			var resp = await ctx.SafeRespondUnformattedAsync("Latest messages deleted.");
 			await Task.Delay(2000);
 			await resp.DeleteAsync("Purge command executed.");
 			await ctx.Message.DeleteAsync("Purge command executed.");
@@ -84,7 +84,7 @@ namespace ModCore.Commands
 
 			if (string.IsNullOrEmpty(regexp))
 			{
-				await ctx.SafeRespondAsync("RegExp is empty");
+				await ctx.SafeRespondUnformattedAsync("RegExp is empty");
 				return;
 			}
 			var blockType = regexp[0];
@@ -143,7 +143,7 @@ namespace ModCore.Commands
 					}
 					else
 					{
-						await ctx.SafeRespondAsync(tokens[1] + " is not a valid int");
+						await ctx.SafeRespondUnformattedAsync(tokens[1] + " is not a valid int");
 						return;
 					}
 					if (tokens.Count > 2)
@@ -154,7 +154,7 @@ namespace ModCore.Commands
 						}
 						else
 						{
-							await ctx.SafeRespondAsync(tokens[2] + " is not a valid int");
+							await ctx.SafeRespondUnformattedAsync(tokens[2] + " is not a valid int");
 							return;
 						}
 					}
@@ -178,7 +178,7 @@ namespace ModCore.Commands
 				$"Purged {deletThis.Count} messages by /{regexp.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
 			if (deletThis.Any())
 				await ctx.Channel.DeleteMessagesAsync(deletThis, resultString);
-			var resp = await ctx.SafeRespondAsync(resultString);
+			var resp = await ctx.SafeRespondUnformattedAsync(resultString);
 			await Task.Delay(2000);
 			await resp.DeleteAsync("Purge command executed.");
 			await ctx.Message.DeleteAsync("Purge command executed.");
@@ -198,7 +198,7 @@ namespace ModCore.Commands
 				.ToList();
 			if (deletThis.Any())
 				await ctx.Channel.DeleteMessagesAsync(deletThis, "Cleaned up commands");
-			var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
+			var resp = await ctx.SafeRespondUnformattedAsync("Latest messages deleted.");
 			await Task.Delay(2000);
 			await resp.DeleteAsync("Clean command executed.");
 			await ctx.Message.DeleteAsync("Clean command executed.");
@@ -217,7 +217,7 @@ namespace ModCore.Commands
 				.ToList();
 			if (deletThis.Any())
 				await ctx.Channel.DeleteMessagesAsync(deletThis, "Cleaned up commands");
-			var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
+			var resp = await ctx.SafeRespondUnformattedAsync("Latest messages deleted.");
 			await Task.Delay(2000);
 			await resp.DeleteAsync("Purge bot command executed.");
 			await ctx.Message.DeleteAsync("Purge bot command executed.");
@@ -234,7 +234,7 @@ namespace ModCore.Commands
 			var deleteThis = ms.Where(m => ImageRegex.IsMatch(m.Content) || m.Attachments.Any()).ToList();
 			if (deleteThis.Any())
 				await ctx.Channel.DeleteMessagesAsync(deleteThis, "Purged images");
-			var resp = await ctx.SafeRespondAsync("Latest messages deleted.");
+			var resp = await ctx.SafeRespondUnformattedAsync("Latest messages deleted.");
 			await Task.Delay(2000);
 			await resp.DeleteAsync("Image purge command executed.");
 			await ctx.Message.DeleteAsync("Image purge command executed.");

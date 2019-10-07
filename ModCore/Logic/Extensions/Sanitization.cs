@@ -14,16 +14,16 @@ namespace ModCore.Logic.Extensions
         // make sure to replace all backslashes preceding @mention so they can't add an extra backslash to escape our escape
         private static readonly Regex EscapeEveryoneMention = new Regex(@"\\*@(everyone|here)");
         
-        public static Task<DiscordMessage> SafeRespondAsync(this CommandContext ctx, string s) 
+        public static Task<DiscordMessage> SafeRespondUnformattedAsync(this CommandContext ctx, string s) 
             => ctx.RespondAsync(Sanitize(s, IsPrivileged(ctx)));
 
-        public static Task<DiscordMessage> SafeModifyAsync(this CommandContext ctx, DiscordMessage m, string s)
+        public static Task<DiscordMessage> SafeModifyUnformattedAsync(this CommandContext ctx, DiscordMessage m, string s)
             => m.ModifyAsync(Sanitize(s, IsPrivileged(ctx)));
 
-        public static Task<DiscordMessage> SafeMessageAsync(this DiscordChannel channel, string s, bool privileged) 
+        public static Task<DiscordMessage> SafeMessageUnformattedAsync(this DiscordChannel channel, string s, bool privileged) 
             => channel.SendMessageAsync(Sanitize(s, privileged));
         
-        public static Task<DiscordMessage> SafeMessageAsync(this DiscordChannel channel, string s, CommandContext ctx) 
+        public static Task<DiscordMessage> SafeMessageUnformattedAsync(this DiscordChannel channel, string s, CommandContext ctx) 
             => channel.SendMessageAsync(Sanitize(s, IsPrivileged(ctx)));
 
         public static Task<DiscordMessage> SafeRespondAsync(this CommandContext ctx, FormattableString s) 

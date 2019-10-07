@@ -7,8 +7,6 @@ namespace ModCore.Api
 {
 	public class DiscordBots
 	{
-		private bool _enabled;
-
         [Obsolete("Library not compatible with net core 3, dropping support.")]
         public DiscordBots(string dbltoken, ulong botid, bool enabled)
 		{

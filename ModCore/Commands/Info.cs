@@ -67,7 +67,7 @@ namespace ModCore.Commands
         [Command("guild"), Aliases("g"), Description("Returns information about this guild."), CheckDisable]
         public async Task GuildInfoAsync(CommandContext ctx)
         {
-            await ctx.SafeRespondAsync("The following embed might flood this channel. Do you want to proceed?");
+            await ctx.SafeRespondUnformattedAsync("The following embed might flood this channel. Do you want to proceed?");
             var m = await Interactivity.WaitForMessageAsync(x => x.Content.ToLower() == "yes" || x.Content.ToLower() == "no");
             if (m.Result?.Content.ToLowerInvariant() == "yes")
             {
@@ -139,7 +139,7 @@ namespace ModCore.Commands
             else
             {
                 #region no or timeout
-                await ctx.SafeRespondAsync("Okay, I'm not sending the embed.");
+                await ctx.SafeRespondUnformattedAsync("Okay, I'm not sending the embed.");
                 #endregion
             }
             await ctx.LogActionAsync();

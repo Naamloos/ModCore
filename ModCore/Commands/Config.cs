@@ -52,7 +52,7 @@ namespace ModCore.Commands
 
 			await ctx.WithGuildSettings(cfg => cfg.Prefix = prefix);
 
-			await ctx.SafeRespondAsync(prefix == null
+			await ctx.SafeRespondUnformattedAsync(prefix == null
 				? "Prefix restored to default."
 				: $"Prefix changed to: \"{prefix}\".");
 		}
@@ -64,7 +64,7 @@ namespace ModCore.Commands
 		{
 			await ctx.WithGuildSettings(cfg => cfg.MuteRoleId = role == null ? 0 : role.Id);
 
-			await ctx.SafeRespondAsync(role == null ? "Muting disabled." : $"Mute role set to {role.Mention}.");
+			await ctx.SafeRespondUnformattedAsync(role == null ? "Muting disabled." : $"Mute role set to {role.Mention}.");
 		}
 
         [Group("updates"), Aliases("ud"), Description("User updates settings commands.")]
@@ -565,7 +565,7 @@ namespace ModCore.Commands
 					var inv = await ctx.Client.GetInviteByCodeAsync(invite);
 					if (inv == null)
 					{
-						await ctx.SafeRespondAsync("Invite seems to be invalid. Maybe the bot is banned.");
+						await ctx.SafeRespondUnformattedAsync("Invite seems to be invalid. Maybe the bot is banned.");
 						return;
 					}
 
@@ -580,7 +580,7 @@ namespace ModCore.Commands
 					var inv = await ctx.Client.GetInviteByCodeAsync(invite);
 					if (inv == null)
 					{
-						await ctx.SafeRespondAsync("Invite seems to be invalid. Maybe the bot is banned.");
+						await ctx.SafeRespondUnformattedAsync("Invite seems to be invalid. Maybe the bot is banned.");
 						return;
 					}
 
@@ -1040,7 +1040,7 @@ namespace ModCore.Commands
 			public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to send the JoinLogs to")]DiscordChannel channel)
 			{
 				await ctx.WithGuildSettings(cfg => cfg.JoinLog.ChannelId = channel.Id);
-				await ctx.SafeRespondAsync("JoinLog channel configured.");
+				await ctx.SafeRespondUnformattedAsync("JoinLog channel configured.");
 			}
 		}
 
@@ -1051,7 +1051,7 @@ namespace ModCore.Commands
 			public async Task AddSelfRoleAsync(CommandContext ctx, [Description("Role to allow for self-granting")]DiscordRole role)
 			{
 				await ctx.WithGuildSettings(cfg => 
-					ctx.SafeRespondAsync(cfg.SelfRoles.Add(role.Id)
+					ctx.SafeRespondUnformattedAsync(cfg.SelfRoles.Add(role.Id)
 						? $"Added role `{role.Name}` with ID `{role.Id}` to SelfRoles." 
 						: "This role has already been added!"));
 			}
@@ -1060,7 +1060,7 @@ namespace ModCore.Commands
 			public async Task RemoveSelfRoleAsync(CommandContext ctx, [Description("Role to disallow from self-granting")]DiscordRole role)
 			{
 				await ctx.WithGuildSettings(cfg =>
-					ctx.SafeRespondAsync(cfg.SelfRoles.Remove(role.Id)
+					ctx.SafeRespondUnformattedAsync(cfg.SelfRoles.Remove(role.Id)
 						? $"Removed role `{role.Name}` with ID `{role.Id}` from SelfRoles."
 						: "This role isn't in SelfRoles!"));
 			}
@@ -1272,7 +1272,7 @@ namespace ModCore.Commands
 			 Description("Sets the GlobalWarn mode.")]
 			public async Task SetRoleAsync(CommandContext ctx)
 			{
-				await ctx.SafeRespondAsync(@"__**Available GlobalWarn modes:**__
+				await ctx.SafeRespondUnformattedAsync(@"__**Available GlobalWarn modes:**__
 1. None
 2. Owner (Warns the Server Owner if someone on the GlobalWarn list joins the server)
 3. Joinlog (Sends the warning to the JoinLog channel)
@@ -1285,7 +1285,7 @@ Type an option.");
 				TimeSpan.FromSeconds(45));
 				if (msg.Result == null)
 				{
-					await ctx.SafeRespondAsync("Operation aborted.");
+					await ctx.SafeRespondUnformattedAsync("Operation aborted.");
 					return;
 				}
 				

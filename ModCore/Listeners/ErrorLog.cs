@@ -199,7 +199,7 @@ namespace ModCore.Listeners
 				var response = $"I couldn't execute `{cmd}` because ";
 				response += string.Join(" and ", reasons);
 				response += "!";
-				await ctx.SafeRespondAsync(response);
+				await ctx.SafeRespondUnformattedAsync(response);
 				return;
 			}
 			await ctx.SafeRespondAsync($"**Command {cmd} Errored!**\n{ex.Message}");

@@ -35,7 +35,7 @@ namespace ModCore.Commands
 	    {
 	        if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
 	        {
-	            await ctx.SafeRespondAsync("You do not have permission to use this command!");
+	            await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
 	            return;
 	        }
 
@@ -45,9 +45,9 @@ namespace ModCore.Commands
 	            {
 	                Command = "test" + s
 	            });
-	            await ctx.SafeRespondAsync("a"+string.Join(",", db.CommandIds.Select(e => e.Command + ":" + e.Id)));
+	            await ctx.SafeRespondUnformattedAsync("a"+string.Join(",", db.CommandIds.Select(e => e.Command + ":" + e.Id)));
 	            await db.SaveChangesAsync();
-	            await ctx.SafeRespondAsync("b"+string.Join(",", db.CommandIds.Select(e => e.Command + ":" + e.Id)));
+	            await ctx.SafeRespondUnformattedAsync("b"+string.Join(",", db.CommandIds.Select(e => e.Command + ":" + e.Id)));
 	        }
 	    }
 
@@ -56,11 +56,11 @@ namespace ModCore.Commands
         {
             if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
-                await ctx.SafeRespondAsync("You do not have permission to use this command!");
+                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
                 return;
             }
 
-            await ctx.SafeRespondAsync("Are you sure you want to shut down the bot?");
+            await ctx.SafeRespondUnformattedAsync("Are you sure you want to shut down the bot?");
 
             var cts = ctx.Services.GetService<SharedData>().CTS;
             var interactivity = ctx.Services.GetService<InteractivityExtension>();
@@ -68,16 +68,16 @@ namespace ModCore.Commands
 
             if (m.TimedOut)
             {
-                await ctx.SafeRespondAsync("Timed out.");
+                await ctx.SafeRespondUnformattedAsync("Timed out.");
             }
             else if (InteractivityUtil.Confirm(m.Result))
             {
-                await ctx.SafeRespondAsync("Shutting down.");
+                await ctx.SafeRespondUnformattedAsync("Shutting down.");
                 cts.Cancel(false);
             }
             else
             {
-                await ctx.SafeRespondAsync("Operation cancelled by user.");
+                await ctx.SafeRespondUnformattedAsync("Operation cancelled by user.");
             }
         }
 
@@ -86,7 +86,7 @@ namespace ModCore.Commands
 		{
 			if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
 			{
-				await ctx.SafeRespondAsync("You do not have permission to use this command!");
+				await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
 				return;
 			}
 			int tk = new Random().Next(0, int.MaxValue);
@@ -100,10 +100,10 @@ namespace ModCore.Commands
         {
             if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
-                await ctx.SafeRespondAsync("You do not have permission to use this command!");
+                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
                 return;
             }
-            await ctx.SafeRespondAsync("Test: 420");
+            await ctx.SafeRespondUnformattedAsync("Test: 420");
         }
 
         [Command("sudo"), Aliases("s"), Hidden]
@@ -111,7 +111,7 @@ namespace ModCore.Commands
         {
             if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
-                await ctx.SafeRespondAsync("You do not have permission to use this command!");
+                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
                 return;
             }
 
@@ -126,7 +126,7 @@ namespace ModCore.Commands
         {
             if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
-                await ctx.SafeRespondAsync("You do not have permission to use this command!");
+                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
                 return;
             }
 
@@ -193,7 +193,7 @@ namespace ModCore.Commands
         {
             if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
             {
-                await ctx.SafeRespondAsync("You do not have permission to use this command!");
+                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
                 return;
             }
             var list = new List<string>();
