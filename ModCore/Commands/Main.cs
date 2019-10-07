@@ -58,6 +58,10 @@ namespace ModCore.Commands
 				"[aexolate](https://github.com/aexolate)\n" +
                 "[Drake103](https://github.com/Drake103)\n" +
                 "[Izumemori](https://github.com/Izumemori)\n")
+                .AddField("Environment", $"OS Version: {Environment.OSVersion}" +
+                $"\nDSharpPlus version: {ctx.Client.VersionString}" +
+                $"\nServer count: {this.Shared.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()}" +
+                $"\nShard count: {this.Shared.ModCore.Shards.Count}")
 				.AddField("Contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
 				.WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
 				.Build();

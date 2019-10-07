@@ -80,15 +80,11 @@ namespace ModCore.Api
 
                 Task.Run(async () =>
                 {
-                    // Send new stats at launch
-                    await Task.Delay(TimeSpan.FromSeconds(15));
-                    await this.UpdateStatsAsync(SD.ModCore.Shards.SelectMany(x => x.Client.Guilds.Values).Count(), SD.ModCore.Shards.Count());
-
                     // Loop to send stats every 12 hours.
                     while (true)
                     {
                         await Task.Delay(TimeSpan.FromHours(12));
-                        await this.UpdateStatsAsync(SD.ModCore.Shards.SelectMany(x => x.Client.Guilds.Values).Count(), SD.ModCore.Shards.Count());
+                        await this.UpdateStatsAsync(SD.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum(), SD.ModCore.Shards.Count());
                     }
                 }, SD.CTS.Token);
             }
