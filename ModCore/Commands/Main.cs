@@ -56,7 +56,8 @@ namespace ModCore.Commands
 				"[YourAverageBlackGuy](https://github.com/YourAverageBlackGuy)\n" +
 				"[DrCreo](https://github.com/DrCreo)\n" +
 				"[aexolate](https://github.com/aexolate)\n" +
-				"[Drake103](https://github.com/Drake103)\n")
+                "[Drake103](https://github.com/Drake103)\n" +
+                "[Izumemori](https://github.com/Izumemori)\n")
 				.AddField("Contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
 				.WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
 				.Build();
