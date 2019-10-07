@@ -881,7 +881,7 @@ namespace ModCore.Commands
 							var channel = await dcc.ConvertAsync(case12.Result.Content, ctx);
 							if (channel.HasValue)
 							{
-								await channel.Value.SendMessageAsync(content, embed: embed.Build());
+								await channel.Value.SendMessageAsync(content, embed: embed == new DiscordEmbedBuilder()? embed.Build() : null);
 								await case12.Result.DeleteAsync();
 								await msg.ModifyAsync("Message sent.", null);
 								return;
@@ -900,7 +900,7 @@ namespace ModCore.Commands
 						DiscordEmbed preview = null;
 						try
 						{
-							preview = embed.Build();
+							preview = embed == new DiscordEmbedBuilder() ? embed.Build() : null;
 						}
 						catch (Exception)
 						{
