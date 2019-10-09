@@ -502,7 +502,8 @@ namespace ModCore.Commands
 		}
 
 		[Command("listbans"), Aliases("lb"), Description("Lists banned users. Real complex stuff."), RequireUserPermissions(Permissions.ViewAuditLog), CheckDisable]
-		public async Task ListBansAsync(CommandContext ctx)
+		[RequireBotPermissions(Permissions.BanMembers)]
+        public async Task ListBansAsync(CommandContext ctx)
 		{
 			var bans = await ctx.Guild.GetBansAsync();
 			if (bans.Count == 0)
