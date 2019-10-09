@@ -93,7 +93,7 @@ namespace ModCore.Commands
 						return;
 					}
 
-					var webhook = await logChannel.CreateWebhookAsync("ModCore Logging", null, "Created webhook to post log messages");
+					var webhook = await logChannel.CreateWebhookAsync("ModCore Logging", reason: "Created webhook to post log messages");
 
 					var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
 					cfg.ActionLog.WebhookId = webhook.Id;
@@ -286,7 +286,7 @@ namespace ModCore.Commands
 			    
 			    await ctx.RespondWithFileAsync(
 				    $"{GetUniqueKey(64)}.png",
-				    new MemoryStream(CaptchaProvider.DrawCaptcha(captcha, "#99AAB5", "#23272A", 24, "Courier New")),
+				    new MemoryStream(CaptchaProvider.DrawCaptcha(captcha, "#99AAB5", "#23272A", 24, "sans-serif")),
 				    "You are about to reset the configuration for this guild. **This change is irreversible.** " +
 				    "Type the characters in the image to continue. You have 45 seconds.");
 			    
