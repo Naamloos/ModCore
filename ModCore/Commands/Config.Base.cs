@@ -63,6 +63,8 @@ namespace ModCore.Commands
 					Permissions.AccessChannels, "modcore overwrites for setup channel");
 				await channel.AddOverwriteAsync(ctx.Member, Permissions.AccessChannels, Permissions.None,
 					"modcore overwrites for setup channel");
+                await channel.AddOverwriteAsync((DiscordMember)ctx.Client.CurrentUser, Permissions.AccessChannels, Permissions.None,
+                    "modcore overwrites for setup channel");
 
 				await channel.ElevatedMessageAsync(
 					"OK, now, can you create a webhook for ModCore and give me its URL?\n" +
@@ -109,8 +111,18 @@ namespace ModCore.Commands
 					cfg.ActionLog.WebhookToken = tokens[1];
 					await ctx.SetGuildSettingsAsync(cfg);
 				}
-				await ctx.SafeRespondUnformattedAsync(
-						"Webhook configured. Looks like you're all set! ModCore has been set up.");
+				await channel.ElevatedMessageAsync(
+						"Webhook configured. Looks like you're all set! ModCore has been set up." +
+                        "\nThis channel will be deleted in 30 seconds...");
+
+                try
+                {
+                    await channel.DeleteAsync();
+                }
+                catch(Exception)
+                {
+                    await channel.ElevatedMessageAsync("Failed to delete the channel.\nPlease try to do so yourself.");
+                }
 
 			},
 				async gcfg =>
