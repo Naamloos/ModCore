@@ -1224,5 +1224,66 @@ namespace ModCore.Commands
             }
             await ctx.RespondAsync($"Invalid cooldown: {cooldown}");
         }
+
+        [Command("screenshare"), Aliases("ss")]
+        [Description("Generates a screen share link")]
+        public async Task ScreenShareAsync(CommandContext ctx)
+        {
+            var voicechannels = ctx.Guild.Channels.Select(x => x.Value).Where(x => x.Type == ChannelType.Voice).Take(10).ToList();
+            string voice = "";
+            for(int i = 0; i < voicechannels.Count(); i++)
+            {
+                voice += $"**{i + 1}**: {voicechannels[i].Name}\n";
+            }
+
+            var emb = new DiscordEmbedBuilder()
+                .WithTitle("Voice channels")
+                .WithDescription("Select a channel to screenshare in.")
+                .AddField("Channels:", voice);
+
+            var question = await ctx.RespondAsync(embed: emb);
+
+            var next = await ctx.Channel.GetNextMessageAsync(ctx.Member);
+
+            try
+            {
+                await question.DeleteAsync();
+            }
+            catch (Exception) { }
+
+            if (next.TimedOut)
+            {
+                await ctx.RespondAsync("Timed out.");
+                return;
+            }
+
+            try
+            {
+                await next.Result.DeleteAsync();
+            }
+            catch (Exception) { }
+
+            if (!int.TryParse(next.Result.Content, out int selected))
+            {
+                await ctx.RespondAsync("Invalid input.");
+                return;
+            }
+
+            if(selected > voicechannels.Count() || selected < 1)
+            {
+                await ctx.RespondAsync("Index out of range.");
+                return;
+            }
+
+            var selectedchannel = voicechannels[selected - 1];
+
+            emb = new DiscordEmbedBuilder()
+                .WithTitle($"Screenshare in {selectedchannel.Name}")
+                .WithDescription($"[Join screenshare](https://discordapp.com/channels/{selectedchannel.GuildId}/{selectedchannel.Id})")
+                .AddField("Note:", $"Joining screenshare only works on Desktop when currently connected to said voice channel. (**{selectedchannel.Name}** in this case.)")
+                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.GetAvatarUrl(ImageFormat.Png));
+
+            await ctx.RespondAsync(embed: emb);
+        }
     }
 }
