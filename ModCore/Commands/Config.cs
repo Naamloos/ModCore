@@ -30,12 +30,14 @@ namespace ModCore.Commands
 
 		private RandomNumberProvider RandomNumberProvider { get; } = new RandomNumberProvider();
 		private CaptchaImageProvider CaptchaProvider { get; }
-		
-		public Config(DatabaseContextBuilder db, InteractivityExtension interactive)
+        public SharedData Shared { get; }
+
+        public Config(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive)
 		{
 			this.Database = db;
 			this.Interactivity = interactive;
 			this.CaptchaProvider = new CaptchaImageProvider(RandomNumberProvider);
+            this.Shared = shared;
 		}
 
 		[Command("prefix"), Aliases("pfix"),
