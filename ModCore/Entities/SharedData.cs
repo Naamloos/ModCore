@@ -26,6 +26,7 @@ namespace ModCore.Entities
 		public int ReadysReceived { get; internal set; } = 0;
 		public List<Permissions> AllPerms { get; internal set; } = new List<Permissions>();
         public ConcurrentDictionary<ulong, DiscordMessage> DeletedMessages = new ConcurrentDictionary<ulong, DiscordMessage>();
+        public ConcurrentDictionary<ulong, DiscordMessage> EditedMessages = new ConcurrentDictionary<ulong, DiscordMessage>();
         public MCoreEmojis Emojis;
         public BotLists BotLists;
 

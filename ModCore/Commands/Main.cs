@@ -1187,6 +1187,29 @@ namespace ModCore.Commands
             await ctx.RespondAsync("No message to snipe!");
         }
 
+        [Command("snipeedit")]
+        [Description("Snipes last edited message")]
+        public async Task SnipeEditAsync(CommandContext ctx)
+        {
+            if (this.Shared.EditedMessages.ContainsKey(ctx.Channel.Id))
+            {
+                var m = this.Shared.EditedMessages[ctx.Channel.Id];
+
+                var content = m.Content;
+                if (content.Length > 500)
+                    content = content.Substring(0, 500) + "...";
+
+                var embed = new DiscordEmbedBuilder().WithAuthor($"{m.Author.Username}#{m.Author.Discriminator}", iconUrl: m.Author.GetAvatarUrl(ImageFormat.Png));
+
+                if (!string.IsNullOrEmpty(m.Content))
+                    embed.WithDescription(m.Content);
+
+                await ctx.RespondAsync(embed: embed);
+                return;
+            }
+            await ctx.RespondAsync("No message to snipe!");
+        }
+
         [Command("cooldown")]
         [Description("Sets a custom message cooldown")]
         [RequirePermissions(Permissions.ManageChannels)]
