@@ -1170,6 +1170,16 @@ namespace ModCore.Commands
 					cfg.Starboard.Emoji = new GuildEmoji { EmojiId = emoji.Id, EmojiName = emoji.Name });
 				await ctx.ElevatedRespondAsync($"Starboard emoji set to {emoji}.");
 			}
+
+            [Command("setminimum"), Aliases("sm"), Description("Sets the minimum amount of reactions for a message to appear on the board.")]
+            public async Task SetMinimumAsync(CommandContext ctx, [Description("Minimum amount of reactions")]int amount)
+            {
+                var newmin = amount > 0 && amount < 25 ? amount : 3;
+
+                await ctx.WithGuildSettings(cfg =>
+                    cfg.Starboard.Minimum = newmin);
+                await ctx.ElevatedRespondAsync($"Starboard minimum set to {newmin}.");
+            }
 		}
 
 		[Group("reactionrole"), Aliases("rr"), Description("ReactionRole configuration commands.")]

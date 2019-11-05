@@ -48,7 +48,7 @@ namespace ModCore.Listeners
                     var c = e.Channel.Guild.Channels.First(x => x.Key == (ulong)cfg.Starboard.ChannelId).Value;
                     if (c.Id == e.Channel.Id) // star on starboard entry
                     {
-                        if (db.StarDatas.Any(x => (ulong)x.StarboardMessageId == e.Message.Id))
+                        /*if (db.StarDatas.Any(x => (ulong)x.StarboardMessageId == e.Message.Id))
                         {
                             var other = db.StarDatas.First(x => (ulong)x.StarboardMessageId == e.Message.Id);
                             var count = db.StarDatas.Count(x => (ulong)x.StarboardMessageId == e.Message.Id);
@@ -73,26 +73,43 @@ namespace ModCore.Listeners
                                 });
                                 await db.SaveChangesAsync();
                             }
-                        }
+                        }*/
+
+                    // Removing this behaviour for jump links.
                     }
                     else // star on actual message
                     {
+                        if (e.Message.Author.Id == e.User.Id || e.User.IsBot)
+                            return;
+
                         if (db.StarDatas.Any(x => (ulong)x.MessageId == e.Message.Id))
                         {
-                            var other = db.StarDatas.First(x => (ulong)x.MessageId == e.Message.Id);
                             var count = db.StarDatas.Count(x => (ulong)x.MessageId == e.Message.Id);
-                            var msg = await c.GetMessageAsync((ulong)other.StarboardMessageId);
-                            if (msg.Author.Id == e.User.Id || e.User.IsBot)
-                                return;
 
-                            var d = await msg.ModifyAsync($"{e.Emoji}: {count + 1} ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
-                            sbmid = (long)d.Id;
+                            if (db.StarDatas.Any(x => (ulong)x.MessageId == e.Message.Id && x.StarboardMessageId != 0))
+                            {
+                                var other = db.StarDatas.First(x => (ulong)x.MessageId == e.Message.Id && x.StarboardMessageId != 0);
+                                var msg = await c.GetMessageAsync((ulong)other.StarboardMessageId);
+
+                                var d = await msg.ModifyAsync($"{e.Emoji}: {count + 1} ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
+                                sbmid = (long)d.Id;
+                            }
+                            else
+                            {
+                                if(count + 1 >= cfg.Starboard.Minimum)
+                                {
+                                    // create msg
+                                    var d = await c.ElevatedMessageAsync($"{e.Emoji}: {count + 1} ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
+                                    sbmid = (long)d.Id;
+                                }
+                            }
                         }
-                        else
+                        else if (cfg.Starboard.Minimum <= 1)
                         {
                             var d = await c.ElevatedMessageAsync($"{e.Emoji}: 1 ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
                             sbmid = (long)d.Id;
                         }
+
                         await db.StarDatas.AddAsync(new DatabaseStarData
                         {
                             ChannelId = (long)e.Channel.Id,
@@ -102,6 +119,12 @@ namespace ModCore.Listeners
                             StarboardMessageId = sbmid,
                             StargazerId = (long)e.User.Id,
                         });
+
+                        // somebody once told me...
+                        var allstars = db.StarDatas.Where(x => (ulong)x.MessageId == e.Message.Id).ToList();
+                        allstars.ForEach(x => x.StarboardMessageId = sbmid);
+                        db.StarDatas.UpdateRange(allstars);
+
                         await db.SaveChangesAsync();
                     }
                 }
@@ -140,33 +163,55 @@ namespace ModCore.Listeners
                     var c = e.Channel.Guild.Channels.First(x => x.Key == (ulong)cfg.Starboard.ChannelId).Value;
                     if (c.Id == e.Channel.Id)
                     {
-                        if (db.StarDatas.Any(x => (ulong)x.StarboardMessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id))
+                        /*if (db.StarDatas.Any(x => (ulong)x.StarboardMessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id))
                         {
                             var star = db.StarDatas.First(x => (ulong)x.StarboardMessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id);
                             var count = db.StarDatas.Count(x => (ulong)x.StarboardMessageId == e.Message.Id);
                             var m = await c.GetMessageAsync((ulong)star.StarboardMessageId);
                             var chn = await e.Client.GetChannelAsync((ulong)star.ChannelId);
                             var msg = await chn.GetMessageAsync((ulong)star.MessageId);
-                            if (count - 1 > 0)
+                            if (count - 1 >= cfg.Starboard.Minimum)
                                 await m.ModifyAsync($"{e.Emoji}: {count - 1} ({msg.Id}) in {msg.Channel.Mention}", embed: BuildMessageEmbed(msg));
                             else
                                 await m.DeleteAsync();
                             db.StarDatas.Remove(star);
                             await db.SaveChangesAsync();
-                        }
+                        }*/
+                        // Removing behaviour due to jump links
                     }
                     else
                     {
-                        if (db.StarDatas.Any(x => (ulong)x.MessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id))
+                        long nsbid = 0;
+                        if (db.StarDatas.Any(x => (ulong)x.MessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id && x.StarboardMessageId != 0))
                         {
                             var star = db.StarDatas.First(x => (ulong)x.MessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id);
                             var count = db.StarDatas.Count(x => (ulong)x.MessageId == e.Message.Id);
-                            var m = await c.GetMessageAsync((ulong)star.StarboardMessageId);
-                            if (count - 1 > 0)
-                                await m.ModifyAsync($"{e.Emoji}: {count - 1} ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
-                            else
-                                await m.DeleteAsync();
+
+                            if (db.StarDatas.Any(x => (ulong)x.MessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id && x.StarboardMessageId != 0))
+                            {
+                                var mid = db.StarDatas.First(x => (ulong)x.MessageId == e.Message.Id && (ulong)x.StargazerId == e.User.Id && x.StarboardMessageId != 0)
+                                    .StarboardMessageId;
+
+                                var m = await c.GetMessageAsync((ulong)mid);
+                                if (count - 1 >= cfg.Starboard.Minimum)
+                                {
+                                    await m.ModifyAsync($"{e.Emoji}: {count - 1} ({e.Message.Id}) in {e.Message.Channel.Mention}", embed: BuildMessageEmbed(e.Message));
+                                    nsbid = mid;
+                                }
+                                else
+                                {
+                                    await m.DeleteAsync();
+                                }
+                            }
+
                             db.StarDatas.Remove(star);
+                            await db.SaveChangesAsync();
+
+                            // somebody once told me...
+                            var allstars = db.StarDatas.Where(x => (ulong)x.MessageId == e.Message.Id).ToList();
+                            allstars.ForEach(x => x.StarboardMessageId = nsbid);
+                            db.StarDatas.UpdateRange(allstars);
+
                             await db.SaveChangesAsync();
                         }
                     }
@@ -209,7 +254,7 @@ namespace ModCore.Listeners
             var e = new DiscordEmbedBuilder()
                 .WithAuthor($"{m.Author.Username}#{m.Author.Discriminator}",
 				iconUrl: (string.IsNullOrEmpty(m.Author.AvatarHash) ? m.Author.DefaultAvatarUrl : m.Author.AvatarUrl))
-                .WithDescription(m.Content.Truncate(1000));
+                .WithDescription(m.Content.Truncate(1000) + $"\n\n[Jump to message]({m.JumpLink})");
 
             // This is shit code kek
             if (m.Attachments.Any(x => x.Url.ToLower().EndsWith(".jpg") || x.Url.ToLower().EndsWith(".png")
