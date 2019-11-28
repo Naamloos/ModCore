@@ -9,6 +9,9 @@ namespace ModCore.Entities
     {
         [JsonProperty("todo_items")]
         public List<TodoItem> TodoItems = new List<TodoItem>();
+
+        [JsonProperty("usertoken")]
+        public string Token = "";
     }
 
     public class TodoItem

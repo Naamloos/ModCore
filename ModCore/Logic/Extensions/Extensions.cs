@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
+using DSharpPlus.Interactivity;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
@@ -30,6 +31,32 @@ namespace ModCore.Logic.Extensions
             await exec(cfg);
             await ctx.SetGuildSettingsAsync(cfg);
             return ctx;
+        }
+
+        public static async Task<(bool Success, T Result)> RequestArgumentAsync<T>(this CommandContext ctx, string question)
+        {
+            var interactivity = ctx.Client.GetInteractivity();
+            var q = await ctx.RespondAsync(question);
+            var response = await ctx.Message.GetNextMessageAsync();
+            await q.DeleteAsync();
+
+
+            if (!response.TimedOut)
+            {
+                if (ctx.Channel.PermissionsFor(ctx.Guild.CurrentMember).HasPermission(Permissions.ManageMessages))
+                    await response.Result.DeleteAsync();
+                try
+                {
+                    T result = (T)await ctx.CommandsNext.ConvertArgument<T>(response.Result.Content, ctx);
+                    return (true, result);
+                }
+                catch (Exception)
+                {
+                    return (false, default(T));
+                }
+            }
+
+            return (false, default(T));
         }
 
         public static string BreakMentions(this string input)

@@ -132,6 +132,21 @@ namespace ModCore.Commands
 			await ctx.LogActionAsync($"Banned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
 		}
 
+        [Command("ban")]
+        public async Task BanAsync(CommandContext ctx)
+        {
+            var m = await ctx.RequestArgumentAsync<DiscordMember>("Member to ban?");
+
+            if (!m.Success)
+            {
+                return;
+            }
+
+            var reason = await ctx.RequestArgumentAsync<string>("Reason? (can be left empty.)");
+
+            await this.BanAsync(ctx, m.Result, reason.Success ? reason.Result : "");
+        }
+
 		[Command("hackban"), Description("Ban an user by their ID. The user does not need to be in the guild."),
 		 Aliases("hb"), RequirePermissions(Permissions.BanMembers), CheckDisable]
 		public async Task HackBanAsync(CommandContext ctx, [Description("ID of user to ban")]ulong id,

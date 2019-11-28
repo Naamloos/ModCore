@@ -129,6 +129,9 @@ namespace ModCore.Entities
 
         [JsonProperty("logupdates")]
         public bool LogUpdates;
+
+        [JsonProperty("webhooktoken")]
+        public string WebhookToken;
     }
 
     public class GuildChangeLogSettings
