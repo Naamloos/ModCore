@@ -1,0 +1,39 @@
+{
+  "IpRateLimiting": {
+    "EnableEndpointRateLimiting": true,
+    "StackBlockedRequests": false,
+    "RealIpHeader": "X-Real-IP",
+    "ClientIdHeader": "X-ClientId",
+    "HttpStatusCode": 429,
+    "IpWhitelist": [],
+    "EndpointWhitelist": [],
+    "ClientWhitelist": [],
+    "GeneralRules": [
+      {
+        "Endpoint": "*",
+        "Period": "1s",
+        "Limit": 2
+      },
+      {
+        "Endpoint": "*:/api/webhook/*",
+        "Period": "5s",
+        "Limit": 1
+      }
+    ]
+  },
+
+  "IpRateLimitPolicies": {
+    "IpRules": [
+      {
+        "Ip": "*",
+        "Rules": [
+          {
+            "Endpoint": "*",
+            "Period": "1h",
+            "Limit": 500
+          }
+        ]
+      }
+    ]
+  }
+}
