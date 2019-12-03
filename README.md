@@ -17,7 +17,7 @@ Setup
 
 Setting up your own instance: *(not recommended)*
 1. Clone the repo
-2. Publish the project using Visual Studio 2017 with .Net Core 2.0 installed
+2. Publish the project using Visual Studio 2019 with .Net Core 3.0 installed
 3. Setup your database ([Database Setup](https://github.com/NaamloosDT/ModCore/blob/master/PostgreSQL.md))
 4. Copy `settings.example.json` to your build folder, replace default values and rename to `config.json`
 5. dotnet ModCore.dll
