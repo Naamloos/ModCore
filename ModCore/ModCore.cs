@@ -18,8 +18,9 @@ using ModCore.CoreApi;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Listeners;
+using ModCore.Web;
 using Newtonsoft.Json;
-using Startup = ModCore.CoreApi.Startup;
+using Startup = ModCore.Web.Startup;
 
 namespace ModCore
 {

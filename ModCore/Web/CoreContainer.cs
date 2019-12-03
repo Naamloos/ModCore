@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ModCore.CoreApi
+namespace ModCore.Web
 {
     public struct CoreContainer
     {
-		internal ModCore mcore;
+		public ModCore mcore;
     }
 }

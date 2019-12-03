@@ -1,0 +1,36 @@
+﻿@page ""
+@model ModCore.Web.Pages.IndexModel
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "ModCore";
+}
+
+@inject ModCore.Web.CoreContainer Cont
+<div class="centertext">
+    <div id="title">
+        <img id="centerimg" src="@Cont.mcore.Shards.First().Client.CurrentUser.AvatarUrl" />
+        <h1>ModCore</h1>
+        <p>Currently serving @Cont.mcore.Shards.Select(x => x.Client.Guilds.Count).Sum() guilds on @Cont.mcore.Shards.Count() shards!</p>
+        <a target="_blank" href="~/info/invite" class="btnlink">
+            <div class="button">Invite ModCore</div>
+        </a>
+        <a href="~/Wiki" class="btnlink">
+            <div class="button buttoncolor-blue">ModCore Wiki</div>
+        </a>
+        <a target="_blank" href="https://discord.gg/hMRWUTa" class="btnlink">
+            <div class="button buttoncolor-orange">Support Server</div>
+        </a>
+    </div>
+</div>
+<div class="textblock">
+    <p>
+        ModCore is a powerful moderating bot written on top of DSharpPlus.
+        It serves as a moderating assistant to make managing your server as easy as possible.
+        Adding ModCore to your server today will open up a world of moderation options to you.
+    </p>
+    <br /><br />
+    <p>
+        This is where I would place a feature showcase, buuuuut it's late and I wanna sleep so I'm going to push this and do a sleepo. 
+        You could check out the <a href="~/wiki?p=features">wiki</a> for a bit though.
+    </p>
+</div>

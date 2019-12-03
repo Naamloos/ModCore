@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ModCore.CoreApi.Controllers
+namespace ModCore.Web.Controllers
 {
 	[Route("info")]
 	public class InfoController : Controller

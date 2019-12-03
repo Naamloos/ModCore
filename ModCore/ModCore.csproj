@@ -17,6 +17,13 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Web\Pages\include\script.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Web\Pages\include\script.js" />
+    <EmbeddedResource Include="Web\Pages\include\style.css" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="AspNetCoreRateLimit" Version="3.0.5" />
     <PackageReference Include="Chronic-netstandard" Version="0.3.2.4" />
     <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-*" />
@@ -40,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="4.6.0" />
+    <PackageReference Include="Westwind.AspNetCore.Markdown" Version="3.3.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="appconfig.json">

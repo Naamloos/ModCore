@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 
-namespace ModCore.CoreApi.Controllers
+namespace ModCore.Web.Controllers
 {
     [Route("api")]
     public class ApiController : Controller
