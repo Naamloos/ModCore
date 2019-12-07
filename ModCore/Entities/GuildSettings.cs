@@ -132,6 +132,24 @@ namespace ModCore.Entities
 
         [JsonProperty("webhooktoken")]
         public string WebhookToken;
+
+        [JsonProperty("levels")]
+        public LevelSettings Levels = new LevelSettings();
+    }
+
+    public class LevelSettings
+    {
+        [JsonProperty("levels_enabled")]
+        public bool Enabled;
+
+        [JsonProperty("messages_enabled")]
+        public bool MessagesEnabled;
+
+        [JsonProperty("redirect_messages")]
+        public bool RedirectMessages;
+
+        [JsonProperty("message_channel_id")]
+        public ulong ChannelId;
     }
 
     public class GuildChangeLogSettings

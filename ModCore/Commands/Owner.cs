@@ -212,6 +212,35 @@ namespace ModCore.Commands
             await ctx.SafeRespondAsync($"Users with access: {(list.Count > 0 ? $"`{string.Join("`, `", list)}`" : "None")}");
         }
 
+        [Command("grantxp"), Aliases("gxp"), Hidden]
+        public async Task GrantXpAsync(CommandContext ctx, DiscordMember m, int xp)
+        {
+            using (var db = Database.CreateContext())
+            {
+                if (db.UserDatas.Any(x => x.UserId == (long)m.Id))
+                {
+                    var dat = db.UserDatas.First(x => x.UserId == (long)m.Id);
+                    var data = dat.GetData();
+
+                    if (data.ServerExperience.ContainsKey(ctx.Guild.Id))
+                    {
+                        data.ServerExperience[ctx.Guild.Id] += xp;
+                        await ctx.RespondAsync($"Granted {xp} xp.");
+                    }
+                    else
+                    {
+                        await ctx.RespondAsync("No xp data stored for this user/guild combo");
+                        return;
+                    }
+
+                    dat.SetData(data);
+                    db.UserDatas.Update(dat);
+
+                    await db.SaveChangesAsync();
+                }
+            }
+        }
+
         [Command("query"), Aliases("q"), Hidden]
         public async Task QueryAsync(CommandContext ctx, string table, [RemainingText] string query)
         {

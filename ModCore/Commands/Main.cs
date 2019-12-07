@@ -1226,6 +1226,10 @@ namespace ModCore.Commands
             await ctx.RespondAsync("No message to snipe!");
         }
 
+        [Command("snoop"), Hidden]
+        public async Task SnoopAsync(CommandContext ctx)
+            => await ctx.RespondAsync("https://media1.tenor.com/images/48ab2af082ad3d41aa34646e4c467fc1/tenor.gif");
+
         [Command("cooldown")]
         [Description("Sets a custom message cooldown")]
         [RequirePermissions(Permissions.ManageChannels)]

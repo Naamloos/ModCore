@@ -12,6 +12,9 @@ namespace ModCore.Entities
 
         [JsonProperty("usertoken")]
         public string Token = "";
+
+        [JsonProperty("server_exp")]
+        public Dictionary<ulong, int> ServerExperience = new Dictionary<ulong, int>();
     }
 
     public class TodoItem

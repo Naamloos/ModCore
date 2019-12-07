@@ -1584,5 +1584,122 @@ Welcome messages support a handful of tags that get parsed to their actual value
 				await ctx.ElevatedRespondAsync($"Set nickname request confirmation channel to {channel.Mention}.");
 			}
 		}
-	}
+
+        [Group("levels"), Aliases("l"), Description("Level settings commands.")]
+        public class Levels : BaseCommandModule
+        {
+            ref bool GetSetting(GuildSettings cfg) => ref cfg.Levels.Enabled;
+
+            ref bool GetRedirectEnabled(GuildSettings cfg) => ref cfg.Levels.RedirectMessages;
+
+            ref bool GetMessagesEnabled(GuildSettings cfg) => ref cfg.Levels.MessagesEnabled;
+
+            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
+
+            string EnabledState => "Enabled";
+            string DisabledState => "Disabled";
+
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetSetting(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            [Command("messages"), Description("Sets whether messages are enabled or not.")]
+            public async Task MessagesAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetMessagesEnabled(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** level-up messages.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            [Command("redirect"), Description("Sets whether messages are enabled or not.")]
+            public async Task RedirectAsync(CommandContext ctx, [Description(
+                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
+                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
+                )] bool? enableOrDisable = null)
+            {
+                // we can't access ref inside an async method, so make a copy
+                var resultingVariable = false;
+
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    ref var configVariable = ref GetRedirectEnabled(cfg);
+
+                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
+                });
+
+                if (resultingVariable)
+                    await AfterEnable(ctx);
+                else
+                    await AfterDisable(ctx);
+
+                // if toggling, tell the user what the new value is
+                if (!enableOrDisable.HasValue)
+                    await ctx.ElevatedRespondAsync(
+                        $"**{(resultingVariable ? EnabledState : DisabledState)}** level-up message redirecting.");
+
+                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+            }
+
+            [Command("setchannel"), Aliases("set-channel", "channel", "chan", "sc"),
+             Description("The channel where confirmations will go to. Anyone with access to this channel will be " +
+                         "able to approve or deny nickname change requests, so choose wisely!")]
+            public async Task SetChannel(CommandContext ctx, DiscordChannel channel)
+            {
+                await ctx.WithGuildSettings(cfg => cfg.Levels.ChannelId = channel.Id);
+                await ctx.ElevatedRespondAsync($"Set level up message channel to {channel.Mention}.");
+            }
+
+            
+
+            Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
+
+            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+        }
+    }
 }
