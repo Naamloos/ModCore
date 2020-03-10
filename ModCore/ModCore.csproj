@@ -26,10 +26,9 @@
   <ItemGroup>
     <PackageReference Include="AspNetCoreRateLimit" Version="3.0.5" />
     <PackageReference Include="Chronic-netstandard" Version="0.3.2.4" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-*" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-*" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-*" />
-    <PackageReference Include="DSharpPlus.WebSocket.WebSocket4NetCore" Version="4.0.0-nightly-*" />
+    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00669" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00669" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00669" />
     <PackageReference Include="F23.StringSimilarity" Version="3.0.0" />
     <PackageReference Include="Humanizer.Core" Version="2.7.9" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />

@@ -64,11 +64,6 @@ namespace ModCore
                 ShardId = this.ShardId
             };
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Environment.OSVersion.Version <= new Version(6, 1, 7601, 65536))
-            {
-                // NT 6.1 (Win7 SP1)
-                cfg.WebSocketClientFactory = WebSocket4NetCoreClient.CreateNew;
-            }
             this.Client = new DiscordClient(cfg);
 
             Client.ClientErrored += async args =>
