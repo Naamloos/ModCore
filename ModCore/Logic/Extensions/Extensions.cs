@@ -242,7 +242,7 @@ namespace ModCore.Logic.Extensions
                     b.Build()
                 };
 
-                await w.ExecuteAsync(null, null, null, false, e, null);
+                await w.ExecuteAsync(new DiscordWebhookBuilder().AddEmbeds(e));
             }
         }
 
@@ -254,7 +254,8 @@ namespace ModCore.Logic.Extensions
             if (a.Enable)
             {
                 var w = await ctx.Client.GetWebhookWithTokenAsync(a.WebhookId, a.WebhookToken);
-                await w.ExecuteAsync(null, null, null, false, embed != null ? new List<DiscordEmbed> { embed } : null, null);
+                await w.ExecuteAsync(new DiscordWebhookBuilder().WithContent(content)
+                    .AddEmbeds(embed != null ? new List<DiscordEmbed> { embed } : new List<DiscordEmbed>()));
             }
         }
 
@@ -278,7 +279,7 @@ namespace ModCore.Logic.Extensions
                     b.Build()
                 };
 
-                await w.ExecuteAsync(null, null, null, false, e, null);
+                await w.ExecuteAsync(new DiscordWebhookBuilder().AddEmbeds(e));
             }
         }
 
@@ -290,7 +291,8 @@ namespace ModCore.Logic.Extensions
             if (s.ActionLog.Enable)
             {
                 var w = await clnt.GetWebhookWithTokenAsync(s.ActionLog.WebhookId, s.ActionLog.WebhookToken);
-                await w.ExecuteAsync(content, null, null, false, embed != null ? new List<DiscordEmbed> { embed } : null, null);
+                await w.ExecuteAsync(new DiscordWebhookBuilder().WithContent(content)
+                    .AddEmbeds(embed != null ? new List<DiscordEmbed> { embed } : new List<DiscordEmbed>()));
             }
         }
 
