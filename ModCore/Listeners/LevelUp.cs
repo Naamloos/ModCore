@@ -110,7 +110,7 @@ namespace ModCore.Listeners
                     if (newlevel > oldlevel)
                     {
                         // Leveled up! congratulate user.
-                        await msgchannel.SendMessageAsync($"Congratulations, {user.Mention}! You've leveled up!\n_Level {oldlevel} -> Level {newlevel}_");
+                        await msgchannel.SendMessageAsync($"Congratulations, {user.Nickname ?? user.Username}! You've leveled up!\n_Level {oldlevel} -> Level {newlevel}_");
                     }
                 }
 
