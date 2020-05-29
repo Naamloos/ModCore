@@ -65,6 +65,44 @@ namespace ModCore.Api
                     await _httpclient.SendAsync(_http);
                 }
             }
+
+            // cock
+            if (_botsettings.DiscordBotListComEnable)
+            {
+                using (var _http = new HttpRequestMessage())
+                {
+                    var json = new JObject();
+                    json.Add("guilds", guildcount);
+                    var content = new StringContent(json.ToString());
+                    _http.Headers.Add("Authorization", _botsettings.DiscordBotListComToken);
+                    content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                    _http.Content = content;
+                    _http.Method = HttpMethod.Post;
+                    _http.RequestUri = new Uri($"https://discordbotlist.com/api/v1/bots/{_botsettings.BotId}/stats");
+
+                    await _httpclient.SendAsync(_http);
+                }
+            }
+
+            // and ball
+            if (_botsettings.BotsOnDiscordXyzEnable)
+            {
+                using (var _http = new HttpRequestMessage())
+                {
+                    var json = new JObject();
+                    json.Add("guildCount", guildcount);
+                    var content = new StringContent(json.ToString());
+                    _http.Headers.Add("Authorization", _botsettings.BotsOnDiscordXyzToken);
+                    content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                    _http.Content = content;
+                    _http.Method = HttpMethod.Post;
+                    _http.RequestUri = new Uri($"https://bots.ondiscord.xyz/bot-api/bots/{_botsettings.BotId}/guilds");
+
+                    await _httpclient.SendAsync(_http);
+                }
+            }
+
+            // torture.
         }
 
         private bool _running = false;

@@ -47,7 +47,19 @@ namespace ModCore.Entities
 
 		[JsonProperty("botlist_org_enable")]
 		public bool BotListOrgEnable { get; private set; } = false;
-	}
+
+        [JsonProperty("discordbotlist_com_enable")]
+        public bool DiscordBotListComEnable { get; private set; } = false;
+
+        [JsonProperty("discordbotlist_com_token")]
+        public string DiscordBotListComToken { get; private set; }
+
+        [JsonProperty("botsondiscord_xyz_enable")]
+        public bool BotsOnDiscordXyzEnable { get; private set; } = false;
+
+        [JsonProperty("botsondiscord_xyz_token")]
+        public string BotsOnDiscordXyzToken { get; private set; }
+    }
 
     public struct DatabaseSettings
     {

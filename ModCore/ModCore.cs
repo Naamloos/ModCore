@@ -48,7 +48,12 @@ namespace ModCore
 
             var input = File.ReadAllText("settings.json", new UTF8Encoding(false));
             Settings = JsonConvert.DeserializeObject<Settings>(input);
-	        GlobalContextBuilder = Settings.Database.CreateContextBuilder();
+
+			// Saving config with same values but updated fields
+			var newjson = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+			File.WriteAllText("settings.json", newjson, new UTF8Encoding(false));
+
+			GlobalContextBuilder = Settings.Database.CreateContextBuilder();
             PerspectiveApi = new Perspective(Settings.PerspectiveToken);
 			Strawpoll = new Strawpoll();
 
