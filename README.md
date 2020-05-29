@@ -5,6 +5,11 @@
     <a href="https://github.com/Naamloos/ModCore/issues" target="_blank"><img src="https://img.shields.io/github/issues/Naamloos/ModCore.svg" alt="Github Issues"></a>
     <a href="https://ci.appveyor.com/project/Naamloos/modcore" target="_blank"><img src="https://ci.appveyor.com/api/projects/status/q1ac6j6qjxvpmm8s?svg=true" alt="Appveyor"></a>
   </p>
+  
+Support
+---------
+ModCore now has it's own support Discord server!
+[![ModCore Chat](https://discord.com/api/guilds/709152601978961990/embed.png?style=banner2)](https://discord.gg/MRUP5dd)
 
 
 Commands
