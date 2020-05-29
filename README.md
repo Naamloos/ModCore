@@ -9,6 +9,7 @@
 Support
 ---------
 ModCore now has it's own support Discord server!
+
 [![ModCore Chat](https://discord.com/api/guilds/709152601978961990/embed.png?style=banner2)](https://discord.gg/MRUP5dd)
 
 
