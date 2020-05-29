@@ -4,6 +4,9 @@
     <a href="https://github.com/Naamloos/ModCore/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/Naamloos/ModCore.svg" alt="Github Stars"></a>
     <a href="https://github.com/Naamloos/ModCore/issues" target="_blank"><img src="https://img.shields.io/github/issues/Naamloos/ModCore.svg" alt="Github Issues"></a>
     <a href="https://ci.appveyor.com/project/Naamloos/modcore" target="_blank"><img src="https://ci.appveyor.com/api/projects/status/q1ac6j6qjxvpmm8s?svg=true" alt="Appveyor"></a>
+  <a href="https://top.gg/bot/359828546719449109" >
+  <img src="https://top.gg/api/widget/status/359828546719449109.svg" alt="ModCore" />
+</a>
   </p>
   
 Support
