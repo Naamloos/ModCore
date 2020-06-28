@@ -156,12 +156,21 @@ namespace ModCore.Commands
 			var resp = await ctx.Message.GetNextMessageAsync();
 			if (!resp.TimedOut && (resp.Result?.Content.ToLower() == "yes" || resp.Result?.Content.ToLower() == "y"))
 			{
+				int skip = 0;
 				var servers = this.Shared.ModCore.Shards.SelectMany(x => x.Client.Guilds.Values).Where(x => x.Owner.Id == ctx.Member.Id);
 				foreach(var s in servers)
 				{
-					await s.BanMemberAsync(userId, 0, $"[ModCore NukeBan] {reason}");
+					if (s.CurrentMember.Roles.Any(x => x.CheckPermission(Permissions.BanMembers) == PermissionLevel.Allowed))
+					{
+						await s.BanMemberAsync(userId, 0, $"[ModCore NukeBan] {reason}");
+					}
+					else
+					{
+						skip++;
+					}
 				}
-				await ctx.RespondAsync($"Succesfully nukebanned member from {servers.Count()} servers.");
+				await ctx.RespondAsync($"Succesfully nukebanned member from {servers.Count()} servers." +
+					$"{(skip > 0? $" Skipped {skip} servers due to lacking permissions" : "")}");
 			}
 			else
 			{
