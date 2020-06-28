@@ -1,4 +1,4 @@
-<p align="center"><img src="https://i.imgur.com/FP6KQtX.png" width="200px" height="200px"></p>
+<p align="center"><img src="https://i.imgur.com/AzWYXOc.png" width="200px" height="200px"></p>
 <h1 align="center"> ModCore </h1>
   <p align="center">
     <a href="https://github.com/Naamloos/ModCore/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/Naamloos/ModCore.svg" alt="Github Stars"></a>
