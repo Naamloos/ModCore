@@ -151,7 +151,8 @@ namespace ModCore.Commands
 		[Description("Bans a member from all servers you own that have ModCore")]
 		public async Task NukeBanAsync(CommandContext ctx, ulong userId, string reason = "")
 		{
-			await ctx.RespondAsync($"This will ban the user with ID {userId} from all servers you own. Proceed?");
+			await ctx.RespondAsync($"This will ban the user with ID {userId} from all servers you own. Proceed?" +
+				$"\n**Be wary that this will ACTUALLY ban them from all servers you own, whether they are part of this server or not.**");
 			var resp = await ctx.Message.GetNextMessageAsync();
 			if (!resp.TimedOut && (resp.Result?.Content.ToLower() == "yes" || resp.Result?.Content.ToLower() == "y"))
 			{
