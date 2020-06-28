@@ -147,6 +147,27 @@ namespace ModCore.Commands
             await this.BanAsync(ctx, m.Result, reason.Success ? reason.Result : "");
         }
 
+		[Command("nukeban")]
+		[Description("Bans a member from all servers you own that have ModCore")]
+		public async Task NukeBanAsync(CommandContext ctx, ulong userId, string reason = "")
+		{
+			await ctx.RespondAsync($"This will ban the user with ID {userId} from all servers you own. Proceed?");
+			var resp = await ctx.Message.GetNextMessageAsync();
+			if (!resp.TimedOut && (resp.Result?.Content.ToLower() == "yes" || resp.Result?.Content.ToLower() == "y"))
+			{
+				var servers = this.Shared.ModCore.Shards.SelectMany(x => x.Client.Guilds.Values).Where(x => x.Owner.Id == ctx.Member.Id);
+				foreach(var s in servers)
+				{
+					await s.BanMemberAsync(userId, 0, $"[ModCore NukeBan] {reason}");
+				}
+				await ctx.RespondAsync($"Succesfully nukebanned member from {servers.Count()} servers.");
+			}
+			else
+			{
+				await ctx.RespondAsync("Action canceled.");
+			}
+		}
+
 		[Command("hackban"), Description("Ban an user by their ID. The user does not need to be in the guild."),
 		 Aliases("hb"), RequirePermissions(Permissions.BanMembers), CheckDisable]
 		public async Task HackBanAsync(CommandContext ctx, [Description("ID of user to ban")]ulong id,
