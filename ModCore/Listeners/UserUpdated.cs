@@ -63,7 +63,7 @@ namespace ModCore.Listeners
                                 $"Wait, what the fuck this isn't possible");
 
                         // TODO ModCore color scheme
-                        embed.WithColor(new DiscordColor("#C1272D"));
+                        embed.WithColor(new DiscordColor("#089FDF"));
 
                         embed.WithThumbnailUrl(e.UserAfter.AvatarUrl);
                         if (embed.Fields.Count > 0)
@@ -92,7 +92,7 @@ namespace ModCore.Listeners
                     .WithDescription($"{e.Member.Username}#{e.Member.Discriminator}");
 
                 // TODO ModCore color scheme
-                embed.WithColor(new DiscordColor("#C1272D"));
+                embed.WithColor(new DiscordColor("#089FDF"));
 
                 embed.WithThumbnailUrl(e.Member.AvatarUrl);
 
