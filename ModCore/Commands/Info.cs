@@ -36,7 +36,7 @@ namespace ModCore.Commands
         {
 
             var embed = new DiscordEmbedBuilder()
-                .WithColor(new DiscordColor("#C1272D"))
+                .WithColor(new DiscordColor("#089FDF"))
                 .WithTitle($"@{usr.Username}#{usr.Discriminator} - ID: {usr.Id}");
 
             if (usr.IsBot) embed.Title += " __[BOT]__ ";
@@ -74,7 +74,7 @@ namespace ModCore.Commands
                 #region yes
                 var g = ctx.Guild;
                 var embed = new DiscordEmbedBuilder()
-                    .WithColor(new DiscordColor("#C1272D"))
+                    .WithColor(new DiscordColor("#089FDF"))
                     .WithTitle($"{g.Name} ID: ({g.Id})")
                     .WithDescription($"Created on: {g.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}\n" +
                     $"Member count: {g.MemberCount}" +
