@@ -1225,8 +1225,11 @@ namespace ModCore.Commands
 
                 var embed = new DiscordEmbedBuilder().WithAuthor($"{m.Author.Username}#{m.Author.Discriminator}", iconUrl: m.Author.GetAvatarUrl(ImageFormat.Png));
 
-                if(!string.IsNullOrEmpty(m.Content))
-                    embed.WithDescription(m.Content);
+				if (!string.IsNullOrEmpty(m.Content))
+				{
+					embed.WithDescription(m.Content);
+					embed.WithTimestamp(m.Id);
+				}
 
                 await ctx.RespondAsync(embed: embed);
                 return;
@@ -1248,8 +1251,11 @@ namespace ModCore.Commands
 
                 var embed = new DiscordEmbedBuilder().WithAuthor($"{m.Author.Username}#{m.Author.Discriminator}", iconUrl: m.Author.GetAvatarUrl(ImageFormat.Png));
 
-                if (!string.IsNullOrEmpty(m.Content))
-                    embed.WithDescription(m.Content);
+				if (!string.IsNullOrEmpty(m.Content))
+				{
+					embed.WithDescription(m.Content);
+					embed.WithTimestamp(m.Id);
+				}
 
                 await ctx.RespondAsync(embed: embed);
                 return;
