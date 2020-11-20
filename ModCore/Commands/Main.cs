@@ -1145,20 +1145,6 @@ namespace ModCore.Commands
 			});
 		}
 
-		// TODO: look into why strawpoll errors with a valid payload??
-		#if DEBUG
-		[Command("strawpoll")]
-		[Description("Creates a strawpoll")]
-		[RequireBotPermissions(Permissions.ManageMessages)]
-		[Cooldown(100, 3600/*strawpoll ratelimit 100 per 60 min*/, CooldownBucketType.Global)]
-		public async Task StrawpollAsync(CommandContext ctx, string title, params string[] options)
-		{
-			await ctx.Message.DeleteAsync();
-			var poll = await this.Shared.Strawpoll.CreatePollAsync(title, options);
-			await ctx.RespondAsync($"{title}:\n{poll}");
-		}
-		#endif
-
 		// TODO: use database timer system??
 		// TODO: multiple winners
 		[Command("giveaway")]

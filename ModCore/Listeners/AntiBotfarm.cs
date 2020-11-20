@@ -27,6 +27,7 @@ namespace ModCore.Listeners
             // - more than 15 bots
             // - more bots than users
             // - not whitelisted
+            await Task.Yield();
         }
     }
 }
