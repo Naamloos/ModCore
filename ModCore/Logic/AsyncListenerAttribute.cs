@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using DSharpPlus;
+using DSharpPlus.CommandsNext;
 
 namespace ModCore.Logic
 {
@@ -19,7 +20,7 @@ namespace ModCore.Logic
         {
             // TODO redo this with linq expressions
             // nope, there's no cleaner way to do this. sorry
-            Task OnEventWithArgs(object e)
+            Task OnEventWithArgs(DiscordClient c, object e)
             {
                 _ = Task.Run(async () =>
                 {
@@ -36,13 +37,13 @@ namespace ModCore.Logic
                 return Task.CompletedTask;
             }
 
-            Task OnEventVoid()
+            Task OnCnextEvent(CommandsNextExtension cmd, object e)
             {
                 _ = Task.Run(async () =>
                 {
                     try
                     {
-                        await (Task) listener.Invoke(null, new object[] {bot});
+                        await (Task)listener.Invoke(null, new[] { bot, e });
                     }
                     catch (Exception ex)
                     {
@@ -62,7 +63,7 @@ namespace ModCore.Logic
                     client.SocketErrored += OnEventWithArgs;
                     break;
                 case EventTypes.SocketOpened:
-                    client.SocketOpened += OnEventVoid;
+                    client.SocketOpened += OnEventWithArgs;
                     break;
                 case EventTypes.SocketClosed:
                     client.SocketClosed += OnEventWithArgs;
@@ -191,10 +192,10 @@ namespace ModCore.Logic
                     client.Heartbeated += OnEventWithArgs;
                     break;
                 case EventTypes.CommandExecuted:
-                    bot.Commands.CommandErrored += OnEventWithArgs;
+                    bot.Commands.CommandExecuted += OnCnextEvent;
                     break;
                 case EventTypes.CommandErrored:
-                    bot.Commands.CommandErrored += OnEventWithArgs;
+                    bot.Commands.CommandErrored += OnCnextEvent;
                     break;
             }
         }

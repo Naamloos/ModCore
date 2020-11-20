@@ -14,6 +14,7 @@ using ModCore.Entities;
 using ModCore.Logic;
 using System.Text;
 using ModCore.Logic.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace ModCore.Listeners
 {
@@ -140,7 +141,7 @@ namespace ModCore.Listeners
 			}
 			catch (Exception ex)
 			{
-				e.Context.Client.DebugLogger.LogMessage(LogLevel.Critical, "CommandErrored", ex.ToString(),
+				e.Context.Client.Logger.Log(LogLevel.Critical, "CommandErrored", ex.ToString(),
 					DateTime.Now);
 			}
 

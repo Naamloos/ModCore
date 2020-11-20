@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Microsoft.Extensions.Logging;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
@@ -47,10 +48,10 @@ namespace ModCore.Listeners
                 }
 
                 var nickstate = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
-                ea.Client.DebugLogger.LogMessage(LogLevel.Debug, "ModCore", $"Do nickname shites: {ea.Member.Nickname}", System.DateTime.Now);
+                shard.Client.Logger.Log(LogLevel.Debug, "ModCore", $"Do nickname shites: {ea.Member.Nickname}", System.DateTime.Now);
                 if (nickstate == null) // no nickstate, create it
                 {
-                    ea.Client.DebugLogger.LogMessage(LogLevel.Debug, "ModCore", "Create nickname shites", System.DateTime.Now);
+                    shard.Client.Logger.Log(LogLevel.Debug, "ModCore", "Create nickname shites", System.DateTime.Now);
                     nickstate = new DatabaseRolestateNick
                     {
                         GuildId = (long)ea.Guild.Id,
@@ -61,7 +62,7 @@ namespace ModCore.Listeners
                 }
                 else // nickstate exists, update it
                 {
-                    ea.Client.DebugLogger.LogMessage(LogLevel.Debug, "ModCore", "Update nickname shites", System.DateTime.Now);
+                    shard.Client.Logger.Log(LogLevel.Debug, "ModCore", "Update nickname shites", System.DateTime.Now);
                     nickstate.Nickname = ea.Member.Nickname;
                     db.RolestateNicks.Update(nickstate);
                 }
@@ -134,7 +135,7 @@ namespace ModCore.Listeners
 
             if(nick != null)
             {
-                ea.Client.DebugLogger.LogMessage(LogLevel.Debug, "ModCore", $"Set new old nick: {nick.Nickname}", System.DateTime.Now);
+                shard.Client.Logger.Log(LogLevel.Debug, "ModCore", $"Set new old nick: {nick.Nickname}", System.DateTime.Now);
                 var m = await ea.Guild.GetMemberAsync(ea.Member.Id);
                 await m.ModifyAsync(x => x.Nickname = nick.Nickname);
             }

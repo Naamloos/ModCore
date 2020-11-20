@@ -21,7 +21,7 @@ namespace ModCore.Listeners
     public class AntiBotfarm
     {
         [AsyncListener(EventTypes.GuildAvailable)]
-        public void GuildAdded(ModCoreShard bot, GuildCreateEventArgs args)
+        public static async Task GuildAdded(ModCoreShard bot, GuildCreateEventArgs args)
         {
             // ModCore checks whether a guild has:
             // - more than 15 bots

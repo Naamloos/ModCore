@@ -14,7 +14,7 @@ namespace ModCore.Listeners
 {
     public class UserUpdate
     {
-        static async Task<bool> IsInGuild(DiscordUser u, DiscordGuild g)
+        public static async Task<bool> IsInGuild(DiscordUser u, DiscordGuild g)
         {
             try
             {
@@ -65,7 +65,7 @@ namespace ModCore.Listeners
                         // TODO ModCore color scheme
                         embed.WithColor(new DiscordColor("#089FDF"));
 
-                        embed.WithThumbnailUrl(e.UserAfter.AvatarUrl);
+                        embed.WithThumbnail(e.UserAfter.AvatarUrl);
                         if (embed.Fields.Count > 0)
                             await log.SendMessageAsync(embed: embed);
                     }
@@ -94,7 +94,7 @@ namespace ModCore.Listeners
                 // TODO ModCore color scheme
                 embed.WithColor(new DiscordColor("#089FDF"));
 
-                embed.WithThumbnailUrl(e.Member.AvatarUrl);
+                embed.WithThumbnail(e.Member.AvatarUrl);
 
                 if (e.NicknameAfter != e.NicknameBefore)
                 {

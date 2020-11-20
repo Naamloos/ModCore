@@ -16,6 +16,8 @@ using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
+using DSharpPlus.Interactivity.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace ModCore
 {
@@ -56,17 +58,17 @@ namespace ModCore
                 AutoReconnect = true,
                 GatewayCompressionLevel = GatewayCompressionLevel.Stream,
                 LargeThreshold = 250,
-                LogLevel = LogLevel.Debug,
+                MinimumLogLevel = LogLevel.Debug,
                 Token = Settings.Token,
                 TokenType = TokenType.Bot,
-                UseInternalLogHandler = true,
                 ShardCount = this.Settings.ShardCount,
-                ShardId = this.ShardId
+                ShardId = this.ShardId,
+
             };
 
             this.Client = new DiscordClient(cfg);
 
-            Client.ClientErrored += async args =>
+            Client.ClientErrored += async (client, args) =>
             {
                 await Task.Yield();
                 Console.WriteLine(args.Exception);
@@ -122,7 +124,7 @@ namespace ModCore
 			}
 
             // Update the SocketStartTime
-            this.Client.SocketOpened += async () =>
+            this.Client.SocketOpened += async (c, e) =>
             {
                 await Task.Yield();
                 StartTimes.SocketStartTime = DateTime.Now;
@@ -134,9 +136,9 @@ namespace ModCore
             AsyncListenerHandler.InstallListeners(Client, this);
         }
 
-        private async Task Client_Ready(ReadyEventArgs e)
+        private async Task Client_Ready(DiscordClient c, ReadyEventArgs e)
         {
-            await Client.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
+            await c.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
             SharedData.BotLists.StartBotStatUpdater(SharedData); // this method only lets itself run once.
         }
 

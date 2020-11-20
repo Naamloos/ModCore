@@ -87,9 +87,10 @@ namespace ModCore.Commands
 				var embed = new DiscordEmbedBuilder
 				{
 					Title = ctx.Guild.Name,
-					ThumbnailUrl = ctx.Guild.IconUrl,
+					Thumbnail = new DiscordEmbedBuilder.EmbedThumbnail() { Url = ctx.Guild.IconUrl },
 					Description = "Available SelfRoles:"
 				};
+
 				var roles = cfg.SelfRoles
 					.Select(ctx.Guild.GetRole)
 					.Where(x => x != null)

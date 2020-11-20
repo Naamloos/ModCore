@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Microsoft.Extensions.Logging;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Logic;
@@ -23,7 +24,7 @@ namespace ModCore.Listeners
 				if (!db.Timers.Any())
 					return;
 
-				var ids = ea.Client.Guilds.Select(xg => (long)xg.Key).ToArray();
+				var ids = shard.Client.Guilds.Select(xg => (long)xg.Key).ToArray();
 				var timers = db.Timers.Where(xt => ids.Contains(xt.GuildId)).ToArray();
 				if (!timers.Any())
 					return;
@@ -48,7 +49,7 @@ namespace ModCore.Listeners
 				}
 				catch (Exception ex)
 				{
-					ea.Client.DebugLogger.LogMessage(LogLevel.Error, "ModCore", 
+					shard.Client.Logger.Log(LogLevel.Error, "ModCore", 
 						$"Caught Exception in Timer Ready: {ex.GetType().ToString()}\n{ex.StackTrace}", DateTime.UtcNow);
 				}
 				finally

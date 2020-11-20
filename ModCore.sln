@@ -23,13 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{0E
 		tags.sql = tags.sql
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Update Scripts", "Update Scripts", "{7C345330-F8B6-47AF-AB01-6F6BFAB00AA5}"
-	ProjectSection(SolutionItems) = preProject
-		Update Scripts\download.ps1 = Update Scripts\download.ps1
-		Update Scripts\update.bat = Update Scripts\update.bat
-		Update Scripts\update.sh = Update Scripts\update.sh
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
