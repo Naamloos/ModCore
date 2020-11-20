@@ -62,7 +62,8 @@ namespace ModCore
                 Token = Settings.Token,
                 TokenType = TokenType.Bot,
                 ShardCount = this.Settings.ShardCount,
-                ShardId = this.ShardId
+                ShardId = this.ShardId,
+                Intents = DiscordIntents.All
             };
 
             this.Client = new DiscordClient(cfg);

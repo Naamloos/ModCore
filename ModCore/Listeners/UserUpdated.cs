@@ -14,7 +14,7 @@ namespace ModCore.Listeners
 {
     public class UserUpdate
     {
-        static async Task<bool> IsInGuild(DiscordUser u, DiscordGuild g)
+        public static async Task<bool> IsInGuild(DiscordUser u, DiscordGuild g)
         {
             try
             {
