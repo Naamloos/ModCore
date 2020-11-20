@@ -258,28 +258,30 @@ namespace ModCore.Commands
 	    {
 	        switch (table.ToUpperInvariant())
 	        {
-	            case "DATABASEINFO":
-	            case "GUILDCONFIG": return await QueryAsync(db.Info, query);
-	            case "DATABASEGUILDCONFIG":
-	            case "MODNOTE":
-	            case "NOTE": return await QueryAsync(db.GuildConfig, query);
-	            case "DATABASEMODNOTE":
-	            case "ROLESTATEOVERRIDE": return await QueryAsync(db.Modnotes, query);
+	            case "DATABASEINFO": return await QueryAsync(db.Info, query);
+
+                case "GUILDCONFIG":
+	            case "DATABASEGUILDCONFIG": return await QueryAsync(db.GuildConfig, query);
+
+                case "MODNOTE":
+	            case "NOTE":
+	            case "DATABASEMODNOTE": return await QueryAsync(db.Modnotes, query);
+
+                case "ROLESTATEOVERRIDE":
 	            case "DATABASEROLESTATEOVERRIDE":
-	            case "ROLESTATEROLES": return await QueryAsync(db.RolestateOverrides, query);
-	            case "DATABASEROLESTATEROLES":
-	            case "WARNING": return await QueryAsync(db.RolestateRoles, query);
-	            case "DATABASEWARNING":
-	            case "TIMER": return await QueryAsync(db.Warnings, query);
-	            case "DATABASETIMER":
-	            case "STARDATA":
-	            case "STAR": return await QueryAsync(db.Timers, query);
-	            case "DATABASESTARDATA":
-	            case "BAN": return await QueryAsync(db.StarDatas, query);
-	            case "DATABASEBAN":
-	            case "TAG": return await QueryAsync(db.Bans, query);
-	            case "DATABASETAG":
-	            case "COMMANDID": return await QueryAsync(db.Tags, query);
+	            case "ROLESTATEROLES":
+	            case "DATABASEROLESTATEROLES": return await QueryAsync(db.RolestateOverrides, query);
+
+                case "TIMER":
+	            case "DATABASETIMER": return await QueryAsync(db.Timers, query);
+
+                case "STARDATA":
+	            case "STAR": 
+	            case "DATABASESTARDATA": return await QueryAsync(db.StarDatas, query);
+
+                case "TAG": 
+	            case "DATABASETAG": return await QueryAsync(db.Tags, query);
+                case "COMMANDID": return await QueryAsync(db.CommandIds, query);
 	            default: throw new ArgumentException();
 	        }
 	    }

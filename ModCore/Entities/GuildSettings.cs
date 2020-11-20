@@ -78,13 +78,6 @@ namespace ModCore.Entities
         [JsonProperty]
         public GuildStarboardSettings Starboard { get; private set; } = new GuildStarboardSettings();
 
-        /// <summary>
-        /// Gets the GlobalWarn settings for this guild. GlobalWarn notifies the server owner when a previously 
-        /// banned user joins, or alternatively bans said user.
-        /// </summary>
-        [JsonProperty]
-        public GuildGlobalWarnSettings GlobalWarn { get; private set; } = new GuildGlobalWarnSettings();
-
 	    /// <summary>
 	    /// Gets whether spelling helper is enabled or disabled for this guild.
 	    /// </summary>
@@ -108,61 +101,106 @@ namespace ModCore.Entities
 	    /// </summary>
 	    [JsonProperty("disverbose")]
 	    public bool NotifyDisabledCommand = true;
-	    
-		[JsonProperty("motd")]
-		public MotdSettings Motd { get; private set; } = new MotdSettings();
 
+        /// <summary>
+        /// Represents settings for welcome messages.
+        /// </summary>
 		[JsonProperty("welcome")]
 		public WelcomeSettings Welcome { get; private set; } = new WelcomeSettings();
 
+        /// <summary>
+        /// Whether this server requires administrator permission for nickname changes.
+        /// </summary>
 	    [JsonProperty("nickconf")]
 	    public bool RequireNicknameChangeConfirmation;
 	    
+        /// <summary>
+        /// Channel where confirmation requests are sent.
+        /// </summary>
 	    [JsonProperty("nickchn")]
 	    public ulong NicknameChangeConfirmationChannel { get; set; }
 
+        /// <summary>
+        /// Role for jailed members. (unused as of right now)
+        /// </summary>
 		[JsonProperty("jailrole")]
 		public long JailRole { get; set; }
 
+        /// <summary>
+        /// Channel to log member updates in.
+        /// </summary>
         [JsonProperty("updatechn")]
         public ulong UpdateChannel { get; set; }
 
+        /// <summary>
+        /// Whether this guild has member update logs enabled.
+        /// </summary>
         [JsonProperty("logupdates")]
         public bool LogUpdates;
 
-        [JsonProperty("webhooktoken")]
-        public string WebhookToken;
-
+        /// <summary>
+        /// Settings for levelups.
+        /// </summary>
         [JsonProperty("levels")]
         public LevelSettings Levels = new LevelSettings();
     }
 
+    /// <summary>
+    /// Represents settings for levelups.
+    /// </summary>
     public class LevelSettings
     {
+        /// <summary>
+        /// Whether levelups are enabled.
+        /// </summary>
         [JsonProperty("levels_enabled")]
         public bool Enabled;
 
+        /// <summary>
+        /// Whether level up messages are enabled.
+        /// </summary>
         [JsonProperty("messages_enabled")]
         public bool MessagesEnabled;
 
+        /// <summary>
+        /// Whether level up messages should be redirected to a logging channel.
+        /// </summary>
         [JsonProperty("redirect_messages")]
         public bool RedirectMessages;
 
+        /// <summary>
+        /// Channel to log level up messages in.
+        /// </summary>
         [JsonProperty("message_channel_id")]
         public ulong ChannelId;
     }
 
+    /// <summary>
+    /// Settings for member change logs
+    /// </summary>
     public class GuildChangeLogSettings
     {
+        /// <summary>
+        /// Channel to log changes in.
+        /// </summary>
         [JsonProperty("log_channel")]
         public long LogChannel = 0;
 
+        /// <summary>
+        /// Whether to log nickname changes.
+        /// </summary>
         [JsonProperty("log_nickname")]
         public bool LogNickname = false;
 
+        /// <summary>
+        /// Whether to log avatar changes.
+        /// </summary>
         [JsonProperty("log_avatar")]
         public bool LogAvatar = false;
 
+        /// <summary>
+        /// Whether to log username changes.
+        /// </summary>
         [JsonProperty("log_username")]
         public bool LogRoles = false;
     }
@@ -187,18 +225,33 @@ namespace ModCore.Entities
 	    [JsonProperty("enabled")]
 	    public bool Enable;
 
+        /// <summary>
+        /// Minimum amount of stars required for star board.
+        /// </summary>
         [JsonProperty("minimum")]
         public int Minimum { get; set; } = 3;
 
+        /// <summary>
+        /// Whether to allow stars from NSFW channels.
+        /// </summary>
 	    [JsonProperty("allow_nsfw")] 
-	    public bool AllowNSFW;
+	    public bool AllowNSFW = false;
     }
 
+    /// <summary>
+    /// Represents an emoji.
+    /// </summary>
     public class GuildEmoji
     {
+        /// <summary>
+        /// Emoji ID.
+        /// </summary>
         [JsonProperty("id")]
         public ulong EmojiId { get; set; }
 
+        /// <summary>
+        /// Emoji name.
+        /// </summary>
         [JsonProperty("name")]
         public string EmojiName { get; set; } = "⭐";
     }
@@ -278,11 +331,26 @@ namespace ModCore.Entities
 	    public CommandErrorVerbosity ActionLog { get; set; } = CommandErrorVerbosity.None;
     }
 
+    /// <summary>
+    /// Represents error verbosity
+    /// </summary>
     public enum CommandErrorVerbosity
     {
+        /// <summary>
+        /// Do not log errors.
+        /// </summary>
         None,
+        /// <summary>
+        /// Log error with command name.
+        /// </summary>
         Name,
+        /// <summary>
+        /// Log error with command name and error description.
+        /// </summary>
         NameDesc,
+        /// <summary>
+        /// Log full exception (bot owner only).
+        /// </summary>
         Exception
     }
 
@@ -415,28 +483,9 @@ namespace ModCore.Entities
         public bool Nickname;
     }
 
-    public class GuildGlobalWarnSettings
-    {
-	    /// <summary>
-	    /// Gets or sets whether GlobalWarn should be enabled.
-	    /// </summary>
-	    [JsonProperty("enabled")] 
-	    public bool Enable;
-
-        /// <summary>
-        /// Gets or sets the GlobalWarn 
-        /// </summary>
-        [JsonProperty("warnlevel")]
-        public GlobalWarnLevel WarnLevel { get; set; } = GlobalWarnLevel.None;
-    }
-
-    public enum GlobalWarnLevel
-    {
-        None,
-        Owner,
-        JoinLog
-    }
-
+    /// <summary>
+    /// Ussnure what this does
+    /// </summary>
     public class GuildBotManagerSettings
     {
         /// <summary>
@@ -494,24 +543,28 @@ namespace ModCore.Entities
 	/// </summary>
 	public class WelcomeSettings
 	{
+        /// <summary>
+        /// Whether welcome messages are enabled.
+        /// </summary>
 		[JsonProperty("enabled")]
 		public bool Enable;
 
+        /// <summary>
+        /// Welcome message to send.
+        /// </summary>
 		[JsonProperty("message")]
 		public string Message { get; set; } = "";
 
+        /// <summary>
+        /// Channel id to send welcome messages in.
+        /// </summary>
 		[JsonProperty("channel_id")]
 		public ulong ChannelId { get; set; }
 
+        /// <summary>
+        /// Whether the welcome message is an embed.
+        /// </summary>
 		[JsonProperty("is_embed")]
 		public bool IsEmbed { get; set; }
-	}
-
-	/// <summary>
-	/// Represents MOTD settings.
-	/// </summary>
-	public class MotdSettings
-	{
-
 	}
 }
