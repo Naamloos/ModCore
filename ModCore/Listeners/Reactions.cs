@@ -35,9 +35,9 @@ namespace ModCore.Listeners
                 var emoji = cfg.Starboard.Emoji;
                 DiscordEmoji em = null;
                 if (emoji.EmojiId != 0)
-                    em = DiscordEmoji.FromGuildEmote(e.Client, (ulong)emoji.EmojiId);
+                    em = DiscordEmoji.FromGuildEmote(bot.Client, (ulong)emoji.EmojiId);
                 else
-                    em = DiscordEmoji.FromUnicode(e.Client, emoji.EmojiName);
+                    em = DiscordEmoji.FromUnicode(bot.Client, emoji.EmojiName);
 
                 if (!cfg.Starboard.AllowNSFW && e.Channel.IsNSFW)
                     return;
@@ -154,9 +154,9 @@ namespace ModCore.Listeners
 				var emoji = cfg.Starboard.Emoji;
                 DiscordEmoji em = null;
                 if (emoji.EmojiId != 0)
-                    em = DiscordEmoji.FromGuildEmote(e.Client, (ulong)emoji.EmojiId);
+                    em = DiscordEmoji.FromGuildEmote(bot.Client, (ulong)emoji.EmojiId);
                 else
-                    em = DiscordEmoji.FromUnicode(e.Client, emoji.EmojiName);
+                    em = DiscordEmoji.FromUnicode(bot.Client, emoji.EmojiName);
 
                 if (cfg.Starboard.Enable && e.Emoji == em)
                 {
@@ -232,9 +232,9 @@ namespace ModCore.Listeners
                 var emoji = cfg.Starboard.Emoji;
                 DiscordEmoji em = null;
                 if (emoji.EmojiId != 0)
-                    em = DiscordEmoji.FromGuildEmote(e.Client, (ulong)emoji.EmojiId);
+                    em = DiscordEmoji.FromGuildEmote(bot.Client, (ulong)emoji.EmojiId);
                 else
-                    em = DiscordEmoji.FromUnicode(e.Client, emoji.EmojiName);
+                    em = DiscordEmoji.FromUnicode(bot.Client, emoji.EmojiName);
 
                 if (cfg.Starboard.Enable)
                 {

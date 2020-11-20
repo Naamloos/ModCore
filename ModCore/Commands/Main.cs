@@ -13,7 +13,7 @@ using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
-using DSharpPlus.Interactivity.EventHandling;
+using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using Humanizer.Localisation;
 using ModCore.Database;
@@ -25,7 +25,7 @@ using ModCore.Logic.Utils;
 
 namespace ModCore.Commands
 {
-	public class Main : BaseCommandModule
+    public class Main : BaseCommandModule
 	{
 		private static readonly Regex SpaceReplacer = new Regex(" {2,}", RegexOptions.Compiled);
 
@@ -67,7 +67,7 @@ namespace ModCore.Commands
                     $"\n*Servers:* {this.Shared.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()}" +
                     $"\n*Shards:* {this.Shared.ModCore.Shards.Count}")
 				.AddField("Contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
-				.WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
+				.WithThumbnail(ctx.Client.CurrentUser.AvatarUrl)
 				.Build();
 
 			await ctx.ElevatedRespondAsync(embed: eb);
@@ -748,7 +748,7 @@ namespace ModCore.Commands
 						var case4 = await this.Interactivity.WaitForMessageAsync(x => x.Author.Id == ctx.Member.Id && x.ChannelId == ctx.Channel.Id);
 						if (!case4.TimedOut)
 						{
-							embed.WithThumbnailUrl(case4.Result.Content);
+							embed.WithThumbnail(case4.Result.Content);
 							await case4.Result.DeleteAsync();
 							await msg.ModifyAsync($"Thumbnail Image URL set.", null);
 						}
@@ -1015,7 +1015,7 @@ namespace ModCore.Commands
 				.WithTitle($"Message by {message.Author.Username}#{message.Author.Discriminator}")
 				.WithDescription($"{message.Content}\n\n[{this.Shared.Emojis.JumpLink.ToString()}](https://discordapp.com/channels/{message.Channel.GuildId}/{message.ChannelId}/{message.Id})")
 				.WithFooter($" Quoted by {ctx.Member.Username}#{ctx.Member.Discriminator}. ID: {message.Id}.", ctx.Member.GetAvatarUrl(ImageFormat.Png))
-				.WithThumbnailUrl(message.Author.GetAvatarUrl(ImageFormat.Png))
+				.WithThumbnail(message.Author.GetAvatarUrl(ImageFormat.Png))
 				.WithTimestamp(message.Timestamp)
 				.Build();
 

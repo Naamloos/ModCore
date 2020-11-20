@@ -80,7 +80,7 @@ namespace ModCore.Commands
                     $"Member count: {g.MemberCount}" +
                     $"Joined at: {g.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}");
                 if (!string.IsNullOrEmpty(g.IconHash))
-                    embed.WithThumbnailUrl(g.IconUrl);
+                    embed.WithThumbnail(g.IconUrl);
                 embed.WithAuthor($"Owner: {g.Owner.Username}#{g.Owner.Discriminator}", iconUrl: string.IsNullOrEmpty(g.Owner.AvatarHash) ? null : g.Owner.AvatarUrl);
                 var cs = new StringBuilder();
                 #region channel list string builder
