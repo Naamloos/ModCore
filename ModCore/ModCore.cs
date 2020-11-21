@@ -98,7 +98,6 @@ namespace ModCore
 		        CTS = CTS,
 		        ProcessStartTime = Process.GetCurrentProcess().StartTime,
 		        Perspective = PerspectiveApi,
-		        BotManagers = Settings.BotManagers,
 		        DefaultPrefix = Settings.DefaultPrefix,
 		        ModCore = this
 	        };

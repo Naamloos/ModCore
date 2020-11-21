@@ -12,7 +12,7 @@ using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands
 {
-    [Group("toxicity"), Aliases("toxic", "tox", "t"), RequireUserPermissions(Permissions.ManageMessages), CheckDisable]
+    [Group("toxicity"), Aliases("toxic", "tox", "t"), RequireOwner]
     public class Toxicity : BaseCommandModule
     {
         public SharedData Shared { get; }

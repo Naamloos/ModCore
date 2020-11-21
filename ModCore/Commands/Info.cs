@@ -13,7 +13,7 @@ using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands
 {
-    [Group("info"), Aliases("i"), Description("Information commands"), CheckDisable]
+    [Group("info"), Aliases("i"), Description("Information commands.\nFor information about the bot you might instead be looking for the command `about`"), CheckDisable]
     public class Info : BaseCommandModule
 	{
         public SharedData Shared { get; }
