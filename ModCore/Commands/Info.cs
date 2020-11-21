@@ -31,6 +31,24 @@ namespace ModCore.Commands
             await ctx.ShowHelpForAsync("info");
         }
 
+        [GroupCommand]
+        public async Task ExecuteGroupAsync(CommandContext ctx, DiscordMember member)
+        {
+            await this.UserInfoAsync(ctx, member);
+        }
+
+        [GroupCommand]
+        public async Task ExecuteGroupAsync(CommandContext ctx, DiscordChannel channel)
+        {
+            await this.ChannelInfoAsync(ctx, channel);
+        }
+
+        [GroupCommand]
+        public async Task ExecuteGroupAsync(CommandContext ctx, DiscordRole role)
+        {
+            await this.RoleInfoAsync(ctx, role);
+        }
+
         [Command("user"), Aliases("u"), Description("Returns information about a specific user."), CheckDisable]
         public async Task UserInfoAsync(CommandContext ctx, [Description("Member to get information about")]DiscordMember usr)
         {
