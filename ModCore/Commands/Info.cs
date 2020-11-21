@@ -26,9 +26,9 @@ namespace ModCore.Commands
         }
 
 		[GroupCommand]
-        public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Member to get information about.")]DiscordMember usr)
+        public async Task ExecuteGroupAsync(CommandContext ctx)
         {
-            await UserInfoAsync(ctx, usr);
+            await ctx.ShowHelpForAsync("info");
         }
 
         [Command("user"), Aliases("u"), Description("Returns information about a specific user."), CheckDisable]

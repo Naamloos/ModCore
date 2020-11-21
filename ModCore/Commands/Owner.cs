@@ -95,17 +95,6 @@ namespace ModCore.Commands
 			await ctx.Member.SendMessageAsync(tk.ToString());
 		}
 
-        [Command("testupdate"), Aliases("t"), Hidden]
-        public async Task ThrowAsync(CommandContext ctx)
-        {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-            {
-                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
-                return;
-            }
-            await ctx.SafeRespondUnformattedAsync("Test: 420");
-        }
-
         [Command("sudo"), Aliases("s"), Hidden]
         public async Task SudoAsync(CommandContext ctx, [Description("Member to sudo")]DiscordMember m, [Description("Command to sudo"), RemainingText]string command)
         {
@@ -115,10 +104,12 @@ namespace ModCore.Commands
                 return;
             }
 
-            var cmdobj = ctx.CommandsNext.FindCommand(command, out string args);
-            var p = ctx.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
-            var fctx = ctx.CommandsNext.CreateFakeContext(m, ctx.Channel, command, p, cmdobj);
-            await ctx.CommandsNext.ExecuteCommandAsync(fctx);
+            var cmd = ctx.CommandsNext.FindCommand(command, out var args);
+            if (cmd == null)
+                await ctx.SafeRespondUnformattedAsync($"Couldn't find command {command}!");
+
+            var fake = ctx.CommandsNext.CreateFakeContext(ctx.Guild.Owner, ctx.Channel, command, ctx.Prefix, cmd, args);
+            await ctx.CommandsNext.ExecuteCommandAsync(fake);
         }
 
         [Command("sudoowner"), Aliases("so"), Hidden]
@@ -130,63 +121,13 @@ namespace ModCore.Commands
                 return;
             }
 
-            var cmdobj = ctx.CommandsNext.FindCommand(command, out string args);
-            var p = ctx.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
-            var fctx = ctx.CommandsNext.CreateFakeContext(ctx.Guild.Owner, ctx.Channel, command, p, cmdobj);
-            await ctx.CommandsNext.ExecuteCommandAsync(fctx);
-        }
+            var cmd = ctx.CommandsNext.FindCommand(command, out var args);
+            if (cmd == null)
+                await ctx.SafeRespondUnformattedAsync($"Couldn't find command {command}!");
 
-        //[Command("update"), Aliases("u"), Hidden]
-        //public async Task UpdateAsync(CommandContext ctx)
-        //{
-        //    if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-        //    {
-        //        await ctx.SafeRespondAsync("You do not have permission to use this command!");
-        //        return;
-        //    }
-        //    var m = await ctx.SafeRespondAsync($"Running update script...");
-        //    const string fn = "update";
-        //    if (File.Exists("update.sh"))
-        //    {
-        //        const string file = fn + ".sh";
-        //        var proc = new Process
-        //        {
-        //            StartInfo = new ProcessStartInfo
-        //            {
-        //                FileName = "nohup",
-        //                Arguments = $"bash {file} {Process.GetCurrentProcess().Id} {ctx.Guild.Id} {ctx.Channel.Id}",
-        //                UseShellExecute = false,
-        //                RedirectStandardOutput = true,
-        //                CreateNoWindow = true
-        //            }
-        //        };
-        //        proc.Start();
-        //        await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
-        //    }
-        //    else if (File.Exists("update.bat"))
-        //    {
-        //        const string file = fn + ".bat";
-        //        var proc = new Process
-        //        {
-        //            StartInfo = new ProcessStartInfo
-        //            {
-        //                FileName = file,
-        //                Arguments = $"{ctx.Guild.Id} {ctx.Channel.Id}",
-        //                UseShellExecute = false,
-        //                RedirectStandardOutput = true,
-        //                CreateNoWindow = true
-        //            }
-        //        };
-        //        proc.Start();
-        //        await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
-        //    }
-        //    else
-        //    {
-        //        await m.ModifyAsync("**‼ Your update script has not been found. ‼**\n\nPlease place `update.sh` (Linux) or `update.bat` (Windows) in your ModCore directory.");
-        //        return;
-        //    }
-        //    this.Shared.CTS.Cancel();
-        //}
+            var fake = ctx.CommandsNext.CreateFakeContext(ctx.Guild.Owner, ctx.Channel, command, ctx.Prefix, cmd, args);
+            await ctx.CommandsNext.ExecuteCommandAsync(fake);
+        }
 
         [Command("botmanagers"), Aliases("bm"), Hidden]
         public async Task BotManagersAsync(CommandContext ctx)

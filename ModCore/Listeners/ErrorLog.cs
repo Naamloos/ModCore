@@ -23,6 +23,11 @@ namespace ModCore.Listeners
 		[AsyncListener(EventTypes.CommandErrored)]
 		public static async Task CommandError(ModCoreShard bot, CommandErrorEventArgs e)
 		{
+			if(e.Exception.GetType() == typeof(ArgumentException))
+            {
+				await e.Context.ShowHelpForAsync(e.Command.QualifiedName);
+				return;
+            }
 			var cfg = e.Context.GetGuildSettings() ?? new GuildSettings();
 			var ctx = e.Context;
 

@@ -34,6 +34,16 @@ namespace ModCore.Logic.Extensions
             return ctx;
         }
 
+        public static async Task ShowHelpForAsync(this CommandContext ctx, string commandname)
+        {
+            var cmd = ctx.CommandsNext.FindCommand($"help {commandname}", out var args);
+            if (cmd == null)
+                return;
+
+            var fake = ctx.CommandsNext.CreateFakeContext(ctx.Guild.Owner, ctx.Channel, $"help {commandname}", ctx.Prefix, cmd, args);
+            await ctx.CommandsNext.ExecuteCommandAsync(fake);
+        }
+
         public static async Task<(bool Success, T Result)> RequestArgumentAsync<T>(this CommandContext ctx, string question)
         {
             var interactivity = ctx.Client.GetInteractivity();

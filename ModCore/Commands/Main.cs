@@ -1177,24 +1177,25 @@ namespace ModCore.Commands
         [Description("Executes (multiple) commands")]
         public async Task ExecAsync(CommandContext ctx, [RemainingText]string cmds)
         {
-            // TODO big ol testes
+            // Commands are split by ; which can be ascaped by \;
             string splitter = @"(?!\\);";
-
             var split = Regex.Split(cmds, splitter);
+
             foreach (var s in split)
             {
                 var p = ctx.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
-                //await ctx.CommandsNext.SudoAsync(ctx.User, ctx.Channel, $"{p}{}");
-                var cmdraw = s.Replace("\\;", ";").Split(' ').ToList();
-                var cmd = cmdraw[0];
-                cmdraw.RemoveAt(0);
-                var args = String.Join(' ', cmdraw);
+				var ccmd = s.Replace("\\;", ";");
 
-                var cmdobj = ctx.CommandsNext.FindCommand(cmd, out args);
+				var cmd = ctx.CommandsNext.FindCommand(ccmd, out var args);
+				if (cmd == null)
+				{
+					await ctx.SafeRespondUnformattedAsync($"Couldn't find command {ccmd}! Execution halted.");
+					return;
+				}
 
-                var fctx = ctx.CommandsNext.CreateFakeContext(ctx.User, ctx.Channel, s.Replace("\\;", ";"), p, cmdobj);
-                await ctx.CommandsNext.ExecuteCommandAsync(fctx);
-            }
+				var fake = ctx.CommandsNext.CreateFakeContext(ctx.Guild.Owner, ctx.Channel, ccmd, p, cmd, args);
+				await ctx.CommandsNext.ExecuteCommandAsync(fake);
+			}
         }
 
         [Command("snipe")]
