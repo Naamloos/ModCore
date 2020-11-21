@@ -20,7 +20,6 @@ namespace ModCore.Entities
         public TimerData TimerData { get; internal set; }
         public Perspective Perspective { get; internal set; }
         public (ulong guild, ulong channel) StartNotify { get; internal set; }
-        public List<ulong> BotManagers { get; internal set; }
         public string DefaultPrefix { get; internal set; }
 		public int ReadysReceived { get; internal set; } = 0;
 		public List<Permissions> AllPerms { get; internal set; } = new List<Permissions>();

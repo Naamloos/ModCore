@@ -18,7 +18,7 @@ using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands
 {
-    [Group("owner"), Aliases("o"), Hidden]
+    [Group("owner"), Aliases("o"), Hidden, RequireOwner]
     public class Owner : BaseCommandModule
 	{
         public SharedData Shared { get; }
@@ -33,12 +33,6 @@ namespace ModCore.Commands
 	    [Command("dbtest"), Hidden]
 	    public async Task DbTestAsync(CommandContext ctx, [RemainingText] string s)
 	    {
-	        if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-	        {
-	            await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
-	            return;
-	        }
-
 	        using (var db = this.Database.CreateContext())
 	        {
 	            await db.CommandIds.AddAsync(new DatabaseCommandId()
@@ -54,11 +48,6 @@ namespace ModCore.Commands
 	    [Command("exit"), Aliases("e"), Hidden]
         public async Task ExitAsync(CommandContext ctx)
         {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-            {
-                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
-                return;
-            }
 
             await ctx.SafeRespondUnformattedAsync("Are you sure you want to shut down the bot?");
 
@@ -84,11 +73,6 @@ namespace ModCore.Commands
 		[Command("apitoken"), Hidden]
 		public async Task ApiToken(CommandContext ctx)
 		{
-			if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-			{
-				await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
-				return;
-			}
 			int tk = new Random().Next(0, int.MaxValue);
 			await ctx.RespondAsync("Received a new token by DM!");
 			this.Shared.ModCore.SharedData.ApiToken = tk.ToString();
@@ -98,11 +82,6 @@ namespace ModCore.Commands
         [Command("sudo"), Aliases("s"), Hidden]
         public async Task SudoAsync(CommandContext ctx, [Description("Member to sudo")]DiscordMember m, [Description("Command to sudo"), RemainingText]string command)
         {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-            {
-                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
-                return;
-            }
 
             var cmd = ctx.CommandsNext.FindCommand(command, out var args);
             if (cmd == null)
@@ -115,42 +94,12 @@ namespace ModCore.Commands
         [Command("sudoowner"), Aliases("so"), Hidden]
         public async Task SudoOwnerAsync(CommandContext ctx, [RemainingText, Description("Command to sudo")]string command)
         {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-            {
-                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
-                return;
-            }
-
             var cmd = ctx.CommandsNext.FindCommand(command, out var args);
             if (cmd == null)
                 await ctx.SafeRespondUnformattedAsync($"Couldn't find command {command}!");
 
             var fake = ctx.CommandsNext.CreateFakeContext(ctx.Guild.Owner, ctx.Channel, command, ctx.Prefix, cmd, args);
             await ctx.CommandsNext.ExecuteCommandAsync(fake);
-        }
-
-        [Command("botmanagers"), Aliases("bm"), Hidden]
-        public async Task BotManagersAsync(CommandContext ctx)
-        {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-            {
-                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
-                return;
-            }
-            var list = new List<string>();
-            foreach (ulong manager in Shared.BotManagers)
-            {
-                try
-                {
-                    DiscordMember m = await ctx.Guild.GetMemberAsync(manager);
-                    list.Add(m.DisplayName);
-                }
-                catch
-                {
-
-                }
-            }
-            await ctx.SafeRespondAsync($"Users with access: {(list.Count > 0 ? $"`{string.Join("`, `", list)}`" : "None")}");
         }
 
         [Command("grantxp"), Aliases("gxp"), Hidden]

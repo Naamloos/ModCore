@@ -20,6 +20,7 @@ namespace ModCore.Listeners
 {
     public class AntiBotfarm
     {
+        // TODO
         [AsyncListener(EventTypes.GuildAvailable)]
         public static async Task GuildAdded(ModCoreShard bot, GuildCreateEventArgs args)
         {

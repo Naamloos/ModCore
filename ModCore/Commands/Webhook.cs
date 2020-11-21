@@ -99,7 +99,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("get")]
+        [Command("get"), RequireUserPermissions(Permissions.ManageMessages | Permissions.ManageChannels)]
         public async Task GetWebhookAsync(CommandContext ctx)
         {
             await this.GetWebhookAsync(ctx, ctx.Channel);

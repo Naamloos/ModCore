@@ -26,9 +26,6 @@ namespace ModCore.Entities
         [JsonProperty("database")]
         internal DatabaseSettings Database { get; private set; }
 
-		[JsonProperty("bot_managers")]
-		public List<ulong> BotManagers { get; private set; } = new List<ulong>();
-
 		[JsonProperty("bot_id")]
 		public ulong BotId { get; private set; } = 359828546719449109;
     }
