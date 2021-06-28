@@ -8,6 +8,10 @@
     <PackageReference Include="DSharpPlus" Version="4.1.0-nightly-00904" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.1.0-nightly-00904" />
     <PackageReference Include="DSharpPlus.Interactivity" Version="4.1.0-nightly-00904" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="5.0.7" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
   </ItemGroup>
 
 </Project>

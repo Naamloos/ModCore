@@ -59,5 +59,20 @@ namespace ModCore.Services
 
         [JsonInclude]
         public string DefaultPrefix = "";
+
+        [JsonInclude]
+        public string DatabaseUsername = "postgres";
+
+        [JsonInclude]
+        public string DatabasePassword = "test123";
+
+        [JsonInclude]
+        public string DatabaseHost = "127.0.0.1";
+
+        [JsonInclude]
+        public string DatabaseName = "mcore_test";
+
+        [JsonInclude]
+        public int DatabasePort = 5432;
     }
 }

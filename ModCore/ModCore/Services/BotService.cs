@@ -9,30 +9,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using ModCore.Services;
+using Microsoft.Extensions.DependencyInjection;
+using DSharpPlus.Interactivity.Extensions;
+using DSharpPlus.Interactivity;
+using ModCore.Modules;
 
-namespace ModCore.Bot
+namespace ModCore.Services
 {
-    public class ModCoreBot : IHostedService
+    public class BotService : IHostedService
     {
         private DiscordClient client;
 
-        public ModCoreBot(ILoggerFactory loggerFactory, IServiceProvider services, ConfigService configUtility)
+        public BotService(DiscordClient client, CommandsNextExtension cnext)
         {
-            var config = configUtility.GetConfig();
-
-            this.client = new DiscordClient(new DiscordConfiguration()
-            {
-                LoggerFactory = loggerFactory,
-                Token = config.Token,
-                TokenType = TokenType.Bot
-            });
-
-            this.client.UseCommandsNext(new CommandsNextConfiguration()
-            {
-                Services = services,
-                EnableMentionPrefix = true,
-                StringPrefixes = new string[] { config.DefaultPrefix }
-            });
+            this.client = client;
+            cnext.RegisterCommands<GeneralModule>();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
