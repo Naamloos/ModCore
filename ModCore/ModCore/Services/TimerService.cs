@@ -12,18 +12,16 @@ namespace ModCore.Services
     public class TimerService : BackgroundService
     {
         private ILogger logger;
+        private DatabaseContext database;
 
-        public TimerService(ILogger<TimerService> logger)
+        public TimerService(ILogger<TimerService> logger, DatabaseService databaseService)
         {
             this.logger = logger;
+            this.database = databaseService.GetDatabase();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await Task.Delay(15000);
-            }
         }
     }
 }
