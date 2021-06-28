@@ -8,15 +8,15 @@ using System.Text.Json;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace ModCore
+namespace ModCore.Services
 {
-    public class ConfigUtility
+    public class ConfigService
     {
         private const string CONFIG_FILENAME = "config.json";
         private string basePath;
         private Config config = null;
 
-        public ConfigUtility()
+        public ConfigService()
         {
             basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }

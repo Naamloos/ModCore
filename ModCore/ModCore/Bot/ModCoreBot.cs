@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
+using ModCore.Services;
 
 namespace ModCore.Bot
 {
@@ -15,7 +16,7 @@ namespace ModCore.Bot
     {
         private DiscordClient client;
 
-        public ModCoreBot(ILoggerFactory loggerFactory, IServiceProvider services, ConfigUtility configUtility)
+        public ModCoreBot(ILoggerFactory loggerFactory, IServiceProvider services, ConfigService configUtility)
         {
             var config = configUtility.GetConfig();
 

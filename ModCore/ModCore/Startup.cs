@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ModCore.Bot;
+using ModCore.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,8 +24,11 @@ namespace ModCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Here we define our dependencies.
             services.AddRazorPages();
-            services.AddSingleton<ConfigUtility>();
+            services.AddSingleton<ConfigService>();
+            services.AddSingleton<TimerService>();
+            services.AddHostedService(x => x.GetRequiredService<TimerService>());
             services.AddHostedService<ModCoreBot>();
         }
 
