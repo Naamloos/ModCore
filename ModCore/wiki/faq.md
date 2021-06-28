@@ -1,1 +1,0 @@
-Well, we haven't had a lot of questions yet.. So just ask us on Discord..
