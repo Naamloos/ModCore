@@ -7,6 +7,10 @@
   <img alt="Online status" src="https://img.shields.io/website?down_color=red&down_message=offline&label=Bot%20Status&up_color=green&up_message=Online&url=https%3A%2F%2Fmodcore.naamloos.dev%2F">
 </a>
   </p>
+ 
+Rewrite
+---------
+ModCore is currently being rewritten. The current codebase can be found at the [Master](https://github.com/Naamloos/ModCore/tree/master) branch.
   
 Support
 ---------
