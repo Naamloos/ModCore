@@ -11,7 +11,7 @@ Please specify:
 
 Make sure to add migrations if you made changes to the database:
 - add a migration: `dotnet-ef add migration MigrationName`
-- generate a config file and fill in details: `dotnet ModCore.dll --pregen-config`
+- generate a config file and fill in details: `dotnet ModCore.dll --generate-configs`
 - test the migration via the command line: `dotnet-ef database update`
 - revert migration via ModCore's command line arguments: `dotnet ModCore.dll --rollback-one`
 - test the migration via ModCore's command line arguments: `dotnet ModCore.dll --migrate`
