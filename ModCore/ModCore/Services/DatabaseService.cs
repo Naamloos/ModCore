@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using ModCore.Entities;
 using Npgsql;
 using System;
@@ -32,13 +33,7 @@ namespace ModCore.Services
 
     public class DatabaseContext : DbContext
     {
-        public DbSet<GuildData> GuildData { get; set; }
-
-        public DbSet<ChannelData> ChannelData { get; set; }
-
-        public DbSet<UserData> UserData { get; set; }
-
-        public DbSet<TimerData> TimerData { get; set; }
+        public DbSet<GuildConfig> GuildConfigs { get; set; }
 
         private string connectionString;
 
@@ -55,6 +50,11 @@ namespace ModCore.Services
             this.Database.SetCommandTimeout(TimeSpan.FromSeconds(30));
         }
 
+        // Context creation for migrations, don't use in-app
+        public DatabaseContext() : this(new ConfigService().GetConfig())
+        {
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder options)
             => options.UseNpgsql(this.connectionString);
 
@@ -62,17 +62,14 @@ namespace ModCore.Services
         {
             // overriding model creation for entities that
             // require +composite keys.
-            modelBuilder.Entity<ChannelData>()
-                .HasKey(e => new { e.GuildId, e.ChannelId });
-
-            modelBuilder.Entity<GuildData>()
-                .HasKey(e => e.GuildId);
-
-            modelBuilder.Entity<UserData>()
-                .HasKey(e => e.UserId);
-
-            modelBuilder.Entity<TimerData>()
-                .HasKey(e => e.TimerId);
+            //modelBuilder.Entity<ChannelData>()
+            //    .HasKey(e => new { e.GuildId, e.ChannelId });
+            //modelBuilder.Entity<GuildData>()
+            //    .HasKey(e => e.GuildId);
+            //modelBuilder.Entity<UserData>()
+            //    .HasKey(e => e.UserId);
+            //modelBuilder.Entity<TimerData>()
+            //    .HasKey(e => e.TimerId);
         }
     }
 }

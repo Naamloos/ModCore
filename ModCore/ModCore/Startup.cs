@@ -36,7 +36,12 @@ namespace ModCore
             {
                 LoggerFactory = x.GetRequiredService<ILoggerFactory>(),
                 Token = config.Token,
-                TokenType = TokenType.Bot
+                TokenType = TokenType.Bot,
+                MinimumLogLevel = LogLevel.Trace
+            }));
+
+            services.AddSingleton(x => x.GetRequiredService<DiscordClient>().UseInteractivity(new DSharpPlus.Interactivity.InteractivityConfiguration()
+            {
             }));
 
             services.AddSingleton(x => x.GetRequiredService<DiscordClient>().UseCommandsNext(new CommandsNextConfiguration()
@@ -45,8 +50,6 @@ namespace ModCore
                 EnableMentionPrefix = true,
                 StringPrefixes = new string[] { config.DefaultPrefix }
             }));
-
-            services.AddSingleton(x => x.GetRequiredService<DiscordClient>().UseInteractivity());
 
             var dbService = new DatabaseService(configUtil);
             dbService.Connect();
