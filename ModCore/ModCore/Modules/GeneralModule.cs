@@ -22,5 +22,14 @@ namespace ModCore.Modules
         {
             await ctx.RespondAsync($"ModCore BETA (rewrite)");
         }
+
+        [Command("testStorage")]
+        public async Task TestStorage(CommandContext ctx)
+        {
+            var b = new StorageBuilder().ForGuild(ctx.Guild.Id).ForUser(ctx.User.Id);
+            var s = b.Build();
+
+            await ctx.RespondAsync(s.GetPath());
+        }
     }
 }
