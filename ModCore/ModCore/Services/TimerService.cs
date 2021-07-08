@@ -16,12 +16,14 @@ namespace ModCore.Services
         private DatabaseContext database;
         private TimerEvent nextTimer = null;
         private DiscordClient client;
+        private CancellationTokenSource cts;
 
         public TimerService(ILogger<TimerService> logger, DatabaseService databaseService, DiscordClient client)
         {
             this.logger = logger;
             this.database = databaseService.GetDatabase();
             this.client = client;
+            this.cts = new CancellationTokenSource();
         }
 
         public async Task Start(CancellationToken stoppingToken)
@@ -43,15 +45,11 @@ namespace ModCore.Services
             logger.LogInformation("bababooey2");
             while (!stoppingToken.IsCancellationRequested)
             {
-                if(nextTimer == null)
+                if (nextTimer == null)
                 {
                     logger.LogInformation("new wait loop");
                     await Task.Delay(1500);
-                    if (database.TimerEvents.Count() > 0)
-                    {
-                        var smallest = database.TimerEvents.Min(x => x.Dispatch);
-                        nextTimer = database.TimerEvents.First(x => x.Dispatch == smallest);
-                    }
+                    NextTimer();
                 }
                 else
                 {
@@ -59,10 +57,27 @@ namespace ModCore.Services
                     var timeUntilDispatch = nextTimer.Dispatch.Subtract(DateTimeOffset.Now).TotalMilliseconds;
                     logger.LogInformation($"Found new timer to wait for... waiting {timeUntilDispatch} milliseconds.");
                     if (timeUntilDispatch > 0)
-                        await Task.Delay((int)timeUntilDispatch);
+                        try
+                        {
+                            await Task.Delay((int)timeUntilDispatch, cts.Token);
+                        }
+                        catch (Exception ex) { }
 
-                    await DispatchEvent(nextTimer);
+                    if (!cts.IsCancellationRequested && !stoppingToken.IsCancellationRequested)
+                        await DispatchEvent(nextTimer);
+
+                    cts = new CancellationTokenSource();
+                    NextTimer();
                 }
+            }
+        }
+
+        private void NextTimer()
+        {
+            if (database.TimerEvents.Count() > 0)
+            {
+                var smallest = database.TimerEvents.Min(x => x.Dispatch);
+                nextTimer = database.TimerEvents.First(x => x.Dispatch == smallest);
             }
         }
 
@@ -71,6 +86,9 @@ namespace ModCore.Services
             logger.LogInformation("new timer added.");
             var dbtimer = database.TimerEvents.Add(timer);
             database.SaveChanges();
+
+            if (nextTimer != null && timer.Dispatch.ToUnixTimeMilliseconds() < nextTimer.Dispatch.ToUnixTimeMilliseconds())
+                cts.Cancel();
         }
 
         private async Task DispatchEvent(TimerEvent timer)
