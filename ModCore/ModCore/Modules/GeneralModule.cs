@@ -26,10 +26,9 @@ namespace ModCore.Modules
         [Command("testStorage")]
         public async Task TestStorage(CommandContext ctx)
         {
-            var b = new StorageBuilder().ForGuild(ctx.Guild.Id).ForUser(ctx.User.Id);
-            var s = b.Build();
+            var storage = new StorageBuilder().ForGuild(ctx.Guild.Id).ForUser(ctx.User.Id).Build();
 
-            await ctx.RespondAsync(s.GetPath());
+            await ctx.RespondAsync(storage.GetPath());
         }
     }
 }
