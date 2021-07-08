@@ -30,9 +30,11 @@ namespace ModCore.Modules
         [Command("uptime")]
         public async Task UptimeAsync(CommandContext ctx)
         {
-            await ctx.RespondAsync(
+            var msg = await ctx.RespondAsync(
                 $"Bot start: <t:{bot.StartTime.ToUnixTimeSeconds()}:R>" +
                 $"\nSocket start: <t:{bot.SocketStartTime.ToUnixTimeSeconds()}:R>");
+            ctx.Message.DestroyIn(TimeSpan.FromSeconds(10));
+            msg.DestroyIn(TimeSpan.FromSeconds(10));
         }
     }
 }
