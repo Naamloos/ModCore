@@ -20,17 +20,21 @@ namespace ModCore.Modules
         }
 
         [GroupCommand]
-        public async Task Execute(CommandContext ctx, TimeSpan dispatch, string message)
+        public async Task ExecuteAsync(CommandContext ctx, TimeSpan dispatch, [RemainingText] string message)
         {
-            await ctx.RespondAsync($"Done! Reminding you about {message} <t:{DateTimeOffset.Now.Add(dispatch).ToUnixTimeSeconds()}:R>");
+            await ctx.RespondAsync($"\u23f0 Reminding you <t:{DateTimeOffset.Now.Add(dispatch).ToUnixTimeSeconds()}:R>.");
             timers.Enqueue(new Entities.TimerEvent()
             {
                 ChannelId = (long)ctx.Channel.Id,
                 UserId = (long)ctx.User.Id,
                 Type = Entities.TimerType.Reminder,
                 Dispatch = DateTimeOffset.Now.Add(dispatch),
-                Message = message
+                Message = message,
+                Creation = DateTimeOffset.Now
             });
         }
+
+        [Command("in")]
+        public async Task InAsync(CommandContext ctx, TimeSpan dispatch, [RemainingText] string message) => await ExecuteAsync(ctx, dispatch, message);
     }
 }

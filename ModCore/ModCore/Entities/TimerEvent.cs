@@ -35,6 +35,9 @@ namespace ModCore.Entities
 
         [Column("dispatch", TypeName = "timestamptz")]
         public DateTimeOffset Dispatch { get; set; }
+
+        [Column("creation", TypeName = "timestamptz")]
+        public DateTimeOffset Creation { get; set; }
     }
 
 

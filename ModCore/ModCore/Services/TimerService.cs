@@ -31,7 +31,6 @@ namespace ModCore.Services
             logger.LogInformation("Started timer service.");
             var now = DateTimeOffset.Now;
             var expired = database.TimerEvents.Where(x => x.Dispatch < now);
-            logger.LogInformation("bababooey");
 
             if (expired.Count() > 0)
             {
@@ -42,12 +41,10 @@ namespace ModCore.Services
                 }
             }
 
-            logger.LogInformation("bababooey2");
             while (!stoppingToken.IsCancellationRequested)
             {
                 if (nextTimer == null)
                 {
-                    logger.LogInformation("new wait loop");
                     await Task.Delay(1500);
                     NextTimer();
                 }
@@ -83,7 +80,6 @@ namespace ModCore.Services
 
         public void Enqueue(TimerEvent timer)
         {
-            logger.LogInformation("new timer added.");
             var dbtimer = database.TimerEvents.Add(timer);
             database.SaveChanges();
 
@@ -101,11 +97,29 @@ namespace ModCore.Services
             {
                 case TimerType.Reminder:
                 default:
-                    var channel = await client.GetChannelAsync((ulong)timer.ChannelId);
-                    var user = await client.GetUserAsync((ulong)timer.UserId);
-                    await channel.SendMessageAsync($"{user.Mention}! You wanted to be reminded of the following:\n{timer.Message}");
+                    _ = Task.Run(() => sendReminder(timer));
+                    break;
+
+                case TimerType.Unban:
+                    _ = Task.Run(() => unbanUser(timer));
                     break;
             }
+        }
+
+        private async Task sendReminder(TimerEvent timer)
+        {
+            var channel = await client.GetChannelAsync((ulong)timer.ChannelId);
+            var user = await client.GetUserAsync((ulong)timer.UserId);
+            await channel.SendMessageAsync($"\u23f0 **{user.Mention}** Reminder from <t:{timer.Creation.ToUnixTimeSeconds()}:R>:\n{timer.Message.Unmention()}");
+        }
+
+        private async Task unbanUser(TimerEvent timer)
+        {
+            var guild = await client.GetGuildAsync((ulong)timer.GuildId);
+            var user = await client.GetUserAsync((ulong)timer.UserId);
+            await guild.UnbanMemberAsync(user);
+
+            // TODO Log expired tempban
         }
     }
 }

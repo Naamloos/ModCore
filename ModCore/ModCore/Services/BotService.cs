@@ -31,12 +31,15 @@ namespace ModCore.Services
             this.meta = meta;
             this.client = client;
             this.timers = timers;
+
             cnext.RegisterCommands<GeneralModule>();
             cnext.RegisterCommands<ReminderModule>();
+            cnext.RegisterCommands<BanModule>();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            this.cancellationToken = cancellationToken;
             meta.StartTime = DateTimeOffset.Now;
             client.SocketOpened += OnSocketConnect;
             client.Ready += Ready;

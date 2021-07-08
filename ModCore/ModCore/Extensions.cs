@@ -19,5 +19,10 @@ namespace ModCore
                 }
             });
         }
+
+        public static string Unmention(this string str)
+        {
+            return str.Replace("@", "@\u200b");
+        }
     }
 }
