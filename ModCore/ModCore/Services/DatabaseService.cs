@@ -20,11 +20,6 @@ namespace ModCore.Services
             this.db = new DatabaseContext(configService.GetConfig());
         }
 
-        public void Connect()
-        {
-            this.db.Database.EnsureCreated();
-        }
-
         public DatabaseContext GetDatabase()
         {
             return this.db;
@@ -34,6 +29,7 @@ namespace ModCore.Services
     public class DatabaseContext : DbContext
     {
         public DbSet<GuildConfig> GuildConfigs { get; set; }
+        public DbSet<TimerEvent> TimerEvents { get; set; }
 
         private string connectionString;
 

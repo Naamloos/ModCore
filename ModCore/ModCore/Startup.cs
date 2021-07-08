@@ -52,7 +52,6 @@ namespace ModCore
             }));
 
             var dbService = new DatabaseService(configUtil);
-            dbService.Connect();
             services.AddSingleton(dbService);
 
             // Here we define our dependencies.
@@ -65,7 +64,6 @@ namespace ModCore
 
             // After that, initialize services that (ab)use DiscordClient, CommandsNextExtension, InteractivityExtension
             services.AddSingleton<TimerService>();
-            services.AddHostedService(x => x.GetRequiredService<TimerService>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

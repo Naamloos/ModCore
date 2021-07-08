@@ -22,18 +22,30 @@ namespace ModCore.Services
 
         private DiscordClient client;
 
-        public BotService(DiscordClient client, CommandsNextExtension cnext, BotMetaService meta)
+        private TimerService timers;
+
+        private CancellationToken cancellationToken;
+
+        public BotService(DiscordClient client, CommandsNextExtension cnext, BotMetaService meta, TimerService timers)
         {
             this.meta = meta;
             this.client = client;
+            this.timers = timers;
             cnext.RegisterCommands<GeneralModule>();
+            cnext.RegisterCommands<ReminderModule>();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             meta.StartTime = DateTimeOffset.Now;
             client.SocketOpened += OnSocketConnect;
+            client.Ready += Ready;
             await client.ConnectAsync(new DiscordActivity("over your memes", ActivityType.Watching), UserStatus.DoNotDisturb);
+        }
+
+        private async Task Ready(DiscordClient sender, DSharpPlus.EventArgs.ReadyEventArgs e)
+        {
+            _ = Task.Run(async () => { await timers.Start(cancellationToken); });
         }
 
         private async Task OnSocketConnect(DiscordClient sender, DSharpPlus.EventArgs.SocketEventArgs e)
