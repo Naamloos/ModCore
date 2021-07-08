@@ -60,7 +60,7 @@ namespace ModCore
 
             // Config comes first, then the bot gets to initialize
             services.AddSingleton(configUtil);
-
+            services.AddSingleton<BotMetaService>();
             services.AddHostedService<BotService>();
 
             // After that, initialize services that (ab)use DiscordClient, CommandsNextExtension, InteractivityExtension

@@ -18,17 +18,28 @@ namespace ModCore.Services
 {
     public class BotService : IHostedService
     {
+        private BotMetaService meta;
+
         private DiscordClient client;
 
-        public BotService(DiscordClient client, CommandsNextExtension cnext)
+        public BotService(DiscordClient client, CommandsNextExtension cnext, BotMetaService meta)
         {
+            this.meta = meta;
             this.client = client;
             cnext.RegisterCommands<GeneralModule>();
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            meta.StartTime = DateTimeOffset.Now;
+            client.SocketOpened += OnSocketConnect;
             await client.ConnectAsync(new DiscordActivity("over your memes", ActivityType.Watching), UserStatus.DoNotDisturb);
+        }
+
+        private async Task OnSocketConnect(DiscordClient sender, DSharpPlus.EventArgs.SocketEventArgs e)
+        {
+            await Task.Yield();
+            meta.SocketStartTime = DateTimeOffset.Now;
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

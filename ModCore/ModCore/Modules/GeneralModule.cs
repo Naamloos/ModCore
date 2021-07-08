@@ -4,6 +4,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
+using ModCore.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,8 +14,11 @@ namespace ModCore.Modules
 {
     public class GeneralModule : BaseCommandModule
     {
-        public GeneralModule()
+        private BotMetaService bot;
+
+        public GeneralModule(BotMetaService bot)
         {
+            this.bot = bot;
         }
 
         [Command("about")]
@@ -23,12 +27,12 @@ namespace ModCore.Modules
             await ctx.RespondAsync($"ModCore BETA (rewrite)");
         }
 
-        [Command("testStorage")]
-        public async Task TestStorage(CommandContext ctx)
+        [Command("uptime")]
+        public async Task UptimeAsync(CommandContext ctx)
         {
-            var storage = new StorageBuilder().ForGuild(ctx.Guild.Id).ForUser(ctx.User.Id).Build();
-
-            await ctx.RespondAsync(storage.GetPath());
+            await ctx.RespondAsync(
+                $"Bot start: <t:{bot.StartTime.ToUnixTimeSeconds()}:R>" +
+                $"\nSocket start: <t:{bot.SocketStartTime.ToUnixTimeSeconds()}:R>");
         }
     }
 }
