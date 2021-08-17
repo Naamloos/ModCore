@@ -26,15 +26,6 @@ namespace ModCore.Commands
             this.Database = db;
         }
 
-        [Command("debug"), Aliases("d"), Description("Returns amount of stars in database."), Hidden]
-        public async Task DebugAsync(CommandContext ctx)
-        {
-            using (var db = Database.CreateContext())
-            {
-                await ctx.SafeRespondAsync($"Stars: {db.StarDatas.Count()}");
-            }
-        }
-
         [Command("info"), Aliases("i", "data", "information"), Description("Returns stardata for a specified user."), CheckDisable]
         public async Task ListGivenAsync(CommandContext ctx, [Description("User to show stardata information about.")] DiscordMember member)
         {

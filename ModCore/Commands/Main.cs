@@ -125,7 +125,12 @@ namespace ModCore.Commands
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			await m.ElevatedMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+			try
+			{
+				await m.ElevatedMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+			}
+			catch (Exception) { }
+
 			await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
 			await ctx.SafeRespondAsync($"Banned user {m.DisplayName} (ID:{m.Id})");
 
@@ -210,7 +215,12 @@ namespace ModCore.Commands
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			await m.ElevatedMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+			try
+			{
+				await m.ElevatedMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+			}
+			catch (Exception ex) { }
+
 			await m.RemoveAsync($"{ustr}{rstr}");
 			await ctx.SafeRespondAsync($"Kicked user {m.DisplayName} (ID:{m.Id})");
 
@@ -232,7 +242,12 @@ namespace ModCore.Commands
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			await m.ElevatedMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+			try
+			{
+				await m.ElevatedMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+			}
+			catch (Exception) { }
+
 			await m.BanAsync(7, $"{ustr}{rstr} (softban)");
 			await m.UnbanAsync(ctx.Guild, $"{ustr}{rstr}");
 			await ctx.SafeRespondAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})");
@@ -274,7 +289,12 @@ namespace ModCore.Commands
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			await m.ElevatedMessageAsync($"You've been muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+			try
+			{
+				await m.ElevatedMessageAsync($"You've been muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+			}
+			catch (Exception) { }
+
 			await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
 			await ctx.SafeRespondAsync(
 				$"Muted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
@@ -318,7 +338,12 @@ namespace ModCore.Commands
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			await m.ElevatedMessageAsync($"You've been unmuted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+			try
+			{
+				await m.ElevatedMessageAsync($"You've been unmuted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+            }
+            catch (Exception) { }
+
 			await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
 			await ctx.SafeRespondAsync(
 				$"Unmuted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
@@ -363,8 +388,13 @@ namespace ModCore.Commands
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			await m.ElevatedMessageAsync($"You've been temporarily banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
-				$"\nYou can rejoin after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+			try
+			{
+				await m.ElevatedMessageAsync($"You've been temporarily banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+					$"\nYou can rejoin after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+			}
+			catch (Exception) { }
+
 			await m.BanAsync(7, $"{ustr}{rstr}");
 			// Add timer
 			var now = DateTimeOffset.UtcNow;
@@ -443,8 +473,12 @@ namespace ModCore.Commands
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			await m.ElevatedMessageAsync($"You've been temporarily muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
-				$"\nYou can talk again after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+			try
+			{
+				await m.ElevatedMessageAsync($"You've been temporarily muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+					$"\nYou can talk again after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+			}
+			catch (Exception) { }
 			await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
 			// Add timer
 			var now = DateTimeOffset.UtcNow;
@@ -606,7 +640,9 @@ namespace ModCore.Commands
 			if (!role.IsMentionable)
 			{
 				await role.ModifyAsync(mentionable: true);
-				await channel.SafeMessageAsync($"{role.Mention} {message}", ctx);
+				var msg = await channel.SafeMessageAsync($"{role.Mention} {message}", ctx);
+				if (channel.Type == ChannelType.News)
+					await channel.CrosspostMessageAsync(msg);
 				await role.ModifyAsync(mentionable: false);
 				await ctx.Message.DeleteAsync();
 				await ctx.LogActionAsync($"Announced {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
@@ -1145,20 +1181,6 @@ namespace ModCore.Commands
 			});
 		}
 
-		// TODO: look into why strawpoll errors with a valid payload??
-		#if DEBUG
-		[Command("strawpoll")]
-		[Description("Creates a strawpoll")]
-		[RequireBotPermissions(Permissions.ManageMessages)]
-		[Cooldown(100, 3600/*strawpoll ratelimit 100 per 60 min*/, CooldownBucketType.Global)]
-		public async Task StrawpollAsync(CommandContext ctx, string title, params string[] options)
-		{
-			await ctx.Message.DeleteAsync();
-			var poll = await this.Shared.Strawpoll.CreatePollAsync(title, options);
-			await ctx.RespondAsync($"{title}:\n{poll}");
-		}
-		#endif
-
 		// TODO: use database timer system??
 		// TODO: multiple winners
 		[Command("giveaway")]
@@ -1186,30 +1208,6 @@ namespace ModCore.Commands
 				$"{winner.Mention}, you won! Contact {ctx.Member.Mention} for your price! " +
 				$"{trophy.ToString()}{trophy.ToString()}");
 		}
-
-        [Command("exec")]
-        [Description("Executes (multiple) commands")]
-        public async Task ExecAsync(CommandContext ctx, [RemainingText]string cmds)
-        {
-            // TODO big ol testes
-            string splitter = @"(?!\\);";
-
-            var split = Regex.Split(cmds, splitter);
-            foreach (var s in split)
-            {
-                var p = ctx.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
-                //await ctx.CommandsNext.SudoAsync(ctx.User, ctx.Channel, $"{p}{}");
-                var cmdraw = s.Replace("\\;", ";").Split(' ').ToList();
-                var cmd = cmdraw[0];
-                cmdraw.RemoveAt(0);
-                var args = String.Join(' ', cmdraw);
-
-                var cmdobj = ctx.CommandsNext.FindCommand(cmd, out args);
-
-                var fctx = ctx.CommandsNext.CreateFakeContext(ctx.User, ctx.Channel, s.Replace("\\;", ";"), p, cmdobj);
-                await ctx.CommandsNext.ExecuteCommandAsync(fctx);
-            }
-        }
 
         [Command("snipe")]
         [Description("Snipes last deleted message")]
@@ -1279,67 +1277,6 @@ namespace ModCore.Commands
                 return;
             }
             await ctx.RespondAsync($"Invalid cooldown: {cooldown}");
-        }
-
-        [Command("screenshare"), Aliases("ss")]
-        [Description("Generates a screen share link")]
-        public async Task ScreenShareAsync(CommandContext ctx)
-        {
-            var voicechannels = ctx.Guild.Channels.Select(x => x.Value).Where(x => x.Type == ChannelType.Voice).Take(10).ToList();
-            string voice = "";
-            for(int i = 0; i < voicechannels.Count(); i++)
-            {
-                voice += $"**{i + 1}**: {voicechannels[i].Name}\n";
-            }
-
-            var emb = new DiscordEmbedBuilder()
-                .WithTitle("Voice channels")
-                .WithDescription("Select a channel to screenshare in.")
-                .AddField("Channels:", voice);
-
-            var question = await ctx.RespondAsync(embed: emb);
-
-            var next = await ctx.Channel.GetNextMessageAsync(ctx.Member);
-
-            try
-            {
-                await question.DeleteAsync();
-            }
-            catch (Exception) { }
-
-            if (next.TimedOut)
-            {
-                await ctx.RespondAsync("Timed out.");
-                return;
-            }
-
-            try
-            {
-                await next.Result.DeleteAsync();
-            }
-            catch (Exception) { }
-
-            if (!int.TryParse(next.Result.Content, out int selected))
-            {
-                await ctx.RespondAsync("Invalid input.");
-                return;
-            }
-
-            if(selected > voicechannels.Count() || selected < 1)
-            {
-                await ctx.RespondAsync("Index out of range.");
-                return;
-            }
-
-            var selectedchannel = voicechannels[selected - 1];
-
-            emb = new DiscordEmbedBuilder()
-                .WithTitle($"Screenshare in {selectedchannel.Name}")
-                .WithDescription($"[Join screenshare](https://discordapp.com/channels/{selectedchannel.GuildId}/{selectedchannel.Id})")
-                .AddField("Note:", $"Joining screenshare only works on Desktop when currently connected to said voice channel. (**{selectedchannel.Name}** in this case.)")
-                .WithAuthor(ctx.Member.DisplayName, iconUrl: ctx.Member.GetAvatarUrl(ImageFormat.Png));
-
-            await ctx.RespondAsync(embed: emb);
         }
     }
 }
