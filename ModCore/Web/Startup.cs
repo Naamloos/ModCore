@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using AspNetCoreRateLimit;
 using Markdig;
 using Markdig.Extensions.AutoIdentifiers;
 using Microsoft.AspNetCore.Builder;
@@ -35,13 +34,7 @@ namespace ModCore.Web
             //Taken from https://github.com/stefanprodan/AspNetCoreRateLimit/wiki/IpRateLimitMiddleware#setup
             services.AddOptions();
             services.AddMemoryCache();
-            services.Configure<IpRateLimitOptions>(Configuration.GetSection("IpRateLimiting"));
-            services.Configure<IpRateLimitPolicies>(Configuration.GetSection("IpRateLimitPolicies"));
-
-            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
-            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
 
             services.AddRazorPages();
 
@@ -86,8 +79,6 @@ namespace ModCore.Web
             {
                 FileProvider = new EmbeddedFileProvider(typeof(Web.Pages.IndexModel).Assembly, "ModCore.Web.Pages")
             });
-
-            app.UseIpRateLimiting();
 
 			app.UseRouting();
 			app.UseEndpoints(x => {

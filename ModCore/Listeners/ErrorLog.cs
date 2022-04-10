@@ -60,8 +60,9 @@ namespace ModCore.Listeners
 					writer.Write(e.Exception.StackTrace);
 					writer.Flush();
 					stream.Position = 0;
-					await ctx.RespondWithFileAsync("exception.txt", stream,
-						$"**Command `{qualifiedName}` Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+					await ctx.RespondAsync(x =>
+						x.WithFile("exception.txt", stream)
+						.WithContent($"**Command `{qualifiedName}` Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}"));
 					break;
 			}
 
@@ -126,7 +127,7 @@ namespace ModCore.Listeners
 					.Where(c => !(c is CommandGroup group) || @group.IsExecutableWithoutSubcommands)
 					.Select(c => (qualifiedName: c.QualifiedName, description: c.Description))
 					.OrderBy(c => leveshtein.Distance(attemptedName, c.qualifiedName))
-					.DistinctBy(c => c.qualifiedName).Take(1).ToArray();
+					.Take(1).ToArray();
 
                 var embed = new DiscordEmbedBuilder()
                     .WithTitle("Command **" + attemptedName.Truncate(200) + "** not found")
