@@ -84,6 +84,14 @@ namespace ModCore.Listeners
 					case CommandErrorVerbosity.Exception:
 						var st = e.Exception.StackTrace;
 
+						var inner = e.Exception.InnerException;
+
+						while(inner != null)
+                        {
+							st += $"\n\nINNER EXCEPTION OF PREVIOUS:\n{inner.StackTrace}";
+							inner = inner.InnerException;
+                        }
+
 						st = st.Length > 1000 ? st.Substring(0, 1000) : st;
 						var b = new DiscordEmbedBuilder().WithDescription(st);
 						await ctx.LogMessageAsync(

@@ -113,8 +113,10 @@ namespace ModCore
 
 	    private async Task InitializeDatabaseAsync()
 	    {
-		    // add command id mappings if they don't already exist
-		    var modifications = new List<string>();
+			// Fix for legacy timestamp behavior. This might need a "proper" fix in the future
+			AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+			// add command id mappings if they don't already exist
+			var modifications = new List<string>();
 		    using (var db = this.CreateGlobalContext())
 		    {
 			    foreach (var (name, _) in SharedData.Commands)

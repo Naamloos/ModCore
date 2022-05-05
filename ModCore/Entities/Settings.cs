@@ -115,7 +115,7 @@ namespace ModCore.Entities
                         SslMode = SslMode.Prefer,
                         TrustServerCertificate = true,
 
-                        Pooling = false
+                        Pooling = true
                     }.ConnectionString;
             }
 
