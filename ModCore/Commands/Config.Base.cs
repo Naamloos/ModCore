@@ -160,12 +160,6 @@ namespace ModCore.Commands
 
                         embed.AddField("Available Selfroles", string.Join(", ", roles), true);
                     }
-
-                    var globalwarn = gcfg.GlobalWarn;
-                    embed.AddField("GlobalWarn",
-                        globalwarn.Enable
-                            ? "Enabled\nMode: " + globalwarn.WarnLevel
-                            : "Disabled", true);
                     await ctx.ElevatedRespondAsync(embed: embed.Build());
                 });
         }

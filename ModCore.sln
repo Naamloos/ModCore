@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29326.143
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore", "ModCore\ModCore.csproj", "{1D3B8DD2-5E0C-4435-8965-3B84BB06EFBD}"
 EndProject
@@ -10,17 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readmes", "Readmes", "{D298
 		LICENSE = LICENSE
 		PostgreSQL.md = PostgreSQL.md
 		README.md = README.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{0E482483-DAA8-43BC-BC9D-3E13CC99DF49}"
-	ProjectSection(SolutionItems) = preProject
-		bans.sql = bans.sql
-		commandDisable.sql = commandDisable.sql
-		dataAnnotations.sql = dataAnnotations.sql
-		db_schema_v1.sql = db_schema_v1.sql
-		db_schema_v1_to_v2.sql = db_schema_v1_to_v2.sql
-		starboard.sql = starboard.sql
-		tags.sql = tags.sql
 	EndProjectSection
 EndProject
 Global

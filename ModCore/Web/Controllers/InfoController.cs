@@ -32,21 +32,14 @@ namespace ModCore.Web.Controllers
 		[HttpGet("invite")]
 		public string Invite()
 		{
-			var perms = Permissions.None;
-			foreach (var p in this.core.SharedData.AllPermissions)
-			{
-				Console.WriteLine(p);
-				perms = perms | p;
-			}
-			var permsvalue = (long)perms;
-
-			Response.Redirect($"https://discordapp.com/oauth2/authorize?client_id=359828546719449109&scope=bot&permissions={permsvalue}");
-			return "Redirecting to generated invite...";
+			Response.Redirect($"https://discordapp.com/oauth2/authorize?client_id=359828546719449109&scope=bot&permissions=8");
+			return "Redirecting to invite...";
 		}
 
 		[HttpGet("permissions")]
 		public ActionResult Perms()
 		{
+			// TODO optimize (cache the info)
 			var cmd = this.core.SharedData.Commands.Select(x => x.cmd);
 			StringBuilder data = new StringBuilder();
 			data.AppendLine("<h1>Commands and their required permissions</h1>");
