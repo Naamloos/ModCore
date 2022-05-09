@@ -60,6 +60,8 @@ namespace ModCore.Commands
 
             embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now}");
 
+            embed.WithThumbnail(usr.GetGuildAvatarUrl(ImageFormat.Auto));
+
             await ctx.ElevatedRespondAsync(embed: embed);
             await ctx.LogActionAsync();
         }
@@ -133,6 +135,8 @@ namespace ModCore.Commands
                     $"MFA Level: {g.MfaLevel}.\n" +
                     $"Verification Level: {g.VerificationLevel}");
 
+                embed.WithThumbnail(g.GetIconUrl(ImageFormat.Auto));
+
                 await ctx.ElevatedRespondAsync(embed: embed);
                 #endregion
             }
@@ -154,6 +158,9 @@ namespace ModCore.Commands
                 .AddField("Permissions", role.Permissions.ToPermissionString())
                 .AddField("Data", $"Mentionable: {(role.IsMentionable ? "yes" : "no")}.\nHoisted: {(role.IsHoisted ? "yes" : "no")}.\nManaged: {(role.IsManaged ? "yes" : "no")}.")
                 .WithColor(role.Color);
+
+            if (!string.IsNullOrEmpty(role.IconUrl))
+                embed.WithThumbnail(role.IconUrl);
 
             await ctx.ElevatedRespondAsync(embed: embed);
             await ctx.LogActionAsync();

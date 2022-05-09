@@ -33,7 +33,7 @@ namespace ModCore.Web.Controllers
 		public string Invite()
 		{
 			var perms = Permissions.None;
-			foreach (var p in this.core.SharedData.AllPerms)
+			foreach (var p in this.core.SharedData.AllPermissions)
 			{
 				Console.WriteLine(p);
 				perms = perms | p;

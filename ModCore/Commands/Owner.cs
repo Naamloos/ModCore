@@ -62,7 +62,7 @@ namespace ModCore.Commands
 
             await ctx.SafeRespondUnformattedAsync("Are you sure you want to shut down the bot?");
 
-            var cts = ctx.Services.GetService<SharedData>().CTS;
+            var cts = ctx.Services.GetService<SharedData>().CancellationTokenSource;
             var interactivity = ctx.Services.GetService<InteractivityExtension>();
             var m = await interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 

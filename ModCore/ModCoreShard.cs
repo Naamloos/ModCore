@@ -112,14 +112,14 @@ namespace ModCore
 				var reqperm = c.Value.ExecutionChecks.Where(x => x.GetType() == typeof(RequirePermissionsAttribute));
 				foreach(RequirePermissionsAttribute att in reqperm)
 				{
-					if (!SharedData.AllPerms.Contains(att.Permissions))
-						SharedData.AllPerms.Add(att.Permissions);
+					if (!SharedData.AllPermissions.Contains(att.Permissions))
+						SharedData.AllPermissions.Add(att.Permissions);
 				}
 				var requsrperm = c.Value.ExecutionChecks.Where(x => x.GetType() == typeof(RequireBotPermissionsAttribute));
 				foreach (RequireBotPermissionsAttribute att in requsrperm)
 				{
-					if(!SharedData.AllPerms.Contains(att.Permissions))
-						SharedData.AllPerms.Add(att.Permissions);
+					if(!SharedData.AllPermissions.Contains(att.Permissions))
+						SharedData.AllPermissions.Add(att.Permissions);
 				}
 			}
 

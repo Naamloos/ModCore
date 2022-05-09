@@ -82,7 +82,7 @@ namespace ModCore
 			foreach (var shard in Shards)
 				await shard.DisconnectAndDispose();
 
-			this.SharedData.CTS.Dispose();
+			this.SharedData.CancellationTokenSource.Dispose();
 			this.SharedData.TimerData.Cancel.Cancel();
 			this.SharedData.TimerSempahore.Dispose();
         }
@@ -95,7 +95,7 @@ namespace ModCore
             CTS = new CancellationTokenSource();
 	        SharedData = new SharedData
 	        {
-		        CTS = CTS,
+		        CancellationTokenSource = CTS,
 		        ProcessStartTime = Process.GetCurrentProcess().StartTime,
 		        Perspective = PerspectiveApi,
 		        BotManagers = Settings.BotManagers,

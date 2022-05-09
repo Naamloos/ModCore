@@ -14,7 +14,7 @@ namespace ModCore.Entities
 {
     public class SharedData
     {
-        public CancellationTokenSource CTS { get; internal set; }
+        public CancellationTokenSource CancellationTokenSource { get; internal set; }
         public DateTime ProcessStartTime { get; internal set; }
         public SemaphoreSlim TimerSempahore { get; internal set; }
         public TimerData TimerData { get; internal set; }
@@ -22,7 +22,7 @@ namespace ModCore.Entities
         public List<ulong> BotManagers { get; internal set; }
         public string DefaultPrefix { get; internal set; }
 		public int ReadysReceived { get; internal set; } = 0;
-		public List<Permissions> AllPerms { get; internal set; } = new List<Permissions>();
+		public List<Permissions> AllPermissions { get; internal set; } = new List<Permissions>();
         public ConcurrentDictionary<ulong, DiscordMessage> DeletedMessages = new ConcurrentDictionary<ulong, DiscordMessage>();
         public ConcurrentDictionary<ulong, DiscordMessage> EditedMessages = new ConcurrentDictionary<ulong, DiscordMessage>();
         public MCoreEmojis Emojis;
