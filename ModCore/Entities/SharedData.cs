@@ -19,8 +19,6 @@ namespace ModCore.Entities
         public SemaphoreSlim TimerSempahore { get; internal set; }
         public TimerData TimerData { get; internal set; }
         public Perspective Perspective { get; internal set; }
-		public Strawpoll Strawpoll { get; internal set; }
-        public (ulong guild, ulong channel) StartNotify { get; internal set; }
         public List<ulong> BotManagers { get; internal set; }
         public string DefaultPrefix { get; internal set; }
 		public int ReadysReceived { get; internal set; } = 0;
@@ -28,7 +26,6 @@ namespace ModCore.Entities
         public ConcurrentDictionary<ulong, DiscordMessage> DeletedMessages = new ConcurrentDictionary<ulong, DiscordMessage>();
         public ConcurrentDictionary<ulong, DiscordMessage> EditedMessages = new ConcurrentDictionary<ulong, DiscordMessage>();
         public MCoreEmojis Emojis;
-        public BotLists BotLists;
 
         /// <summary>
         /// Every command, top-level or not, along with full qualified name.

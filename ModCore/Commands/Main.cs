@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -76,28 +76,25 @@ namespace ModCore.Commands
 		[Command("ping"), Description("Check ModCore's API connection status."), CheckDisable]
 		public async Task PingAsync(CommandContext ctx)
 		{
-			await ctx.SafeRespondAsync($"Pong: ({ctx.Client.Ping}) ms.");
+			await ctx.SafeRespondAsync($"🏓 Pong: ({ctx.Client.Ping}) ms.");
 		}
 
 		[Command("prefix"), Description("Check ModCore's current prefix."), CheckDisable]
 		public async Task PrefixAsync(CommandContext ctx)
 		{
 			await ctx.IfGuildSettings(
-				async (e) => await ctx.SafeRespondAsync($"Current prefix: {e.Prefix}"),
-				async () => await ctx.SafeRespondAsync($"Current prefix: {this.Shared.DefaultPrefix}"));
+				async (e) => await ctx.SafeRespondAsync($"ℹ️ Current prefix: {e.Prefix}"),
+				async () => await ctx.SafeRespondAsync($"ℹ️ Current prefix: {this.Shared.DefaultPrefix}"));
 		}
 
 		[Command("uptime"), Description("Check ModCore's uptime."), Aliases("u"), CheckDisable]
 		public async Task UptimeAsync(CommandContext ctx)
 		{
 			var st = this.StartTimes;
-			var bup = DateTimeOffset.Now.Subtract(st.ProcessStartTime);
-			var sup = DateTimeOffset.Now.Subtract(st.SocketStartTime);
 
-			// Needs improvement
 			await ctx.SafeRespondUnformattedAsync(
-				$"Program uptime: {string.Format("{0} days, {1}", bup.ToString("dd"), bup.ToString(@"hh\:mm\:ss"))}\n" +
-				$"Socket uptime: {string.Format("{0} days, {1}", sup.ToString("dd"), sup.ToString(@"hh\:mm\:ss"))}");
+				$"⏱️ Program start: {string.Format("<t:{0}:R>", st.ProcessStartTime.ToUnixTimeSeconds())}\n" +
+				$"⏱️ Socket start: {string.Format("<t:{0}:R>", st.SocketStartTime.ToUnixTimeSeconds())}");
 		}
 
 		[Command("invite"), Description("Get an invite to this ModCore instance. Sharing is caring!"), Aliases("inv"), CheckDisable]
@@ -110,7 +107,7 @@ namespace ModCore.Commands
 				await ctx.SafeRespondAsync(
 					$"Add ModCore to your server!\n<https://modcore.naamloos.dev/info/invite>");
 			else
-				await ctx.SafeRespondUnformattedAsync("I'm sorry Mario, but this instance of ModCore has been set to private!");
+				await ctx.SafeRespondUnformattedAsync("⚠️ I'm sorry Mario, but this instance of ModCore has been set to private!");
 		}
 
 		[Command("ban"), Description("Bans a member."), Aliases("b"), RequirePermissions(Permissions.BanMembers), CheckDisable]
@@ -119,44 +116,31 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+			var sent_dm = false;
 			try
 			{
-				await m.ElevatedMessageAsync($"You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+				await m.ElevatedMessageAsync($"🚓 You've been banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+				sent_dm = true;
 			}
 			catch (Exception) { }
 
 			await ctx.Guild.BanMemberAsync(m, 7, $"{ustr}{rstr}");
-			await ctx.SafeRespondAsync($"Banned user {m.DisplayName} (ID:{m.Id})");
+			await ctx.SafeRespondAsync($"🚓 Banned user {m.DisplayName} (ID:{m.Id}).\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
-			await ctx.LogActionAsync($"Banned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
+			await ctx.LogActionAsync($"🚓 Banned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
 		}
-
-        [Command("ban")]
-        public async Task BanAsync(CommandContext ctx)
-        {
-            var m = await ctx.RequestArgumentAsync<DiscordMember>("Member to ban?");
-
-            if (!m.Success)
-            {
-                return;
-            }
-
-            var reason = await ctx.RequestArgumentAsync<string>("Reason? (can be left empty.)");
-
-            await this.BanAsync(ctx, m.Result, reason.Success ? reason.Result : "");
-        }
 
 		[Command("nukeban")]
 		[Description("Bans a member from all servers you own that have ModCore")]
 		public async Task NukeBanAsync(CommandContext ctx, ulong userId, string reason = "")
 		{
-			await ctx.RespondAsync($"This will ban the user with ID {userId} from all servers you own. Proceed?" +
+			await ctx.RespondAsync($"‼️ This will ban the user with ID {userId} from all servers you own. Proceed?" +
 				$"\n**Be wary that this will ACTUALLY ban them from all servers you own, whether they are part of this server or not.**");
 			var resp = await ctx.Message.GetNextMessageAsync();
 			if (!resp.TimedOut && (resp.Result?.Content.ToLower() == "yes" || resp.Result?.Content.ToLower() == "y"))
@@ -174,7 +158,7 @@ namespace ModCore.Commands
 						skip++;
 					}
 				}
-				await ctx.RespondAsync($"Succesfully nukebanned member from {servers.Count()} servers." +
+				await ctx.RespondAsync($"🚓 Succesfully nukebanned member from {servers.Count()} servers." +
 					$"{(skip > 0? $" Skipped {skip} servers due to lacking permissions" : "")}");
 			}
 			else
@@ -190,16 +174,16 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == id)
 			{
-				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
 			await ctx.Guild.BanMemberAsync(id, 7, $"{ustr}{rstr}");
-			await ctx.SafeRespondUnformattedAsync("User hackbanned successfully.");
+			await ctx.SafeRespondUnformattedAsync("🚓 User hackbanned successfully.");
 
-			await ctx.LogActionAsync($"Hackbanned ID: {id}\n{rstr}");
+			await ctx.LogActionAsync($"🚓 Hackbanned ID: {id}\n{rstr}");
 		}
 
 		[Command("kick"), Description("Kicks a member from the guild. Can optionally provide a reason for kick."),
@@ -209,22 +193,24 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+			var sent_dm = false;
 			try
 			{
-				await m.ElevatedMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+				await m.ElevatedMessageAsync($"🚓 You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+				sent_dm = true;
 			}
 			catch (Exception ex) { }
 
 			await m.RemoveAsync($"{ustr}{rstr}");
-			await ctx.SafeRespondAsync($"Kicked user {m.DisplayName} (ID:{m.Id})");
+			await ctx.SafeRespondAsync($"🚓 Kicked user {m.DisplayName} (ID:{m.Id}).\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
-			await ctx.LogActionAsync($"Kicked user {m.DisplayName} (ID:{m.Id})\n{rstr}");
+			await ctx.LogActionAsync($"🚓 Kicked user {m.DisplayName} (ID:{m.Id})\n{rstr}");
 		}
 
 		[Command("softban"),
@@ -236,23 +222,25 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+			var sent_dm = false;
 			try
 			{
-				await m.ElevatedMessageAsync($"You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+				await m.ElevatedMessageAsync($"🚓 You've been kicked from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+				sent_dm = true;
 			}
 			catch (Exception) { }
 
 			await m.BanAsync(7, $"{ustr}{rstr} (softban)");
 			await m.UnbanAsync(ctx.Guild, $"{ustr}{rstr}");
-			await ctx.SafeRespondAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})");
+			await ctx.SafeRespondAsync($"🚓 Softbanned user {m.DisplayName} (ID:{m.Id}).\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
-			await ctx.LogActionAsync($"Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
+			await ctx.LogActionAsync($"🚓 Softbanned user {m.DisplayName} (ID:{m.Id})\n{rstr}");
 		}
 
 		[Command("mute"), Description("Mutes an user indefinitely. This will prevent them from speaking in chat. " +
@@ -264,14 +252,14 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
 			var guildSettings = ctx.GetGuildSettings() ?? new GuildSettings();
 			if (guildSettings == null)
 			{
-				await ctx.SafeRespondUnformattedAsync("Guild is not configured, please configure and rerun");
+				await ctx.SafeRespondUnformattedAsync("⚠️ Guild is not configured, please configure and rerun");
 				return;
 			}
 
@@ -282,25 +270,27 @@ namespace ModCore.Commands
 				var (Role, Message) = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
 				mute = Role;
 				guildSettings.MuteRoleId = Role.Id;
-				await ctx.SafeRespondUnformattedAsync("Mute role is not configured or missing, " + Message);
+				await ctx.SafeRespondUnformattedAsync("⚠️ Mute role is not configured or missing, " + Message);
 				await ctx.SetGuildSettingsAsync(guildSettings);
 			}
 			await Utils.GuaranteeMuteRoleDeniedEverywhere(ctx.Guild, mute);
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+			var sent_dm = false;
 			try
 			{
-				await m.ElevatedMessageAsync($"You've been muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+				await m.ElevatedMessageAsync($"🚓 You've been muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}");
+				sent_dm = true;
 			}
 			catch (Exception) { }
 
 			await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
 			await ctx.SafeRespondAsync(
-				$"Muted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
+				$"🚓 Muted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
 			await ctx.LogActionAsync(
-				$"Muted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
+				$"🚓 Muted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
 		}
 
 		[Command("unmute"), Description("Unmutes an user previously muted with the mute command. Let them speak!"),
@@ -311,7 +301,7 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
@@ -319,7 +309,7 @@ namespace ModCore.Commands
 			if (gcfg == null)
 			{
 				await ctx.SafeRespondUnformattedAsync(
-					"Guild is not configured. Adjust this guild's configuration and re-run this command.");
+					"⚠️ Guild is not configured. Adjust this guild's configuration and re-run this command.");
 				return;
 			}
 
@@ -328,7 +318,7 @@ namespace ModCore.Commands
 			if (b == 0 || mute == null)
 			{
 				await ctx.SafeRespondUnformattedAsync(
-					"Mute role is not configured or missing. Set a correct role and re-run this command.");
+					"⚠️ Mute role is not configured or missing. Set a correct role and re-run this command.");
 				return;
 			}
 
@@ -338,18 +328,20 @@ namespace ModCore.Commands
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+			var sent_dm = false;
 			try
 			{
-				await m.ElevatedMessageAsync($"You've been unmuted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
-            }
+				await m.ElevatedMessageAsync($"🚓 You've been unmuted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+				sent_dm = true;
+			}
             catch (Exception) { }
 
 			await m.RevokeRoleAsync(mute, $"{ustr}{rstr} (unmute)");
 			await ctx.SafeRespondAsync(
-				$"Unmuted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
+				$"🚓 Unmuted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
 			await ctx.LogActionAsync(
-				$"Unmuted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
+				$"🚓 Unmuted user {m.DisplayName} (ID:{m.Id}) {(reason != "" ? "With reason: " + reason : "")}");
 		}
 
 		[Command("leave"), Description("Makes this bot leave the current server. Goodbye moonmen."),
@@ -357,7 +349,7 @@ namespace ModCore.Commands
 		public async Task LeaveAsync(CommandContext ctx)
 		{
 			var interactivity = this.Interactivity;
-			await ctx.SafeRespondUnformattedAsync("Are you sure you want to remove modcore from your guild?");
+			await ctx.SafeRespondUnformattedAsync("❓ Are you sure you want to remove modcore from your guild?");
 			var m = await interactivity.WaitForMessageAsync(
 				x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
 
@@ -365,7 +357,7 @@ namespace ModCore.Commands
 				await ctx.SafeRespondUnformattedAsync("Timed out.");
 			else if (m.Result.Content.ToLowerInvariant() == "yes")
 			{
-				await ctx.SafeRespondUnformattedAsync("Thanks for using ModCore. Leaving this guild.");
+				await ctx.SafeRespondUnformattedAsync("❤️ Thanks for using ModCore. Leaving this guild.");
 				await ctx.LogActionAsync("Left your server. Thanks for using ModCore.");
 				await ctx.Guild.LeaveAsync();
 			}
@@ -382,16 +374,20 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
+			var unbanmoment = DateTimeOffset.UtcNow.Add(ts);
+
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+			var sent_dm = false;
 			try
 			{
-				await m.ElevatedMessageAsync($"You've been temporarily banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
-					$"\nYou can rejoin after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+				await m.ElevatedMessageAsync($"🚓 You've been temporarily banned from {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+					$"\nYou can rejoin <t:{unbanmoment.ToUnixTimeSeconds}:R>");
+				sent_dm = true;
 			}
 			catch (Exception) { }
 
@@ -424,10 +420,10 @@ namespace ModCore.Commands
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
-				$"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+				$"🚓 Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
 			await ctx.LogActionAsync(
-				$"Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+				$"🚓 Tempbanned user {m.DisplayName} (ID:{m.Id}) to be unbanned in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 		}
 
 		[Command("tempmute"), Aliases("tm"), Description("Temporarily mutes a member. They will be automatically " +
@@ -440,7 +436,7 @@ namespace ModCore.Commands
 		{
 			if (ctx.Member.Id == m.Id)
 			{
-				await ctx.SafeRespondUnformattedAsync("You can't do that to yourself! You have so much to live for!");
+				await ctx.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
 				return;
 			}
 
@@ -448,7 +444,7 @@ namespace ModCore.Commands
 			if (guildSettings == null)
 			{
 				await ctx.SafeRespondUnformattedAsync(
-					"Guild is not configured. Adjust this guild's configuration and re-run this command.");
+					"⚠️ Guild is not configured. Adjust this guild's configuration and re-run this command.");
 				return;
 			}
 
@@ -459,7 +455,7 @@ namespace ModCore.Commands
 				var (Role, Message) = await Utils.SetupMuteRole(ctx.Guild, ctx.Member, m);
 				mute = Role;
 				guildSettings.MuteRoleId = Role.Id;
-				await ctx.SafeRespondUnformattedAsync("Mute role is not configured or missing, " + Message);
+				await ctx.SafeRespondUnformattedAsync("⚠️ Mute role is not configured or missing, " + Message);
 				await ctx.SetGuildSettingsAsync(guildSettings);
 			}
 			await Utils.GuaranteeMuteRoleDeniedEverywhere(ctx.Guild, mute);
@@ -467,16 +463,18 @@ namespace ModCore.Commands
 			var timer = Timers.FindNearestTimer(TimerActionType.Unmute, m.Id, 0, ctx.Guild.Id, this.Database);
 			if (timer != null)
 			{
-				await ctx.SafeRespondUnformattedAsync("This member was already muted! Please try to unmute them first!");
+				await ctx.SafeRespondUnformattedAsync("⚠️ This member was already muted! Please try to unmute them first!");
 				return;
 			}
 
 			var ustr = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
 			var rstr = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+			var sent_dm = false;
 			try
 			{
-				await m.ElevatedMessageAsync($"You've been temporarily muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+				await m.ElevatedMessageAsync($"🚓 You've been temporarily muted in {ctx.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
 					$"\nYou can talk again after {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+				sent_dm = true;
 			}
 			catch (Exception) { }
 			await m.GrantRoleAsync(mute, $"{ustr}{rstr} (mute)");
@@ -509,10 +507,10 @@ namespace ModCore.Commands
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
-				$"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+				$"🚓 Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
 			await ctx.LogActionAsync(
-				$"Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
+				$"🚓 Tempmuted user {m.DisplayName} (ID:{m.Id}) to be unmuted in {ts.Humanize(4, minUnit: TimeUnit.Second)}");
 		}
 
 		[Command("schedulepin"), Aliases("sp"), Description("Schedules a pinned message. _I really don't know why " +
@@ -544,7 +542,7 @@ namespace ModCore.Commands
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
-				$"After {pinfrom.Humanize(4, minUnit: TimeUnit.Second)} this message will be pinned");
+				$"✅ After {pinfrom.Humanize(4, minUnit: TimeUnit.Second)} this message will be pinned");
 		}
 
 		[Command("scheduleunpin"), Aliases("sup"), Description("Schedules unpinning a pinned message. This command " +
@@ -578,7 +576,7 @@ namespace ModCore.Commands
 
 			// End of Timer adding
 			await ctx.SafeRespondAsync(
-				$"In {pinuntil.Humanize(4, minUnit: TimeUnit.Second)} this message will be unpinned.");
+				$"✅ In {pinuntil.Humanize(4, minUnit: TimeUnit.Second)} this message will be unpinned.");
 		}
 
 		[Command("listbans"), Aliases("lb"), Description("Lists banned users. Real complex stuff."), RequireUserPermissions(Permissions.ViewAuditLog), CheckDisable]
@@ -645,11 +643,11 @@ namespace ModCore.Commands
 					await channel.CrosspostMessageAsync(msg);
 				await role.ModifyAsync(mentionable: false);
 				await ctx.Message.DeleteAsync();
-				await ctx.LogActionAsync($"Announced {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
+				await ctx.LogActionAsync($"✅ Announced {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
 			}
 			else
 			{
-				await ctx.Channel.SafeMessageUnformattedAsync("You can't announce to that role because it is mentionable!", true);
+				await ctx.Channel.SafeMessageUnformattedAsync("⚠️ You can't announce to that role because it is mentionable!", true);
 				await ctx.LogActionAsync(
 					$"Failed announcement\nMessage: {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
 			}
@@ -676,7 +674,7 @@ namespace ModCore.Commands
 		[RequirePermissions(Permissions.ManageMessages)]
 		public async Task BuildMessageAsync(CommandContext ctx)
 		{
-			var msg = await ctx.RespondAsync($"Hello and welcome to the ModCore message builder!\nI am your host Smirky, and I will guide you through the creation of a message! "
+			var msg = await ctx.RespondAsync($"👋 Hello and welcome to the ModCore message builder!\nI am your host Smirky, and I will guide you through the creation of a message! "
 				+ DiscordEmoji.FromName(ctx.Client, ":smirk:").ToString());
 			await Task.Delay(TimeSpan.FromSeconds(2));
 			var menu = new DiscordEmbedBuilder()
@@ -1017,7 +1015,7 @@ namespace ModCore.Commands
 		{
 			if(DateTimeOffset.Now.Subtract(msg.Timestamp).TotalDays > 1)
 			{
-				await ctx.RespondAsync("Yeah.. Can't do that for messages older than a day");
+				await ctx.RespondAsync("⚠️ Yeah.. Can't do that for messages older than a day");
 				return;
 			}
 
@@ -1035,30 +1033,6 @@ namespace ModCore.Commands
 			await ctx.RespondAsync($"Counted {ms.Count} Messages.");
 		}
 
-		[Command("quote")]
-		[Description("Quotes a message")]
-		public async Task QuoteAsync(CommandContext ctx, DiscordChannel channel, ulong message)
-		{
-			var m = await channel.GetMessageAsync(message);
-			await QuoteAsync(ctx, m);
-		}
-
-		[Command("quote")]
-		[Description("Quotes a message")]
-		public async Task QuoteAsync(CommandContext ctx, DiscordMessage message)
-		{
-			var embed = new DiscordEmbedBuilder()
-				.WithTitle($"Message by {message.Author.Username}#{message.Author.Discriminator}")
-				.WithDescription($"{message.Content}\n\n[{this.Shared.Emojis.JumpLink.ToString()}](https://discordapp.com/channels/{message.Channel.GuildId}/{message.ChannelId}/{message.Id})")
-				.WithFooter($" Quoted by {ctx.Member.Username}#{ctx.Member.Discriminator}. ID: {message.Id}.", ctx.Member.GetAvatarUrl(ImageFormat.Png))
-				.WithThumbnail(message.Author.GetAvatarUrl(ImageFormat.Png))
-				.WithTimestamp(message.Timestamp)
-				.Build();
-
-			await ctx.Message.DeleteAsync();
-			await ctx.RespondAsync(embed: embed);
-		}
-
 		[Command("nick")]
 		#if !DEBUG
 		[Cooldown(1, 60, CooldownBucketType.User)]
@@ -1068,12 +1042,12 @@ namespace ModCore.Commands
 		{
 			if (nick == ctx.Member.Nickname)
 			{
-				await ctx.ElevatedRespondAsync("That's already your nickname.");
+				await ctx.ElevatedRespondAsync("⚠️ That's already your nickname.");
 				return;
 			}
 			if (nick == ctx.Member.Username)
 			{
-				await ctx.ElevatedRespondAsync("That's already your username.");
+				await ctx.ElevatedRespondAsync("⚠️ That's already your username.");
 				return;
 			}
 			
@@ -1098,7 +1072,7 @@ namespace ModCore.Commands
 					return;
 				}
 
-				await ctx.ElevatedRespondAsync("Do it yourself, you have the permission!");
+				await ctx.ElevatedRespondAsync("⚠️ Do it yourself, you have the permission!");
 				return;
 			}
 
@@ -1109,12 +1083,12 @@ namespace ModCore.Commands
 				{
 					if (ctx.Member == ctx.Guild.Owner)
 					{
-						await ctx.ElevatedRespondAsync("Use the `config nickchange enable` command to enable nickname " +
+						await ctx.ElevatedRespondAsync("⚠️ Use the `config nickchange enable` command to enable nickname " +
 						                               "change requests.");
 					}
 					else
 					{
-						await ctx.ElevatedRespondAsync("The server owner has disabled nickname changing on this server.");
+						await ctx.ElevatedRespondAsync("⚠️ The server owner has disabled nickname changing on this server.");
 					}
 
 					return;
@@ -1125,7 +1099,7 @@ namespace ModCore.Commands
 				if (!ctx.Guild.CurrentMember.PermissionsIn(ctx.Channel).HasPermission(Permissions.ManageNicknames) ||
 				    !ctx.Guild.CurrentMember.CanInteract(ctx.Member))
 				{
-					await ctx.ElevatedRespondAsync("Unable to process nickname change because the bot lacks the " +
+					await ctx.ElevatedRespondAsync("⚠️ Unable to process nickname change because the bot lacks the " +
 					                               "required permissions, or cannot action on this member.");
 					return;
 				}
@@ -1141,7 +1115,7 @@ namespace ModCore.Commands
 				await Task.WhenAll(message.CreateReactionAsync(yes), message.CreateReactionAsync(no));
 
 				await ctx.ElevatedRespondAsync(
-					"Your request to change username was placed, and should be actioned shortly.");
+					"✅ Your request to change username was placed, and should be actioned shortly.");
 				
                 // TODO: y'all gotta mess with dem timeout shit, else we'll get sum nasty errors
 				var res = await this.Interactivity.WaitForReactionAsync(
@@ -1153,7 +1127,7 @@ namespace ModCore.Commands
 					await ctx.Member.ModifyAsync(member => member.Nickname = nick);
 
 					await message.DeleteAsync(
-						$"Request to change username accepted by @{reaction.User.Username}#{reaction.User.Discriminator}");
+						$"✅ Request to change username accepted by @{reaction.User.Username}#{reaction.User.Discriminator}");
 					
 					await ctx.Member.SendMessageAsync($"Your name in {ctx.Guild.Name} was successfully changed to " +
 					                                  $"{Formatter.Sanitize(nick)}.");
@@ -1166,10 +1140,10 @@ namespace ModCore.Commands
 				else
 				{
 					await message.DeleteAsync(
-						$"Request to change username denied by @{reaction.User.Username}#{reaction.User.Discriminator}");
+						$"❌ Request to change username denied by @{reaction.User.Username}#{reaction.User.Discriminator}");
 					
 					await ctx.Member.SendMessageAsync(
-						$"Your request to change your username in {ctx.Guild.Name} was denied.");
+						$"❌ Your request to change your username in {ctx.Guild.Name} was denied.");
 					
 					try
 					{
@@ -1232,7 +1206,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync(embed: embed);
                 return;
             }
-            await ctx.RespondAsync("No message to snipe!");
+            await ctx.RespondAsync("⚠️ No message to snipe!");
         }
 
         [Command("snipeedit")]
@@ -1258,7 +1232,7 @@ namespace ModCore.Commands
                 await ctx.RespondAsync(embed: embed);
                 return;
             }
-            await ctx.RespondAsync("No message to snipe!");
+            await ctx.RespondAsync("⚠️ No message to snipe!");
         }
 
         [Command("snoop"), Hidden]
@@ -1273,10 +1247,10 @@ namespace ModCore.Commands
             if (cooldown <= 21600 && cooldown >= 0)
             {
                 await ctx.Channel.ModifyAsync(x => x.PerUserRateLimit = cooldown);
-                await ctx.RespondAsync($"Set cooldown to {cooldown} seconds.");
+                await ctx.RespondAsync($"✅ Set cooldown to {cooldown} seconds.");
                 return;
             }
-            await ctx.RespondAsync($"Invalid cooldown: {cooldown}");
+            await ctx.RespondAsync($"⚠️ Invalid cooldown: {cooldown}");
         }
     }
 }

@@ -1,6 +1,0 @@
-- [Welcome](../wiki)
-- [Features](../wiki?p=features)
-- [Setup Guide](../wiki?p=setup)
-- [Webhook / IFTTT guide](../wiki?p=ifttt)
-- [FAQ](../wiki?p=faq)
-- [Credits](../wiki?p=Credits)

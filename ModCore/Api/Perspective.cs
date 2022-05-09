@@ -6,25 +6,6 @@ using Newtonsoft.Json;
 
 namespace ModCore.Api
 {
-    /// <summary>
-    /// Using this for testing the perspective API
-    /// </summary>
-    public class PerspectiveTest
-    {
-        /*
-        static void Main(params string[] args)
-        {
-            var input = File.ReadAllText("settings.json", new UTF8Encoding(false));
-            var settings = JsonConvert.DeserializeObject<Settings>(input);
-            var p = new Perspective(settings.PerspectiveToken);
-            Console.Write("Write a witty comment about my shoes: ");
-            var c = Console.ReadLine();
-            var a = p.RequestAnalysis(c).GetAwaiter().GetResult();
-            Console.WriteLine($"analysis score: {a.AttributeScores.First().Value.SummaryScore.Value}");
-            Console.ReadKey();
-        }*/
-    }
-
     public class Perspective
     {
         private string _token;

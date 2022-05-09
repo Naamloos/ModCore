@@ -22,6 +22,7 @@ namespace ModCore.Listeners
                 if (cfg == null)
                     return;
 
+                // Reaction roles
 				if (cfg.ReactionRoles.Any(x => (ulong)x.ChannelId == e.Channel.Id && (ulong)x.MessageId == e.Message.Id && (ulong)x.Reaction.EmojiId == e.Emoji.Id && x.Reaction.EmojiName == e.Emoji.Name))
 				{
 					var rrid = (ulong)cfg.ReactionRoles.First(
@@ -32,6 +33,7 @@ namespace ModCore.Listeners
 						await mem.GrantRoleAsync(rrrole);
 				}
 
+                // Starboard
                 var emoji = cfg.Starboard.Emoji;
                 DiscordEmoji em = null;
                 if (emoji.EmojiId != 0)
