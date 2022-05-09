@@ -136,82 +136,6 @@ namespace ModCore.Commands
             await ctx.CommandsNext.ExecuteCommandAsync(fctx);
         }
 
-        //[Command("update"), Aliases("u"), Hidden]
-        //public async Task UpdateAsync(CommandContext ctx)
-        //{
-        //    if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-        //    {
-        //        await ctx.SafeRespondAsync("You do not have permission to use this command!");
-        //        return;
-        //    }
-        //    var m = await ctx.SafeRespondAsync($"Running update script...");
-        //    const string fn = "update";
-        //    if (File.Exists("update.sh"))
-        //    {
-        //        const string file = fn + ".sh";
-        //        var proc = new Process
-        //        {
-        //            StartInfo = new ProcessStartInfo
-        //            {
-        //                FileName = "nohup",
-        //                Arguments = $"bash {file} {Process.GetCurrentProcess().Id} {ctx.Guild.Id} {ctx.Channel.Id}",
-        //                UseShellExecute = false,
-        //                RedirectStandardOutput = true,
-        //                CreateNoWindow = true
-        //            }
-        //        };
-        //        proc.Start();
-        //        await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
-        //    }
-        //    else if (File.Exists("update.bat"))
-        //    {
-        //        const string file = fn + ".bat";
-        //        var proc = new Process
-        //        {
-        //            StartInfo = new ProcessStartInfo
-        //            {
-        //                FileName = file,
-        //                Arguments = $"{ctx.Guild.Id} {ctx.Channel.Id}",
-        //                UseShellExecute = false,
-        //                RedirectStandardOutput = true,
-        //                CreateNoWindow = true
-        //            }
-        //        };
-        //        proc.Start();
-        //        await m.ModifyAsync($"Updating ModCore using `{file}`. See you soon!");
-        //    }
-        //    else
-        //    {
-        //        await m.ModifyAsync("**‼ Your update script has not been found. ‼**\n\nPlease place `update.sh` (Linux) or `update.bat` (Windows) in your ModCore directory.");
-        //        return;
-        //    }
-        //    this.Shared.CTS.Cancel();
-        //}
-
-        [Command("botmanagers"), Aliases("bm"), Hidden]
-        public async Task BotManagersAsync(CommandContext ctx)
-        {
-            if (!Shared.BotManagers.Contains(ctx.Member.Id) && !ctx.Client.CurrentApplication.Owners.Any(x => x.Id == ctx.User.Id))
-            {
-                await ctx.SafeRespondUnformattedAsync("You do not have permission to use this command!");
-                return;
-            }
-            var list = new List<string>();
-            foreach (ulong manager in Shared.BotManagers)
-            {
-                try
-                {
-                    DiscordMember m = await ctx.Guild.GetMemberAsync(manager);
-                    list.Add(m.DisplayName);
-                }
-                catch
-                {
-
-                }
-            }
-            await ctx.SafeRespondAsync($"Users with access: {(list.Count > 0 ? $"`{string.Join("`, `", list)}`" : "None")}");
-        }
-
         [Command("grantxp"), Aliases("gxp"), Hidden]
         public async Task GrantXpAsync(CommandContext ctx, DiscordMember m, int xp)
         {
@@ -259,28 +183,43 @@ namespace ModCore.Commands
 	        switch (table.ToUpperInvariant())
 	        {
 	            case "DATABASEINFO":
-	            case "GUILDCONFIG": return await QueryAsync(db.Info, query);
+                    return await QueryAsync(db.Info, query);
+
+                case "GUILDCONFIG":
 	            case "DATABASEGUILDCONFIG":
-	            case "MODNOTE":
-	            case "NOTE": return await QueryAsync(db.GuildConfig, query);
+                    return await QueryAsync(db.GuildConfig, query);
+
+                case "MODNOTE":
+	            case "NOTE":
 	            case "DATABASEMODNOTE":
-	            case "ROLESTATEOVERRIDE": return await QueryAsync(db.Modnotes, query);
+                    return await QueryAsync(db.Modnotes, query);
+
+                case "ROLESTATEOVERRIDE":
 	            case "DATABASEROLESTATEOVERRIDE":
-	            case "ROLESTATEROLES": return await QueryAsync(db.RolestateOverrides, query);
+                    return await QueryAsync(db.RolestateOverrides, query);
+
+                case "ROLESTATEROLES":
 	            case "DATABASEROLESTATEROLES":
-	            case "WARNING": return await QueryAsync(db.RolestateRoles, query);
-	            case "DATABASEWARNING":
-	            case "TIMER": return await QueryAsync(db.Warnings, query);
+	                return await QueryAsync(db.RolestateRoles, query);
+
+	            case "TIMER":
 	            case "DATABASETIMER":
-	            case "STARDATA":
-	            case "STAR": return await QueryAsync(db.Timers, query);
+                    return await QueryAsync(db.Timers, query);
+
+                case "STARDATA":
+	            case "STAR":
 	            case "DATABASESTARDATA":
-	            case "BAN": return await QueryAsync(db.StarDatas, query);
-	            case "DATABASEBAN":
-	            case "TAG": return await QueryAsync(db.Bans, query);
+	                return await QueryAsync(db.StarDatas, query);
+
+	            case "TAG": 
 	            case "DATABASETAG":
-	            case "COMMANDID": return await QueryAsync(db.Tags, query);
-	            default: throw new ArgumentException();
+                    return await QueryAsync(db.Tags, query);
+
+                case "COMMANDID":
+                    return await QueryAsync(db.CommandIds, query);
+
+                default: 
+                    throw new ArgumentException();
 	        }
 	    }
 
