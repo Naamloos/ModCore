@@ -28,7 +28,7 @@ namespace ModCore.Listeners
             var message = eventargs.Message;
             var user = eventargs.Message.Author as DiscordMember;
 
-            if (user.IsBot)
+            if (user == null || user.IsBot)
                 return;
 
             GuildSettings config;

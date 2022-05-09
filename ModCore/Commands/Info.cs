@@ -91,7 +91,7 @@ namespace ModCore.Commands
                     .WithColor(new DiscordColor("#089FDF"))
                     .WithTitle($"{guild.Name} ID: ({guild.Id})")
                     .WithDescription($"Created on: {guild.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}\n" +
-                    $"Member count: {guild.MemberCount}" +
+                    $"Member count: {guild.MemberCount}\n" +
                     $"Joined at: {guild.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}");
 
                 if (!string.IsNullOrEmpty(guild.IconHash))
@@ -130,19 +130,6 @@ namespace ModCore.Commands
                 }
                 #endregion
                 embed.AddField("Roles", rolestring.ToString());
-
-                var emojistring = new StringBuilder();
-                #region emoji list string builder
-                foreach (var emoji in guild.Emojis)
-                {
-                    emojistring.Append($"[`{emoji.Value.Name}`] ");
-                }
-                #endregion
-                embed.AddField("Emotes", emojistring.ToString());
-
-                embed.AddField("Voice", $"AFK Channel: {(guild.AfkChannel != null ? $"#{guild.AfkChannel.Name}" : "None.")}\n" +
-                    $"AFK Timeout: {guild.AfkTimeout}\n" +
-                    $"Region: {guild.VoiceRegion.Name}");
 
                 embed.AddField("Misc", $"Large: {(guild.IsLarge ? "yes" : "no")}.\n" +
                     $"Default Notifications: {guild.DefaultMessageNotifications}.\n" +

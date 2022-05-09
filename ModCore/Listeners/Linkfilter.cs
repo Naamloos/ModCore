@@ -24,6 +24,9 @@ namespace ModCore.Listeners
         [AsyncListener(EventTypes.MessageCreated)]
         public static async Task RemoveSuspiciousLinks(ModCoreShard bot, MessageCreateEventArgs eventargs)
         {
+            if (eventargs.Author == null || eventargs.Channel == null)
+                return;
+
             if ((eventargs.Channel.PermissionsFor(eventargs.Author as DiscordMember) & Permissions.ManageMessages) != 0) return;
 
             if (eventargs.Channel.Guild == null)
