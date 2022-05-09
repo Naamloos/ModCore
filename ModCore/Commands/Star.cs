@@ -27,7 +27,7 @@ namespace ModCore.Commands
         }
 
         [Command("info"), Aliases("i", "data", "information"), Description("Returns stardata for a specified user."), CheckDisable]
-        public async Task ListGivenAsync(CommandContext ctx, [Description("User to show stardata information about.")] DiscordMember member)
+        public async Task ListGivenAsync(CommandContext context, [Description("User to show stardata information about.")] DiscordMember member)
         {
             var embed = new DiscordEmbedBuilder()
                 .WithColor(new DiscordColor("#089FDF"))
@@ -35,7 +35,7 @@ namespace ModCore.Commands
 
             using (var db = Database.CreateContext())
             {
-                var guildStars = db.StarDatas.Where(x => (ulong)x.GuildId == ctx.Guild.Id);
+                var guildStars = db.StarDatas.Where(x => (ulong)x.GuildId == context.Guild.Id);
                 var givenStars = guildStars.Where(x => (ulong)x.StargazerId == member.Id);
                 var gotStars = guildStars.Where(x => (ulong)x.AuthorId == member.Id);
 
@@ -43,7 +43,7 @@ namespace ModCore.Commands
                     $"You have given **{givenStars.Count()}** stars to other users.\n\n" +
                     $"You have been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StargazerId).Distinct().Count()}** different users, over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
 
-                var allMembers = await ctx.Guild.GetAllMembersAsync();
+                var allMembers = await context.Guild.GetAllMembersAsync();
 
                 var givenMemberNames = new Dictionary<string, int>();                
                 foreach (DatabaseStarData star in givenStars)
@@ -92,7 +92,7 @@ namespace ModCore.Commands
                 if (orderedGotMemberNames.Length > 10)
                     embed.Fields.Last().Value += $"\nAnd {orderedGotMemberNames.Length - 10} more...";
 
-                await ctx.ElevatedRespondAsync(embed: embed);
+                await context.ElevatedRespondAsync(embed: embed);
             }
         }
     }

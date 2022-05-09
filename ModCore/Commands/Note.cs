@@ -29,79 +29,79 @@ namespace ModCore.Commands
 		}
 
 		[GroupCommand]
-		public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Member to get notes about.")]DiscordUser user)
+		public async Task ExecuteGroupAsync(CommandContext context, [Description("Member to get notes about.")]DiscordUser user)
 		{
-			await ctx.Message.DeleteAsync();
-			var dbctx = Database.CreateContext();
+			await context.Message.DeleteAsync();
+			var db = Database.CreateContext();
 			
-			if (!dbctx.Modnotes.Any(x => x.MemberId == (long)user.Id && x.GuildId == (long)ctx.Guild.Id))
+			if (!db.Modnotes.Any(x => x.MemberId == (long)user.Id && x.GuildId == (long)context.Guild.Id))
 			{
-				await ctx.Member.SendMessageAsync($"**No notes exist for user {user.Username}#{user.Discriminator} in guild `{ctx.Guild.Name}`!**");
+				await context.Member.SendMessageAsync($"⚠️ No notes exist for user {user.Username}#{user.Discriminator} in guild `{context.Guild.Name}`!");
 			}
 			else
 			{
-				var note = dbctx.Modnotes?.First(x => x.MemberId == (long)user.Id && x.GuildId == (long)ctx.Guild.Id);
-				await ctx.Member.SendMessageAsync($"**Notes for user {user.Username}#{user.Discriminator} in guild `{ctx.Guild.Name}`:**\n```\n{note.Contents.Replace("`", " ` ")}\n```");
+				var note = db.Modnotes?.First(x => x.MemberId == (long)user.Id && x.GuildId == (long)context.Guild.Id);
+				await context.Member.SendMessageAsync($"📃 Notes for user {user.Username}#{user.Discriminator} in guild `{context.Guild.Name}`:\n```\n{note.Contents.Replace("`", " ` ")}\n```");
 			}
 		}
 
 		[Command("create"), Aliases("c")]
-		public async Task CreateAsync(CommandContext ctx, DiscordUser user, [RemainingText]string note)
+		public async Task CreateAsync(CommandContext context, DiscordUser user, [RemainingText]string note)
 		{
-			await ctx.Message.DeleteAsync();
-			var dbctx = Database.CreateContext();
-			if (dbctx.Modnotes.Any(x => x.MemberId == (long)user.Id && x.GuildId == (long)ctx.Guild.Id))
+			await context.Message.DeleteAsync();
+			var db = Database.CreateContext();
+			if (db.Modnotes.Any(x => x.MemberId == (long)user.Id && x.GuildId == (long)context.Guild.Id))
 			{
-				await ctx.Member.SendMessageAsync($"**Notes already exist for user {user.Username}#{user.Discriminator} in guild `{ctx.Guild.Name}`!**");
+				await context.Member.SendMessageAsync($"⚠️ Notes already exist for user {user.Username}#{user.Discriminator} in guild `{context.Guild.Name}`!");
 			}
 			else
 			{
-				dbctx.Modnotes.Add(new DatabaseModNote()
+				db.Modnotes.Add(new DatabaseModNote()
 				{
 					Contents = note,
-					GuildId = (long)ctx.Guild.Id,
+					GuildId = (long)context.Guild.Id,
 					MemberId = (long)user.Id
 				});
-				await dbctx.SaveChangesAsync();
+				await db.SaveChangesAsync();
 
-				await ctx.Member.SendMessageAsync($"**Created ModNote for user {user.Username}#{user.Discriminator} in guild `{ctx.Guild.Name}` with content:**\n```\n{note.Replace("`", " ` ")}\n```");
+				await context.Member.SendMessageAsync($"✅ Created ModNote for user {user.Username}#{user.Discriminator} in guild `{context.Guild.Name}` with content:\n```\n{note.Replace("`", " ` ")}\n```");
 			}
 		}
 
 		[Command("clear"), Aliases("clr")]
-		public async Task ClearAsync(CommandContext ctx, DiscordUser user)
+		public async Task ClearAsync(CommandContext context, DiscordUser user)
 		{
-			await ctx.Message.DeleteAsync();
-			var dbctx = Database.CreateContext();
-			if(!dbctx.Modnotes.Any(x => x.MemberId == (long)user.Id && x.GuildId == (long)ctx.Guild.Id))
+			await context.Message.DeleteAsync();
+			var db = Database.CreateContext();
+			if(!db.Modnotes.Any(x => x.MemberId == (long)user.Id && x.GuildId == (long)context.Guild.Id))
 			{
-				await ctx.Member.SendMessageAsync($"**No notes exist for user {user.Username}#{user.Discriminator} in guild `{ctx.Guild.Name}`!**");
+				await context.Member.SendMessageAsync($"⚠️ No notes exist for user {user.Username}#{user.Discriminator} in guild `{context.Guild.Name}`!");
 			}
 			else
 			{
-				var old = dbctx.Modnotes?.First(x => x.MemberId == (long)user.Id && x.GuildId == (long)ctx.Guild.Id);
-				dbctx.Modnotes.Remove(old);
-				await ctx.Member.SendMessageAsync($"**Cleared ModNote for user {user.Username}#{user.Discriminator} in guild `{ctx.Guild.Name}`.**");
-				await dbctx.SaveChangesAsync();
+				var old = db.Modnotes?.First(x => x.MemberId == (long)user.Id && x.GuildId == (long)context.Guild.Id);
+				db.Modnotes.Remove(old);
+				await context.Member.SendMessageAsync($"✅ Cleared ModNote for user {user.Username}#{user.Discriminator} in guild `{context.Guild.Name}`.");
+				await db.SaveChangesAsync();
 			}
 		}
 
 		[Command("append"), Aliases("a")]
-		public async Task AppendAsync(CommandContext ctx, DiscordUser user, [RemainingText]string note)
+		public async Task AppendAsync(CommandContext context, DiscordUser user, [RemainingText]string note)
 		{
-			await ctx.Message.DeleteAsync();
-			var dbctx = Database.CreateContext();
-			if (!dbctx.Modnotes.Any(x => x.MemberId == (long)user.Id && x.GuildId == (long)ctx.Guild.Id))
+			await context.Message.DeleteAsync();
+			var db = Database.CreateContext();
+			if (!db.Modnotes.Any(x => x.MemberId == (long)user.Id && x.GuildId == (long)context.Guild.Id))
 			{
-				await ctx.Member.SendMessageAsync($"**No notes exist for user {user.Username}#{user.Discriminator} in guild `{ctx.Guild.Name}`!**");
+				await context.Member.SendMessageAsync($"⚠️ No notes exist for user {user.Username}#{user.Discriminator} in guild `{context.Guild.Name}`!");
 			}
 			else
 			{
-				var old = dbctx.Modnotes?.First(x => x.MemberId == (long)user.Id && x.GuildId == (long)ctx.Guild.Id);
+				var old = db.Modnotes?.First(x => x.MemberId == (long)user.Id && x.GuildId == (long)context.Guild.Id);
 				old.Contents += $"\n{note}";
-				dbctx.Modnotes.Update(old);
-				await ctx.Member.SendMessageAsync($"**Appended to ModNote for user {user.Username}#{user.Discriminator} in guild `{ctx.Guild.Name}` with new content:**\n```\n{old.Contents.Replace("`", " ` ")}\n```");
-				await dbctx.SaveChangesAsync();
+				db.Modnotes.Update(old);
+				await context.Member.SendMessageAsync($"✅ Appended to ModNote for user {user.Username}#{user.Discriminator} in guild `{context.Guild.Name}` with new content: \n```\n{old.Contents.Replace("`", " ` ")}\n```");
+				await db.SaveChangesAsync();
 			}
 		}
 	}

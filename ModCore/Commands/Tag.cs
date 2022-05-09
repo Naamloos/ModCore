@@ -34,106 +34,107 @@ namespace ModCore.Commands
         }
 
 		[GroupCommand]
-		public async Task ExecuteGroupAsync(CommandContext ctx, 
-            [RemainingText, Description("Tag to get information about. Prefix with a channel to get it from a different channel.")] string args)
+		public async Task ExecuteGroupAsync(CommandContext context, 
+            [RemainingText, Description("Tag to get information about. Prefix with a channel to get it from a different channel.")] string arguments)
         {
-            List<string> s = (args.Split(' ')).ToList();
+            List<string> s = (arguments.Split(' ')).ToList();
             try
             {
                 if (!s[0].StartsWith("<#"))
                     throw new Exception();
-                DiscordChannel c = (DiscordChannel)await ctx.CommandsNext.ConvertArgument<DiscordChannel>(s[0], ctx);
+                DiscordChannel c = (DiscordChannel)await context.CommandsNext.ConvertArgument<DiscordChannel>(s[0], context);
                 s.RemoveAt(0);
-                await ReturnTag(ctx, c, string.Join(' ', s));
+                await ReturnTag(context, c, string.Join(' ', s));
             }
             catch (Exception)
             {
-                await ReturnTag(ctx, ctx.Channel, string.Join(' ', s));
+                await ReturnTag(context, context.Channel, string.Join(' ', s));
             }
         }
 
-        public async Task ReturnTag(CommandContext ctx, DiscordChannel channel, string name)
+        public async Task ReturnTag(CommandContext context, DiscordChannel channel, string name)
         {
             using (var db = this.Database.CreateContext())
             {
                 try
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)channel.Id);
-                    await ctx.SafeRespondAsync($"`{tag.Name.BreakMentions()}`:\n{tag.Contents.BreakMentions()}");
+                    await context.SafeRespondAsync($"`{tag.Name.BreakMentions()}`:\n{tag.Contents.BreakMentions()}");
                 }
                 catch (Exception)
                 {
-                    await ctx.SafeRespondUnformattedAsync("No such tag exists!");
+                    await context.SafeRespondUnformattedAsync("No such tag exists!");
                 }
             }
         }
 
         [Command("set"), CheckDisable]
         [Description("Sets a new tag for this channel, or modifies one if you own it.")]
-        public async Task SetAsync(CommandContext ctx, [Description("Tag to create")]string name, [Description("Contents of tag"), RemainingText]string contents)
+        public async Task SetAsync(CommandContext context, [Description("Tag to create")]string name, [Description("Contents of tag"), RemainingText]string contents)
         {
             using (var db = this.Database.CreateContext())
             {
-                if (db.Tags.Any(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id))
+                if (db.Tags.Any(x => x.Name == name && x.ChannelId == (long)context.Channel.Id))
                 {
-                    var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id);
-                    if (tag.OwnerId != (long)ctx.Member.Id)
-                        await ctx.SafeRespondUnformattedAsync("That tag already exists for this channel and you don't own it!");
+                    var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)context.Channel.Id);
+                    if (tag.OwnerId != (long)context.Member.Id)
+                        await context.SafeRespondUnformattedAsync("That tag already exists for this channel and you don't own it!");
                     else
                     {
                         tag.Contents = contents;
                         db.Tags.Update(tag);
                         await db.SaveChangesAsync();
-                        await ctx.SafeRespondAsync($"Succesfully modified your tag `{name.BreakMentions()}`!");
+                        await context.SafeRespondAsync($"Succesfully modified your tag `{name.BreakMentions()}`!");
                     }
                     return;
                 }
 
-                var t = new DatabaseTag
+                var newtag = new DatabaseTag
                 {
-                    ChannelId = (long)ctx.Channel.Id,
+                    ChannelId = (long)context.Channel.Id,
                     Contents = contents,
                     Name = name,
-                    OwnerId = (long)ctx.Member.Id,
+                    OwnerId = (long)context.Member.Id,
                     CreatedAt = DateTime.Now
                 };
-                db.Tags.Add(t);
+                db.Tags.Add(newtag);
                 await db.SaveChangesAsync();
-                await ctx.SafeRespondAsync($"Tag `{name.BreakMentions()}` succesfully created!");
+                await context.SafeRespondAsync($"Tag `{name.BreakMentions()}` succesfully created!");
             }
         }
 
         [Command("remove"), CheckDisable]
         [Description("Removes a tag for this channel, if it exists and you own it")]
-        public async Task RemoveAsync(CommandContext ctx, [Description("Tag to remove"), RemainingText]string name)
+        public async Task RemoveAsync(CommandContext context, [Description("Tag to remove"), RemainingText]string name)
         {
             using (var db = this.Database.CreateContext())
             {
-                if (db.Tags.Any(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id))
+                if (db.Tags.Any(x => x.Name == name && x.ChannelId == (long)context.Channel.Id))
                 {
-                    var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id);
+                    var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)context.Channel.Id);
 
-                    if ((ctx.Member.PermissionsIn(ctx.Channel) & Permissions.ManageMessages) == 0 || tag.OwnerId == (long)ctx.Member.Id || ctx.Guild.Owner.Id == ctx.Member.Id)
+                    if ((context.Member.PermissionsIn(context.Channel) & Permissions.ManageMessages) == 0 
+                        || tag.OwnerId == (long)context.Member.Id || context.Guild.Owner.Id == context.Member.Id)
                     {
                         db.Tags.Remove(tag);
                         await db.SaveChangesAsync();
-                        await ctx.SafeRespondAsync($"Tag `{name.BreakMentions()}` successfully removed!");
+                        await context.SafeRespondAsync($"Tag `{name.BreakMentions()}` successfully removed!");
                     }
                     else
                     {
-                        await ctx.SafeRespondUnformattedAsync("You don't own that tag!");
+                        await context.SafeRespondUnformattedAsync("You don't own that tag!");
                     }
                 }
                 else
                 {
-                    await ctx.SafeRespondAsync($"No such tag exists!");
+                    await context.SafeRespondAsync($"No such tag exists!");
                 }
             }
         }
 
         [Command("copy"), CheckDisable]
         [Description("Copies a tag from a channel to this channel.")]
-        public async Task RemoveAsync(CommandContext ctx, [Description("Channel the tag originated from")]DiscordChannel origin, 
+        public async Task RemoveAsync(CommandContext context, [Description("Channel the tag originated from")]DiscordChannel origin, 
             [Description("Name of tag to copy"), RemainingText]string name)
         {
             using (var db = this.Database.CreateContext())
@@ -141,52 +142,52 @@ namespace ModCore.Commands
                 if (db.Tags.Any(x => x.Name == name && x.ChannelId == (long)origin.Id))
                 {
                     var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)origin.Id);
-                    if (!db.Tags.Any(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id))
+                    if (!db.Tags.Any(x => x.Name == name && x.ChannelId == (long)context.Channel.Id))
                     {
                         var newtag = new DatabaseTag
                         {
-                            ChannelId = (long)ctx.Channel.Id,
+                            ChannelId = (long)context.Channel.Id,
                             Contents = tag.Contents,
                             Name = tag.Name,
-                            OwnerId = (long)ctx.Member.Id,
+                            OwnerId = (long)context.Member.Id,
                             CreatedAt = DateTime.Now
                         };
                         db.Tags.Add(newtag);
                         await db.SaveChangesAsync();
-                        await ctx.SafeRespondAsync($"Tag `{name.BreakMentions()}` successfully copied from {origin.Mention}!");
+                        await context.SafeRespondAsync($"Tag `{name.BreakMentions()}` successfully copied from {origin.Mention}!");
                     }
                     else
                     {
-                        await ctx.SafeRespondAsync($"Tag `{name.BreakMentions()}` already exists in this channel!");
+                        await context.SafeRespondAsync($"Tag `{name.BreakMentions()}` already exists in this channel!");
                     }
                 }
                 else
                 {
-                    await ctx.SafeRespondAsync($"No such tag exists!");
+                    await context.SafeRespondAsync($"No such tag exists!");
                 }
             }
         }
 
         [Command("info"), CheckDisable]
         [Description("Shows info about a tag.")]
-        public async Task InfoAsync(CommandContext ctx, [Description("Tag to show information about"), RemainingText] string args)
+        public async Task InfoAsync(CommandContext context, [Description("Tag to show information about"), RemainingText] string arguments)
         {
-            List<string> s = (args.Split(' ')).ToList();
+            List<string> splitstring = (arguments.Split(' ')).ToList();
             try
             {
-                if (!s[0].StartsWith("<#"))
+                if (!splitstring[0].StartsWith("<#"))
                     throw new Exception();
-                DiscordChannel c = (DiscordChannel)await ctx.CommandsNext.ConvertArgument<DiscordChannel>(s[0], ctx);
-                s.RemoveAt(0);
-                await ReturnTagInfo(ctx, c, string.Join(' ', s));
+                DiscordChannel channel = (DiscordChannel)await context.CommandsNext.ConvertArgument<DiscordChannel>(splitstring[0], context);
+                splitstring.RemoveAt(0);
+                await ReturnTagInfo(context, channel, string.Join(' ', splitstring));
             }
             catch (Exception)
             {
-                await ReturnTagInfo(ctx, ctx.Channel, string.Join(' ', s));
+                await ReturnTagInfo(context, context.Channel, string.Join(' ', splitstring));
             }
         }
 
-        public async Task ReturnTagInfo(CommandContext ctx, DiscordChannel channel, [RemainingText]string name)
+        public async Task ReturnTagInfo(CommandContext context, DiscordChannel channel, [RemainingText]string name)
         {
             using (var db = this.Database.CreateContext())
             {
@@ -196,8 +197,8 @@ namespace ModCore.Commands
                     string owner = tag.OwnerId.ToString();
                     try
                     {
-                        var o = await channel.Guild.GetMemberAsync((ulong)tag.OwnerId);
-                        owner = $"{o.Username}#{o.Discriminator} / {o.Mention}";
+                        var tagowner = await channel.Guild.GetMemberAsync((ulong)tag.OwnerId);
+                        owner = $"{tagowner.Username}#{tagowner.Discriminator} / {tagowner.Mention}";
                     }
                     catch (Exception) { }
                     var embed = new DiscordEmbedBuilder()
@@ -205,11 +206,11 @@ namespace ModCore.Commands
                         .WithDescription($"Created at: {tag.CreatedAt.ToString()}\nOwned by: {owner}\nChannel: {channel.Mention}")
                         .AddField("Content", tag.Contents);
 
-                    await ctx.ElevatedRespondAsync(embed: embed);
+                    await context.ElevatedRespondAsync(embed: embed);
                 }
                 catch (Exception)
                 {
-                    await ctx.SafeRespondUnformattedAsync("No such tag exists!");
+                    await context.SafeRespondUnformattedAsync("No such tag exists!");
                 }
             }
         }
@@ -220,11 +221,11 @@ namespace ModCore.Commands
         {
             using (var db = this.Database.CreateContext())
             {
-				long chan = (long)ctx.Channel.Id;
+				long channelid = (long)ctx.Channel.Id;
 				if (channel != null)
-					chan = (long)channel.Id;
+					channelid = (long)channel.Id;
 
-				var list = db.Tags.Where(x => x.ChannelId == chan);
+				var list = db.Tags.Where(x => x.ChannelId == channelid);
 				if (list.Count() < 1)
                 {
                     await ctx.SafeRespondUnformattedAsync("This channel has no tags!");
@@ -232,35 +233,35 @@ namespace ModCore.Commands
                 else
                 {
                     string tags = string.Join("\n", list.Select(x => x.Name));
-                    var p = this.Interactivity.GeneratePagesInEmbed(tags, SplitType.Line);
-                    await this.Interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.Member, p, new PaginationEmojis());
+                    var pages = this.Interactivity.GeneratePagesInEmbed(tags, SplitType.Line);
+                    await this.Interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.Member, pages, new PaginationEmojis());
                 }
             }
         }
 
         [Command("transfer"), CheckDisable]
         [Description("Transfers ownership of a tag to another member.")]
-        public async Task TransferAsync(CommandContext ctx, [Description("New owner of this tag")]DiscordMember newowner, 
+        public async Task TransferAsync(CommandContext context, [Description("New owner of this tag")]DiscordMember newowner, 
             [Description("Name of tag to transfer"), RemainingText]string name)
         {
             using (var db = this.Database.CreateContext())
             {
-                if (db.Tags.Any(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id))
+                if (db.Tags.Any(x => x.Name == name && x.ChannelId == (long)context.Channel.Id))
                 {
-                    var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)ctx.Channel.Id);
-                    if (tag.OwnerId != (long)ctx.Member.Id)
-                        await ctx.SafeRespondUnformattedAsync("You don't own that tag!");
+                    var tag = db.Tags.First(x => x.Name == name && x.ChannelId == (long)context.Channel.Id);
+                    if (tag.OwnerId != (long)context.Member.Id)
+                        await context.SafeRespondUnformattedAsync("⚠️ You don't own that tag!");
                     else
                     {
                         tag.OwnerId = (long)newowner.Id;
                         db.Tags.Update(tag);
                         await db.SaveChangesAsync();
-                        await ctx.SafeRespondAsync($"Tag `{name.BreakMentions()}` successfully transferred to {newowner.Mention}!");
+                        await context.SafeRespondAsync($"✅ Tag `{name.BreakMentions()}` successfully transferred to {newowner.Mention}!");
                     }
                 }
                 else
                 {
-                    await ctx.SafeRespondAsync($"No such tag exists!");
+                    await context.SafeRespondAsync($"⚠️ No such tag exists!");
                 }
             }
         }

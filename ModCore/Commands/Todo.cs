@@ -39,94 +39,99 @@ namespace ModCore.Commands
         }
 
         [Command("clear")]
-        public async Task ClearAsync(CommandContext ctx)
+        public async Task ClearAsync(CommandContext context)
         {
             using (var db = Database.CreateContext())
             {
-                if (db.UserDatas.Any(x => x.UserId == (long)ctx.Member.Id))
+                if (db.UserDatas.Any(x => x.UserId == (long)context.Member.Id))
                 {
-                    var user = db.UserDatas.First(x => x.UserId == (long)ctx.Member.Id);
+                    var user = db.UserDatas.First(x => x.UserId == (long)context.Member.Id);
                     var data = user.GetData();
                     if(data.TodoItems.Count() == 0)
                     {
-                        await ctx.RespondAsync("Your to do list is empty!");
+                        await context.RespondAsync("Your to do list is empty!");
                         return;
                     }
                     data.TodoItems.Clear();
                     user.SetData(data);
                     db.UserDatas.Update(user);
                     await db.SaveChangesAsync();
-                    await ctx.RespondAsync("Cleared your todo list!");
+                    await context.RespondAsync("Cleared your todo list!");
                 }
                 else
                 {
-                    await ctx.RespondAsync("Your to do list is empty!");
+                    await context.RespondAsync("Your to do list is empty!");
                 }
             }
         }
 
         [Command("check"), Priority(1)]
-        public async Task CheckAsync(CommandContext ctx, int item)
+        public async Task CheckAsync(CommandContext context, int item)
         {
             using (var db = Database.CreateContext())
             {
-                if (db.UserDatas.Any(x => x.UserId == (long)ctx.Member.Id))
+                if (db.UserDatas.Any(x => x.UserId == (long)context.Member.Id))
                 {
-                    var udata = db.UserDatas.First(x => x.UserId == (long)ctx.Member.Id);
-                    var data = udata.GetData();
+                    var userdata = db.UserDatas.First(x => x.UserId == (long)context.Member.Id);
+                    var data = userdata.GetData();
                     var todo = data.TodoItems;
                     if (todo.Count() < item || item < 1)
                     {
-                        await ctx.RespondAsync("That index doesn't exist!");
+                        await context.RespondAsync("That index doesn't exist!");
                         return;
                     }
+
                     var listitem = todo[item - 1];
+
                     listitem.Done = true;
                     todo[item - 1] = listitem;
+
                     data.TodoItems = todo;
-                    udata.SetData(data);
-                    db.UserDatas.Update(udata);
+                    userdata.SetData(data);
+
+                    db.UserDatas.Update(userdata);
                     await db.SaveChangesAsync();
                 }
-                await ctx.RespondAsync("Checked item on your todo list!");
+                await context.RespondAsync("✅ Checked item on your todo list!");
             }
         }
 
         [Command("check"), Priority(0)]
-        public async Task CheckAsync(CommandContext ctx, string item)
+        public async Task CheckAsync(CommandContext context, string item)
         {
             int index = 0;
             using (var db = Database.CreateContext())
             {
-                if (db.UserDatas.Any(x => x.UserId == (long)ctx.Member.Id))
+                if (db.UserDatas.Any(x => x.UserId == (long)context.Member.Id))
                 {
-                    var udata = db.UserDatas.First(x => x.UserId == (long)ctx.Member.Id);
-                    var data = udata.GetData();
+                    var userdata = db.UserDatas.First(x => x.UserId == (long)context.Member.Id);
+                    var data = userdata.GetData();
                     var todo = data.TodoItems;
+
                     if (todo.Any(x => x.Item.ToLower() == item.ToLower()))
                     {
                         index = todo.IndexOf(todo.First(x => x.Item.ToLower() == item.ToLower()));
                     }
                     else
                     {
-                        await ctx.RespondAsync("No such item!");
+                        await context.RespondAsync("⚠️ No such item!");
                         return;
                     }
                 }
             }
-            await CheckAsync(ctx, index + 1); // listing starts at 1, array starts at 0. Just add 1
+            await CheckAsync(context, index + 1); // listing starts at 1, array starts at 0. Just add 1
         }
 
         [Command("remove"), Priority(1)]
-        public async Task RemoveAsync(CommandContext ctx, string item)
+        public async Task RemoveAsync(CommandContext context, string item)
         {
             int index = 0;
             using (var db = Database.CreateContext())
             {
-                if (db.UserDatas.Any(x => x.UserId == (long)ctx.Member.Id))
+                if (db.UserDatas.Any(x => x.UserId == (long)context.Member.Id))
                 {
-                    var udata = db.UserDatas.First(x => x.UserId == (long)ctx.Member.Id);
-                    var data = udata.GetData();
+                    var userdata = db.UserDatas.First(x => x.UserId == (long)context.Member.Id);
+                    var data = userdata.GetData();
                     var todo = data.TodoItems;
                     if(todo.Any(x => x.Item.ToLower() == item.ToLower()))
                     {
@@ -134,27 +139,27 @@ namespace ModCore.Commands
                     }
                     else
                     {
-                        await ctx.RespondAsync("No such item!");
+                        await context.RespondAsync("⚠️ No such item!");
                         return;
                     }
                 }
             }
-            await RemoveAsync(ctx, index + 1); // listing starts at 1, array starts at 0. Just add 1
+            await RemoveAsync(context, index + 1); // listing starts at 1, array starts at 0. Just add 1
         }
 
         [Command("remove"), Priority(0)]
-        public async Task RemoveAsync(CommandContext ctx, int item)
+        public async Task RemoveAsync(CommandContext context, int item)
         {
             using (var db = Database.CreateContext())
             {
-                if(db.UserDatas.Any(x => x.UserId == (long)ctx.Member.Id))
+                if(db.UserDatas.Any(x => x.UserId == (long)context.Member.Id))
                 {
-                    var udata = db.UserDatas.First(x => x.UserId == (long)ctx.Member.Id);
+                    var udata = db.UserDatas.First(x => x.UserId == (long)context.Member.Id);
                     var data = udata.GetData();
                     var todo = data.TodoItems;
                     if(todo.Count() < item || item < 1)
                     {
-                        await ctx.RespondAsync("That index doesn't exist!");
+                        await context.RespondAsync("⚠️ That index doesn't exist!");
                         return;
                     }
                     todo.RemoveAt(item - 1);
@@ -163,41 +168,39 @@ namespace ModCore.Commands
                     db.UserDatas.Update(udata);
                     await db.SaveChangesAsync();
                 }
-                await ctx.RespondAsync("Removed item from your todo list!");
+                await context.RespondAsync("✅ Removed item from your todo list!");
             }
         }
 
         [Command("add")]
-        public async Task AddAsync(CommandContext ctx, [RemainingText]string item)
+        public async Task AddAsync(CommandContext context, [RemainingText]string item)
         {
             using (var db = Database.CreateContext())
             {
-                var udata = new DatabaseUserData
+                var userdata = new DatabaseUserData
                 {
-                    UserId = (long)ctx.Member.Id
+                    UserId = (long)context.Member.Id
                 };
-                if (db.UserDatas.Any(x => x.UserId == (long)ctx.Member.Id))
-                    udata = db.UserDatas.First(x => x.UserId == (long)ctx.Member.Id);
+                if (db.UserDatas.Any(x => x.UserId == (long)context.Member.Id))
+                    userdata = db.UserDatas.First(x => x.UserId == (long)context.Member.Id);
 
-                var data = udata.GetData() ?? new UserData();
+                var data = userdata.GetData() ?? new UserData();
                 if(data.TodoItems.Any(x => x.Item.ToLower() == item.ToLower()))
                 {
-                    await ctx.RespondAsync("That item is already in your list!");
+                    await context.RespondAsync("⚠️ That item is already in your list!");
                     return;
                 }
                 data.TodoItems.Add(new TodoItem() { Item = item });
-                udata.SetData(data);
+                userdata.SetData(data);
 
-                Console.WriteLine($"{udata.Data}");
-
-                if (db.UserDatas.Any(x => x.UserId == (long)ctx.Member.Id))
-                    db.UserDatas.Update(udata);
+                if (db.UserDatas.Any(x => x.UserId == (long)context.Member.Id))
+                    db.UserDatas.Update(userdata);
                 else
-                    db.UserDatas.Add(udata);
+                    db.UserDatas.Add(userdata);
 
                 await db.SaveChangesAsync();
             }
-            await ctx.RespondAsync("Added item to your todo!");
+            await context.RespondAsync("✅ Added item to your todo!");
         }
 
         [GroupCommand]
@@ -212,7 +215,7 @@ namespace ModCore.Commands
                     Console.WriteLine(udat.Data);
                     if (!todo.Any())
                     {
-                        await ctx.RespondAsync("You do not have any todo items yet!");
+                        await ctx.RespondAsync("⚠️ You do not have any todo items yet!");
                         return;
                     }
 
@@ -226,7 +229,7 @@ namespace ModCore.Commands
 
                     var deb = new DiscordEmbedBuilder()
                         .WithTitle("Todo")
-                        .WithDescription($"Todo list for {ctx.Member.Username}#{ctx.Member.Discriminator}")
+                        .WithDescription($"📃 Todo list for {ctx.Member.Username}#{ctx.Member.Discriminator}")
                         .AddField("List", sb.ToString())
                         .Build();
 
@@ -234,7 +237,7 @@ namespace ModCore.Commands
                 }
                 else
                 {
-                    await ctx.RespondAsync("You do not have any todo items yet!");
+                    await ctx.RespondAsync("⚠️ You do not have any todo items yet!");
                 }
             }
         }

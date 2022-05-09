@@ -33,43 +33,43 @@ namespace ModCore.Commands
         }
 
         [GroupCommand]
-        public async Task ExecuteGroupAsync(CommandContext ctx,
+        public async Task ExecuteGroupAsync(CommandContext context,
             [RemainingText, Description("User to get level data from")] DiscordMember member = null)
         {
-            DiscordMember m = member;
-            if (m == null)
+            DiscordMember localmember = member;
+            if (localmember == null)
             {
-                m = ctx.Member;
+                localmember = context.Member;
             }
 
-            var xp = 0;
+            var experience = 0;
             var level = 0;
 
             using (var db = Database.CreateContext())
             {
 
-                if (db.UserDatas.Any(x => x.UserId == (long)m.Id))
+                if (db.UserDatas.Any(x => x.UserId == (long)localmember.Id))
                 {
-                    var data = db.UserDatas.First(x => x.UserId == (long)m.Id).GetData();
+                    var data = db.UserDatas.First(x => x.UserId == (long)localmember.Id).GetData();
 
-                    if (data.ServerExperience.ContainsKey(ctx.Guild.Id))
+                    if (data.ServerExperience.ContainsKey(context.Guild.Id))
                     {
-                        xp = data.ServerExperience[ctx.Guild.Id];
-                        level = Listeners.LevelUp.CalculateLevel(xp);
+                        experience = data.ServerExperience[context.Guild.Id];
+                        level = Listeners.LevelUp.CalculateLevel(experience);
                     }
                 }
             }
 
-            var levelupxp = Listeners.LevelUp.CalculateRequiredXp(level + 1) - xp;
+            var levelupxp = Listeners.LevelUp.CalculateRequiredXp(level + 1) - experience;
 
-            await ctx.RespondAsync($"**Currently, {(member == null ? "you are" : $"{member.DisplayName} is")} Level {level} with {xp} xp.**" +
+            await context.RespondAsync($"💫 **Currently, {(member == null ? "you are" : $"{member.DisplayName} is")} Level {level} with {experience} xp.**" +
                 $"\n{levelupxp} more xp is required to reach level {level + 1}.");
         }
 
         [Command("leaderboard"), Aliases("top", "lb", "board")]
-        public async Task LeaderboardAsync(CommandContext ctx)
+        public async Task LeaderboardAsync(CommandContext context)
         {
-            await ctx.RespondAsync("This feature has not yet been implemented. Please try again later!");
+            await context.RespondAsync("😔 This feature has not yet been implemented. Please try again later!");
         }
     }
 }

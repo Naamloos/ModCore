@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -62,34 +62,35 @@ If in doubt, just try it! You can always clear the reminders later.
         }
 
         [GroupCommand, Description(ReminderTut)]
-        public async Task ExecuteGroupAsync(CommandContext ctx, [RemainingText, Description("When the reminder is to be sent.")] string dataToParse)
+        public async Task ExecuteGroupAsync(CommandContext context, [RemainingText, Description("When the reminder is to be sent.")] string data)
         {
-            await SetAsync(ctx, dataToParse);
+            await SetAsync(context, data);
         }
 
         [Command("list"), Description("Lists your active reminders."), CheckDisable]
-        public async Task ListAsync(CommandContext ctx)
+        public async Task ListAsync(CommandContext context)
         {
-            await ctx.TriggerTypingAsync();
+            await context.TriggerTypingAsync();
             DatabaseTimer[] reminders;
+
             using (var db = this.Database.CreateContext())
                 reminders = db.Timers.Where(xt =>
-                    xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long)ctx.Guild.Id &&
-                    xt.UserId == (long)ctx.User.Id).ToArray();
+                    xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long)context.Guild.Id &&
+                    xt.UserId == (long)context.User.Id).ToArray();
             if (!reminders.Any())
             {
-                await ctx.ElevatedRespondAsync("You have no reminders set.");
+                await context.ElevatedRespondAsync("You have no reminders set.");
                 return;
             }
 
-            var rms = reminders.OrderByDescending(xt => xt.DispatchAt).ToArray();
+            var orderedreminders = reminders.OrderByDescending(xt => xt.DispatchAt).ToArray();
             var interactivity = this.Interactivity;
-            var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
+            var emoji = DiscordEmoji.FromName(context.Client, ":alarm_clock:");
 
             var page = 1;
-            var total = rms.Length / 5 + (rms.Length % 5 == 0 ? 0 : 1);
+            var total = orderedreminders.Length / 5 + (orderedreminders.Length % 5 == 0 ? 0 : 1);
             var pages = new List<Page>();
-            var cembed = new DiscordEmbedBuilder
+            var currentembed = new DiscordEmbedBuilder
             {
                 Title = $"{emoji} Your currently set reminders:",
                 Footer = new DiscordEmbedBuilder.EmbedFooter
@@ -97,22 +98,22 @@ If in doubt, just try it! You can always clear the reminders later.
                     Text = $"Page {page} of {total}"
                 }
             };
-            foreach (var xr in rms)
+            foreach (var reminder in orderedreminders)
             {
-                var data = xr.GetData<TimerReminderData>();
+                var data = reminder.GetData<TimerReminderData>();
                 var note = data.ReminderText;
                 if (note.Contains('\n'))
                     note = string.Concat(note.Substring(0, note.IndexOf('\n')), "...");
 				note.BreakMentions();
 
 
-				cembed.AddField(
-                    $"In {(DateTimeOffset.UtcNow - xr.DispatchAt).Humanize(4, minUnit: TimeUnit.Second)} (ID: #{xr.Id})",
+				currentembed.AddField(
+                    $"In {(DateTimeOffset.UtcNow - reminder.DispatchAt).Humanize(4, minUnit: TimeUnit.Second)} (ID: #{reminder.Id})",
                     $"{note}");
-                if (cembed.Fields.Count < 5) continue;
+                if (currentembed.Fields.Count < 5) continue;
                 page++;
-                pages.Add(new Page("", cembed));
-                cembed = new DiscordEmbedBuilder
+                pages.Add(new Page("", currentembed));
+                currentembed = new DiscordEmbedBuilder
                 {
                     Title = $"{emoji} Your currently set reminders:",
                     Footer = new DiscordEmbedBuilder.EmbedFooter
@@ -121,25 +122,25 @@ If in doubt, just try it! You can always clear the reminders later.
                     }
                 };
             }
-            if (cembed.Fields.Count > 0)
-                pages.Add(new Page("", cembed));
+            if (currentembed.Fields.Count > 0)
+                pages.Add(new Page("", currentembed));
 
             if (pages.Count > 1)
-                await interactivity.SendPaginatedMessageAsync(ctx.Channel, ctx.User, pages.ToArray(), new PaginationEmojis());
+                await interactivity.SendPaginatedMessageAsync(context.Channel, context.User, pages.ToArray(), new PaginationEmojis());
             else
-                await ctx.ElevatedRespondAsync(embed: pages.First().Embed);
+                await context.ElevatedRespondAsync(embed: pages.First().Embed);
         }
 
 		[Command("about"), Description("Reminds you about a specific message")]
-		public async Task AboutAsync(CommandContext ctx, DiscordMessage message, [RemainingText]string when)
+		public async Task AboutAsync(CommandContext context, DiscordMessage message, [RemainingText]string when)
 		{
-			await ctx.TriggerTypingAsync();
+			await context.TriggerTypingAsync();
 
 			var (duration, text) = Dates.ParseTime(when);
 
 			if (duration > TimeSpan.FromDays(365)) // 1 year is the maximum
 			{
-				await ctx.ElevatedRespondAsync("Maximum allowed time span to set a reminder is 1 year.");
+				await context.ElevatedRespondAsync("⚠️ Maximum allowed time span to set a reminder is 1 year.");
 				return;
 			}
 
@@ -158,9 +159,9 @@ If in doubt, just try it! You can always clear the reminders later.
 			// create a new timer
 			var reminder = new DatabaseTimer
 			{
-				GuildId = (long)ctx.Guild.Id,
-				ChannelId = (long)ctx.Channel.Id,
-				UserId = (long)ctx.User.Id,
+				GuildId = (long)context.Guild.Id,
+				ChannelId = (long)context.Channel.Id,
+				UserId = (long)context.User.Id,
 				DispatchAt = dispatchAt.LocalDateTime,
 				ActionType = TimerActionType.Reminder
 			};
@@ -172,23 +173,22 @@ If in doubt, just try it! You can always clear the reminders later.
 			}
 
 			// reschedule timers
-			await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
-			var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
-			await ctx.SafeRespondAsync(
-				$"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following message:\n\n{content}\n\n({message.Id})");
+			await Timers.RescheduleTimers(context.Client, this.Database, this.Shared);
+			await context.SafeRespondAsync(
+				$"⏰ Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following message:\n\n{content}\n\n({message.Id})");
 		}
 
         [Command("set"), Description(ReminderTut), CheckDisable]
-        public async Task SetAsync(CommandContext ctx, [Description("When the reminder is to be sent"), RemainingText] string dataToParse)
+        public async Task SetAsync(CommandContext context, [Description("When the reminder is to be sent"), RemainingText] string data)
         {
-            await ctx.TriggerTypingAsync();
+            await context.TriggerTypingAsync();
 
-            var (duration, text) = Dates.ParseTime(dataToParse);
+            var (duration, text) = Dates.ParseTime(data);
             
             if (string.IsNullOrWhiteSpace(text) || text.Length > 128)
             {
-                await ctx.ElevatedRespondAsync(
-                    "Reminder text must to be no longer than 128 characters, not empty and not whitespace.");
+                await context.ElevatedRespondAsync(
+                    "⚠️ Reminder text must to be no longer than 128 characters, not empty and not whitespace.");
                 return;
             }
 #if !DEBUG
@@ -201,7 +201,7 @@ If in doubt, just try it! You can always clear the reminders later.
 
             if (duration > TimeSpan.FromDays(365)) // 1 year is the maximum
             {
-                await ctx.ElevatedRespondAsync("Maximum allowed time span to set a reminder is 1 year.");
+                await context.ElevatedRespondAsync("⚠️ Maximum allowed time span to set a reminder is 1 year.");
                 return;
             }
 
@@ -211,9 +211,9 @@ If in doubt, just try it! You can always clear the reminders later.
             // create a new timer
             var reminder = new DatabaseTimer
             {
-                GuildId = (long) ctx.Guild.Id,
-                ChannelId = (long) ctx.Channel.Id,
-                UserId = (long) ctx.User.Id,
+                GuildId = (long) context.Guild.Id,
+                ChannelId = (long) context.Channel.Id,
+                UserId = (long) context.User.Id,
                 DispatchAt = dispatchAt.LocalDateTime,
                 ActionType = TimerActionType.Reminder
             };
@@ -225,75 +225,73 @@ If in doubt, just try it! You can always clear the reminders later.
             }
 
             // reschedule timers
-            await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
-            var emoji = DiscordEmoji.FromName(ctx.Client, ":alarm_clock:");
-            await ctx.SafeRespondAsync(
-                $"{emoji} Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text.BreakMentions()}");
+            await Timers.RescheduleTimers(context.Client, this.Database, this.Shared);
+            await context.SafeRespondAsync(
+                $"⏰ Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{text.BreakMentions()}");
         }
 
         [Command("stop"), Aliases("unset", "remove"), Description("Stops and removes a reminder."), CheckDisable]
-        public async Task UnsetAsync(CommandContext ctx, [Description("Which timer to stop. To get a Timer ID, use " +
+        public async Task UnsetAsync(CommandContext context, [Description("Which timer to stop. To get a Timer ID, use " +
                                                                         "the `reminder list` command.")] int timerId)
         {
-            await ctx.TriggerTypingAsync();
+            await context.TriggerTypingAsync();
 
             // find the timer
-            var reminder = Timers.FindTimer(timerId, TimerActionType.Reminder, ctx.User.Id, this.Database);
+            var reminder = Timers.FindTimer(timerId, TimerActionType.Reminder, context.User.Id, this.Database);
             if (reminder == null)
             {
-                await ctx.SafeRespondAsync($"Timer with specified ID (#{timerId}) was not found.");
+                await context.SafeRespondAsync($"⚠️ Timer with specified ID (#{timerId}) was not found.");
                 return;
             }
 
             // unschedule and reset timers
-            await Timers.UnscheduleTimerAsync(reminder, ctx.Client, this.Database, this.Shared);
+            await Timers.UnscheduleTimerAsync(reminder, context.Client, this.Database, this.Shared);
 
             var duration = reminder.DispatchAt - DateTimeOffset.Now;
             var data = reminder.GetData<TimerReminderData>();
-            var emoji = DiscordEmoji.FromName(ctx.Client, ":ballot_box_with_check:");
-            await ctx.SafeRespondAsync(
-                $"{emoji} Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText.BreakMentions()}");
+            await context.SafeRespondAsync(
+                $"✅ Ok, timer #{reminder.Id} due in {duration.Humanize(4, minUnit: TimeUnit.Second)} was removed. The reminder's message was:\n\n{data.ReminderText.BreakMentions()}");
         }
 
         [Command("clear"), Description("Clears all active reminders."), CheckDisable]
-        public async Task ClearAsync(CommandContext ctx)
+        public async Task ClearAsync(CommandContext context)
         {
-            await ctx.TriggerTypingAsync();
+            await context.TriggerTypingAsync();
 
-            await ctx.SafeRespondUnformattedAsync("Are you sure you want to clear all your active reminders? This action cannot be undone!");
+            await context.SafeRespondUnformattedAsync("❓ Are you sure you want to clear all your active reminders? This action cannot be undone!");
 
-            var m = await this.Interactivity.WaitForMessageAsync(x => x.ChannelId == ctx.Channel.Id && x.Author.Id == ctx.Member.Id, TimeSpan.FromSeconds(30));
+            var message = await this.Interactivity.WaitForMessageAsync(x => x.ChannelId == context.Channel.Id && x.Author.Id == context.Member.Id, TimeSpan.FromSeconds(30));
 
-            if (m.TimedOut)
+            if (message.TimedOut)
             {
-                await ctx.SafeRespondUnformattedAsync("Timed out.");
+                await context.SafeRespondUnformattedAsync("⚠️⌛ Timed out.");
             }
-            else if (InteractivityUtil.Confirm(m.Result))
+            else if (InteractivityUtil.Confirm(message.Result))
             {
-                await ctx.SafeRespondUnformattedAsync("Brace for impact!");
-                await ctx.TriggerTypingAsync();
+                await context.SafeRespondUnformattedAsync("🔥 Brace for impact!");
+                await context.TriggerTypingAsync();
                 using (var db = this.Database.CreateContext())
                 {
-                    List<DatabaseTimer> timers = db.Timers.Where(xt => xt.ActionType == TimerActionType.Reminder && xt.UserId == (long)ctx.User.Id).ToList();
+                    List<DatabaseTimer> timers = db.Timers.Where(xt => xt.ActionType == TimerActionType.Reminder && xt.UserId == (long)context.User.Id).ToList();
 
                     var count = timers.Count;
-                    await Timers.UnscheduleTimersAsync(timers, ctx.Client, this.Database, this.Shared);
+                    await Timers.UnscheduleTimersAsync(timers, context.Client, this.Database, this.Shared);
 
 
-                    await ctx.SafeRespondUnformattedAsync("Alright, cleared " + count + " timers.");
+                    await context.SafeRespondUnformattedAsync("✅ Alright, cleared " + count + " timers.");
                 }
 
             }
             else
             {
-                await ctx.SafeRespondUnformattedAsync("Never mind then, maybe next time.");
+                await context.SafeRespondUnformattedAsync("🤷 Never mind then, maybe next time.");
             }
         }
 
-        [Command("test"), Description("WIP."), CheckDisable]
-        public async Task TestAsync(CommandContext ctx)
+        [Command("test"), Description("WIP."), RequireOwner]
+        public async Task TestAsync(CommandContext context)
         {
-            await ctx.SafeRespondAsync($"Timer will dispatch at: `{Shared.TimerData.DispatchTime}`, and has the message ```{Shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText.BreakMentions()}```.");
+            await context.SafeRespondAsync($"❓ Timer will dispatch at: `{Shared.TimerData.DispatchTime}`, and has the message ```{Shared.TimerData.DbTimer.GetData<TimerReminderData>().ReminderText.BreakMentions()}```.");
         }
     }
 }

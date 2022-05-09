@@ -50,15 +50,15 @@ namespace ModCore.Entities
         private static IEnumerable<(string name, Command cmd)> SelectCommandsFromDict(KeyValuePair<string, Command> c)
             => CommandSelector(c.Value);
 
-        private static IEnumerable<(string name, Command cmd)> CommandSelector(Command c)
+        private static IEnumerable<(string name, Command cmd)> CommandSelector(Command command)
         {
-            yield return (c.QualifiedName, c);
-            if (!(c is CommandGroup group)) yield break;
+            yield return (command.QualifiedName, command);
+            if (!(command is CommandGroup group)) yield break;
             if (group.Children == null) yield break;
 
-            foreach (var cmd in group.Children)
+            foreach (var icommand in group.Children)
             {
-                foreach (var res in CommandSelector(cmd))
+                foreach (var res in CommandSelector(icommand))
                 {
                     yield return res;
                 }
