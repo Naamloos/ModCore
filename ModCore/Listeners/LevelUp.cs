@@ -21,45 +21,45 @@ namespace ModCore.Listeners
             = new ConcurrentDictionary<(ulong server, ulong user), DateTimeOffset>();
 
         [AsyncListener(EventTypes.MessageCreated)]
-        public static async Task CheckLevelUpdates(ModCoreShard bot, MessageCreateEventArgs e)
+        public static async Task CheckLevelUpdates(ModCoreShard bot, MessageCreateEventArgs eventargs)
         {
             // Storing vars for quick reference
-            var server = e.Guild;
-            var message = e.Message;
-            var user = e.Message.Author as DiscordMember;
+            var server = eventargs.Guild;
+            var message = eventargs.Message;
+            var user = eventargs.Message.Author as DiscordMember;
 
             if (user.IsBot)
                 return;
 
-            GuildSettings cfg;
-            DatabaseUserData ud = null;
+            GuildSettings config;
+            DatabaseUserData userdata = null;
             // holder for returned datetimeoffsets
-            DateTimeOffset p = DateTimeOffset.MinValue;
+            DateTimeOffset lastGrant = DateTimeOffset.MinValue;
 
             using (var db = bot.Database.CreateContext())
             {
-                cfg = e.Guild.GetGuildSettings(db);
-                if (cfg == null)
+                config = eventargs.Guild.GetGuildSettings(db);
+                if (config == null)
                     return;
-                if (!cfg.Levels.Enabled)
+                if (!config.Levels.Enabled)
                     return;
-                if (e.Message.Content.StartsWith(string.IsNullOrEmpty(cfg.Prefix) ? bot.Settings.DefaultPrefix : cfg.Prefix))
+                if (eventargs.Message.Content.StartsWith(string.IsNullOrEmpty(config.Prefix) ? bot.Settings.DefaultPrefix : config.Prefix))
                     return;
 
                 // Get user data and assign new when null
                 if (db.UserDatas.Any(x => x.UserId == (long)user.Id))
                 {
-                    ud = db.UserDatas.First(x => x.UserId == (long)user.Id);
+                    userdata = db.UserDatas.First(x => x.UserId == (long)user.Id);
                 }
-                ud ??= new DatabaseUserData() { UserId = (long)user.Id };
+                userdata ??= new DatabaseUserData() { UserId = (long)user.Id };
 
                 // do level stuff
                 if(LastXpGrants.ContainsKey((server.Id, user.Id)))
                 {
                     // Less than 1 hour since last message in server
-                    if (LastXpGrants.TryGetValue((server.Id, user.Id), out p))
+                    if (LastXpGrants.TryGetValue((server.Id, user.Id), out lastGrant))
                     {
-                        if (DateTimeOffset.Now.Subtract(p).TotalMinutes < 30)
+                        if (DateTimeOffset.Now.Subtract(lastGrant).TotalMinutes < 30)
                         {
                             // When debugging we want to grant xp for every message.
                             #if !DEBUG
@@ -74,32 +74,32 @@ namespace ModCore.Listeners
                 }
 
                 // Setting new last xp grant timestamp
-                LastXpGrants.TryRemove((server.Id, user.Id), out p);
+                LastXpGrants.TryRemove((server.Id, user.Id), out lastGrant);
                 LastXpGrants.TryAdd((server.Id, user.Id), DateTimeOffset.Now);
 
                 // Getting user data and setting xp value if not yet set.
-                var udata = ud.GetData();
-                udata ??= new UserData();
-                if (!udata.ServerExperience.ContainsKey(server.Id))
+                var jsonuserdata = userdata.GetData();
+                jsonuserdata ??= new UserData();
+                if (!jsonuserdata.ServerExperience.ContainsKey(server.Id))
                 {
-                    udata.ServerExperience.Add(server.Id, 0);
+                    jsonuserdata.ServerExperience.Add(server.Id, 0);
                 }
 
                 // Getting old XP value and new XP value
-                var previousxp = udata.ServerExperience[server.Id];
-                udata.ServerExperience[server.Id] += new Random().Next(10, 50);
-                var newxp = udata.ServerExperience[server.Id];
+                var previousxp = jsonuserdata.ServerExperience[server.Id];
+                jsonuserdata.ServerExperience[server.Id] += new Random().Next(10, 50);
+                var newxp = jsonuserdata.ServerExperience[server.Id];
 
                 // Do checks for message
-                if (cfg.Levels.MessagesEnabled)
+                if (config.Levels.MessagesEnabled)
                 {
-                    var msgchannel = e.Channel;
-                    if (cfg.Levels.RedirectMessages)
+                    var msgchannel = eventargs.Channel;
+                    if (config.Levels.RedirectMessages)
                     {
                         // Check whether channel exists and then change channel
-                        if (server.Channels.ContainsKey(cfg.Levels.ChannelId))
+                        if (server.Channels.ContainsKey(config.Levels.ChannelId))
                         {
-                            msgchannel = server.Channels[cfg.Levels.ChannelId];
+                            msgchannel = server.Channels[config.Levels.ChannelId];
                         }
                     }
 
@@ -115,8 +115,8 @@ namespace ModCore.Listeners
                 }
 
                 // setting new data and updating
-                ud.SetData(udata);
-                db.UserDatas.Update(ud);
+                userdata.SetData(jsonuserdata);
+                db.UserDatas.Update(userdata);
                 await db.SaveChangesAsync();
             }
         }

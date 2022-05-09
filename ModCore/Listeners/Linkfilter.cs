@@ -22,110 +22,110 @@ namespace ModCore.Listeners
             new ConcurrentDictionary<string, DiscordInvite>();
 
         [AsyncListener(EventTypes.MessageCreated)]
-        public static async Task RemoveSuspiciousLinks(ModCoreShard bot, MessageCreateEventArgs e)
+        public static async Task RemoveSuspiciousLinks(ModCoreShard bot, MessageCreateEventArgs eventargs)
         {
-            if ((e.Channel.PermissionsFor(e.Author as DiscordMember) & Permissions.ManageMessages) != 0) return;
+            if ((eventargs.Channel.PermissionsFor(eventargs.Author as DiscordMember) & Permissions.ManageMessages) != 0) return;
 
-            if (e.Channel.Guild == null)
+            if (eventargs.Channel.Guild == null)
                 return;
 
-            GuildSettings cfg;
+            GuildSettings config;
             using (var db = bot.Database.CreateContext())
-                cfg = e.Guild.GetGuildSettings(db);
-            if (cfg == null)
+                config = eventargs.Guild.GetGuildSettings(db);
+            if (config == null)
                 return;
 
-            var lfSettings = cfg.Linkfilter;
+            var lfSettings = config.Linkfilter;
             if (!lfSettings.Enable)
                 return;
 
-            if (lfSettings.ExemptUserIds.Contains(e.Message.Author.Id))
+            if (lfSettings.ExemptUserIds.Contains(eventargs.Message.Author.Id))
                 return;
 
-            if (e.Message.Author is DiscordMember mbr &&
-                mbr.Roles.Select(xr => xr.Id).Intersect(lfSettings.ExemptRoleIds).Any())
+            if (eventargs.Message.Author is DiscordMember member &&
+                member.Roles.Select(xr => xr.Id).Intersect(lfSettings.ExemptRoleIds).Any())
                 return;
 
             if (lfSettings.BlockInviteLinks)
-                await FindAndPurgeInvites(bot, e, lfSettings);
+                await FindAndPurgeInvites(bot, eventargs, lfSettings);
 
             if (lfSettings.BlockIpLoggers)
             {
-                var match = LinkRemoverMatchers.IpLogger.Check(e.Message);
+                var match = LinkRemoverMatchers.IpLogger.Check(eventargs.Message);
                 if (match.Success)
                 {
-                    await e.Message.DeleteAsync($"Discovered IP logger site <{match.Matched}> and deleted message");
-                    await (e.Author as DiscordMember).ElevatedMessageAsync(
-                        $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
-                        $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to an IP logger website: **`{match.Matched}`**");
+                    await eventargs.Message.DeleteAsync($"Discovered IP logger site <{match.Matched}> and deleted message");
+                    await (eventargs.Author as DiscordMember).ElevatedMessageAsync(
+                        $"Your message ```\n{eventargs.Message.Content}``` was automatically removed from " +
+                        $"{eventargs.Guild.Name}#{eventargs.Channel.Name} because it contained a link to an IP logger website: **`{match.Matched}`**");
                 }
             }
 
             if (lfSettings.BlockBooters)
             {
-                var match = LinkRemoverMatchers.BooterRegex.Check(e.Message);
+                var match = LinkRemoverMatchers.BooterRegex.Check(eventargs.Message);
                 if (match.Success)
                 {
-                    await e.Message.DeleteAsync($"Discovered Booter/DDoS site <{match.Matched}> and deleted message");
-                    await (e.Author as DiscordMember).ElevatedMessageAsync(
-                        $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
-                        $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to a DDoS/booter website: **`{match.Matched}`**");
+                    await eventargs.Message.DeleteAsync($"Discovered Booter/DDoS site <{match.Matched}> and deleted message");
+                    await (eventargs.Author as DiscordMember).ElevatedMessageAsync(
+                        $"Your message ```\n{eventargs.Message.Content}``` was automatically removed from " +
+                        $"{eventargs.Guild.Name}#{eventargs.Channel.Name} because it contained a link to a DDoS/booter website: **`{match.Matched}`**");
                 }
             }
 
             if (lfSettings.BlockShockSites)
             {
-                var match = LinkRemoverMatchers.ShockSiteRegex.Check(e.Message);
+                var match = LinkRemoverMatchers.ShockSiteRegex.Check(eventargs.Message);
                 if (match.Success)
                 {
-                    await e.Message.DeleteAsync($"Discovered shock site <{match.Matched}> and deleted message");
-                    await (e.Author as DiscordMember).ElevatedMessageAsync(
-                        $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
-                        $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to a shock/gore site: **`{match.Matched}`**");
+                    await eventargs.Message.DeleteAsync($"Discovered shock site <{match.Matched}> and deleted message");
+                    await (eventargs.Author as DiscordMember).ElevatedMessageAsync(
+                        $"Your message ```\n{eventargs.Message.Content}``` was automatically removed from " +
+                        $"{eventargs.Guild.Name}#{eventargs.Channel.Name} because it contained a link to a shock/gore site: **`{match.Matched}`**");
                 }
             }
 
             // separate method to avoid loading the url shortener class (and all the strings inside) if not necessary.
             // this saves a lot of memory if you don't care about URL shorteners.
             if (lfSettings.BlockUrlShorteners)
-                await MatchUrlShorteners(e);
+                await MatchUrlShorteners(eventargs);
         }
 
-        private static async Task FindAndPurgeInvites(ModCoreShard bot, MessageCreateEventArgs e,
-            GuildLinkfilterSettings ib)
+        private static async Task FindAndPurgeInvites(ModCoreShard bot, MessageCreateEventArgs eventargs,
+            GuildLinkfilterSettings linkfilter)
         {
-            var ms = InviteRegex.Matches(e.Message.Content);
-            if (!ms.Any())
+            var matches = InviteRegex.Matches(eventargs.Message.Content);
+            if (!matches.Any())
                 return;
 
-            foreach (Match m in ms)
+            foreach (Match match in matches)
             {
-                var invk = m.Groups[1].Value;
+                var invk = match.Groups[1].Value;
                 if (!InviteCache.TryGetValue(invk, out var inv))
                 {
                     inv = await bot.Client.GetInviteByCodeAsync(invk);
                     InviteCache.TryAdd(invk, inv);
                 }
 
-                if (ib.ExemptInviteGuildIds.Contains(inv.Guild.Id))
+                if (linkfilter.ExemptInviteGuildIds.Contains(inv.Guild.Id))
                     continue;
 
-                await e.Message.DeleteAsync($"Discovered invite <{inv.Code}> and deleted message");
+                await eventargs.Message.DeleteAsync($"Discovered invite <{inv.Code}> and deleted message");
                 break;
             }
         }
 
-        private static async Task MatchUrlShorteners(MessageCreateEventArgs e)
+        private static async Task MatchUrlShorteners(MessageCreateEventArgs eventargs)
         {
-            var match = UrlShortenerConstants.UrlShortenerRegex.Check(e.Message);
+            var match = UrlShortenerConstants.UrlShortenerRegex.Check(eventargs.Message);
             if (match.Success)
             {
                 var origin = UrlShortenerConstants.UrlShorteners[match.Matched];
-                await e.Message.DeleteAsync(
+                await eventargs.Message.DeleteAsync(
                     $"Discovered URL shortener <{match.Matched}> and deleted message. Info: <{origin}>");
-                await (e.Author as DiscordMember).ElevatedMessageAsync(
-                    $"Your message ```\n{e.Message.Content}``` was automatically removed from " +
-                    $"{e.Guild.Name}#{e.Channel.Name} because it contained a link to an URL shortener: **`{match.Matched}`**\n" +
+                await (eventargs.Author as DiscordMember).ElevatedMessageAsync(
+                    $"Your message ```\n{eventargs.Message.Content}``` was automatically removed from " +
+                    $"{eventargs.Guild.Name}#{eventargs.Channel.Name} because it contained a link to an URL shortener: **`{match.Matched}`**\n" +
                     $"This URL shortener seems to have originated from the following domain: **`{origin}`**");
             }
         }

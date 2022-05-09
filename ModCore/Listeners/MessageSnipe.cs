@@ -10,37 +10,37 @@ namespace ModCore.Listeners
     public static class MessageSnipe
     {
         [AsyncListener(EventTypes.MessageDeleted)]
-        public static async Task MessageSniped(ModCoreShard bot, MessageDeleteEventArgs e)
+        public static async Task MessageSniped(ModCoreShard bot, MessageDeleteEventArgs eventargs)
         {
             await Task.Yield();
 
-            if((!string.IsNullOrEmpty(e.Message.Content) || e.Message.Embeds.Count > 0) && !e.Message.Author.IsBot)
+            if((!string.IsNullOrEmpty(eventargs.Message.Content) || eventargs.Message.Embeds.Count > 0) && !eventargs.Message.Author.IsBot)
             {
-                if (bot.SharedData.DeletedMessages.ContainsKey(e.Channel.Id))
+                if (bot.SharedData.DeletedMessages.ContainsKey(eventargs.Channel.Id))
                 {
-                    bot.SharedData.DeletedMessages[e.Channel.Id] = e.Message;
+                    bot.SharedData.DeletedMessages[eventargs.Channel.Id] = eventargs.Message;
                 }
                 else
                 {
-                    bot.SharedData.DeletedMessages.TryAdd(e.Channel.Id, e.Message);
+                    bot.SharedData.DeletedMessages.TryAdd(eventargs.Channel.Id, eventargs.Message);
                 }
             }
         }
 
         [AsyncListener(EventTypes.MessageUpdated)]
-        public static async Task MessageEdited(ModCoreShard bot, MessageUpdateEventArgs e)
+        public static async Task MessageEdited(ModCoreShard bot, MessageUpdateEventArgs eventargs)
         {
             await Task.Yield();
 
-            if ((!string.IsNullOrEmpty(e.MessageBefore.Content) || e.Message.Embeds.Count > 0) && !e.Message.Author.IsBot)
+            if ((!string.IsNullOrEmpty(eventargs.MessageBefore.Content) || eventargs.Message.Embeds.Count > 0) && !eventargs.Message.Author.IsBot)
             {
-                if (bot.SharedData.EditedMessages.ContainsKey(e.Channel.Id))
+                if (bot.SharedData.EditedMessages.ContainsKey(eventargs.Channel.Id))
                 {
-                    bot.SharedData.EditedMessages[e.Channel.Id] = e.MessageBefore;
+                    bot.SharedData.EditedMessages[eventargs.Channel.Id] = eventargs.MessageBefore;
                 }
                 else
                 {
-                    bot.SharedData.EditedMessages.TryAdd(e.Channel.Id, e.MessageBefore);
+                    bot.SharedData.EditedMessages.TryAdd(eventargs.Channel.Id, eventargs.MessageBefore);
                 }
             }
         }

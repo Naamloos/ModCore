@@ -22,24 +22,24 @@ namespace ModCore.Logic.Extensions
         /// The resulting GuildSettings will be automatically persisted.
         /// If the guild is not configured, a new GuildSettings object will be created.
         /// </summary>
-        /// <param name="ctx">This object</param>
+        /// <param name="context">This object</param>
         /// <param name="exec">The function to call</param>
         /// <returns>Asynchronous task resolving to the CommandContext, if you wish to reuse it.</returns>
-        public static async Task<CommandContext> WithGuildSettings(this CommandContext ctx,
+        public static async Task<CommandContext> WithGuildSettings(this CommandContext context,
             Func<GuildSettings, Task> exec)
         {
-            var cfg = GetGuildSettings(ctx) ?? new GuildSettings();
-            await exec(cfg);
-            await ctx.SetGuildSettingsAsync(cfg);
-            return ctx;
+            var config = GetGuildSettings(context) ?? new GuildSettings();
+            await exec(config);
+            await context.SetGuildSettingsAsync(config);
+            return context;
         }
 
         public static async Task<(bool Success, T Result)> RequestArgumentAsync<T>(this CommandContext ctx, string question)
         {
             var interactivity = ctx.Client.GetInteractivity();
-            var q = await ctx.RespondAsync(question);
+            var questionmessage = await ctx.RespondAsync(question);
             var response = await ctx.Message.GetNextMessageAsync();
-            await q.DeleteAsync();
+            await questionmessage.DeleteAsync();
 
 
             if (!response.TimedOut)

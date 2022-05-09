@@ -14,11 +14,11 @@ namespace ModCore.Listeners
 {
     public class UserUpdate
     {
-        public static async Task<bool> IsInGuild(DiscordUser u, DiscordGuild g)
+        public static async Task<bool> IsInGuild(DiscordUser user, DiscordGuild guild)
         {
             try
             {
-                var m = await g.GetMemberAsync(u.Id);
+                var member = await guild.GetMemberAsync(user.Id);
                 return true;
             }
             catch (Exception)
@@ -29,7 +29,7 @@ namespace ModCore.Listeners
         }
 
         [AsyncListener(EventTypes.PresenceUpdated)]
-        public static async Task PresenceUpdated(ModCoreShard bot, PresenceUpdateEventArgs e)
+        public static async Task PresenceUpdated(ModCoreShard bot, PresenceUpdateEventArgs eventargs)
         {
             // TODO fix me
             var db = bot.SharedData.ModCore.CreateGlobalContext();
@@ -39,33 +39,33 @@ namespace ModCore.Listeners
             if (guilds != null)
                 foreach (var g in guilds.Select(x => x.Value))
                 {
-                    if (await IsInGuild(e.UserAfter, g))
+                    if (await IsInGuild(eventargs.UserAfter, g))
                     {
-                        var gst = g.GetGuildSettings(db);
-                        var log = g.GetChannel(gst.UpdateChannel);
+                        var guildsettings = g.GetGuildSettings(db);
+                        var log = g.GetChannel(guildsettings.UpdateChannel);
 
                         var embed = new DiscordEmbedBuilder()
                             .WithTitle("User Updated:")
-                            .WithDescription($"{e.UserAfter.Username}#{e.UserAfter.Discriminator}");
+                            .WithDescription($"{eventargs.UserAfter.Username}#{eventargs.UserAfter.Discriminator}");
 
-                        if (e.UserAfter.Username != e.UserBefore.Username)
-                            embed.AddField("Changed username", $"{e.UserBefore.Username} to {e.UserAfter.Username}");
+                        if (eventargs.UserAfter.Username != eventargs.UserBefore.Username)
+                            embed.AddField("Changed username", $"{eventargs.UserBefore.Username} to {eventargs.UserAfter.Username}");
 
-                        if (e.UserAfter.Discriminator != e.UserBefore.Discriminator)
-                            embed.AddField("Changed discriminator", $"{e.UserBefore.Discriminator} to {e.UserAfter.Discriminator}");
+                        if (eventargs.UserAfter.Discriminator != eventargs.UserBefore.Discriminator)
+                            embed.AddField("Changed discriminator", $"{eventargs.UserBefore.Discriminator} to {eventargs.UserAfter.Discriminator}");
 
-                        if (e.UserAfter.AvatarUrl != e.UserBefore.AvatarUrl)
-                            embed.AddField("Changed avatar", $"[Old Avatar]({e.UserBefore.AvatarUrl})" +
+                        if (eventargs.UserAfter.AvatarUrl != eventargs.UserBefore.AvatarUrl)
+                            embed.AddField("Changed avatar", $"[Old Avatar]({eventargs.UserBefore.AvatarUrl})" +
                                 $"\nNote: this link may 404 later due to cache invalidation");
 
-                        if (e.UserAfter.IsBot != e.UserBefore.IsBot)
+                        if (eventargs.UserAfter.IsBot != eventargs.UserBefore.IsBot)
                             embed.AddField("Magically transformed between bot form and human form",
                                 $"Wait, what the fuck this isn't possible");
 
                         // TODO ModCore color scheme
                         embed.WithColor(new DiscordColor("#089FDF"));
 
-                        embed.WithThumbnail(e.UserAfter.AvatarUrl);
+                        embed.WithThumbnail(eventargs.UserAfter.AvatarUrl);
                         if (embed.Fields.Count > 0)
                             await log.SendMessageAsync(embed: embed);
                     }
@@ -73,46 +73,46 @@ namespace ModCore.Listeners
         }
 
         [AsyncListener(EventTypes.GuildMemberUpdated)]
-        public static async Task MemberUpdated(ModCoreShard bot, GuildMemberUpdateEventArgs e)
+        public static async Task MemberUpdated(ModCoreShard bot, GuildMemberUpdateEventArgs eventargs)
         {
             var db = bot.SharedData.ModCore.CreateGlobalContext();
-            var gst = e.Guild.GetGuildSettings(db);
+            var guildsettings = eventargs.Guild.GetGuildSettings(db);
 
-            if(gst == null)
+            if(guildsettings == null)
             {
                 return;
             }
 
-            if (gst.LogUpdates)
+            if (guildsettings.LogUpdates)
             {
-                var log = e.Guild.GetChannel(gst.UpdateChannel);
+                var log = eventargs.Guild.GetChannel(guildsettings.UpdateChannel);
 
                 var embed = new DiscordEmbedBuilder()
                     .WithTitle("Member Updated:")
-                    .WithDescription($"{e.Member.Username}#{e.Member.Discriminator}");
+                    .WithDescription($"{eventargs.Member.Username}#{eventargs.Member.Discriminator}");
 
                 // TODO ModCore color scheme
                 embed.WithColor(new DiscordColor("#089FDF"));
 
-                embed.WithThumbnail(e.Member.AvatarUrl);
+                embed.WithThumbnail(eventargs.Member.AvatarUrl);
 
-                if (e.NicknameAfter != e.NicknameBefore)
+                if (eventargs.NicknameAfter != eventargs.NicknameBefore)
                 {
-                    var after = e.Member.Username;
-                    var before = e.Member.Username;
+                    var after = eventargs.Member.Username;
+                    var before = eventargs.Member.Username;
 
-                    if (!string.IsNullOrEmpty(e.NicknameAfter))
-                        after = e.NicknameAfter;
-                    if (!string.IsNullOrEmpty(e.NicknameBefore))
-                        before = e.NicknameBefore;
+                    if (!string.IsNullOrEmpty(eventargs.NicknameAfter))
+                        after = eventargs.NicknameAfter;
+                    if (!string.IsNullOrEmpty(eventargs.NicknameBefore))
+                        before = eventargs.NicknameBefore;
 
                     embed.AddField("Nickname update", $"{before} to {after}");
                 }
 
-                if (e.RolesAfter != e.RolesBefore)
+                if (eventargs.RolesAfter != eventargs.RolesBefore)
                 {
-                    var added = e.RolesAfter.Where(x => !e.RolesBefore.Contains(x));
-                    var removed = e.RolesBefore.Where(x => !e.RolesAfter.Contains(x));
+                    var added = eventargs.RolesAfter.Where(x => !eventargs.RolesBefore.Contains(x));
+                    var removed = eventargs.RolesBefore.Where(x => !eventargs.RolesAfter.Contains(x));
 
                     if (added.Count() > 0)
                         embed.AddField("Added roles", string.Join(", ", added.Select(x => x.Name)));

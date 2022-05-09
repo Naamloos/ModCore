@@ -17,15 +17,15 @@ namespace ModCore.Listeners
 	public static class Timers
 	{
 		[AsyncListener(EventTypes.Ready)]
-		public static async Task OnReady(ModCoreShard shard, ReadyEventArgs ea)
+		public static async Task OnReady(ModCoreShard shard, ReadyEventArgs eventargs)
 		{
 			using (var db = shard.Database.CreateContext())
 			{
 				if (!db.Timers.Any())
 					return;
 
-				var ids = shard.Client.Guilds.Select(xg => (long)xg.Key).ToArray();
-				var timers = db.Timers.Where(xt => ids.Contains(xt.GuildId)).ToArray();
+				var guildids = shard.Client.Guilds.Select(xg => (long)xg.Key).ToArray();
+				var timers = db.Timers.Where(xt => guildids.Contains(xt.GuildId)).ToArray();
 				if (!timers.Any())
 					return;
 
@@ -34,16 +34,16 @@ namespace ModCore.Listeners
 				try
 				{
 					var now = DateTimeOffset.UtcNow;
-					var past = timers.Where(xt => xt.DispatchAt <= now.AddSeconds(30)).ToArray();
-					if (past.Any())
+					var pasttimers = timers.Where(xt => xt.DispatchAt <= now.AddSeconds(30)).ToArray();
+					if (pasttimers.Any())
 					{
-						foreach (var xt in past)
+						foreach (var timer in pasttimers)
 						{
 							// dispatch past timers
-							_ = DispatchTimer(new TimerData(null, xt, shard.Client, shard.Database, shard.SharedData, null));
+							_ = DispatchTimer(new TimerData(null, timer, shard.Client, shard.Database, shard.SharedData, null));
 						}
 
-						db.Timers.RemoveRange(past);
+						db.Timers.RemoveRange(pasttimers);
 						await db.SaveChangesAsync();
 					}
 				}
@@ -62,11 +62,11 @@ namespace ModCore.Listeners
 			}
 		}
 
-		public static async Task TimerCallback(Task t, object state)
+		public static async Task TimerCallback(Task task, object state)
 		{
-			var tdata = state as TimerData;
-			var shard = tdata.Context;
-			var shared = tdata.Shared;
+			var timerdata = state as TimerData;
+			var shard = timerdata.Context;
+			var shared = timerdata.Shared;
 
 			// lock the timers
 			shared.TimerSempahore.Wait();
@@ -74,9 +74,9 @@ namespace ModCore.Listeners
 			try
 			{
 				// remove the timer
-				using (var db = tdata.Database.CreateContext())
+				using (var db = timerdata.Database.CreateContext())
 				{
-					db.Timers.Remove(tdata.DbTimer);
+					db.Timers.Remove(timerdata.DbTimer);
 					db.SaveChanges();
 				}
 			}
@@ -86,7 +86,7 @@ namespace ModCore.Listeners
 			}
 			finally
 			{
-				tdata.Shared.TimerData = null;
+				timerdata.Shared.TimerData = null;
 				// release the lock
 				shared.TimerSempahore.Release();
 			}
@@ -95,10 +95,10 @@ namespace ModCore.Listeners
 			_ = Task.Run(LocalDispatch);
 
 			// schedule new one
-			await RescheduleTimers(shard, tdata.Database, tdata.Shared);
+			await RescheduleTimers(shard, timerdata.Database, timerdata.Shared);
 
 			Task LocalDispatch()
-				=> DispatchTimer(tdata);
+				=> DispatchTimer(timerdata);
 		}
 
 		private static async Task DispatchTimer(TimerData tdata)
@@ -107,24 +107,24 @@ namespace ModCore.Listeners
 			var client = tdata.Context;
 			if (timer.ActionType == TimerActionType.Reminder)
 			{
-				DiscordChannel chn = null;
+				DiscordChannel channel = null;
 				try
 				{
-					chn = await client.GetChannelAsync((ulong)timer.ChannelId);
+					channel = await client.GetChannelAsync((ulong)timer.ChannelId);
 				}
 				catch
 				{
 					return;
 				}
 
-				if (chn == null)
+				if (channel == null)
 					return;
 
 				var data = timer.GetData<TimerReminderData>();
 				var emoji = DiscordEmoji.FromName(client, ":alarm_clock:");
 				var user = (ulong)timer.UserId;
-				var msg = $"{emoji} <@!{user}>, you wanted to be reminded of the following:\n\n{data.ReminderText.BreakMentions()}";
-				await chn.SafeMessageUnformattedAsync(msg, false);
+				var message = $"{emoji} <@!{user}>, you wanted to be reminded of the following:\n\n{data.ReminderText.BreakMentions()}";
+				await channel.SafeMessageUnformattedAsync(message, false);
 				// ALWAYS filter stuff so i set it to false. No need to @everyone in a reminder.
 			}
 			else if (timer.ActionType == TimerActionType.Unban)
@@ -253,9 +253,9 @@ namespace ModCore.Listeners
 				if (CancelIfLaterThan(nearest.DispatchAt, shared, force))
 				{
 					var cts = new CancellationTokenSource();
-					var t = Task.Delay(nearest.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
-					tdata = new TimerData(t, nearest, client, database, shared, cts);
-					_ = t.ContinueWith(TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
+					var task = Task.Delay(nearest.DispatchAt - DateTimeOffset.UtcNow, cts.Token);
+					tdata = new TimerData(task, nearest, client, database, shared, cts);
+					_ = task.ContinueWith(TimerCallback, tdata, TaskContinuationOptions.OnlyOnRanToCompletion);
 					shared.TimerData = tdata;
 				}
 			}
@@ -345,8 +345,8 @@ namespace ModCore.Listeners
 			// check if a timer is going
 			if (force || shared.TimerData == null || shared.TimerData.DispatchTime >= dto)
 			{
-				var xtdata = shared.TimerData;
-				xtdata?.Cancel?.Cancel();
+				var timerdata = shared.TimerData;
+				timerdata?.Cancel?.Cancel();
 				return true;
 			}
 

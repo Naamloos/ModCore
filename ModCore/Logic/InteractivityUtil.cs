@@ -6,15 +6,15 @@ namespace ModCore.Logic
 {
     public static class InteractivityUtil
     {
-        public static bool Confirm(DiscordMessage m)
+        public static bool Confirm(DiscordMessage message)
         {
-            return m.Content.EqualsIgnoreCase("yes")
-                   || m.Content.EqualsIgnoreCase("y")
-                   || m.Content.EqualsIgnoreCase("1")
-                   || m.Content.EqualsIgnoreCase("ya")
-                   || m.Content.EqualsIgnoreCase("ja")
-                   || m.Content.EqualsIgnoreCase("si")
-                   || m.Content.EqualsIgnoreCase("da");
+            return message.Content.EqualsIgnoreCase("yes")
+                   || message.Content.EqualsIgnoreCase("y")
+                   || message.Content.EqualsIgnoreCase("1")
+                   || message.Content.EqualsIgnoreCase("ya")
+                   || message.Content.EqualsIgnoreCase("ja")
+                   || message.Content.EqualsIgnoreCase("si")
+                   || message.Content.EqualsIgnoreCase("da");
         }
     }
 }

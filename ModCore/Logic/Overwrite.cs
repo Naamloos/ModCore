@@ -25,12 +25,12 @@ namespace ModCore.Logic
 
         private readonly DiscordGuild _guild;
 
-        public Overwrite(DiscordOverwrite ov, DiscordGuild guild)
+        public Overwrite(DiscordOverwrite overwrite, DiscordGuild guild)
         {
-            this.Type = ov.Type;
-            this.Allow = ov.Allowed;
-            this.Deny = ov.Denied;
-            this.Id = ov.Id;
+            this.Type = overwrite.Type;
+            this.Allow = overwrite.Allowed;
+            this.Deny = overwrite.Denied;
+            this.Id = overwrite.Id;
             _guild = guild;
         }
     }

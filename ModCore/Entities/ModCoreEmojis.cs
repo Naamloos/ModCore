@@ -8,7 +8,7 @@ using System.Text;
 
 namespace ModCore.Entities
 {
-    public class MCoreEmojis
+    public class ModCoreEmojis
     {
         [JsonIgnore]
         public DiscordEmoji JumpLink
@@ -24,7 +24,7 @@ namespace ModCore.Entities
         [JsonIgnore]
         private DiscordClient _client = null;
 
-        private MCoreEmojis()
+        private ModCoreEmojis()
         {
 
         }
@@ -34,7 +34,7 @@ namespace ModCore.Entities
         /// </summary>
         /// <param name="client"></param>
         /// <returns></returns>
-        public static MCoreEmojis LoadEmojis(DiscordClient client)
+        public static ModCoreEmojis LoadEmojis(DiscordClient client)
         {
             if (!File.Exists("emojis.json"))
             {
@@ -44,7 +44,7 @@ namespace ModCore.Entities
             }
 
             var input = File.ReadAllText("emojis.json", new UTF8Encoding(false));
-            var emojis = JsonConvert.DeserializeObject<MCoreEmojis>(input);
+            var emojis = JsonConvert.DeserializeObject<ModCoreEmojis>(input);
 
             // update with possible new fields.
             File.WriteAllText("emojis.json", JsonConvert.SerializeObject(emojis), new UTF8Encoding(false));
