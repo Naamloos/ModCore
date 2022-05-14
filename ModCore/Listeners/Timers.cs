@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -108,6 +108,7 @@ namespace ModCore.Listeners
 			if (timer.ActionType == TimerActionType.Reminder)
 			{
 				DiscordChannel channel = null;
+				DiscordMessage original = null;
 				try
 				{
 					channel = await client.GetChannelAsync((ulong)timer.ChannelId);
@@ -121,10 +122,39 @@ namespace ModCore.Listeners
 					return;
 
 				var data = timer.GetData<TimerReminderData>();
+				try 
+				{
+					if (data.MessageId != null)
+						original = await channel.GetMessageAsync(data.MessageId.Value, true);
+				}
+				catch (Exception) { } // message no longer exists
+
 				var emoji = DiscordEmoji.FromName(client, ":alarm_clock:");
 				var user = (ulong)timer.UserId;
-				var message = $"{emoji} <@!{user}>, you wanted to be reminded of the following:\n\n{data.ReminderText.BreakMentions()}";
-				await channel.SafeMessageUnformattedAsync(message, false);
+
+				var message = $"<@{user}>";
+				var unixTimestamp = new DateTimeOffset(timer.DispatchAt);
+
+				var msg = new DiscordMessageBuilder();
+
+				msg.AddEmbed(
+					new DiscordEmbedBuilder()
+					.WithTitle("⏰ Reminder")
+					.WithDescription($"You wanted to be reminded <t:{unixTimestamp.ToUnixTimeSeconds()}:R>")
+					.AddField("✏️ Reminder Text", data.ReminderText)
+					);
+
+				msg.WithReply(data.MessageId, true, false);
+
+				if (original == null)
+				{
+					msg.WithContent(message);
+				}
+
+				msg.WithAllowedMention(new UserMention(user));
+
+				await msg.SendAsync(channel);
+
 				// ALWAYS filter stuff so i set it to false. No need to @everyone in a reminder.
 			}
 			else if (timer.ActionType == TimerActionType.Unban)

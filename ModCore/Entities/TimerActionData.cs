@@ -22,6 +22,12 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("text")]
         public string ReminderText { get; set; }
+
+        /// <summary>
+        /// Gets or sets the original message ID set for this reminder.
+        /// </summary>
+        [JsonProperty("message")]
+        public ulong? MessageId { get; set; } = null;
     }
 
     /// <summary>
