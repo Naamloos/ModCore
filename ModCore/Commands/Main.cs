@@ -243,107 +243,6 @@ namespace ModCore.Commands
 			await context.LogActionAsync($"🚓 Softbanned user {member.DisplayName} (ID:{member.Id})\n{reasonstring}");
 		}
 
-		[Command("mute"), Description("Mutes an user indefinitely. This will prevent them from speaking in chat. " +
-									  "You might need to set up a mute role, but most of the time ModCore can do it " +
-									  "for you."), Aliases("m"), RequirePermissions(Permissions.MuteMembers),
-		 RequireBotPermissions(Permissions.ManageRoles), CheckDisable]
-		public async Task MuteAsync(CommandContext context, [Description("Member to mute")]DiscordMember member,
-			[RemainingText, Description("Reason to mute this member")] string reason = "")
-		{
-			if (context.Member.Id == member.Id)
-			{
-				await context.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
-				return;
-			}
-
-			var guildSettings = context.GetGuildSettings() ?? new GuildSettings();
-			if (guildSettings == null)
-			{
-				await context.SafeRespondUnformattedAsync("⚠️ Guild is not configured, please configure and rerun");
-				return;
-			}
-
-			var muteroleid = guildSettings.MuteRoleId;
-			var mute = context.Guild.GetRole(muteroleid);
-			if (muteroleid == 0 || mute == null)
-			{
-				var (Role, Message) = await Utils.SetupMuteRole(context.Guild, context.Member, member);
-				mute = Role;
-				guildSettings.MuteRoleId = Role.Id;
-				await context.SafeRespondUnformattedAsync("⚠️ Mute role is not configured or missing, " + Message);
-				await context.SetGuildSettingsAsync(guildSettings);
-			}
-			await Utils.GuaranteeMuteRoleDeniedEverywhere(context.Guild, mute);
-
-			var userstring = $"{context.User.Username}#{context.User.Discriminator} ({context.User.Id})";
-			var reasonstring = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			var sent_dm = false;
-			try
-			{
-				await member.ElevatedMessageAsync($"🚓 You've been muted in {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}");
-				sent_dm = true;
-			}
-			catch (Exception) { }
-
-			await member.GrantRoleAsync(mute, $"{userstring}{reasonstring} (mute)");
-			await context.SafeRespondAsync(
-				$"🚓 Muted user {member.DisplayName} (ID:{member.Id}) {(reason != "" ? "With reason: " + reason : "")}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
-
-			await context.LogActionAsync(
-				$"🚓 Muted user {member.DisplayName} (ID:{member.Id}) {(reason != "" ? "With reason: " + reason : "")}");
-		}
-
-		[Command("unmute"), Description("Unmutes an user previously muted with the mute command. Let them speak!"),
-		 Aliases("um"), RequirePermissions(Permissions.MuteMembers),
-		 RequireBotPermissions(Permissions.ManageRoles), CheckDisable]
-		public async Task UnmuteAsync(CommandContext context, [Description("Member to unmute")]DiscordMember message,
-			[RemainingText, Description("Reason to unmute this member")] string reason = "")
-		{
-			if (context.Member.Id == message.Id)
-			{
-				await context.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
-				return;
-			}
-
-			var guildconfig = context.GetGuildSettings() ?? new GuildSettings();
-			if (guildconfig == null)
-			{
-				await context.SafeRespondUnformattedAsync(
-					"⚠️ Guild is not configured. Adjust this guild's configuration and re-run this command.");
-				return;
-			}
-
-			var muteroleid = guildconfig.MuteRoleId;
-			var mute = context.Guild.GetRole(muteroleid);
-			if (muteroleid == 0 || mute == null)
-			{
-				await context.SafeRespondUnformattedAsync(
-					"⚠️ Mute role is not configured or missing. Set a correct role and re-run this command.");
-				return;
-			}
-
-			var timer = Timers.FindNearestTimer(TimerActionType.Unmute, message.Id, 0, context.Guild.Id, this.Database);
-			if (timer != null)
-				await Timers.UnscheduleTimerAsync(timer, context.Client, this.Database, this.Shared);
-
-			var userstring = $"{context.User.Username}#{context.User.Discriminator} ({context.User.Id})";
-			var reasonstring = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			var sent_dm = false;
-			try
-			{
-				await message.ElevatedMessageAsync($"🚓 You've been unmuted in {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
-				sent_dm = true;
-			}
-            catch (Exception) { }
-
-			await message.RevokeRoleAsync(mute, $"{userstring}{reasonstring} (unmute)");
-			await context.SafeRespondAsync(
-				$"🚓 Unmuted user {message.DisplayName} (ID:{message.Id}) {(reason != "" ? "With reason: " + reason : "")}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
-
-			await context.LogActionAsync(
-				$"🚓 Unmuted user {message.DisplayName} (ID:{message.Id}) {(reason != "" ? "With reason: " + reason : "")}");
-		}
-
 		[Command("leave"), Description("Makes this bot leave the current server. Goodbye moonmen."),
 		 RequireUserPermissions(Permissions.Administrator), CheckDisable]
 		public async Task LeaveAsync(CommandContext context)
@@ -428,44 +327,51 @@ namespace ModCore.Commands
 				$"🚓 Tempbanned user {member.DisplayName} (ID:{member.Id}) to be unbanned in {timespan.Humanize(4, minUnit: TimeUnit.Second)}");
 		}
 
-		[Command("tempmute"), Aliases("tm"), Description("Temporarily mutes a member. They will be automatically " +
+		[Command("timeout"), Aliases("mute", "tempmute", "tm", "m"), Description("Temporarily mutes a member. They will be automatically " +
 														 "unmuted after a set amount of time. This will prevent them " +
-														 "from speaking in chat. You might need to set up a mute role, " +
-														 "but most of the time ModCore can do it for you."),
+														 "from speaking in chat."),
 		 RequirePermissions(Permissions.MuteMembers), CheckDisable]
 		public async Task TempMuteAsync(CommandContext context, [Description("Member to temporarily mute")]DiscordMember member,
 			[Description("How long this member will be muted")]TimeSpan timespan, [Description("Reason to temp mute this member")]string reason = "")
 		{
 			if (context.Member.Id == member.Id)
 			{
-				await context.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
+				await context.SafeRespondUnformattedAsync("⚠️ No need to mute yourself bruv");
 				return;
 			}
 
-			var guildSettings = context.GetGuildSettings() ?? new GuildSettings();
-			if (guildSettings == null)
-			{
-				await context.SafeRespondUnformattedAsync(
-					"⚠️ Guild is not configured. Adjust this guild's configuration and re-run this command.");
-				return;
-			}
+			var timeoutEnd = DateTimeOffset.UtcNow.Add(timespan);
 
-			var muteroleid = guildSettings.MuteRoleId;
-			var mute = context.Guild.GetRole(muteroleid);
-			if (muteroleid == 0 || mute == null)
+			var userstring = $"{context.User.Username}#{context.User.Discriminator} ({context.User.Id})";
+			var reasonstring = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+			var sent_dm = false;
+			try
 			{
-				var (Role, Message) = await Utils.SetupMuteRole(context.Guild, context.Member, member);
-				mute = Role;
-				guildSettings.MuteRoleId = Role.Id;
-				await context.SafeRespondUnformattedAsync("⚠️ Mute role is not configured or missing, " + Message);
-				await context.SetGuildSettingsAsync(guildSettings);
+				await member.ElevatedMessageAsync($"🚓 You've been temporarily muted in {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
+					$"\nYou can talk again <t:{timeoutEnd.ToUnixTimeSeconds}:R>");
+				sent_dm = true;
 			}
-			await Utils.GuaranteeMuteRoleDeniedEverywhere(context.Guild, mute);
+			catch (Exception) { }
 
-			var timer = Timers.FindNearestTimer(TimerActionType.Unmute, member.Id, 0, context.Guild.Id, this.Database);
-			if (timer != null)
+			await member.TimeoutAsync(timeoutEnd, reasonstring);
+			
+			// End of Timer adding
+			await context.SafeRespondAsync(
+				$"🚓 Tempmuted user {member.DisplayName} (ID:{member.Id}) to be unmuted in {timespan.Humanize(4, minUnit: TimeUnit.Second)}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
+
+			await context.LogActionAsync(
+				$"🚓 Tempmuted user {member.DisplayName} (ID:{member.Id}) to be unmuted in {timespan.Humanize(4, minUnit: TimeUnit.Second)}");
+		}
+
+		[Command("unmute"), Description("Unmutes an user previously muted with the mute command. Let them speak!"),
+		 Aliases("um"), RequirePermissions(Permissions.MuteMembers),
+		 RequireBotPermissions(Permissions.ManageRoles), CheckDisable]
+		public async Task UnmuteAsync(CommandContext context, [Description("Member to unmute")] DiscordMember message,
+			[RemainingText, Description("Reason to unmute this member")] string reason = "")
+		{
+			if (context.Member.Id == message.Id)
 			{
-				await context.SafeRespondUnformattedAsync("⚠️ This member was already muted! Please try to unmute them first!");
+				await context.SafeRespondUnformattedAsync("⚠️ You can't really execute this command if you're muted yourself...");
 				return;
 			}
 
@@ -474,48 +380,17 @@ namespace ModCore.Commands
 			var sent_dm = false;
 			try
 			{
-				await member.ElevatedMessageAsync($"🚓 You've been temporarily muted in {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
-					$"\nYou can talk again after {timespan.Humanize(4, minUnit: TimeUnit.Second)}");
+				await message.ElevatedMessageAsync($"🚓 You've been unmuted in {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
 				sent_dm = true;
 			}
 			catch (Exception) { }
 
-			await member.GrantRoleAsync(mute, $"{userstring}{reasonstring} (mute)");
-			// Add timer
-			var currentTime = DateTimeOffset.UtcNow;
-			var dispatchTime = currentTime + timespan;
-
-			var reminder = new DatabaseTimer
-			{
-				GuildId = (long)context.Guild.Id,
-				ChannelId = 0,
-				UserId = (long)member.Id,
-				DispatchAt = dispatchTime.LocalDateTime,
-				ActionType = TimerActionType.Unmute
-			};
-
-			reminder.SetData(new TimerUnmuteData
-			{
-				Discriminator = member.Discriminator,
-				DisplayName = member.Username,
-				UserId = (long)member.Id,
-				MuteRoleId = (long)(context.GetGuildSettings() ?? new GuildSettings()).MuteRoleId
-			});
-
-			using (var db = this.Database.CreateContext())
-			{
-				db.Timers.Add(reminder);
-				await db.SaveChangesAsync();
-			}
-
-			await Timers.RescheduleTimers(context.Client, this.Database, this.Shared);
-
-			// End of Timer adding
+			await message.TimeoutAsync(null, $"{userstring}{reasonstring} (unmute)");
 			await context.SafeRespondAsync(
-				$"🚓 Tempmuted user {member.DisplayName} (ID:{member.Id}) to be unmuted in {timespan.Humanize(4, minUnit: TimeUnit.Second)}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
+				$"🚓 Unmuted user {message.DisplayName} (ID:{message.Id}) {(reason != "" ? "With reason: " + reason : "")}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
 			await context.LogActionAsync(
-				$"🚓 Tempmuted user {member.DisplayName} (ID:{member.Id}) to be unmuted in {timespan.Humanize(4, minUnit: TimeUnit.Second)}");
+				$"🚓 Unmuted user {message.DisplayName} (ID:{message.Id}) {(reason != "" ? "With reason: " + reason : "")}");
 		}
 
 		[Command("schedulepin"), Aliases("sp"), Description("Schedules a pinned message. _I really don't know why " +
