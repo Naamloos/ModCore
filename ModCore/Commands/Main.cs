@@ -243,7 +243,7 @@ namespace ModCore.Commands
 			await context.LogActionAsync($"🚓 Softbanned user {member.DisplayName} (ID:{member.Id})\n{reasonstring}");
 		}
 
-		[Command("leave"), Description("Makes this bot leave the current server. Goodbye moonmen."),
+		[Command("leave"), Description("Makes this bot leave the current server. Goodbye."),
 		 RequireUserPermissions(Permissions.Administrator), CheckDisable]
 		public async Task LeaveAsync(CommandContext context)
 		{
@@ -285,7 +285,7 @@ namespace ModCore.Commands
 			try
 			{
 				await member.ElevatedMessageAsync($"🚓 You've been temporarily banned from {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
-					$"\nYou can rejoin <t:{unbanmoment.ToUnixTimeSeconds}:R>");
+					$"\nYou can rejoin <t:{unbanmoment.ToUnixTimeSeconds()}:R>");
 				sent_dm = true;
 			}
 			catch (Exception) { }
@@ -348,7 +348,7 @@ namespace ModCore.Commands
 			try
 			{
 				await member.ElevatedMessageAsync($"🚓 You've been temporarily muted in {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
-					$"\nYou can talk again <t:{timeoutEnd.ToUnixTimeSeconds}:R>");
+					$"\nYou can talk again <t:{timeoutEnd.ToUnixTimeSeconds()}:R>");
 				sent_dm = true;
 			}
 			catch (Exception) { }
