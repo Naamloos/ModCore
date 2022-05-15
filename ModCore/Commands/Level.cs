@@ -50,13 +50,9 @@ namespace ModCore.Commands
 
                 if (db.UserDatas.Any(x => x.UserId == (long)localmember.Id))
                 {
-                    var data = db.UserDatas.First(x => x.UserId == (long)localmember.Id).GetData();
+                    var data = db.Levels.First(x => x.UserId == (long)localmember.Id && x.GuildId == (long)localmember.Guild.Id);
 
-                    if (data.ServerExperience.ContainsKey(context.Guild.Id))
-                    {
-                        experience = data.ServerExperience[context.Guild.Id];
-                        level = Listeners.LevelUp.CalculateLevel(experience);
-                    }
+                    level = Listeners.LevelUp.CalculateLevel(data.Experience);
                 }
             }
 
@@ -69,7 +65,34 @@ namespace ModCore.Commands
         [Command("leaderboard"), Aliases("top", "lb", "board")]
         public async Task LeaderboardAsync(CommandContext context)
         {
-            await context.RespondAsync("😔 This feature has not yet been implemented. Please try again later!");
+            using (var db = Database.CreateContext()) 
+            {
+                var top10 = db.Levels.Where(x => x.GuildId == (long)context.Guild.Id)
+                    .OrderByDescending(x => x.Experience)
+                    .Take(10)
+                    .ToList();
+
+                var top10string = "";
+                int index = 1;
+                foreach(var leveldata in top10)
+                {
+                    top10string += $"{index}. <@{leveldata.UserId}>: Level " +
+                        $"{Listeners.LevelUp.CalculateLevel(leveldata.Experience)} ({leveldata.Experience} xp)";
+                    index++;
+                }
+
+                var embed = new DiscordEmbedBuilder()
+                    .WithTitle($"{context.Guild.Name} Leaderboard")
+                    .WithDescription($"These are the users with the most activity!")
+                    .WithColor(new DiscordColor())
+                    .AddField("Top 10", top10string);
+
+                var message = new DiscordMessageBuilder()
+                    .AddEmbed(embed)
+                    .WithReply(context.Message.Id, true, false);
+
+                await context.RespondAsync(message);
+            }
         }
     }
 }

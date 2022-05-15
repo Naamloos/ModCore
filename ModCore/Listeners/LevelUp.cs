@@ -32,9 +32,7 @@ namespace ModCore.Listeners
                 return;
 
             GuildSettings config;
-            DatabaseUserData userdata = null;
-            // holder for returned datetimeoffsets
-            DateTimeOffset lastGrant = DateTimeOffset.MinValue;
+            DatabaseLevel leveldata = null;
 
             using (var db = bot.Database.CreateContext())
             {
@@ -46,49 +44,29 @@ namespace ModCore.Listeners
                 if (eventargs.Message.Content.StartsWith(string.IsNullOrEmpty(config.Prefix) ? bot.Settings.DefaultPrefix : config.Prefix))
                     return;
 
-                // Get user data and assign new when null
-                if (db.UserDatas.Any(x => x.UserId == (long)user.Id))
+                // Get level xp data and assign new when null
+                if (db.Levels.Any(x => x.UserId == (long)user.Id && x.GuildId == (long)server.Id))
                 {
-                    userdata = db.UserDatas.First(x => x.UserId == (long)user.Id);
-                }
-                userdata ??= new DatabaseUserData() { UserId = (long)user.Id };
-
-                // do level stuff
-                if(LastXpGrants.ContainsKey((server.Id, user.Id)))
-                {
-                    // Less than 1 hour since last message in server
-                    if (LastXpGrants.TryGetValue((server.Id, user.Id), out lastGrant))
-                    {
-                        if (DateTimeOffset.Now.Subtract(lastGrant).TotalMinutes < 30)
-                        {
-                            // When debugging we want to grant xp for every message.
-                            #if !DEBUG
-                            return;
-                            #endif
-                        }
-                    }
-                }
-                else
-                {
-                    LastXpGrants.TryAdd((server.Id, user.Id), DateTimeOffset.MinValue);
+                    leveldata = db.Levels.First(x => x.UserId == (long)user.Id && x.GuildId == (long)server.Id);
+                    // do level stuff
+                    if (DateTime.Now.Subtract(leveldata.LastXpGrant).TotalMinutes < 5)
+                        return;
                 }
 
-                // Setting new last xp grant timestamp
-                LastXpGrants.TryRemove((server.Id, user.Id), out lastGrant);
-                LastXpGrants.TryAdd((server.Id, user.Id), DateTimeOffset.Now);
+                leveldata ??= new DatabaseLevel() 
+                { 
+                    UserId = (long)user.Id, 
+                    GuildId = (long)server.Id, 
+                    Experience = 0,
+                    LastXpGrant = DateTime.Now
+                };
 
-                // Getting user data and setting xp value if not yet set.
-                var jsonuserdata = userdata.GetData();
-                jsonuserdata ??= new UserData();
-                if (!jsonuserdata.ServerExperience.ContainsKey(server.Id))
-                {
-                    jsonuserdata.ServerExperience.Add(server.Id, 0);
-                }
+                // Set new last xp datetime
+                leveldata.LastXpGrant = DateTime.Now;
 
                 // Getting old XP value and new XP value
-                var previousxp = jsonuserdata.ServerExperience[server.Id];
-                jsonuserdata.ServerExperience[server.Id] += new Random().Next(10, 50);
-                var newxp = jsonuserdata.ServerExperience[server.Id];
+                var previousxp = leveldata.Experience;
+                leveldata.Experience += new Random().Next(10, 50);
 
                 // Do checks for message
                 if (config.Levels.MessagesEnabled)
@@ -105,18 +83,17 @@ namespace ModCore.Listeners
 
                     // Calculate old and new level from XPs
                     var oldlevel = CalculateLevel(previousxp);
-                    var newlevel = CalculateLevel(newxp);
+                    var newlevel = CalculateLevel(leveldata.Experience);
 
                     if (newlevel > oldlevel)
                     {
                         // Leveled up! congratulate user.
-                        await msgchannel.SendMessageAsync($"Congratulations, {user.Nickname ?? user.Username}! You've leveled up!\n_Level {oldlevel} -> Level {newlevel}_");
+                        await msgchannel.SendMessageAsync($"🏆 Congratulations, {user.Nickname ?? user.Username}! You've leveled up!\n_Level {oldlevel} ➡️ Level {newlevel}_");
                     }
                 }
 
                 // setting new data and updating
-                userdata.SetData(jsonuserdata);
-                db.UserDatas.Update(userdata);
+                db.Levels.Update(leveldata);
                 await db.SaveChangesAsync();
             }
         }

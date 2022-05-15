@@ -95,26 +95,20 @@ namespace ModCore.Commands
         {
             using (var db = Database.CreateContext())
             {
-                if (db.UserDatas.Any(x => x.UserId == (long)member.Id))
+                var data = db.Levels.FirstOrDefault(x => x.UserId == (long)member.Id && x.GuildId == (long)context.Guild.Id);
+
+                if (data != null)
                 {
-                    var dat = db.UserDatas.First(x => x.UserId == (long)member.Id);
-                    var data = dat.GetData();
-
-                    if (data.ServerExperience.ContainsKey(context.Guild.Id))
-                    {
-                        data.ServerExperience[context.Guild.Id] += experience;
-                        await context.RespondAsync($"✅ Granted {experience} xp.");
-                    }
-                    else
-                    {
-                        await context.RespondAsync("⚠️ No xp data stored for this user/guild combo");
-                        return;
-                    }
-
-                    dat.SetData(data);
-                    db.UserDatas.Update(dat);
+                    data.Experience += experience;
+                    await context.RespondAsync($"✅ Granted {experience} xp to {member.DisplayName}.");
+                    db.Levels.Update(data);
 
                     await db.SaveChangesAsync();
+                }
+                else
+                {
+                    await context.RespondAsync("⚠️ No xp data stored for this user/guild combo");
+                    return;
                 }
             }
         }

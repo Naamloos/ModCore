@@ -26,9 +26,13 @@ namespace ModCore.Commands
         }
 
 		[GroupCommand]
-        public async Task ExecuteGroupAsync(CommandContext context, [Description("Member to get information about.")]DiscordMember member)
+        public async Task ExecuteGroupAsync(CommandContext context)
         {
-            await UserInfoAsync(context, member);
+            var prefix = context.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
+            var commandstring = "help info";
+            var commandobject = context.CommandsNext.FindCommand(commandstring, out string args);
+            var fakecontext = context.CommandsNext.CreateFakeContext(context.Member, context.Channel, commandstring, prefix, commandobject, args);
+            await context.CommandsNext.ExecuteCommandAsync(fakecontext);
         }
 
         [Command("user"), Aliases("u"), Description("Returns information about a specific user."), CheckDisable]
