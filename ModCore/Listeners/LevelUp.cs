@@ -49,8 +49,10 @@ namespace ModCore.Listeners
                 {
                     leveldata = db.Levels.First(x => x.UserId == (long)user.Id && x.GuildId == (long)server.Id);
                     // do level stuff
+                    #if !DEBUG
                     if (DateTime.Now.Subtract(leveldata.LastXpGrant).TotalMinutes < 5)
                         return;
+                    #endif
                 }
 
                 leveldata ??= new DatabaseLevel() 
@@ -88,7 +90,12 @@ namespace ModCore.Listeners
                     if (newlevel > oldlevel)
                     {
                         // Leveled up! congratulate user.
-                        await msgchannel.SendMessageAsync($"🏆 Congratulations, {user.Nickname ?? user.Username}! You've leveled up!\n_Level {oldlevel} ➡️ Level {newlevel}_");
+                        var embed = new DiscordEmbedBuilder()
+                            .WithTitle($"🏆 Congratulations, {user.Nickname ?? user.Username}! You've leveled up!")
+                            .WithDescription($"Level {oldlevel} ➡ Level {newlevel}")
+                            .AddField("Experience", $"You currently have {leveldata.Experience} xp. " +
+                            $"{CalculateRequiredXp(newlevel + 1) - leveldata.Experience} needed to level up.");
+                        await msgchannel.SendMessageAsync(embed);
                     }
                 }
 

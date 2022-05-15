@@ -47,12 +47,11 @@ namespace ModCore.Commands
 
             using (var db = Database.CreateContext())
             {
-
-                if (db.UserDatas.Any(x => x.UserId == (long)localmember.Id))
+                var data = db.Levels.FirstOrDefault(x => x.UserId == (long)localmember.Id && x.GuildId == (long)context.Guild.Id);
+                if (data != null)
                 {
-                    var data = db.Levels.First(x => x.UserId == (long)localmember.Id && x.GuildId == (long)localmember.Guild.Id);
-
                     level = Listeners.LevelUp.CalculateLevel(data.Experience);
+                    experience = data.Experience;
                 }
             }
 
