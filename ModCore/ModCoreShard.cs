@@ -130,16 +130,28 @@ namespace ModCore
                 StartTimes.SocketStartTime = DateTime.Now;
             };
 
+            this.Client.GuildCreated += onGuildCreated;
             // register event handlers
-            this.Client.Ready += Client_Ready;
+            this.Client.Ready += onClientReady;
 
             AsyncListenerHandler.InstallListeners(Client, this);
         }
 
-        private async Task Client_Ready(DiscordClient c, ReadyEventArgs e)
+        private async Task onGuildCreated(DiscordClient c, GuildCreateEventArgs e)
+        {
+            await update_status(c);
+        }
+
+        private async Task onClientReady(DiscordClient c, ReadyEventArgs e)
         {
             //await c.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
-            await c.UpdateStatusAsync(new DiscordActivity($"over {c.Guilds.Count} servers! (shard {this.ShardId})", ActivityType.Watching));
+            await update_status(c);
+        }
+
+        private async Task update_status(DiscordClient c)
+        {
+            await c.UpdateStatusAsync(new DiscordActivity($"over {c.Guilds.Count} servers! (on shard {this.ShardId})",
+                ActivityType.Watching));
         }
 
         public Task RunAsync() =>
