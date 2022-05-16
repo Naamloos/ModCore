@@ -19,23 +19,29 @@ namespace ModCore.Commands
 	{
 		private static readonly Regex SpaceReplacer = new Regex(" {2,}", RegexOptions.Compiled);
 
+		public SharedData Shared { get; }
+
+		public Purge(SharedData shared)
+		{
+			this.Shared = shared;
+		}
+
 		[GroupCommand, Description("Delete an amount of messages from the current channel.")]
 		public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Amount of messages to remove (max 100)")]int limit = 50,
 			[Description("Amount of messages to skip")]int skip = 0)
 		{
-			var i = 0;
-			var messages = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, limit);
-			var delete = new List<DiscordMessage>();
-			foreach (var message in messages)
+			IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync(limit));
+			messages = messages.Skip(skip);
+			messages = messages.Where(x => DateTimeOffset.Now.Subtract(x.CreationTimestamp).TotalDays < 14);
+
+			if (!messages.Any()) 
 			{
-				if (i < skip)
-					i++;
-				else
-					delete.Add(message);
+				await ctx.SafeRespondUnformattedAsync("⚠️ No messages were deleted. Do take in mind messages that are at least 14 days old can not be purged.");
+				return;
 			}
-			if (delete.Any())
-				await ctx.Channel.DeleteMessagesAsync(delete, "Purged messages.");
+
 			var resp = await ctx.SafeRespondUnformattedAsync("✅ Latest messages deleted.");
+			await ctx.Channel.DeleteMessagesAsync(messages, "Purged messages.");
 			await Task.Delay(2000);
 			await resp.DeleteAsync("Purge command executed.");
 			await ctx.Message.DeleteAsync("Purge command executed.");
@@ -47,22 +53,19 @@ namespace ModCore.Commands
 		public async Task PurgeUserAsync(CommandContext context, [Description("User to delete messages from")]DiscordUser user,
 		[Description("Amount of messages to remove (max 100)")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
 		{
-			var i = 0;
-			var messages = await context.Channel.GetMessagesBeforeAsync(context.Message.Id, limit);
-			var deletThis = new List<DiscordMessage>();
-			foreach (var m in messages)
-			{
-				if (user != null && m.Author.Id != user.Id) 
-					continue;
+			IEnumerable<DiscordMessage> messages = (await context.Channel.GetMessagesAsync(limit));
+			messages = messages.Skip(skip);
+			messages = messages.Where(x => DateTimeOffset.Now.Subtract(x.CreationTimestamp).TotalDays < 14);
+			messages = messages.Where(x => x.Author.Id == user.Id);
 
-				if (i < skip)
-					i++;
-				else
-					deletThis.Add(m);
+			if (!messages.Any())
+			{
+				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted. Do take in mind messages that are at least 14 days old can not be purged.");
+				return;
 			}
-			if (deletThis.Any())
-				await context.Channel.DeleteMessagesAsync(deletThis,
-					$"Purged messages by {user?.Username}#{user?.Discriminator} (ID:{user?.Id})");
+
+			await context.Channel.DeleteMessagesAsync(messages,
+				$"Purged messages by {user?.Username}#{user?.Discriminator} (ID:{user?.Id})");
 			var response = await context.SafeRespondAsync($"✅ Latest messages by {user?.Mention} (ID:{user?.Id}) deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Purge command executed.");
@@ -75,7 +78,7 @@ namespace ModCore.Commands
 		[Command("regexp"), Description(
 		 "For power users! Delete messages from the current channel by regular expression match. " +
 		 "Pass a Regexp in ECMAScript ( /expression/flags ) format, or simply a regex string " +
-		 "in quotes."), Aliases("purgeregex", "pr", "r"), CheckDisable]
+		 "in quotes."), Aliases("purgeregex", "pr", "r", "regex"), CheckDisable]
 		public async Task PurgeRegexpAsync(CommandContext context, [Description("Your regex")] string regex,
 		[Description("Amount of messages to remove (max 100)")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
 		{
@@ -156,7 +159,7 @@ namespace ModCore.Commands
 						}
 						else
 						{
-							await context.SafeRespondUnformattedAsync("⚠️" + tokens[2] + " is not a valid int");
+							await context.SafeRespondUnformattedAsync("⚠️ " + tokens[2] + " is not a valid int");
 							return;
 						}
 					}
@@ -164,29 +167,29 @@ namespace ModCore.Commands
 			}
 			var regexCompiled = new Regex(regex, regexOptions);
 
-			var i = 0;
-			var messages = await context.Channel.GetMessagesBeforeAsync(context.Message.Id, limit);
-			var deletThis = new List<DiscordMessage>();
-			foreach (var message in messages)
-			{
-				if (!regexCompiled.IsMatch(message.Content)) continue;
+			IEnumerable<DiscordMessage> messages = (await context.Channel.GetMessagesAsync(limit));
+			messages = messages.Skip(skip);
+			messages = messages.Where(x => DateTimeOffset.Now.Subtract(x.CreationTimestamp).TotalDays < 14);
+			messages = messages.Where(x => regexCompiled.IsMatch(x.Content));
 
-				if (i < skip)
-					i++;
-				else
-					deletThis.Add(message);
+			if (!messages.Any())
+			{
+				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted.");
+				return;
 			}
+
 			var resultString =
-				$"✅ Purged {deletThis.Count} messages by /{regex.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
-			if (deletThis.Any())
-				await context.Channel.DeleteMessagesAsync(deletThis, resultString);
+				$"✅ Purged {messages.Count()} messages by /{regex.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
+
+			await context.Channel.DeleteMessagesAsync(messages, resultString);
+
 			var response = await context.SafeRespondUnformattedAsync(resultString);
 			await Task.Delay(2000);
 			await response.DeleteAsync("Purge command executed.");
 			await context.Message.DeleteAsync("Purge command executed.");
 
 			await context.LogActionAsync(
-				$"Purged {deletThis.Count} messages.\nRegex: ```\n{regex}```\nFlags: {flags}\nChannel: #{context.Channel.Name} ({context.Channel.Id})");
+				$"Purged {messages.Count()} messages.\nRegex: ```\n{regex}```\nFlags: {flags}\nChannel: #{context.Channel.Name} ({context.Channel.Id})");
 		}
 
 		[Command("commands"), Description("Purge ModCore's messages."), Aliases("c", "self", "own"),
@@ -194,12 +197,21 @@ namespace ModCore.Commands
 		public async Task CleanAsync(CommandContext context)
 		{
 			var guildsettings = context.GetGuildSettings() ?? new GuildSettings();
-			var prefix = guildsettings?.Prefix ?? "?>";
-			var messages = await context.Channel.GetMessagesBeforeAsync(context.Message.Id, 100);
-			var deletThis = messages.Where(m => m.Author.Id == context.Client.CurrentUser.Id || m.Content.StartsWith(prefix))
-				.ToList();
-			if (deletThis.Any())
-				await context.Channel.DeleteMessagesAsync(deletThis, "Cleaned up commands");
+			var prefix = guildsettings?.Prefix ?? Shared.DefaultPrefix;
+
+			IEnumerable<DiscordMessage> messages = (await context.Channel.GetMessagesAsync(100));
+			messages = messages.Where(x => DateTimeOffset.Now.Subtract(x.CreationTimestamp).TotalDays < 14);
+			messages = messages.Where(m => m.Author.Id == context.Client.CurrentUser.Id || m.Content.StartsWith(prefix));
+
+			if (!messages.Any())
+			{
+				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted.");
+				return;
+			}
+
+			await context.Channel.DeleteMessagesAsync(messages,
+				"Clean command executed.");
+
 			var response = await context.SafeRespondUnformattedAsync("✅ Latest messages deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Clean command executed.");
@@ -213,12 +225,20 @@ namespace ModCore.Commands
 		public async Task PurgeBotsAsync(CommandContext context)
 		{
 			var guildsettings = context.GetGuildSettings() ?? new GuildSettings();
-			var prefix = guildsettings?.Prefix ?? "?>";
-			var messages = await context.Channel.GetMessagesBeforeAsync(context.Message.Id, 100);
-			var deletThis = messages.Where(m => m.Author.IsBot || m.Content.StartsWith(prefix))
-				.ToList();
-			if (deletThis.Any())
-				await context.Channel.DeleteMessagesAsync(deletThis, "Cleaned up commands");
+			var prefix = guildsettings?.Prefix ?? Shared.DefaultPrefix;
+
+			IEnumerable<DiscordMessage> messages = (await context.Channel.GetMessagesAsync(100));
+			messages = messages.Where(x => DateTimeOffset.Now.Subtract(x.CreationTimestamp).TotalDays < 14);
+			messages = messages.Where(m => m.Author.IsBot || m.Content.StartsWith(prefix));
+
+			if (!messages.Any())
+			{
+				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted.");
+				return;
+			}
+
+			await context.Channel.DeleteMessagesAsync(messages, "Cleaned up bot messages.");
+
 			var response = await context.SafeRespondUnformattedAsync("✅ Latest messages deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Purge bot command executed.");
@@ -233,9 +253,19 @@ namespace ModCore.Commands
 		{
 			var ms = await context.Channel.GetMessagesBeforeAsync(context.Message.Id, 100);
 			Regex ImageRegex = new Regex(@"\.(png|gif|jpg|jpeg|tiff|webp)");
-			var deleteThis = ms.Where(m => ImageRegex.IsMatch(m.Content) || m.Attachments.Any()).ToList();
-			if (deleteThis.Any())
-				await context.Channel.DeleteMessagesAsync(deleteThis, "Purged images");
+
+			IEnumerable<DiscordMessage> messages = (await context.Channel.GetMessagesAsync(100));
+			messages = messages.Where(x => DateTimeOffset.Now.Subtract(x.CreationTimestamp).TotalDays < 14);
+			messages = messages.Where(m => ImageRegex.IsMatch(m.Content) || m.Attachments.Any());
+
+			if (!messages.Any())
+			{
+				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted.");
+				return;
+			}
+
+			await context.Channel.DeleteMessagesAsync(messages, "Cleaned up messages with images.");
+
 			var response = await context.SafeRespondUnformattedAsync("✅ Latest messages deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Image purge command executed.");
