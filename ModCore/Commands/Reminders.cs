@@ -147,7 +147,7 @@ If in doubt, just try it! You can always clear the reminders later.
 #if !DEBUG
             if (duration < TimeSpan.FromSeconds(30))
             {
-                await ctx.ElevatedRespondAsync("Minimum required time span to set a reminder is 30 seconds.");
+                await context.ElevatedRespondAsync("Minimum required time span to set a reminder is 30 seconds.");
                 return;
             }
 #endif
