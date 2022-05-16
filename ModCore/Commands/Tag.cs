@@ -33,7 +33,8 @@ namespace ModCore.Commands
             this.StartTimes = starttimes;
         }
 
-		[GroupCommand]
+        [Priority(0)]
+        [GroupCommand]
 		public async Task ExecuteGroupAsync(CommandContext context, 
             [RemainingText, Description("Tag to get information about.")] string name)
         {
@@ -43,6 +44,7 @@ namespace ModCore.Commands
             }
         }
 
+        [Priority(1)]
         [Command("set"), CheckDisable]
         [Description("Sets a new tag for this channel, or modifies one if you own it.")]
         public async Task SetAsync(CommandContext context, [Description("Tag to create")]string name, [Description("Contents of tag"), RemainingText]string contents)
@@ -88,6 +90,7 @@ namespace ModCore.Commands
             }
         }
 
+        [Priority(1)]
         [Command("override"), CheckDisable]
         [Description("Overrides a tag for a specific channel")]
         public async Task OverrideAsync(CommandContext context, [Description("Override tag to create")] string name, [Description("Contents of tag"), RemainingText] string contents)
@@ -131,7 +134,8 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("remove"), CheckDisable]
+        [Priority(1)]
+        [Command("remove"), Aliases("delete", "gonezo"), CheckDisable]
         [Description("Removes a tag, if it exists and you own it")]
         public async Task RemoveAsync(CommandContext context, [Description("Tag to remove"), RemainingText]string name)
         {
@@ -168,6 +172,7 @@ namespace ModCore.Commands
             await context.SafeRespondAsync($"⚠️ Canceled deleting tag `{name.BreakMentions()}`");
         }
 
+        [Priority(1)]
         [Command("info"), CheckDisable]
         [Description("Shows info about a tag.")]
         public async Task InfoAsync(CommandContext context, [Description("Tag to show information about"), RemainingText] string name)
@@ -187,6 +192,7 @@ namespace ModCore.Commands
             await context.ElevatedRespondAsync(embed: embed);
         }
 
+        [Priority(1)]
         [Command("list"), CheckDisable]
         [Description("Lists tags for this channel.")]
         public async Task ListAsync(CommandContext ctx)
@@ -215,6 +221,7 @@ namespace ModCore.Commands
             }
         }
 
+        [Priority(1)]
         [Command("transfer"), CheckDisable]
         [Description("Transfers ownership of a tag to another member.")]
         public async Task TransferAsync(CommandContext context, [Description("New owner of this tag")]DiscordMember newowner, 
