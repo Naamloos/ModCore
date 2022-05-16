@@ -81,7 +81,7 @@ namespace ModCore.Commands
                 }
 
                 var embed = new DiscordEmbedBuilder()
-                    .WithTitle($"{context.Guild.Name} Leaderboard")
+                    .WithTitle($"{context.Guild.Name} Level Leaderboard")
                     .WithDescription($"These are the users with the most activity!")
                     .WithColor(new DiscordColor())
                     .AddField("Top 10", top10string);

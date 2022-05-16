@@ -95,5 +95,37 @@ namespace ModCore.Commands
                 await context.ElevatedRespondAsync(embed: embed);
             }
         }
+
+        [Command("leaderboard"), Aliases("top", "lb", "board")]
+        public async Task LeaderboardAsync(CommandContext context)
+        {
+            using (var db = Database.CreateContext())
+            {
+                var guildStars = db.StarDatas.Where(x => (ulong)x.GuildId == context.Guild.Id).ToList();
+                var groups = guildStars.GroupBy(x => x.AuthorId);
+                var top10 = groups.OrderByDescending(x => x.Count()).Take(10);
+
+                var top10string = "";
+                int index = 1;
+                foreach (var data in top10)
+                {
+                    top10string += $"{index}. <@{data.Key}>: " +
+                        $"{data.Count()} stars\n";
+                    index++;
+                }
+
+                var embed = new DiscordEmbedBuilder()
+                    .WithTitle($"{context.Guild.Name} Star Leaderboard")
+                    .WithDescription($"These are the users with the most stars!")
+                    .WithColor(new DiscordColor())
+                    .AddField("Top 10", top10string);
+
+                var message = new DiscordMessageBuilder()
+                    .AddEmbed(embed)
+                    .WithReply(context.Message.Id, true, false);
+
+                await context.RespondAsync(message);
+            }
+        }
     }
 }
