@@ -78,13 +78,6 @@ namespace ModCore.Entities
         [JsonProperty]
         public GuildStarboardSettings Starboard { get; private set; } = new GuildStarboardSettings();
 
-        /// <summary>
-        /// Gets the GlobalWarn settings for this guild. GlobalWarn notifies the server owner when a previously 
-        /// banned user joins, or alternatively bans said user.
-        /// </summary>
-        [JsonProperty]
-        public GuildGlobalWarnSettings GlobalWarn { get; private set; } = new GuildGlobalWarnSettings();
-
 	    /// <summary>
 	    /// Gets whether spelling helper is enabled or disabled for this guild.
 	    /// </summary>

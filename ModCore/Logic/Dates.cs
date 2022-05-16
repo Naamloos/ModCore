@@ -17,9 +17,9 @@ namespace ModCore.Logic
             var time = 0UL;
             
             var foundDelimiter = false;
-            foreach (var s in tokenizer)
+            foreach (var item in tokenizer)
             {
-                var result = _parseToken(tokenizer, s.Trim(), time);
+                var result = _parseToken(tokenizer, item.Trim(), time);
                 time = result.time;
                 // if broken by Break, we found a delimiter, if exited the loop normally no delimiter was found
                 if (!result.cont)
@@ -65,21 +65,21 @@ namespace ModCore.Logic
         /// <c>true</c> to continue parsing execution or <c>false</c> to escape control flow. The returned value of
         /// <c>time</c> is stored and used for the next token, or for the return value if control flow is escaped.</returns>
         /// <exception cref="Exception"></exception>
-        private static (bool cont, ulong time) _parseToken(StringTokenizer tokenizer, string s, ulong time)
+        private static (bool cont, ulong time) _parseToken(StringTokenizer tokenizer, string input, ulong time)
         {
             // filler words
-            if (DateLexer.IsFillerWord(s))
+            if (DateLexer.IsFillerWord(input))
                 return (Continue, time);
 
-            if (s == "tomorrow")
+            if (input == "tomorrow")
                 return (Continue, time + (ulong) Unit.Day);
 
             // TODO maybe restore "next X" functionality?
-            if (DateTime.TryParse(s, out var dt))
+            if (DateTime.TryParse(input, out var dt))
                 return (Continue, (ulong)dt.Subtract(DateTime.Now).TotalMilliseconds);
 
             // read values like "5 seconds"
-            if (DateLexer.TryIsNumber(s, out var i))
+            if (DateLexer.TryIsNumber(input, out var i))
             {
                 // ended early, so assume it's talking about minutes (e.g remindme in 5)
                 if (!tokenizer.Next(out var s2))
@@ -98,19 +98,19 @@ namespace ModCore.Logic
             }
 
             // read compound values like "15h14min" or "5s"
-            if (TryParseCompound(s, out var j))
+            if (TryParseCompound(input, out var j))
                 return (Continue, time + j);
             
             // read values like "15:14" as 15h14min
-            if (TimeSpan.TryParse(s, out var ts))
+            if (TimeSpan.TryParse(input, out var ts))
                 return (Continue, time + (ulong) ts.TotalMilliseconds);
 
             // ending words, so break and make the rest into a message
-            if (DateLexer.IsFinishingWord(s))
+            if (DateLexer.IsFinishingWord(input))
                 return (Break, time);
 
             DebugWriteLine("####\n" +
-                           $"Unrecognized token: {s}\n" +
+                           $"Unrecognized token: {input}\n" +
                            $"In text: {tokenizer.String}\n" +
                            $"At pos:  {new string('-', Math.Max(0, (tokenizer.Index==-1?tokenizer.String.Length:tokenizer.Index)-tokenizer.Current.Length))}^ (semi-accurate)\n" + // this is bad
                            "####");

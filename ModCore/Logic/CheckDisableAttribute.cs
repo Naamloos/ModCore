@@ -16,21 +16,21 @@ namespace ModCore.Logic
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = false)]
 	public sealed class CheckDisableAttribute : CheckBaseAttribute
 	{
-		public override async Task<bool> ExecuteCheckAsync(CommandContext ctx, bool help)
+		public override async Task<bool> ExecuteCheckAsync(CommandContext context, bool help)
 		{
 #if !HSN_DEBUG_ALWAYS_COMMAND_CHECK
-			if (ctx.Member.IsOwner || ctx.Client.CurrentApplication.Owners.Select(x => x.Id).Contains(ctx.User.Id)) return true;
+			if (context.Member.IsOwner || context.Client.CurrentApplication.Owners.Select(x => x.Id).Contains(context.User.Id)) return true;
 #endif
 			
 			// don't use GetGuildSettings here
 			// TODO i wrote this a long time ago, and forgot why not to do that.
 			using (var db = Program.ModCore.CreateGlobalContext())
 			{
-				var stg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id)?.GetSettings();
+				var stg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == context.Guild.Id)?.GetSettings();
 				if ((stg?.DisabledCommands?.Count ?? 0) == 0) return true;
 
 				// the parts to a command eg {"config", "linkfilter", "modules", "all", "on"}
-				var parts = CommandParts(ctx.Command).ToArray();
+				var parts = CommandParts(context.Command).ToArray();
 				// we take the parts and build a tree, eg
 				// config
 				// config linkfilter

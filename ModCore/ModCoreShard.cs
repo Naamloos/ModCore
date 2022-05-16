@@ -112,14 +112,14 @@ namespace ModCore
 				var reqperm = c.Value.ExecutionChecks.Where(x => x.GetType() == typeof(RequirePermissionsAttribute));
 				foreach(RequirePermissionsAttribute att in reqperm)
 				{
-					if (!SharedData.AllPerms.Contains(att.Permissions))
-						SharedData.AllPerms.Add(att.Permissions);
+					if (!SharedData.AllPermissions.Contains(att.Permissions))
+						SharedData.AllPermissions.Add(att.Permissions);
 				}
 				var requsrperm = c.Value.ExecutionChecks.Where(x => x.GetType() == typeof(RequireBotPermissionsAttribute));
 				foreach (RequireBotPermissionsAttribute att in requsrperm)
 				{
-					if(!SharedData.AllPerms.Contains(att.Permissions))
-						SharedData.AllPerms.Add(att.Permissions);
+					if(!SharedData.AllPermissions.Contains(att.Permissions))
+						SharedData.AllPermissions.Add(att.Permissions);
 				}
 			}
 
@@ -130,16 +130,28 @@ namespace ModCore
                 StartTimes.SocketStartTime = DateTime.Now;
             };
 
+            this.Client.GuildCreated += onGuildCreated;
             // register event handlers
-            this.Client.Ready += Client_Ready;
+            this.Client.Ready += onClientReady;
 
             AsyncListenerHandler.InstallListeners(Client, this);
         }
 
-        private async Task Client_Ready(DiscordClient c, ReadyEventArgs e)
+        private async Task onGuildCreated(DiscordClient c, GuildCreateEventArgs e)
         {
-            await c.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
-            SharedData.BotLists.StartBotStatUpdater(SharedData); // this method only lets itself run once.
+            await update_status(c);
+        }
+
+        private async Task onClientReady(DiscordClient c, ReadyEventArgs e)
+        {
+            //await c.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
+            await update_status(c);
+        }
+
+        private async Task update_status(DiscordClient c)
+        {
+            await c.UpdateStatusAsync(new DiscordActivity($"over {c.Guilds.Count} servers! (on shard {this.ShardId})",
+                ActivityType.Watching));
         }
 
         public Task RunAsync() =>

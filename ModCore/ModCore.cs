@@ -33,7 +33,6 @@ namespace ModCore
 	    private DatabaseContextBuilder GlobalContextBuilder { get; set; }
         private CancellationTokenSource CTS { get; set; }
         private Perspective PerspectiveApi { get; set; }
-		private Strawpoll Strawpoll { get; set; }
 
         internal async Task InitializeAsync(string[] args)
         {
@@ -55,7 +54,6 @@ namespace ModCore
 
 			GlobalContextBuilder = Settings.Database.CreateContextBuilder();
             PerspectiveApi = new Perspective(Settings.PerspectiveToken);
-			Strawpoll = new Strawpoll();
 
             Shards = new List<ModCoreShard>();
             InitializeSharedData(args);
@@ -84,7 +82,7 @@ namespace ModCore
 			foreach (var shard in Shards)
 				await shard.DisconnectAndDispose();
 
-			this.SharedData.CTS.Dispose();
+			this.SharedData.CancellationTokenSource.Dispose();
 			this.SharedData.TimerData.Cancel.Cancel();
 			this.SharedData.TimerSempahore.Dispose();
         }
@@ -97,18 +95,13 @@ namespace ModCore
             CTS = new CancellationTokenSource();
 	        SharedData = new SharedData
 	        {
-		        CTS = CTS,
+		        CancellationTokenSource = CTS,
 		        ProcessStartTime = Process.GetCurrentProcess().StartTime,
 		        Perspective = PerspectiveApi,
 		        BotManagers = Settings.BotManagers,
 		        DefaultPrefix = Settings.DefaultPrefix,
-		        ModCore = this,
-				Strawpoll = this.Strawpoll,
-                BotLists = new BotLists(Settings)
+		        ModCore = this
 	        };
-	        if (args.Length == 2) {
-                SharedData.StartNotify = (ulong.Parse(args[0]), ulong.Parse(args[1]));
-            }
         }
 
 	    private async Task InitializeDatabaseAsync()

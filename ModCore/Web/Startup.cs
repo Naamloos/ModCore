@@ -41,30 +41,6 @@ namespace ModCore.Web
             services.AddControllersWithViews()
                 .AddNewtonsoftJson()
                 .AddRazorPagesOptions(x => x.RootDirectory = "/Web/Pages");
-
-            services.AddMarkdown(config =>
-            {
-                // Create custom MarkdigPipeline 
-                // using MarkDig; for extension methods
-                config.ConfigureMarkdigPipeline = builder =>
-                {
-                    builder.UseEmphasisExtras(Markdig.Extensions.EmphasisExtras.EmphasisExtraOptions.Default)
-                        .UsePipeTables()
-                        .UseGridTables()
-                        .UseAutoIdentifiers(AutoIdentifierOptions.GitHub) // Headers get id="name" 
-                        .UseAutoLinks() // URLs are parsed into anchors
-                        .UseAbbreviations()
-                        .UseYamlFrontMatter()
-                        .UseEmojiAndSmiley(true)
-                        .UseListExtras()
-                        .UseFigures()
-                        .UseTaskLists()
-                        .UseCustomContainers()
-                        .UseGenericAttributes();
-
-                    //.DisableHtml();   // don't render HTML - encode as text
-                };
-            });
         }
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -85,8 +61,6 @@ namespace ModCore.Web
 				x.MapControllers();
                 x.MapRazorPages();
 			});
-
-            app.UseMarkdown();
 		}
 	}
 }

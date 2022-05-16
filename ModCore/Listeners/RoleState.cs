@@ -15,27 +15,27 @@ namespace ModCore.Listeners
     public static class RoleState
     {
         [AsyncListener(EventTypes.GuildMemberRemoved)]
-        public static async Task OnMemberLeave(ModCoreShard shard, GuildMemberRemoveEventArgs ea)
+        public static async Task OnMemberLeave(ModCoreShard shard, GuildMemberRemoveEventArgs eventargs)
         {
             using (var db = shard.Database.CreateContext())
             {
-                var cfg = ea.Guild.GetGuildSettings(db);
-                if (cfg == null || !cfg.RoleState.Enable)
+                var config = eventargs.Guild.GetGuildSettings(db);
+                if (config == null || !config.RoleState.Enable)
                     return;
-                var rs = cfg.RoleState;
+                var rolestateconfig = config.RoleState;
 
-                if (ea.Member.Roles.Any()) // no roles or cache miss, but at this point little can be done about it
+                if (eventargs.Member.Roles.Any()) // no roles or cache miss, but at this point little can be done about it
                 {
-                    var rsx = rs.IgnoredRoleIds;
-                    var roles = ea.Member.Roles.Select(xr => xr.Id).Except(rsx).Select(xul => (long)xul);
+                    var ignoredroles = rolestateconfig.IgnoredRoleIds;
+                    var roles = eventargs.Member.Roles.Select(xr => xr.Id).Except(ignoredroles).Select(xul => (long)xul);
 
-                    var state = db.RolestateRoles.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
+                    var state = db.RolestateRoles.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
                     if (state == null) // no rolestate, create it
                     {
                         state = new DatabaseRolestateRoles
                         {
-                            GuildId = (long)ea.Guild.Id,
-                            MemberId = (long)ea.Member.Id,
+                            GuildId = (long)eventargs.Guild.Id,
+                            MemberId = (long)eventargs.Member.Id,
                             RoleIds = roles.ToArray()
                         };
                         await db.RolestateRoles.AddAsync(state);
@@ -47,23 +47,23 @@ namespace ModCore.Listeners
                     }
                 }
 
-                var nickstate = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
-                shard.Client.Logger.Log(LogLevel.Debug, "ModCore", $"Do nickname shites: {ea.Member.Nickname}", System.DateTime.Now);
+                var nickstate = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
+                shard.Client.Logger.Log(LogLevel.Debug, "ModCore", $"Do nickname shites: {eventargs.Member.Nickname}", System.DateTime.Now);
                 if (nickstate == null) // no nickstate, create it
                 {
                     shard.Client.Logger.Log(LogLevel.Debug, "ModCore", "Create nickname shites", System.DateTime.Now);
                     nickstate = new DatabaseRolestateNick
                     {
-                        GuildId = (long)ea.Guild.Id,
-                        MemberId = (long)ea.Member.Id,
-                        Nickname = ea.Member.Nickname
+                        GuildId = (long)eventargs.Guild.Id,
+                        MemberId = (long)eventargs.Member.Id,
+                        Nickname = eventargs.Member.Nickname
                     };
                     await db.RolestateNicks.AddAsync(nickstate);
                 }
                 else // nickstate exists, update it
                 {
                     shard.Client.Logger.Log(LogLevel.Debug, "ModCore", "Update nickname shites", System.DateTime.Now);
-                    nickstate.Nickname = ea.Member.Nickname;
+                    nickstate.Nickname = eventargs.Member.Nickname;
                     db.RolestateNicks.Update(nickstate);
                 }
 
@@ -73,137 +73,137 @@ namespace ModCore.Listeners
         }
 
         [AsyncListener(EventTypes.GuildMemberAdded)]
-        public static async Task OnMemberJoin(ModCoreShard shard, GuildMemberAddEventArgs ea)
+        public static async Task OnMemberJoin(ModCoreShard shard, GuildMemberAddEventArgs eventargs)
         {
-            var gld = ea.Guild;
-            GuildSettings cfg = null;
-            GuildRoleStateConfig rs = null;
+            var guild = eventargs.Guild;
+            GuildSettings config = null;
+            GuildRoleStateConfig rolestateconfig = null;
             DatabaseRolestateRoles roleids = null;
-            DatabaseRolestateOverride[] chperms = null;
-            DatabaseRolestateNick nick = null;
+            DatabaseRolestateOverride[] channelperms = null;
+            DatabaseRolestateNick nickname = null;
 
             using (var db = shard.Database.CreateContext())
             {
-                cfg = ea.Guild.GetGuildSettings(db);
-                if (cfg == null || !cfg.RoleState.Enable)
+                config = eventargs.Guild.GetGuildSettings(db);
+                if (config == null || !config.RoleState.Enable)
                     return;
-                rs = cfg.RoleState;
+                rolestateconfig = config.RoleState;
 
-                roleids = db.RolestateRoles.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
-                chperms = db.RolestateOverrides.Where(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id).ToArray();
-                nick = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
+                roleids = db.RolestateRoles.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
+                channelperms = db.RolestateOverrides.Where(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id).ToArray();
+                nickname = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
             }
 
             if (roleids?.RoleIds != null)
             {
                 var oroles = roleids.RoleIds
                     .Select(xid => (ulong)xid)
-                    .Except(rs.IgnoredRoleIds)
-                    .Select(xid => gld.GetRole(xid))
+                    .Except(rolestateconfig.IgnoredRoleIds)
+                    .Select(xid => guild.GetRole(xid))
                     .Where(xr => xr != null).ToList();
 
                     var roles = oroles;
 
-                    var highestself = ea.Guild.CurrentMember.Roles.Select(x => x.Position).Max();
+                    var highestself = eventargs.Guild.CurrentMember.Roles.Select(x => x.Position).Max();
                     roles.RemoveAll(x => x.Position > highestself);
 
                     if (roles.Any())
-                        await ea.Member.ReplaceRolesAsync(roles, "Restoring Role State.");
+                        await eventargs.Member.ReplaceRolesAsync(roles, "Restoring Role State.");
             }
             else
             {
-                var ar = cfg.AutoRole;
+                var autoroleconfig = config.AutoRole;
 
-                if (ar.Enable && ea.Guild.Roles.Count(x => x.Value.Id == (ulong)ar.RoleId) > 0)
+                if (autoroleconfig.Enable && eventargs.Guild.Roles.Count(x => x.Value.Id == (ulong)autoroleconfig.RoleId) > 0)
                 {
-                    var role = ea.Guild.Roles.First(x => x.Value.Id == (ulong)ar.RoleId);
-                    await ea.Member.GrantRoleAsync(role.Value, "AutoRole");
+                    var role = eventargs.Guild.Roles.First(x => x.Value.Id == (ulong)autoroleconfig.RoleId);
+                    await eventargs.Member.GrantRoleAsync(role.Value, "AutoRole");
                 }
             }
 
-            if (chperms.Any())
+            if (channelperms.Any())
             {
-                foreach (var chperm in chperms)
+                foreach (var channelpermission in channelperms)
                 {
-                    var chn = gld.GetChannel((ulong)chperm.ChannelId);
-                    if (chn == null)
+                    var channel = guild.GetChannel((ulong)channelpermission.ChannelId);
+                    if (channel == null)
                         continue;
 
-                    await chn.AddOverwriteAsync(ea.Member, (Permissions)chperm.PermsAllow, (Permissions)chperm.PermsDeny, "Restoring Role State");
+                    await channel.AddOverwriteAsync(eventargs.Member, (Permissions)channelpermission.PermsAllow, (Permissions)channelpermission.PermsDeny, "Restoring Role State");
                 }
             }
 
-            if(nick != null)
+            if(nickname != null)
             {
-                shard.Client.Logger.Log(LogLevel.Debug, "ModCore", $"Set new old nick: {nick.Nickname}", System.DateTime.Now);
-                var m = await ea.Guild.GetMemberAsync(ea.Member.Id);
-                await m.ModifyAsync(x => x.Nickname = nick.Nickname);
+                shard.Client.Logger.Log(LogLevel.Debug, "ModCore", $"Set new old nick: {nickname.Nickname}", System.DateTime.Now);
+                var member = await eventargs.Guild.GetMemberAsync(eventargs.Member.Id);
+                await member.ModifyAsync(x => x.Nickname = nickname.Nickname);
             }
         }
 
         [AsyncListener(EventTypes.GuildMemberUpdated)]
-        public static async Task OnMemberUpdate(ModCoreShard shard, GuildMemberUpdateEventArgs ea)
+        public static async Task OnMemberUpdate(ModCoreShard shard, GuildMemberUpdateEventArgs eventargs)
         {
             using (var db = shard.Database.CreateContext())
             {
-                var cfg = ea.Guild.GetGuildSettings(db);
-                if (cfg == null || !cfg.RoleState.Enable)
+                var config = eventargs.Guild.GetGuildSettings(db);
+                if (config == null || !config.RoleState.Enable)
                     return;
-                var rs = cfg.RoleState;
+                var rolestate = config.RoleState;
 
-                var gld = ea.Guild;
-                var roleids = db.RolestateRoles.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
+                var guild = eventargs.Guild;
+                var roleids = db.RolestateRoles.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
 
                 if (roleids == null)
                 {
                     roleids = new DatabaseRolestateRoles
                     {
-                        GuildId = (long)ea.Guild.Id,
-                        MemberId = (long)ea.Member.Id
+                        GuildId = (long)eventargs.Guild.Id,
+                        MemberId = (long)eventargs.Member.Id
                     };
                 }
 
-                roleids.RoleIds = ea.RolesAfter
+                roleids.RoleIds = eventargs.RolesAfter
                     .Select(xr => xr.Id)
-                    .Except(rs.IgnoredRoleIds)
+                    .Except(rolestate.IgnoredRoleIds)
                     .Select(xid => (long)xid)
                     .ToArray();
                 db.RolestateRoles.Update(roleids);
 
-                var nick = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)ea.Guild.Id && xs.MemberId == (long)ea.Member.Id);
-                if(nick == null)
+                var nickname = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
+                if(nickname == null)
                 {
-                    nick = new DatabaseRolestateNick
+                    nickname = new DatabaseRolestateNick
                     {
-                        GuildId = (long)ea.Guild.Id,
-                        MemberId = (long)ea.Member.Id,
+                        GuildId = (long)eventargs.Guild.Id,
+                        MemberId = (long)eventargs.Member.Id,
                     };
                 }
-                nick.Nickname = ea.NicknameAfter;
-                db.RolestateNicks.Update(nick);
+                nickname.Nickname = eventargs.NicknameAfter;
+                db.RolestateNicks.Update(nickname);
 
                 await db.SaveChangesAsync();
             }
         }
 
         [AsyncListener(EventTypes.ChannelDeleted)]
-        public static async Task OnChannelRemove(ModCoreShard shard, ChannelDeleteEventArgs ea)
+        public static async Task OnChannelRemove(ModCoreShard shard, ChannelDeleteEventArgs eventargs)
         {
-            if (ea.Guild == null)
+            if (eventargs.Guild == null)
                 return;
 
             using (var db = shard.Database.CreateContext())
             {
-                var cfg = ea.Guild.GetGuildSettings(db);
-                if (cfg == null || !cfg.RoleState.Enable)
+                var config = eventargs.Guild.GetGuildSettings(db);
+                if (config == null || !config.RoleState.Enable)
                     return;
-                var rs = cfg.RoleState;
+                var rolestate = config.RoleState;
 
-                var chperms = db.RolestateOverrides.Where(xs => xs.GuildId == (long)ea.Guild.Id && xs.ChannelId == (long)ea.Channel.Id);
+                var channelpermissions = db.RolestateOverrides.Where(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.ChannelId == (long)eventargs.Channel.Id);
 
-                if (chperms.Any())
+                if (channelpermissions.Any())
                 {
-                    db.RolestateOverrides.RemoveRange(chperms);
+                    db.RolestateOverrides.RemoveRange(channelpermissions);
                     await db.SaveChangesAsync();
                 }
             }
@@ -222,61 +222,61 @@ namespace ModCore.Listeners
         //}
 
         [AsyncListener(EventTypes.ChannelUpdated)]
-        public static async Task OnChannelUpdate(ModCoreShard shard, ChannelUpdateEventArgs ea)
+        public static async Task OnChannelUpdate(ModCoreShard shard, ChannelUpdateEventArgs eventargs)
         {
-            if (ea.Guild == null)
+            if (eventargs.Guild == null)
                 return;
 
             using (var db = shard.Database.CreateContext())
             {
-                var cfg = ea.Guild.GetGuildSettings(db);
-                if (cfg == null || !cfg.RoleState.Enable)
+                var config = eventargs.Guild.GetGuildSettings(db);
+                if (config == null || !config.RoleState.Enable)
                     return;
-                var rs = cfg.RoleState;
+                var rolestateconfig = config.RoleState;
 
-                if (rs.IgnoredChannelIds.Contains(ea.ChannelAfter.Id))
+                if (rolestateconfig.IgnoredChannelIds.Contains(eventargs.ChannelAfter.Id))
                     return;
 
-                var os = ea.ChannelAfter.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
-                var osids = os.Select(xo => xo.Key).ToArray();
+                var overwrites = eventargs.ChannelAfter.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
+                var overwriteids = overwrites.Select(xo => xo.Key).ToArray();
 
-                var chperms = db.RolestateOverrides.Where(xs => xs.GuildId == (long)ea.Guild.Id && xs.ChannelId == (long)ea.ChannelAfter.Id)
+                var channelpermissions = db.RolestateOverrides.Where(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.ChannelId == (long)eventargs.ChannelAfter.Id)
                     .ToDictionary(xs => xs.MemberId, xs => xs);
-                var permids = chperms.Select(xo => xo.Key).ToArray();
+                var channelpermissionids = channelpermissions.Select(xo => xo.Key).ToArray();
 
-                var del = permids.Except(osids);
-                var add = osids.Except(permids);
-                var mod = osids.Intersect(permids);
+                var removepermissions = channelpermissionids.Except(overwriteids);
+                var addpermissions = overwriteids.Except(channelpermissionids);
+                var modifypermissions = overwriteids.Intersect(channelpermissionids);
 
-                if (del.Any())
-                    db.RolestateOverrides.RemoveRange(del.Select(xid => chperms[xid]));
+                if (removepermissions.Any())
+                    db.RolestateOverrides.RemoveRange(removepermissions.Select(xid => channelpermissions[xid]));
 
-                if (add.Any())
-                    await db.RolestateOverrides.AddRangeAsync(add.Select(xid => new DatabaseRolestateOverride
+                if (addpermissions.Any())
+                    await db.RolestateOverrides.AddRangeAsync(addpermissions.Select(xid => new DatabaseRolestateOverride
                     {
-                        ChannelId = (long)ea.ChannelAfter.Id,
-                        GuildId = (long)ea.Guild.Id,
+                        ChannelId = (long)eventargs.ChannelAfter.Id,
+                        GuildId = (long)eventargs.Guild.Id,
                         MemberId = xid,
-                        PermsAllow = (long)os[xid].Allowed,
-                        PermsDeny = (long)os[xid].Denied
+                        PermsAllow = (long)overwrites[xid].Allowed,
+                        PermsDeny = (long)overwrites[xid].Denied
                     }));
 
-                if (mod.Any())
-                    foreach (var xid in mod)
+                if (modifypermissions.Any())
+                    foreach (var xid in modifypermissions)
                     {
-                        chperms[xid].PermsAllow = (long)os[xid].Allowed;
-                        chperms[xid].PermsDeny = (long)os[xid].Denied;
+                        channelpermissions[xid].PermsAllow = (long)overwrites[xid].Allowed;
+                        channelpermissions[xid].PermsDeny = (long)overwrites[xid].Denied;
 
-                        db.RolestateOverrides.Update(chperms[xid]);
+                        db.RolestateOverrides.Update(channelpermissions[xid]);
                     }
 
-                if (del.Any() || add.Any() || mod.Any())
+                if (removepermissions.Any() || addpermissions.Any() || modifypermissions.Any())
                     await db.SaveChangesAsync();
             }
         }
 
         [AsyncListener(EventTypes.GuildAvailable)]
-        public static async Task OnGuildAvailable(ModCoreShard shard, GuildCreateEventArgs ea)
+        public static async Task OnGuildAvailable(ModCoreShard shard, GuildCreateEventArgs eventargs)
         {
             // Ensure full member cache?
 
@@ -287,33 +287,33 @@ namespace ModCore.Listeners
 
             using (var db = shard.Database.CreateContext())
             {
-                var cfg = ea.Guild.GetGuildSettings(db);
-                if (cfg == null || !cfg.RoleState.Enable)
+                var config = eventargs.Guild.GetGuildSettings(db);
+                if (config == null || !config.RoleState.Enable)
                     return;
-                var rs = cfg.RoleState;
+                var rolestateconfig = config.RoleState;
 
-                var chperms = db.RolestateOverrides.Where(xs => xs.GuildId == (long)ea.Guild.Id);
-                var prms = chperms.AsEnumerable().GroupBy(xs => xs.ChannelId).ToDictionary(xg => xg.Key, xg => xg.ToDictionary(xs => xs.MemberId, xs => xs));
+                var channelpermissions = db.RolestateOverrides.Where(xs => xs.GuildId == (long)eventargs.Guild.Id);
+                var permissions = channelpermissions.AsEnumerable().GroupBy(xs => xs.ChannelId).ToDictionary(xg => xg.Key, xg => xg.ToDictionary(xs => xs.MemberId, xs => xs));
 
                 var any = false;
 
-                foreach (var chn in ea.Guild.Channels)
+                foreach (var channel in eventargs.Guild.Channels)
                 {
-                    if (rs.IgnoredChannelIds.Contains(chn.Key))
+                    if (rolestateconfig.IgnoredChannelIds.Contains(channel.Key))
                         continue;
 
-                    if (!prms.ContainsKey((long)chn.Key))
+                    if (!permissions.ContainsKey((long)channel.Key))
                     {
                         any = true;
 
-                        var os = chn.Value.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member");
-                        if (!os.Any())
+                        var overwrites = channel.Value.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member");
+                        if (!overwrites.Any())
                             continue;
 
-                        await db.RolestateOverrides.AddRangeAsync(os.Select(xo => new DatabaseRolestateOverride
+                        await db.RolestateOverrides.AddRangeAsync(overwrites.Select(xo => new DatabaseRolestateOverride
                         {
-                            ChannelId = (long)chn.Value.Id,
-                            GuildId = (long)chn.Value.Guild.Id,
+                            ChannelId = (long)channel.Value.Id,
+                            GuildId = (long)channel.Value.Guild.Id,
                             MemberId = (long)xo.Id,
                             PermsAllow = (long)xo.Allowed,
                             PermsDeny = (long)xo.Denied
@@ -321,34 +321,34 @@ namespace ModCore.Listeners
                     }
                     else
                     {
-                        var cps = prms[(long)chn.Value.Id];
-                        var os = chn.Value.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
-                        var osids = os.Keys.ToArray();
+                        var rolestateoverrides = permissions[(long)channel.Value.Id];
+                        var overrides = channel.Value.PermissionOverwrites.Where(xo => xo.Type.ToString().ToLower() == "member").ToDictionary(xo => (long)xo.Id, xo => xo);
+                        var overrideids = overrides.Keys.ToArray();
 
-                        var del = cps.Keys.Except(osids);
-                        var add = osids.Except(cps.Keys);
-                        var mod = osids.Intersect(cps.Keys);
+                        var deleteoverrides = rolestateoverrides.Keys.Except(overrideids);
+                        var addoverrides = overrideids.Except(rolestateoverrides.Keys);
+                        var modifyoverrides = overrideids.Intersect(rolestateoverrides.Keys);
 
-                        if (any |= del.Any())
-                            db.RolestateOverrides.RemoveRange(del.Select(xid => cps[xid]));
+                        if (any |= deleteoverrides.Any())
+                            db.RolestateOverrides.RemoveRange(deleteoverrides.Select(xid => rolestateoverrides[xid]));
 
-                        if (any |= add.Any())
-                            await db.RolestateOverrides.AddRangeAsync(add.Select(xid => new DatabaseRolestateOverride
+                        if (any |= addoverrides.Any())
+                            await db.RolestateOverrides.AddRangeAsync(addoverrides.Select(xid => new DatabaseRolestateOverride
                             {
-                                ChannelId = (long)chn.Key,
-                                GuildId = (long)ea.Guild.Id,
+                                ChannelId = (long)channel.Key,
+                                GuildId = (long)eventargs.Guild.Id,
                                 MemberId = xid,
-                                PermsAllow = (long)os[xid].Allowed,
-                                PermsDeny = (long)os[xid].Denied
+                                PermsAllow = (long)overrides[xid].Allowed,
+                                PermsDeny = (long)overrides[xid].Denied
                             }));
 
-                        if (any |= mod.Any())
-                            foreach (var xid in mod)
+                        if (any |= modifyoverrides.Any())
+                            foreach (var overrideid in modifyoverrides)
                             {
-                                cps[xid].PermsAllow = (long)os[xid].Allowed;
-                                cps[xid].PermsDeny = (long)os[xid].Denied;
+                                rolestateoverrides[overrideid].PermsAllow = (long)overrides[overrideid].Allowed;
+                                rolestateoverrides[overrideid].PermsDeny = (long)overrides[overrideid].Denied;
 
-                                db.RolestateOverrides.Update(cps[xid]);
+                                db.RolestateOverrides.Update(rolestateoverrides[overrideid]);
                             }
                     }
                 }
@@ -359,7 +359,7 @@ namespace ModCore.Listeners
         }
 
         [AsyncListener(EventTypes.GuildCreated)]
-        public static Task OnGuildCreated(ModCoreShard shard, GuildCreateEventArgs ea) =>
-            OnGuildAvailable(shard, ea);
+        public static Task OnGuildCreated(ModCoreShard shard, GuildCreateEventArgs eventargs) =>
+            OnGuildAvailable(shard, eventargs);
     }
 }

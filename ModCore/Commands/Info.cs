@@ -26,127 +26,137 @@ namespace ModCore.Commands
         }
 
 		[GroupCommand]
-        public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Member to get information about.")]DiscordMember usr)
+        public async Task ExecuteGroupAsync(CommandContext context)
         {
-            await UserInfoAsync(ctx, usr);
+            var prefix = context.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
+            var commandstring = "help info";
+            var commandobject = context.CommandsNext.FindCommand(commandstring, out string args);
+            var fakecontext = context.CommandsNext.CreateFakeContext(context.Member, context.Channel, commandstring, prefix, commandobject, args);
+            await context.CommandsNext.ExecuteCommandAsync(fakecontext);
         }
 
         [Command("user"), Aliases("u"), Description("Returns information about a specific user."), CheckDisable]
-        public async Task UserInfoAsync(CommandContext ctx, [Description("Member to get information about")]DiscordMember usr)
+        public async Task UserInfoAsync(CommandContext context, [Description("Member to get information about")]DiscordMember member)
         {
 
             var embed = new DiscordEmbedBuilder()
                 .WithColor(new DiscordColor("#089FDF"))
-                .WithTitle($"@{usr.Username}#{usr.Discriminator} - ID: {usr.Id}");
+                .WithTitle($"@{member.Username}#{member.Discriminator} - ID: {member.Id}");
 
-            if (usr.IsBot) embed.Title += " __[BOT]__ ";
-            if (usr.IsOwner) embed.Title += " __[OWNER]__ ";
+            if (member.IsBot) 
+                embed.Title += " __[BOT]__ ";
+
+            if (member.IsOwner) 
+                embed.Title += " __[OWNER]__ ";
 
             embed.Description =
-                $"Registered on     : {usr.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}\n" +
-                $"Joined Guild on  : {usr.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}";
+                $"Registered on     : {member.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}\n" +
+                $"Joined Guild on  : {member.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}";
 
             var roles = new StringBuilder();
-            foreach (var r in usr.Roles) roles.Append($"[{r.Name}] ");
-            if (roles.Length == 0) roles.Append("*None*");
+
+            foreach (var r in member.Roles) 
+                roles.Append($"[{r.Name}] ");
+
+            if (roles.Length == 0) 
+                roles.Append("*None*");
+
             embed.AddField("Roles", roles.ToString());
 
-            var permsobj = usr.PermissionsIn(ctx.Channel);
-            var perms = permsobj.ToPermissionString();
-            if (((permsobj & Permissions.Administrator) | (permsobj & Permissions.AccessChannels)) == 0)
-                perms = "**[!] User can't see this channel!**\n" + perms;
-            if (perms == String.Empty) perms = "*None*";
-            embed.AddField("Permissions", perms);
+            var permissionsEnum = member.PermissionsIn(context.Channel);
+            var permissions = permissionsEnum.ToPermissionString();
+            if (((permissionsEnum & Permissions.Administrator) | (permissionsEnum & Permissions.AccessChannels)) == 0)
+                permissions = "**[!] User can't see this channel!**\n" + permissions;
 
-            embed.WithFooter($"{ctx.Guild.Name} / #{ctx.Channel.Name} / {DateTime.Now}");
+            if (permissions == String.Empty) 
+                permissions = "*None*";
 
-            await ctx.ElevatedRespondAsync(embed: embed);
-            await ctx.LogActionAsync();
+            embed.AddField("Permissions", permissions);
+
+            embed.WithFooter($"{context.Guild.Name} / #{context.Channel.Name} / {DateTime.Now}");
+
+            embed.WithThumbnail(member.GetGuildAvatarUrl(ImageFormat.Auto));
+
+            await context.ElevatedRespondAsync(embed: embed);
+            await context.LogActionAsync();
         }
 
         [Command("guild"), Aliases("g"), Description("Returns information about this guild."), CheckDisable]
-        public async Task GuildInfoAsync(CommandContext ctx)
+        public async Task GuildInfoAsync(CommandContext context)
         {
-            await ctx.SafeRespondUnformattedAsync("The following embed might flood this channel. Do you want to proceed?");
-            var m = await Interactivity.WaitForMessageAsync(x => x.Content.ToLower() == "yes" || x.Content.ToLower() == "no");
-            if (m.Result?.Content.ToLowerInvariant() == "yes")
+            await context.SafeRespondUnformattedAsync("The following embed might flood this channel. Do you want to proceed?");
+            var message = await Interactivity.WaitForMessageAsync(x => x.Content.ToLower() == "yes" || x.Content.ToLower() == "no");
+            if (message.Result?.Content.ToLowerInvariant() == "yes")
             {
                 #region yes
-                var g = ctx.Guild;
+                var guild = context.Guild;
+
                 var embed = new DiscordEmbedBuilder()
                     .WithColor(new DiscordColor("#089FDF"))
-                    .WithTitle($"{g.Name} ID: ({g.Id})")
-                    .WithDescription($"Created on: {g.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}\n" +
-                    $"Member count: {g.MemberCount}" +
-                    $"Joined at: {g.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}");
-                if (!string.IsNullOrEmpty(g.IconHash))
-                    embed.WithThumbnail(g.IconUrl);
-                embed.WithAuthor($"Owner: {g.Owner.Username}#{g.Owner.Discriminator}", iconUrl: string.IsNullOrEmpty(g.Owner.AvatarHash) ? null : g.Owner.AvatarUrl);
-                var cs = new StringBuilder();
+                    .WithTitle($"{guild.Name} ID: ({guild.Id})")
+                    .WithDescription($"Created on: {guild.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}\n" +
+                    $"Member count: {guild.MemberCount}\n" +
+                    $"Joined at: {guild.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}");
+
+                if (!string.IsNullOrEmpty(guild.IconHash))
+                    embed.WithThumbnail(guild.IconUrl);
+
+                embed.WithAuthor($"Owner: {guild.Owner.Username}#{guild.Owner.Discriminator}", 
+                    iconUrl: string.IsNullOrEmpty(guild.Owner.AvatarHash) ? null : guild.Owner.AvatarUrl);
+                var channelstring = new StringBuilder();
                 #region channel list string builder
-                foreach (var c in g.Channels)
+                foreach (var channel in guild.Channels)
                 {
-                    switch (c.Value.Type)
+                    switch (channel.Value.Type)
                     {
                         case ChannelType.Text:
-                            cs.Append($"[`#{c.Value.Name} (💬)`]");
+                            channelstring.Append($"[`#{channel.Value.Name} (💬)`]");
                             break;
                         case ChannelType.Voice:
-                            cs.Append($"`[{c.Value.Name} (🔈)]`");
+                            channelstring.Append($"`[{channel.Value.Name} (🔈)]`");
                             break;
                         case ChannelType.Category:
-                            cs.Append($"`[{c.Value.Name.ToUpper()} (📁)]`");
+                            channelstring.Append($"`[{channel.Value.Name.ToUpper()} (📁)]`");
                             break;
                         default:
-                            cs.Append($"`[{c.Value.Name} (❓)]`");
+                            channelstring.Append($"`[{channel.Value.Name} (❓)]`");
                             break;
                     }
                 }
                 #endregion
-                embed.AddField("Channels", cs.ToString());
+                embed.AddField("Channels", channelstring.ToString());
 
-                var rs = new StringBuilder();
+                var rolestring = new StringBuilder();
                 #region role list string builder
-                foreach (var r in g.Roles)
+                foreach (var role in guild.Roles)
                 {
-                    rs.Append($"[`{r.Value.Name}`] ");
+                    rolestring.Append($"[`{role.Value.Name}`] ");
                 }
                 #endregion
-                embed.AddField("Roles", rs.ToString());
+                embed.AddField("Roles", rolestring.ToString());
 
-                var es = new StringBuilder();
-                #region emoji list string builder
-                foreach (var e in g.Emojis)
-                {
-                    es.Append($"[`{e.Value.Name}`] ");
-                }
-                #endregion
-                embed.AddField("Emotes", es.ToString());
+                embed.AddField("Misc", $"Large: {(guild.IsLarge ? "yes" : "no")}.\n" +
+                    $"Default Notifications: {guild.DefaultMessageNotifications}.\n" +
+                    $"Explicit content filter: {guild.ExplicitContentFilter}.\n" +
+                    $"MFA Level: {guild.MfaLevel}.\n" +
+                    $"Verification Level: {guild.VerificationLevel}");
 
-                embed.AddField("Voice", $"AFK Channel: {(g.AfkChannel != null ? $"#{g.AfkChannel.Name}" : "None.")}\n" +
-                    $"AFK Timeout: {g.AfkTimeout}\n" +
-                    $"Region: {g.VoiceRegion.Name}");
+                embed.WithThumbnail(guild.GetIconUrl(ImageFormat.Auto));
 
-                embed.AddField("Misc", $"Large: {(g.IsLarge ? "yes" : "no")}.\n" +
-                    $"Default Notifications: {g.DefaultMessageNotifications}.\n" +
-                    $"Explicit content filter: {g.ExplicitContentFilter}.\n" +
-                    $"MFA Level: {g.MfaLevel}.\n" +
-                    $"Verification Level: {g.VerificationLevel}");
-
-                await ctx.ElevatedRespondAsync(embed: embed);
+                await context.ElevatedRespondAsync(embed: embed);
                 #endregion
             }
             else
             {
                 #region no or timeout
-                await ctx.SafeRespondUnformattedAsync("Okay, I'm not sending the embed.");
+                await context.SafeRespondUnformattedAsync("Okay, I'm not sending the embed.");
                 #endregion
             }
-            await ctx.LogActionAsync();
+            await context.LogActionAsync();
         }
 
         [Command("role"), Aliases("r"), Description("Returns information about a specific role."), CheckDisable]
-        public async Task RoleInfoAsync(CommandContext ctx, [Description("Role to get information about")]DiscordRole role)
+        public async Task RoleInfoAsync(CommandContext context, [Description("Role to get information about")]DiscordRole role)
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"{role.Name} ID: ({role.Id})")
@@ -155,41 +165,45 @@ namespace ModCore.Commands
                 .AddField("Data", $"Mentionable: {(role.IsMentionable ? "yes" : "no")}.\nHoisted: {(role.IsHoisted ? "yes" : "no")}.\nManaged: {(role.IsManaged ? "yes" : "no")}.")
                 .WithColor(role.Color);
 
-            await ctx.ElevatedRespondAsync(embed: embed);
-            await ctx.LogActionAsync();
+            if (!string.IsNullOrEmpty(role.IconUrl))
+                embed.WithThumbnail(role.IconUrl);
+
+            await context.ElevatedRespondAsync(embed: embed);
+            await context.LogActionAsync();
         }
 
         [Command("channel"), Aliases("c"), Description("Returns information about a specific channel."), CheckDisable]
-        public async Task ChannelInfoAsync(CommandContext ctx, [Description("Channel to get information about")]DiscordChannel channel)
+        public async Task ChannelInfoAsync(CommandContext context, [Description("Channel to get information about")]DiscordChannel channel)
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"#{channel.Name} ID: ({channel.Id})")
                 .WithDescription($"Topic: {channel.Topic}\nCreated at: {channel.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}" +
                 $"{(channel.ParentId != null ? $"\nChild of `{channel.Parent.Name.ToUpper()}` ID: ({channel.Parent.Id})" : "")}");
+
             if (channel.IsCategory)
             {
-                var cs = new StringBuilder();
+                var channelstring = new StringBuilder();
                 #region channel list string builder
-                foreach (var c in channel.Children)
+                foreach (var childchannel in channel.Children)
                 {
-                    switch (c.Type)
+                    switch (childchannel.Type)
                     {
                         case ChannelType.Text:
-                            cs.Append($"[`#{c.Name} (💬)`]");
+                            channelstring.Append($"[`#{childchannel.Name} (💬)`]");
                             break;
                         case ChannelType.Voice:
-                            cs.Append($"`[{c.Name} (🔈)]`");
+                            channelstring.Append($"`[{childchannel.Name} (🔈)]`");
                             break;
                         case ChannelType.Category:
-                            cs.Append($"`[{c.Name.ToUpper()} (📁)]`");
+                            channelstring.Append($"`[{childchannel.Name.ToUpper()} (📁)]`");
                             break;
                         default:
-                            cs.Append($"`[{c.Name} (❓)]`");
+                            channelstring.Append($"`[{childchannel.Name} (❓)]`");
                             break;
                     }
                 }
                 #endregion
-                embed.AddField("Children of category", cs.ToString());
+                embed.AddField("Children of category", channelstring.ToString());
             }
             if (channel.Type == ChannelType.Voice)
             {
@@ -198,8 +212,8 @@ namespace ModCore.Commands
             embed.AddField("Misc", $"NSFW: {(channel.IsNSFW ? "yes" : "no")}\n" +
                 $"{(channel.Type == ChannelType.Text ? $"Last message ID: {channel.LastMessageId}" : "")}");
 
-            await ctx.ElevatedRespondAsync(embed: embed);
-            await ctx.LogActionAsync();
+            await context.ElevatedRespondAsync(embed: embed);
+            await context.LogActionAsync();
         }
     }
 }

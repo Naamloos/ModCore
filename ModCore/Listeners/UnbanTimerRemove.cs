@@ -8,11 +8,11 @@ namespace ModCore.Listeners
     public class UnbanTimerRemove
     {
         [AsyncListener(EventTypes.GuildBanRemoved)]
-        public static async Task CommandError(ModCoreShard bot, GuildBanRemoveEventArgs e)
+        public static async Task CommandError(ModCoreShard bot, GuildBanRemoveEventArgs eventargs)
         {
-            var t = Timers.FindNearestTimer(TimerActionType.Unban, e.Member.Id, 0, e.Guild.Id, bot.Database);
-            if (t != null)
-                await Timers.UnscheduleTimerAsync(t, bot.Client, bot.Database, bot.SharedData);
+            var timer = Timers.FindNearestTimer(TimerActionType.Unban, eventargs.Member.Id, 0, eventargs.Guild.Id, bot.Database);
+            if (timer != null)
+                await Timers.UnscheduleTimerAsync(timer, bot.Client, bot.Database, bot.SharedData);
         }
     }
 }

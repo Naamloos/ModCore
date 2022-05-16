@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ModCore.Database;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ModCore.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20220509151704_RemoveBansWarninge")]
+    partial class RemoveBansWarninge
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -100,40 +102,6 @@ namespace ModCore.Migrations
                         .HasDatabaseName("mcore_database_info_meta_key_key");
 
                     b.ToTable("mcore_database_info");
-                });
-
-            modelBuilder.Entity("ModCore.Database.DatabaseLevel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Experience")
-                        .HasColumnType("integer")
-                        .HasColumnName("experience");
-
-                    b.Property<long>("GuildId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("channel_id");
-
-                    b.Property<DateTime>("LastXpGrant")
-                        .HasColumnType("timestamptz")
-                        .HasColumnName("last_xp_grant");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GuildId", "UserId")
-                        .IsUnique()
-                        .HasDatabaseName("mcore_levels_channel_id_user_id_key");
-
-                    b.ToTable("mcore_levels");
                 });
 
             modelBuilder.Entity("ModCore.Database.DatabaseModNote", b =>
@@ -327,10 +295,6 @@ namespace ModCore.Migrations
                         .HasColumnType("timestamptz")
                         .HasColumnName("created_at");
 
-                    b.Property<long>("GuildId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("guild_id");
-
                     b.Property<string>("Name")
                         .HasColumnType("text")
                         .HasColumnName("tagname");
@@ -341,9 +305,9 @@ namespace ModCore.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuildId", "ChannelId", "Name")
+                    b.HasIndex("ChannelId", "Name")
                         .IsUnique()
-                        .HasDatabaseName("mcore_tags_guild_id_channel_id_name_key");
+                        .HasDatabaseName("mcore_tags_channel_id_tag_name_key");
 
                     b.ToTable("mcore_tags");
                 });

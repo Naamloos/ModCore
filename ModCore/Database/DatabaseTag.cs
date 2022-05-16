@@ -9,11 +9,15 @@ namespace ModCore.Database
     public class DatabaseTag
     {
         #region Index
-        [Index("channel_id_tag_name_key", IsUnique = true, IsLocal = true)]
+        [Index("guild_id_channel_id_name_key", IsUnique = true, IsLocal = true)]
+        [Column("guild_id")]
+        public long GuildId { get; set; } = 0;
+
+        [Index("guild_id_channel_id_name_key", IsUnique = true, IsLocal = true)]
         [Column("channel_id")]
         public long ChannelId { get; set; }
         
-        [Index("channel_id_tag_name_key", IsUnique = true, IsLocal = true)]
+        [Index("guild_id_channel_id_name_key", IsUnique = true, IsLocal = true)]
         [Column("tagname")]
         public string Name { get; set; }
         #endregion

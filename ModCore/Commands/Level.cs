@@ -33,43 +33,65 @@ namespace ModCore.Commands
         }
 
         [GroupCommand]
-        public async Task ExecuteGroupAsync(CommandContext ctx,
+        public async Task ExecuteGroupAsync(CommandContext context,
             [RemainingText, Description("User to get level data from")] DiscordMember member = null)
         {
-            DiscordMember m = member;
-            if (m == null)
+            DiscordMember localmember = member;
+            if (localmember == null)
             {
-                m = ctx.Member;
+                localmember = context.Member;
             }
 
-            var xp = 0;
+            var experience = 0;
             var level = 0;
 
             using (var db = Database.CreateContext())
             {
-
-                if (db.UserDatas.Any(x => x.UserId == (long)m.Id))
+                var data = db.Levels.FirstOrDefault(x => x.UserId == (long)localmember.Id && x.GuildId == (long)context.Guild.Id);
+                if (data != null)
                 {
-                    var data = db.UserDatas.First(x => x.UserId == (long)m.Id).GetData();
-
-                    if (data.ServerExperience.ContainsKey(ctx.Guild.Id))
-                    {
-                        xp = data.ServerExperience[ctx.Guild.Id];
-                        level = Listeners.LevelUp.CalculateLevel(xp);
-                    }
+                    level = Listeners.LevelUp.CalculateLevel(data.Experience);
+                    experience = data.Experience;
                 }
             }
 
-            var levelupxp = Listeners.LevelUp.CalculateRequiredXp(level + 1) - xp;
+            var levelupxp = Listeners.LevelUp.CalculateRequiredXp(level + 1) - experience;
 
-            await ctx.RespondAsync($"**Currently, {(member == null ? "you are" : $"{member.DisplayName} is")} Level {level} with {xp} xp.**" +
+            await context.RespondAsync($"💫 **Currently, {(member == null ? "you are" : $"{member.DisplayName} is")} Level {level} with {experience} xp.**" +
                 $"\n{levelupxp} more xp is required to reach level {level + 1}.");
         }
 
         [Command("leaderboard"), Aliases("top", "lb", "board")]
-        public async Task LeaderboardAsync(CommandContext ctx)
+        public async Task LeaderboardAsync(CommandContext context)
         {
-            await ctx.RespondAsync("This feature has not yet been implemented. Please try again later!");
+            using (var db = Database.CreateContext()) 
+            {
+                var top10 = db.Levels.Where(x => x.GuildId == (long)context.Guild.Id)
+                    .OrderByDescending(x => x.Experience)
+                    .Take(10)
+                    .ToList();
+
+                var top10string = "";
+                int index = 1;
+                foreach(var leveldata in top10)
+                {
+                    top10string += $"{index}. <@{leveldata.UserId}>: Level " +
+                        $"{Listeners.LevelUp.CalculateLevel(leveldata.Experience)} ({leveldata.Experience} xp)";
+                    index++;
+                }
+
+                var embed = new DiscordEmbedBuilder()
+                    .WithTitle($"{context.Guild.Name} Level Leaderboard")
+                    .WithDescription($"These are the users with the most activity!")
+                    .WithColor(new DiscordColor())
+                    .AddField("Top 10", top10string);
+
+                var message = new DiscordMessageBuilder()
+                    .AddEmbed(embed)
+                    .WithReply(context.Message.Id, true, false);
+
+                await context.RespondAsync(message);
+            }
         }
     }
 }

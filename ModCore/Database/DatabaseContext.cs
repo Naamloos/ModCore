@@ -20,13 +20,12 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseRolestateOverride> RolestateOverrides { get; set; }
         public virtual DbSet<DatabaseRolestateRoles> RolestateRoles { get; set; }
         public virtual DbSet<DatabaseRolestateNick> RolestateNicks { get; set; }
-        public virtual DbSet<DatabaseWarning> Warnings { get; set; }
         public virtual DbSet<DatabaseTimer> Timers { get; set; }
         public virtual DbSet<DatabaseStarData> StarDatas { get; set; }
-        public virtual DbSet<DatabaseBan> Bans { get; set; }
         public virtual DbSet<DatabaseTag> Tags { get; set; }
         public virtual DbSet<DatabaseCommandId> CommandIds { get; set; }
         public virtual DbSet<DatabaseUserData> UserDatas { get; set; }
+        public virtual DbSet<DatabaseLevel> Levels { get; set; }
 
         public DatabaseProvider Provider { get; }
         private string ConnectionString { get; }

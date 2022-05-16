@@ -31,34 +31,6 @@ namespace ModCore.Entities
 
 		[JsonProperty("bot_id")]
 		public ulong BotId { get; private set; } = 359828546719449109;
-
-		[JsonProperty("dbl_token")]
-		public string DblToken { get; private set; }
-
-		[JsonProperty("bot_discord_pl_token")]
-		public string BotDiscordPlToken { get; private set; }
-
-		[JsonProperty("bot_lists_enabled")]
-        [Obsolete("I just use the separate enablers now.")]
-		public bool BotListsEnabled { get; private set; } = false;
-
-		[JsonProperty("botlist_pw_enable")]
-		public bool BotListPwEnable { get; private set; } = false;
-
-		[JsonProperty("botlist_org_enable")]
-		public bool BotListOrgEnable { get; private set; } = false;
-
-        [JsonProperty("discordbotlist_com_enable")]
-        public bool DiscordBotListComEnable { get; private set; } = false;
-
-        [JsonProperty("discordbotlist_com_token")]
-        public string DiscordBotListComToken { get; private set; }
-
-        [JsonProperty("botsondiscord_xyz_enable")]
-        public bool BotsOnDiscordXyzEnable { get; private set; } = false;
-
-        [JsonProperty("botsondiscord_xyz_token")]
-        public string BotsOnDiscordXyzToken { get; private set; }
     }
 
     public struct DatabaseSettings

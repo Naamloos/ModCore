@@ -21,95 +21,93 @@ namespace ModCore.Listeners
 	public class ErrorLog
 	{
 		[AsyncListener(EventTypes.CommandErrored)]
-		public static async Task CommandError(ModCoreShard bot, CommandErrorEventArgs e)
+		public static async Task CommandError(ModCoreShard bot, CommandErrorEventArgs eventargs)
 		{
-			var cfg = e.Context.GetGuildSettings() ?? new GuildSettings();
-			var ctx = e.Context;
+			var config = eventargs.Context.GetGuildSettings() ?? new GuildSettings();
+			var context = eventargs.Context;
 
-			if (await NotifyCommandDisabled(e, cfg, ctx)) return;
+			if (await NotifyCommandDisabled(eventargs, config, context)) return;
 
-			if (await NotifyCommandNotFound(bot, e, cfg, ctx)) return;
+			if (await NotifyCommandNotFound(bot, eventargs, config, context)) return;
 
-			await NotifyCommandErrored(e, cfg, ctx);
+			await NotifyCommandErrored(eventargs, config, context);
 		}
 
-		private static async Task NotifyCommandErrored(CommandErrorEventArgs e, GuildSettings cfg, CommandContext ctx)
+		private static async Task NotifyCommandErrored(CommandErrorEventArgs eventargs, GuildSettings config, CommandContext context)
 		{
-			var qualifiedName = e.Command.QualifiedName;
-			switch (cfg.CommandError.Chat)
+			var qualifiedName = eventargs.Command.QualifiedName;
+			switch (config.CommandError.Chat)
 			{
 				default:
 				case CommandErrorVerbosity.None:
-#if DEBUG
-					Console.WriteLine($"Oopsie woopsie! {e.Exception}");
-#endif
 					break;
 
 				case CommandErrorVerbosity.Name:
-					await ctx.SafeRespondAsync($"**Command {qualifiedName} Errored!**");
-#if DEBUG
-					Console.WriteLine($"Oopsie woopsie! {e.Exception}");
-#endif
+					await context.SafeRespondAsync($"⚠️ **Command {qualifiedName} Errored!**");
 					break;
 				case CommandErrorVerbosity.NameDesc:
-					await DescribeCommandErrorAsync(e.Exception, qualifiedName, ctx);
+					await DescribeCommandErrorAsync(eventargs.Exception, qualifiedName, context);
 					break;
 				case CommandErrorVerbosity.Exception:
 					var stream = new MemoryStream();
 					var writer = new StreamWriter(stream);
-					writer.Write(e.Exception.StackTrace);
+					writer.Write(eventargs.Exception.StackTrace);
 					writer.Flush();
 					stream.Position = 0;
-					await ctx.RespondAsync(x =>
+					await context.RespondAsync(x =>
 						x.WithFile("exception.txt", stream)
-						.WithContent($"**Command `{qualifiedName}` Errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}"));
+						.WithContent($"**Command `{qualifiedName}` Errored!**\n`{eventargs.Exception.GetType()}`:\n{eventargs.Exception.Message}"));
 					break;
 			}
 
-			if (cfg.ActionLog.Enable)
+			#if DEBUG
+				Console.WriteLine($"Oopsie woopsie! {eventargs.Exception}");
+			#endif
+
+			if (config.ActionLog.Enable)
 			{
-				switch (cfg.CommandError.ActionLog)
+				switch (config.CommandError.ActionLog)
 				{
 					default:
 					case CommandErrorVerbosity.None:
 						break;
 
 					case CommandErrorVerbosity.Name:
-						await ctx.LogMessageAsync($"**Command {qualifiedName} errored!**\n`{e.Exception.GetType()}`");
+						await context.LogMessageAsync($"**Command {qualifiedName} errored!**\n`{eventargs.Exception.GetType()}`");
 						break;
 					case CommandErrorVerbosity.NameDesc:
-						await ctx.LogMessageAsync(
-							$"**Command {qualifiedName} errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}");
+						await context.LogMessageAsync(
+							$"**Command {qualifiedName} errored!**\n`{eventargs.Exception.GetType()}`:\n{eventargs.Exception.Message}");
 						break;
 					case CommandErrorVerbosity.Exception:
-						var st = e.Exception.StackTrace;
+						var stacktrace = eventargs.Exception.StackTrace;
 
-						var inner = e.Exception.InnerException;
+						var inner = eventargs.Exception.InnerException;
 
 						while(inner != null)
                         {
-							st += $"\n\nINNER EXCEPTION OF PREVIOUS:\n{inner.StackTrace}";
+							stacktrace += $"\n\nINNER EXCEPTION OF PREVIOUS:\n{inner.StackTrace}";
 							inner = inner.InnerException;
                         }
 
-						st = st.Length > 1000 ? st.Substring(0, 1000) : st;
-						var b = new DiscordEmbedBuilder().WithDescription(st);
-						await ctx.LogMessageAsync(
-							$"**Command {qualifiedName} {e.Command.Overloads.First().Arguments} errored!**\n`{e.Exception.GetType()}`:\n{e.Exception.Message}",
+						stacktrace = stacktrace.Length > 1000 ? stacktrace.Substring(0, 1000) : stacktrace;
+						var b = new DiscordEmbedBuilder().WithDescription(stacktrace);
+						await context.LogMessageAsync(
+							$"⚠️ **Command {qualifiedName} {eventargs.Command.Overloads.First().Arguments} errored!**\n`{eventargs.Exception.GetType()}`:\n{eventargs.Exception.Message}",
 							b);
 						break;
 				}
 			}
 		}
 
-		private static async Task<bool> NotifyCommandNotFound(ModCoreShard bot, CommandErrorEventArgs e,
-			GuildSettings cfg, CommandContext ctx)
+		private static async Task<bool> NotifyCommandNotFound(ModCoreShard bot, CommandErrorEventArgs eventargs,
+			GuildSettings config, CommandContext context)
 		{
-			if (!(e.Exception is CommandNotFoundException commandNotFound)) return false;
+			if (!(eventargs.Exception is CommandNotFoundException commandNotFound)) return false;
 
 			// return instead of proceeding, since qualifiedName below this will throw
 			// (since there is no Command obj) 
-			if (!cfg.SpellingHelperEnabled) return true;
+			if (!config.SpellingHelperEnabled) return true;
 
 			// TODO: this only gives the first invalid token, so "a b" will just recognize as "a".
 			//       it should probably take into consideration all the tokens.
@@ -127,7 +125,7 @@ namespace ModCore.Listeners
 
 				for(int i = 0; i < everything.Count(); i++)
 				{
-					if (await CanExecute(everything[i], ctx))
+					if (await CanExecute(everything[i], context))
 						some_of_them.Add(everything[i]);
 				}
 
@@ -138,7 +136,7 @@ namespace ModCore.Listeners
 					.Take(1).ToArray();
 
                 var embed = new DiscordEmbedBuilder()
-                    .WithTitle("Command **" + attemptedName.Truncate(200) + "** not found")
+                    .WithTitle("⚠️ Command **" + attemptedName.Truncate(200) + "** not found!")
                     .WithDescription("Did you mean...");
 
                 foreach(var (qualifiedName, description) in ordered)
@@ -146,11 +144,11 @@ namespace ModCore.Listeners
                     embed.AddField(qualifiedName.Truncate(256), description?.Truncate(999) ?? "<no desc>");
                 }
 
-                await ctx.RespondAsync(embed: embed);
+                await context.RespondAsync(embed: embed);
 			}
 			catch (Exception ex)
 			{
-				e.Context.Client.Logger.Log(LogLevel.Critical, "CommandErrored", ex.ToString(),
+				eventargs.Context.Client.Logger.Log(LogLevel.Critical, "CommandErrored", ex.ToString(),
 					DateTime.Now);
 			}
 
@@ -158,32 +156,32 @@ namespace ModCore.Listeners
 
 		}
 
-		private static async Task<bool> CanExecute(Command cmd, CommandContext ctx)
+		private static async Task<bool> CanExecute(Command command, CommandContext context)
 		{
-			if (cmd.Parent != null)
-				return await CanExecute(cmd.Parent, ctx).ConfigureAwait(false);
+			if (command.Parent != null)
+				return await CanExecute(command.Parent, context).ConfigureAwait(false);
 
-			var fchecks = await cmd.RunChecksAsync(ctx, true).ConfigureAwait(false);
+			var fchecks = await command.RunChecksAsync(context, true).ConfigureAwait(false);
 			if (fchecks.Any())
 				return false;
 			return true;
 		}
 
-		private static async Task<bool> NotifyCommandDisabled(CommandErrorEventArgs e, GuildSettings cfg,
+		private static async Task<bool> NotifyCommandDisabled(CommandErrorEventArgs eventargs, GuildSettings config,
 			CommandContext ctx)
 		{
-			if (!(e.Exception is ChecksFailedException checksFailed) ||
+			if (!(eventargs.Exception is ChecksFailedException checksFailed) ||
 				!checksFailed.FailedChecks.Any(x => x is CheckDisableAttribute)) return false;
 
-			if (cfg.NotifyDisabledCommand)
+			if (config.NotifyDisabledCommand)
 			{
-				await ctx.ElevatedRespondAsync("Sorry! that command has been disabled in this guild.");
+				await ctx.ElevatedRespondAsync("⚠️ Sorry! that command has been disabled in this guild.");
 			}
 
 			return true;
 		}
 
-		public static async Task DescribeCommandErrorAsync(Exception ex, string cmd, CommandContext ctx)
+		public static async Task DescribeCommandErrorAsync(Exception ex, string command, CommandContext context)
 		{
 			if (ex is ChecksFailedException checksFailed)
 			{
@@ -206,13 +204,13 @@ namespace ModCore.Listeners
 				if (failed.Any(x => x is RequireBotPermissionsAttribute))
 					reasons.Add("I don't have the right permissions to execute this command");
 
-				var response = $"I couldn't execute `{cmd}` because ";
-				response += string.Join(" and ", reasons);
+				var response = $"⚠️ I couldn't execute `{command}` because ";
+				response += string.Join(" _and_ ", reasons);
 				response += "!";
-				await ctx.SafeRespondUnformattedAsync(response);
+				await context.SafeRespondUnformattedAsync(response);
 				return;
 			}
-			await ctx.SafeRespondAsync($"**Command {cmd} Errored!**\n{ex.Message}");
+			await context.SafeRespondAsync($"⚠️ Command {command} Errored!\n{ex.Message}");
 		}
 	}
 }
