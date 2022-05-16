@@ -16,7 +16,9 @@ using ModCore.Logic.Extensions;
 using ModCore.Logic.Utils;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text;
@@ -1160,5 +1162,78 @@ namespace ModCore.Commands
             }
             await context.RespondAsync($"⚠️ Invalid cooldown: {cooldown}");
         }
+
+        [Command("yoink")]
+        [Description("Copies an emoji from a different server to this one")]
+        [RequirePermissions(Permissions.ManageEmojis)]
+		public async Task YoinkAsync(CommandContext ctx, DiscordEmoji emoji, [RemainingText]string name = "")
+        {
+			if(!emoji.ToString().StartsWith('<'))
+            {
+				await ctx.RespondAsync("⚠️ This is not a valid guild emoji!");
+				return;
+            }				
+			await stealieEmoji(ctx, string.IsNullOrEmpty(name)? emoji.Name : name, emoji.Id, emoji.IsAnimated);
+		}
+
+		const string EMOJI_REGEX = @"<a?:(.+?):(\d+)>";
+        [Command("yoink")]
+		[RequirePermissions(Permissions.ManageEmojis)]
+		public async Task YoinkAsync(CommandContext ctx, int index = 1)
+        {
+			if(ctx.Message.ReferencedMessage != null)
+            {
+				var matches = Regex.Matches(ctx.Message.ReferencedMessage.Content, EMOJI_REGEX);
+				if(matches.Count < index || index < 1)
+                {
+					await ctx.RespondAsync("⚠️ Referenced emoji not found!");
+					return;
+                }
+
+				var split = matches[index-1].Groups[2].Value;
+				var emojiName = matches[index-1].Groups[1].Value;
+				var animated = matches[index-1].Value.StartsWith("<a");
+
+				if (ulong.TryParse(split, out ulong emoji_id))
+                {
+					await stealieEmoji(ctx, emojiName, emoji_id, animated);
+					return;
+                }
+                else
+                {
+					await ctx.RespondAsync("⚠️ Failed to fetch your new emoji.");
+					return;
+				}
+            }
+			await ctx.RespondAsync("⚠️ You need to reply to an existing message to use this command!");
+		}
+
+		[Command("yeet")]
+		[Description("Deletes an emoji from this server.")]
+		[RequirePermissions(Permissions.ManageEmojis)]
+		public async Task YeetAsync(CommandContext ctx, DiscordEmoji emoji)
+		{
+			try
+			{
+				var guildEmoji = await ctx.Guild.GetEmojiAsync(emoji.Id);
+				await ctx.Guild.DeleteEmojiAsync(guildEmoji);
+				await ctx.RespondAsync($"⚠️ Deleted emoji {emoji.Name}!");
+			}
+			catch (Exception) 
+			{
+				await ctx.RespondAsync("⚠️ This emoji does not belong to this server!");
+			} 
+		}
+
+		private async Task stealieEmoji(CommandContext ctx, string name, ulong id, bool animated)
+        {
+			using HttpClient _client = new HttpClient();
+			var downloadedEmoji = await _client.GetStreamAsync($"https://cdn.discordapp.com/emojis/{id}.{(animated ? "gif" : "png")}");
+			using MemoryStream memory = new MemoryStream();
+			downloadedEmoji.CopyTo(memory);
+			downloadedEmoji.Dispose();
+			var newEmoji = await ctx.Guild.CreateEmojiAsync(name, memory);
+			await ctx.RespondAsync($"✅ Yoink! This emoji has been added to your server: {newEmoji.ToString()}");
+		}
     }
 }
