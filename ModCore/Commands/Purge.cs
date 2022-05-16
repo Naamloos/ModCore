@@ -27,32 +27,37 @@ namespace ModCore.Commands
 		}
 
 		[GroupCommand, Description("Delete an amount of messages from the current channel.")]
-		public async Task ExecuteGroupAsync(CommandContext ctx, [Description("Amount of messages to remove (max 100)")]int limit = 50,
+		public async Task ExecuteGroupAsync(CommandContext context, [Description("Amount of messages to remove (max 100)")]int limit = 50,
 			[Description("Amount of messages to skip")]int skip = 0)
 		{
-			IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync(limit));
+			await context.Message.DeleteAsync();
+			IEnumerable<DiscordMessage> messages = (await context.Channel.GetMessagesAsync(limit));
 			messages = messages.Skip(skip);
-			messages = messages.Where(x => DateTimeOffset.Now.Subtract(x.CreationTimestamp).TotalDays < 14);
+			messages = messages.Where(x => DateTimeOffset.Now.Subtract(x.CreationTimestamp).TotalDays < 14).ToList();
 
 			if (!messages.Any()) 
 			{
-				await ctx.SafeRespondUnformattedAsync("⚠️ No messages were deleted. Do take in mind messages that are at least 14 days old can not be purged.");
+				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted. Do take in mind messages that are at least 14 days old can not be purged.");
 				return;
 			}
 
-			var resp = await ctx.SafeRespondUnformattedAsync("✅ Latest messages deleted.");
-			await ctx.Channel.DeleteMessagesAsync(messages, "Purged messages.");
+			await context.Channel.DeleteMessagesAsync(messages,
+				$"Purged messages in #{context.Channel.Name}.");
+
+			var resp = await context.SafeRespondUnformattedAsync("✅ Latest messages deleted.");
 			await Task.Delay(2000);
 			await resp.DeleteAsync("Purge command executed.");
-			await ctx.Message.DeleteAsync("Purge command executed.");
+			await context.Message.DeleteAsync("Purge command executed.");
 
-			await ctx.LogActionAsync($"Purged messages.\nChannel: #{ctx.Channel.Name} ({ctx.Channel.Id})");
+			await context.LogActionAsync($"Purged messages.\nChannel: #{context.Channel.Name} ({context.Channel.Id})");
 		}
 
 		[Command("user"), Description("Delete an amount of messages by an user."), Aliases("u", "pu"), CheckDisable]
 		public async Task PurgeUserAsync(CommandContext context, [Description("User to delete messages from")]DiscordUser user,
 		[Description("Amount of messages to remove (max 100)")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
 		{
+			await context.Message.DeleteAsync();
+
 			IEnumerable<DiscordMessage> messages = (await context.Channel.GetMessagesAsync(limit));
 			messages = messages.Skip(skip);
 			messages = messages.Where(x => DateTimeOffset.Now.Subtract(x.CreationTimestamp).TotalDays < 14);
@@ -82,6 +87,8 @@ namespace ModCore.Commands
 		public async Task PurgeRegexpAsync(CommandContext context, [Description("Your regex")] string regex,
 		[Description("Amount of messages to remove (max 100)")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
 		{
+			await context.Message.DeleteAsync();
+
 			// TODO add a flag to disable CultureInvariant.
 			var regexOptions = RegexOptions.CultureInvariant;
 			// kept here for displaying in the result
@@ -196,6 +203,8 @@ namespace ModCore.Commands
 	 RequirePermissions(Permissions.ManageMessages), CheckDisable]
 		public async Task CleanAsync(CommandContext context)
 		{
+			await context.Message.DeleteAsync();
+
 			var guildsettings = context.GetGuildSettings() ?? new GuildSettings();
 			var prefix = guildsettings?.Prefix ?? Shared.DefaultPrefix;
 
@@ -224,6 +233,8 @@ namespace ModCore.Commands
 	 RequirePermissions(Permissions.ManageMessages), CheckDisable]
 		public async Task PurgeBotsAsync(CommandContext context)
 		{
+			await context.Message.DeleteAsync();
+
 			var guildsettings = context.GetGuildSettings() ?? new GuildSettings();
 			var prefix = guildsettings?.Prefix ?? Shared.DefaultPrefix;
 
@@ -251,6 +262,8 @@ namespace ModCore.Commands
 	 RequirePermissions(Permissions.ManageMessages), CheckDisable]
 		public async Task PurgeImagesAsync(CommandContext context)
 		{
+			await context.Message.DeleteAsync();
+
 			var ms = await context.Channel.GetMessagesBeforeAsync(context.Message.Id, 100);
 			Regex ImageRegex = new Regex(@"\.(png|gif|jpg|jpeg|tiff|webp)");
 
