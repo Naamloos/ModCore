@@ -42,6 +42,8 @@ namespace ModCore.Commands
             {
                 await context.RespondAsync($"🏷 `{name}`:\n\n{tag.Contents}");
             }
+
+            await context.SafeRespondAsync($"⚠️ No such tag exists!");
         }
 
         [Priority(1)]
@@ -207,7 +209,7 @@ namespace ModCore.Commands
 
                 if (list.Count() < 1)
                 {
-                    await ctx.SafeRespondUnformattedAsync("This channel has no tags!");
+                    await ctx.SafeRespondUnformattedAsync("⚠️ This channel has no tags!");
                 }
                 else
                 {

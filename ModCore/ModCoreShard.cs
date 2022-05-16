@@ -138,7 +138,8 @@ namespace ModCore
 
         private async Task Client_Ready(DiscordClient c, ReadyEventArgs e)
         {
-            await c.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
+            //await c.UpdateStatusAsync(new DiscordActivity($"over {this.Settings.ShardCount} shard" + (this.Settings.ShardCount > 1 ? "s!" : "!"), ActivityType.Watching));
+            await c.UpdateStatusAsync(new DiscordActivity($"over {c.Guilds.Count} servers! (shard {this.ShardId})", ActivityType.Watching));
         }
 
         public Task RunAsync() =>

@@ -107,7 +107,7 @@ namespace ModCore.Commands
 			var app = context.Client.CurrentApplication;
 			if (app.IsPublic != null && (bool)app.IsPublic)
 				await context.SafeRespondAsync(
-					$"Add ModCore to your server!\n<https://modcore.naamloos.dev/info/invite>");
+					$"🛡️ Add ModCore to your server!\n<https://modcore.naamloos.dev/info/invite>");
 			else
 				await context.SafeRespondUnformattedAsync("⚠️ I'm sorry Mario, but this instance of ModCore has been set to private!");
 		}
