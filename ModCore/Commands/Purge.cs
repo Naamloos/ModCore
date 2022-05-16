@@ -44,7 +44,7 @@ namespace ModCore.Commands
 			await context.Channel.DeleteMessagesAsync(messages,
 				$"Purged messages in #{context.Channel.Name}.");
 
-			var resp = await context.SafeRespondUnformattedAsync("✅ Latest messages deleted.");
+			var resp = await context.SafeRespondUnformattedAsync($"✅ {messages.Count()} messages were deleted.");
 			await Task.Delay(2000);
 			await resp.DeleteAsync("Purge command executed.");
 			await context.Message.DeleteAsync("Purge command executed.");
@@ -71,7 +71,7 @@ namespace ModCore.Commands
 
 			await context.Channel.DeleteMessagesAsync(messages,
 				$"Purged messages by {user?.Username}#{user?.Discriminator} (ID:{user?.Id})");
-			var response = await context.SafeRespondAsync($"✅ Latest messages by {user?.Mention} (ID:{user?.Id}) deleted.");
+			var response = await context.SafeRespondAsync($"✅ {messages.Count()} messages by {user?.Mention} (ID:{user?.Id}) deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Purge command executed.");
 			await context.Message.DeleteAsync("Purge command executed.");
@@ -186,7 +186,7 @@ namespace ModCore.Commands
 			}
 
 			var resultString =
-				$"✅ Purged {messages.Count()} messages by /{regex.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
+				$"✅ {messages.Count()} messages were deleted by /{regex.Replace("/", @"\/").Replace(@"\", @"\\")}/{flags}";
 
 			await context.Channel.DeleteMessagesAsync(messages, resultString);
 
@@ -221,7 +221,7 @@ namespace ModCore.Commands
 			await context.Channel.DeleteMessagesAsync(messages,
 				"Clean command executed.");
 
-			var response = await context.SafeRespondUnformattedAsync("✅ Latest messages deleted.");
+			var response = await context.SafeRespondUnformattedAsync($"✅ {messages.Count()} messages deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Clean command executed.");
 			await context.Message.DeleteAsync("Clean command executed.");
@@ -250,7 +250,7 @@ namespace ModCore.Commands
 
 			await context.Channel.DeleteMessagesAsync(messages, "Cleaned up bot messages.");
 
-			var response = await context.SafeRespondUnformattedAsync("✅ Latest messages deleted.");
+			var response = await context.SafeRespondUnformattedAsync($"✅ {messages.Count()} messages deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Purge bot command executed.");
 			await context.Message.DeleteAsync("Purge bot command executed.");
@@ -279,7 +279,7 @@ namespace ModCore.Commands
 
 			await context.Channel.DeleteMessagesAsync(messages, "Cleaned up messages with images.");
 
-			var response = await context.SafeRespondUnformattedAsync("✅ Latest messages deleted.");
+			var response = await context.SafeRespondUnformattedAsync($"✅ {messages.Count()} messages deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Image purge command executed.");
 			await context.Message.DeleteAsync("Image purge command executed.");
