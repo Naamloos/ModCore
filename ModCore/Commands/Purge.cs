@@ -174,7 +174,7 @@ namespace ModCore.Commands
 
 			if (!messages.Any())
 			{
-				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted.");
+				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted. Do take in mind messages that are at least 14 days old can not be purged.");
 				return;
 			}
 
@@ -205,7 +205,7 @@ namespace ModCore.Commands
 
 			if (!messages.Any())
 			{
-				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted.");
+				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted. Do take in mind messages that are at least 14 days old can not be purged.");
 				return;
 			}
 
@@ -233,7 +233,7 @@ namespace ModCore.Commands
 
 			if (!messages.Any())
 			{
-				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted.");
+				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted. Do take in mind messages that are at least 14 days old can not be purged.");
 				return;
 			}
 
@@ -260,7 +260,7 @@ namespace ModCore.Commands
 
 			if (!messages.Any())
 			{
-				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted.");
+				await context.SafeRespondUnformattedAsync("⚠️ No messages were deleted. Do take in mind messages that are at least 14 days old can not be purged.");
 				return;
 			}
 
