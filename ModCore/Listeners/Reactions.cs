@@ -218,8 +218,8 @@ namespace ModCore.Listeners
             var embed = new DiscordEmbedBuilder()
                 .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}",
                 iconUrl: (string.IsNullOrEmpty(message.Author.AvatarHash) ? message.Author.DefaultAvatarUrl : message.Author.AvatarUrl))
-                .WithDescription($"ID: {message.Id}")
-                .AddField("Content", message.Content.Truncate(1000))
+                .WithDescription(message.Content.Truncate(1000))
+                .WithFooter($"ID: {message.Id}")
                 .WithTimestamp(message.Id);
 
             // This is shit code kek
