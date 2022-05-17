@@ -44,6 +44,7 @@ namespace ModCore.Listeners
                         .WithAuthor($"{eventargs.Message.Author.Username}",
                             iconUrl: eventargs.Message.Author.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
                         .AddField("Content", eventargs.Message != null ? eventargs.Message.Content.Truncate(1000) : "Original Content Unknown.")
+                        .AddField("Channel", eventargs.Message.Channel.Mention)
                         .WithColor(DiscordColor.Orange);
                 await channel.ElevatedMessageAsync(embed);
             }
@@ -79,6 +80,7 @@ namespace ModCore.Listeners
                             iconUrl: eventargs.Author.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
                         .AddField("Original Message", eventargs.MessageBefore != null ? eventargs.MessageBefore.Content.Truncate(1000) : "Original Content Unknown.")
                         .AddField("Edited Message", eventargs.Message.Content.Truncate(1000))
+                        .AddField("Channel", eventargs.Message.Channel.Mention)
                         .WithColor(DiscordColor.Orange);
                 await channel.ElevatedMessageAsync(embed);
             }

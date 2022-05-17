@@ -33,10 +33,11 @@ namespace ModCore.Listeners
                     .WithColor(DiscordColor.Sienna);
                     await channel.ElevatedMessageAsync(embed);
                 }
+                return;
             }
             if(cfg.Logging.AvatarLog_Enable)
             {
-                if (eventargs.AvatarHashBefore != eventargs.AvatarHashAfter)
+                if (eventargs.AvatarHashBefore != eventargs.AvatarHashAfter && eventargs.AvatarHashBefore != null)
                 {
                     var embed = new DiscordEmbedBuilder()
                         .WithTitle("Member Avatar Updated")

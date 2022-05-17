@@ -1293,6 +1293,7 @@ namespace ModCore.Commands
         [Command("offtopic")]
         [Description("Moves off-topic chat to an appropriate channel.")]
         [Cooldown(1, 60 * 5, CooldownBucketType.Guild)]
+        [RequirePermissions(Permissions.ManageMessages | Permissions.ManageWebhooks)]
 		public async Task OffTopicAsync(CommandContext ctx, DiscordChannel channel, int limit, params DiscordMember[] members)
         {
 			IEnumerable<DiscordMessage> messages = await ctx.Channel.GetMessagesAsync(100);
