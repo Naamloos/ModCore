@@ -37,7 +37,7 @@ namespace ModCore.Listeners
             }
             if(cfg.Logging.AvatarLog_Enable)
             {
-                if (eventargs.AvatarHashBefore != eventargs.AvatarHashAfter && eventargs.AvatarHashBefore != null)
+                if (!string.IsNullOrEmpty(eventargs.AvatarHashAfter))
                 {
                     var embed = new DiscordEmbedBuilder()
                         .WithTitle("Member Avatar Updated")
