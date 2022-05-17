@@ -78,7 +78,6 @@ namespace ModCore.Commands
             embed.WithThumbnail(member.GetGuildAvatarUrl(ImageFormat.Auto));
 
             await context.ElevatedRespondAsync(embed: embed);
-            await context.LogActionAsync();
         }
 
         [Command("guild"), Aliases("g"), Description("Returns information about this guild."), CheckDisable]
@@ -152,7 +151,6 @@ namespace ModCore.Commands
                 await context.SafeRespondUnformattedAsync("Okay, I'm not sending the embed.");
                 #endregion
             }
-            await context.LogActionAsync();
         }
 
         [Command("role"), Aliases("r"), Description("Returns information about a specific role."), CheckDisable]
@@ -169,7 +167,6 @@ namespace ModCore.Commands
                 embed.WithThumbnail(role.IconUrl);
 
             await context.ElevatedRespondAsync(embed: embed);
-            await context.LogActionAsync();
         }
 
         [Command("channel"), Aliases("c"), Description("Returns information about a specific channel."), CheckDisable]
@@ -213,7 +210,6 @@ namespace ModCore.Commands
                 $"{(channel.Type == ChannelType.Text ? $"Last message ID: {channel.LastMessageId}" : "")}");
 
             await context.ElevatedRespondAsync(embed: embed);
-            await context.LogActionAsync();
         }
     }
 }

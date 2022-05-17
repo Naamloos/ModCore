@@ -40,11 +40,13 @@ namespace ModCore.Commands
                     var muted = gcfg.MuteRoleId != 0 ? ctx.Guild.GetRole(gcfg.MuteRoleId) : null;
                     embed.AddField("Muted Role", muted != null ? muted.Mention : "Not configured or missing", true);
 
-                    var actionlog = gcfg.ActionLog;
-                    embed.AddField("Action Log",
-                        actionlog.Enable
-                            ? "Enabled" + (actionlog.WebhookId == 0 ? ", but not configured!" : "")
-                            : "Disabled");
+                    var logs = gcfg.Logging;
+                    embed.AddField("Logging",
+                        $"Member join/leave: " + (logs.JoinLog_Enable ? "Enabled" : "Disabled") +
+                        $"\nMessage edits: " + (logs.EditLog_Enable ? "Enabled" : "Disabled") +
+                        $"\nAvatar edits: " + (logs.AvatarLog_Enable ? "Enabled" : "Disabled") +
+                        $"\nNickname edits: " + (logs.NickameLog_Enable ? "Enabled" : "Disabled")
+                        );
 
                     var autorole = gcfg.AutoRole;
                     embed.AddField("Auto Role",
@@ -145,12 +147,6 @@ namespace ModCore.Commands
                     embed.AddField("Command Suggestions",
                         suggestions ? "Enabled" : "Disabled", true);
 
-                    var joinlog = gcfg.JoinLog;
-                    embed.AddField("Join Logging",
-                        joinlog.Enable
-                            ? "Enabled" + (joinlog.ChannelId == 0 ? ", but no channel configured!" : "")
-                            : "Disabled", true);
-
                     if (gcfg.SelfRoles.Any())
                     {
                         var roles = gcfg.SelfRoles
@@ -162,127 +158,6 @@ namespace ModCore.Commands
                     }
                     await ctx.ElevatedRespondAsync(embed: embed.Build());
                 });
-        }
-
-        [Command("setup"), Description("Sets up this guild's config.")]
-        [RequireBotPermissions(Permissions.ManageWebhooks | Permissions.ManageRoles | Permissions.ManageGuild)]
-        public async Task SetupAsync(CommandContext ctx)
-        {
-            var hassettings = ctx.GetGuildSettings() != null;
-            DiscordMessage t0;
-
-            if (hassettings)
-            {
-                t0 = await ctx.SafeRespondUnformattedAsync(
-                        "Welcome to ModCore! Looks like you already configured your guild." +
-                        "Would you like to go through the setup again? (Y/N)");
-            }
-            else
-            {
-                t0 = await ctx.SafeRespondUnformattedAsync(
-                        "Welcome to ModCore! This server has not been set up yet." +
-                        "Would you like to go through the setup? (Y/N)");
-            }
-
-            var res = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
-                    TimeSpan.FromSeconds(40));
-
-            var message = res.TimedOut ? null : res.Result;
-
-            if (!message.Content.EqualsIgnoreCase("y") &&
-                !message.Content.EqualsIgnoreCase("yes") &&
-                !message.Content.EqualsIgnoreCase("ya") &&
-                !message.Content.EqualsIgnoreCase("ja") &&
-                !message.Content.EqualsIgnoreCase("da"))
-            {
-                await ctx.SafeRespondUnformattedAsync(
-                    "OK, I won't bother you anymore. Just execute this command again if you need help configuring.");
-                await t0.DeleteAsync("modcore cleanup after itself: welcome message");
-                await message.DeleteAsync(
-                    "modcore cleanup after itself: user response to welcome message");
-                return;
-            }
-
-            DiscordChannel channel;
-            try
-            {
-                channel =
-                    ctx.Guild.Channels.FirstOrDefault(e => e.Value.Name == "modcore-setup").Value ??
-                    await ctx.Guild.CreateChannelAsync("modcore-setup", ChannelType.Text, reason: "modcore setup channel creation");
-            }
-            catch
-            {
-                await ctx.SafeRespondUnformattedAsync("Unfortunately, I wasn't able to create the modcore setup channel.\n" +
-                                       "Could you kindly create a channel called `modcore-setup` and re-run the command?\n" +
-                                       "I'll set up the rest for you. This will help keep the setup process away from prying eyes.");
-                return;
-            }
-            await channel.AddOverwriteAsync(ctx.Guild.EveryoneRole, Permissions.None,
-                Permissions.AccessChannels, "modcore overwrites for setup channel");
-            await channel.AddOverwriteAsync(ctx.Member, Permissions.AccessChannels, Permissions.None,
-                "modcore overwrites for setup channel");
-            await channel.AddOverwriteAsync(ctx.Guild.CurrentMember, Permissions.AccessChannels, Permissions.None,
-                "modcore overwrites for setup channel");
-
-            await channel.ElevatedMessageAsync(
-                "OK, now, can you create a webhook for ModCore and give me its URL?\n" +
-                "If you don't know what that is, simply say no and I'll make one for you.");
-
-            var res2 = await Interactivity.WaitForMessageAsync(e => e.Author.Id == ctx.Message.Author.Id,
-                TimeSpan.FromSeconds(40));
-            var message2 = res2.TimedOut ? null : res2.Result;
-
-            var mContent = message2.Content;
-            if (!mContent.Contains("discordapp.com/api/webhooks/"))
-            {
-                await channel.ElevatedMessageAsync("Alright, I'll make a webhook for you then. Sit tight...");
-                DiscordChannel logChannel;
-                try
-                {
-                    logChannel =
-                        ctx.Guild.Channels.FirstOrDefault(e => e.Value.Name == "modlog").Value ??
-                        await ctx.Guild.CreateChannelAsync("modlog", ChannelType.Text, reason: "ModCore Logging channel.");
-                }
-                catch
-                {
-                    await ctx.SafeRespondUnformattedAsync("Unfortunately, I wasn't able to create the modcore logging channel.\n" +
-                                           "Could you kindly create a channel called `modlog` and re-run the command?\n" +
-                                           "I'll set up the rest for you. This is to setup a channel for the actionlog to post into.");
-                    return;
-                }
-
-                var webhook = await logChannel.CreateWebhookAsync("ModCore Logging", reason: "Created webhook to post log messages");
-
-                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                cfg.ActionLog.WebhookId = webhook.Id;
-                cfg.ActionLog.WebhookToken = webhook.Token;
-                await ctx.SetGuildSettingsAsync(cfg);
-            }
-            else
-            {
-                var tokens = mContent
-                    .Substring(mContent.IndexOfInvariant("/api/webhooks/") + "/api/webhooks/".Length)
-                    .Split('/');
-
-                var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-                cfg.ActionLog.WebhookId = ulong.Parse(tokens[0]);
-                cfg.ActionLog.WebhookToken = tokens[1];
-                await ctx.SetGuildSettingsAsync(cfg);
-            }
-            await channel.ElevatedMessageAsync(
-                    "Webhook configured. Looks like you're all set! ModCore has been set up." +
-                    "\nThis channel will be deleted in 30 seconds...");
-
-            await Task.Delay(TimeSpan.FromSeconds(30));
-
-            try
-            {
-                await channel.DeleteAsync();
-            }
-            catch (Exception)
-            {
-                await channel.ElevatedMessageAsync("Failed to delete the channel.\nPlease try to do so yourself.");
-            }
         }
 
         [Command("reset"), Description("Resets this guild's configuration to initial state. This cannot be reversed.")]

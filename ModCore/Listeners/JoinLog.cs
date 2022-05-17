@@ -28,20 +28,21 @@ namespace ModCore.Listeners
             }
 
 			DiscordChannel channel;
-			if (config.JoinLog.Enable)
+			if (config.Logging.JoinLog_Enable)
 			{
 				var m = eventargs.Member;
-				channel = eventargs.Guild.GetChannel(config.JoinLog.ChannelId);
+				channel = eventargs.Guild.GetChannel(config.Logging.ChannelId);
 				if (channel != null)
 				{
+					var newUser = DateTimeOffset.Now.Subtract(m.CreationTimestamp.DateTime).TotalDays < 30;
 					var embed = new DiscordEmbedBuilder()
 						.WithTitle("New member joined")
-						.WithDescription($"ID: ({m.Id})")
+						.WithDescription($"ID: ({m.Id})" + (newUser? "\n\n⚠️ This is a very new user!" : ""))
 						.WithAuthor($"{m.Username}#{m.Discriminator}",
 							iconUrl: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
 						.AddField("Join Date", $"{m.JoinedAt.DateTime}")
 						.AddField("Register Date", $"{m.CreationTimestamp.DateTime}")
-						.WithColor(DiscordColor.Green);
+						.WithColor(newUser ? DiscordColor.Red : DiscordColor.Green);
 					await channel.ElevatedMessageAsync(embed);
 				}
 			}
@@ -145,11 +146,11 @@ namespace ModCore.Listeners
 			using (var db = bot.Database.CreateContext())
 				config = eventargs.Guild.GetGuildSettings(db);
 			
-			if (config == null || !config.JoinLog.Enable)
+			if (config == null || !config.Logging.JoinLog_Enable)
 				return;
 
 			var member = eventargs.Member;
-			var channel = eventargs.Guild.GetChannel(config.JoinLog.ChannelId);
+			var channel = eventargs.Guild.GetChannel(config.Logging.ChannelId);
 
 			if (channel == null)
 				return;
@@ -166,7 +167,7 @@ namespace ModCore.Listeners
 			embed
 				.AddField("Leave Date", $"{DateTime.Now}")
 				.AddField("Register Date", $"{member.CreationTimestamp.DateTime}")
-				.WithColor(DiscordColor.Red);
+				.WithColor(DiscordColor.LightGray);
 
 			await channel.ElevatedMessageAsync(embed);
 		}

@@ -826,63 +826,96 @@ namespace ModCore.Commands
             Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
         }
 
-		[Group("actionlog"), Aliases("al"), Description("ActionLog configuration commands.")]
+		[Group("logs"), Aliases("log", "l"), Description("ActionLog configuration commands.")]
 		public class ActionLog : BaseCommandModule
         {
-			ref bool GetSetting(GuildSettings cfg) => ref cfg.ActionLog.Enable;
-
-            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
-
-            string EnabledState => "Enabled";
-            string DisabledState => "Disabled";
-
-            [GroupCommand, Description("Sets whether this module is enabled or not.")]
-            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
-            "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
-            "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
-        )] bool? enableOrDisable = null)
+            public SharedData Shared;
+            public ActionLog(SharedData shared)
             {
-                // we can't access ref inside an async method, so make a copy
-                var resultingVariable = false;
-
-                await ctx.WithGuildSettings(cfg =>
-                {
-                    ref var configVariable = ref GetSetting(cfg);
-
-                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
-                });
-
-                if (resultingVariable)
-                    await AfterEnable(ctx);
-                else
-                    await AfterDisable(ctx);
-
-                // if toggling, tell the user what the new value is
-                if (!enableOrDisable.HasValue)
-                    await ctx.ElevatedRespondAsync(
-                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
-
-                await ctx.Message.CreateReactionAsync(Config.CheckMark);
+                Shared = shared;
             }
 
-            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
+            [GroupCommand, Description("Sets whether this module is enabled or not.")]
+            public async Task ExecuteGroupAsync(CommandContext context)
+            {
+                var prefix = context.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
+                var commandstring = "help config logs";
+                var commandobject = context.CommandsNext.FindCommand(commandstring, out string args);
+                var fakecontext = context.CommandsNext.CreateFakeContext(context.Member, context.Channel, commandstring, prefix, commandobject, args);
+                await context.CommandsNext.ExecuteCommandAsync(fakecontext);
+            }
 
-            Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
-				"ActionLog enabled.\n" +
-				"If you haven't done this yet, Please execute the `config actionlog setwebhook` command.");
-
-			[Command("setwebhook"), Aliases("webhook", "hook", "swh"),
-			 Description("Sets the webhook ID and token for this guild's action log.")]
-			public async Task SetWebhookAsync(CommandContext ctx, [Description("Webhook ID")]ulong id, [Description("Webhook token")]string token)
+			[Command("setchannel"), Aliases("sc"),
+			 Description("Sets the channel for this guild's log.")]
+			public async Task SetWebhookAsync(CommandContext ctx, [Description("Channel to post logs to")]DiscordChannel channel)
 			{
 				await ctx.WithGuildSettings(cfg =>
 				{
-					cfg.ActionLog.WebhookId = id;
-					cfg.ActionLog.WebhookToken = token;
+					cfg.Logging.ChannelId = channel.Id;
 				});
-				await ctx.ElevatedRespondAsync("ActionLog webhook configured.");
+				await ctx.ElevatedRespondAsync("Log channel configured.");
 			}
-		}
+
+            [Command("avatar"), Aliases("a")]
+            public async Task SetAvatarLogAsync(CommandContext ctx, bool enabled)
+            {
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    cfg.Logging.AvatarLog_Enable = enabled;
+                });
+                await ctx.ElevatedRespondAsync("✅");
+            }
+
+            [Command("join"), Aliases("j")]
+            public async Task SetJoinlogAsync(CommandContext ctx, bool enabled)
+            {
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    cfg.Logging.JoinLog_Enable = enabled;
+                });
+                await ctx.ElevatedRespondAsync("✅");
+            }
+
+            [Command("nickname"), Aliases("n")]
+            public async Task SetNicknameLogAsync(CommandContext ctx, bool enabled)
+            {
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    cfg.Logging.NickameLog_Enable = enabled;
+                });
+                await ctx.ElevatedRespondAsync("✅");
+            }
+
+            [Command("edit"), Aliases("e")]
+            public async Task SetEditLogAsync(CommandContext ctx, bool enabled)
+            {
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    cfg.Logging.EditLog_Enable = enabled;
+                });
+                await ctx.ElevatedRespondAsync("✅");
+            }
+
+            [Command("invite"), Aliases("i")]
+            public async Task SetInviteLogAsync(CommandContext ctx, bool enabled)
+            {
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    cfg.Logging.InviteLog_Enable = enabled;
+                });
+                await ctx.ElevatedRespondAsync("✅");
+            }
+
+            [Command("moderation"), Aliases("m", "mod")]
+            public async Task SetModerationAsync(CommandContext ctx, bool enabled)
+            {
+                await ctx.WithGuildSettings(cfg =>
+                {
+                    cfg.Logging.ModLog_Enable = enabled;
+                });
+                await ctx.ElevatedRespondAsync("✅");
+            }
+        }
 
 		[Group("autorole"), Aliases("ar"), Description("AutoRole configuration commands.")]
 		public class AutoRole : BaseCommandModule
@@ -941,22 +974,13 @@ namespace ModCore.Commands
 		[Group("error"), Aliases("er"), Description("Error verbosity configuration commands.")]
 		public class ErrorVerbosity : BaseCommandModule
 		{
-			[Command("chat"), Aliases("c"), Description("Sets command error reporting for this guild (in chat).")]
+			[GroupCommand, Description("Sets command error reporting for this guild (in chat).")]
 			public async Task ChatAsync(CommandContext ctx, [Description("New error verbosity")]string verbosity)
 			{
 				if (!await TryGetVerbosity(ctx, verbosity, out var vb)) return;
 				
 				await ctx.WithGuildSettings(cfg => cfg.CommandError.Chat = vb);
 				await ctx.ElevatedRespondAsync($"Error reporting verbosity in chat set to `{verbosity}`.");
-			}
-
-			[Command("log"), Aliases("a"), Description("Sets command error reporting for this guild (in ActionLog).")]
-			public async Task ActionLogAsync(CommandContext ctx, [Description("New error verbosity")]string verbosity)
-			{
-				if (!await TryGetVerbosity(ctx, verbosity, out var vb)) return;
-				
-				await ctx.WithGuildSettings(cfg => cfg.CommandError.ActionLog = vb);
-				await ctx.ElevatedRespondAsync($"Error reporting verbosity in ActionLog set to `{verbosity}`.");
 			}
 
 			private static Task<bool> TryGetVerbosity(CommandContext ctx, string verbosity, out CommandErrorVerbosity vb)
@@ -991,59 +1015,6 @@ namespace ModCore.Commands
 								"Supported levels: `none`, `name` or `namedesc`")
 							.ContinueWith(task => false);
 				}
-			}
-		}
-
-		[Group("joinlog"), Aliases("j"), Description("JoinLog configuration commands.")]
-		public class JoinLog : BaseCommandModule
-        {
-			ref bool GetSetting(GuildSettings cfg) => ref cfg.JoinLog.Enable;
-
-            string CurrentModuleName => GetType().GetCustomAttribute<GroupAttribute>().Name;
-
-            string EnabledState => "Enabled";
-            string DisabledState => "Disabled";
-
-            [GroupCommand, Description("Sets whether this module is enabled or not.")]
-            public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
-                "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
-                "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
-                )] bool? enableOrDisable = null)
-            {
-                // we can't access ref inside an async method, so make a copy
-                var resultingVariable = false;
-
-                await ctx.WithGuildSettings(cfg =>
-                {
-                    ref var configVariable = ref GetSetting(cfg);
-
-                    resultingVariable = configVariable = enableOrDisable ?? !configVariable;
-                });
-
-                if (resultingVariable)
-                    await AfterEnable(ctx);
-                else
-                    await AfterDisable(ctx);
-
-                // if toggling, tell the user what the new value is
-                if (!enableOrDisable.HasValue)
-                    await ctx.ElevatedRespondAsync(
-                        $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
-
-                await ctx.Message.CreateReactionAsync(Config.CheckMark);
-            }
-
-            Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
-
-            Task AfterEnable(CommandContext ctx) => ctx.ElevatedRespondAsync(
-					"Joinlog enabled.\n" +
-					"If you haven't done this yet, Please execute `config joinlog setchannel` command");
-
-			[Command("setchannel"), Aliases("sc"), Description("Sets the channel ID for this guild's JoinLog.")]
-			public async Task SetChannelAsync(CommandContext ctx, [Description("Channel to send the JoinLogs to")]DiscordChannel channel)
-			{
-				await ctx.WithGuildSettings(cfg => cfg.JoinLog.ChannelId = channel.Id);
-				await ctx.SafeRespondUnformattedAsync("JoinLog channel configured.");
 			}
 		}
 

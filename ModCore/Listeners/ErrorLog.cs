@@ -63,41 +63,6 @@ namespace ModCore.Listeners
 			#if DEBUG
 				Console.WriteLine($"Oopsie woopsie! {eventargs.Exception}");
 			#endif
-
-			if (config.ActionLog.Enable)
-			{
-				switch (config.CommandError.ActionLog)
-				{
-					default:
-					case CommandErrorVerbosity.None:
-						break;
-
-					case CommandErrorVerbosity.Name:
-						await context.LogMessageAsync($"**Command {qualifiedName} errored!**\n`{eventargs.Exception.GetType()}`");
-						break;
-					case CommandErrorVerbosity.NameDesc:
-						await context.LogMessageAsync(
-							$"**Command {qualifiedName} errored!**\n`{eventargs.Exception.GetType()}`:\n{eventargs.Exception.Message}");
-						break;
-					case CommandErrorVerbosity.Exception:
-						var stacktrace = eventargs.Exception.StackTrace;
-
-						var inner = eventargs.Exception.InnerException;
-
-						while(inner != null)
-                        {
-							stacktrace += $"\n\nINNER EXCEPTION OF PREVIOUS:\n{inner.StackTrace}";
-							inner = inner.InnerException;
-                        }
-
-						stacktrace = stacktrace.Length > 1000 ? stacktrace.Substring(0, 1000) : stacktrace;
-						var b = new DiscordEmbedBuilder().WithDescription(stacktrace);
-						await context.LogMessageAsync(
-							$"⚠️ **Command {qualifiedName} {eventargs.Command.Overloads.First().Arguments} errored!**\n`{eventargs.Exception.GetType()}`:\n{eventargs.Exception.Message}",
-							b);
-						break;
-				}
-			}
 		}
 
 		private static async Task<bool> NotifyCommandNotFound(ModCoreShard bot, CommandErrorEventArgs eventargs,

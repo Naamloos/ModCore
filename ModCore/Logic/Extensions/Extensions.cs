@@ -219,81 +219,18 @@ namespace ModCore.Logic.Extensions
             }
         }
 
-        public static async Task LogActionAsync(this CommandContext ctx, string additionalinfo = "")
+        public static async Task ModLogAsync(this DiscordGuild guild, DatabaseContext db, DiscordEmbedBuilder embed)
         {
-            var s = ctx.GetGuildSettings() ?? new GuildSettings();
+            var s = guild.GetGuildSettings(db) ?? new GuildSettings();
             if (s == null)
                 return;
-            var a = s.ActionLog;
-            var commandArgs = (string.IsNullOrEmpty(ctx.RawArgumentString)) ? "None" : ctx.RawArgumentString;
-            if (a.Enable)
+            var a = s.Logging;
+
+            if (a.ModLog_Enable)
             {
-                var w = await ctx.Client.GetWebhookWithTokenAsync(a.WebhookId, a.WebhookToken);
-                var b = new DiscordEmbedBuilder();
+                var channel = guild.GetChannel(a.ChannelId);
 
-                b.WithTitle($"New Action executed by {ctx.Member.Username}#{ctx.Member.Discriminator}")
-                    .WithDescription($"Executed command: {ctx.Command.QualifiedName}\nArguments: {commandArgs}")
-                    .WithFooter($"Guild: {ctx.Guild.Name}",
-                        string.IsNullOrEmpty(ctx.Guild.IconHash) ? "" : ctx.Guild.IconUrl);
-                if (!string.IsNullOrEmpty(additionalinfo))
-                    b.AddField("Additional information", additionalinfo);
-
-                var e = new List<DiscordEmbed>
-                {
-                    b.Build()
-                };
-
-                await w.ExecuteAsync(new DiscordWebhookBuilder().AddEmbeds(e));
-            }
-        }
-
-        public static async Task LogMessageAsync(this CommandContext ctx, string content = "",
-            DiscordEmbedBuilder embed = null)
-        {
-            var s = ctx.GetGuildSettings();
-            var a = s.ActionLog;
-            if (a.Enable)
-            {
-                var w = await ctx.Client.GetWebhookWithTokenAsync(a.WebhookId, a.WebhookToken);
-                await w.ExecuteAsync(new DiscordWebhookBuilder().WithContent(content)
-                    .AddEmbeds(embed != null ? new List<DiscordEmbed> { embed } : new List<DiscordEmbed>()));
-            }
-        }
-
-        public static async Task LogAutoActionAsync(this DiscordClient clnt, DiscordGuild gld, DatabaseContext db,
-            string additionalinfo = "")
-        {
-            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == gld.Id);
-            var s = cfg.GetSettings();
-
-            if (s.ActionLog.Enable)
-            {
-                var w = await clnt.GetWebhookWithTokenAsync(s.ActionLog.WebhookId, s.ActionLog.WebhookToken);
-                var b = new DiscordEmbedBuilder();
-
-                b.WithTitle($"New Automated action executed")
-                    .WithDescription($"Executed action: {additionalinfo}")
-                    .WithFooter($"Guild: {gld.Name}", string.IsNullOrEmpty(gld.IconHash) ? "" : gld.IconUrl);
-
-                var e = new List<DiscordEmbed>
-                {
-                    b.Build()
-                };
-
-                await w.ExecuteAsync(new DiscordWebhookBuilder().AddEmbeds(e));
-            }
-        }
-
-        public static async Task ActionLogMessageAsync(this DiscordClient clnt, DiscordGuild gld, DatabaseContext db,
-            string content = "", DiscordEmbedBuilder embed = null)
-        {
-            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == gld.Id);
-            var s = cfg.GetSettings();
-            if (s.ActionLog.Enable)
-            {
-                var w = await clnt.GetWebhookWithTokenAsync(s.ActionLog.WebhookId, s.ActionLog.WebhookToken);
-                await w.ExecuteAsync(new DiscordWebhookBuilder().WithContent(content)
-                    .AddEmbeds(embed != null ? new List<DiscordEmbed> { embed } : new List<DiscordEmbed>()));
+                await channel.SendMessageAsync(embed);
             }
         }
 

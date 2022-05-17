@@ -194,6 +194,9 @@ namespace ModCore.Logic
                 case EventTypes.CommandErrored:
                     bot.Commands.CommandErrored += OnCnextEvent;
                     break;
+                case EventTypes.InviteCreate:
+                    client.InviteCreated += OnEventWithArgs;
+                    break;
             }
         }
     }

@@ -46,7 +46,7 @@ namespace ModCore.Entities
         /// Gets the configuration for the ActionLog. ActionLog logs actions by moderators to a webhook URL.
         /// </summary>
         [JsonProperty("actionlog")]
-        public GuildActionLogSettings ActionLog { get; private set; } = new GuildActionLogSettings();
+        public GuildLogSettings Logging { get; private set; } = new GuildLogSettings();
 
         /// <summary>
         /// Gets the configuration for AutoRole. AutoRole automatically grants a role to a member on join if there's no existing rolestate.
@@ -59,12 +59,6 @@ namespace ModCore.Entities
         /// </summary>
         [JsonProperty("commanderror")]
         public GuildCommandErrorSettings CommandError { get; private set; } = new GuildCommandErrorSettings();
-
-        /// <summary>
-        /// Gets the configuration for JoinLog. JoinLog logs new memebrs to a channel.
-        /// </summary>
-        [JsonProperty("joinlog")]
-        public GuildJoinLogSettings JoinLog { get; private set; } = new GuildJoinLogSettings();
 
         /// <summary>
         /// Gets the SelfRoles for this guild. SelfRoles are roles members can grant themselves.
@@ -101,9 +95,6 @@ namespace ModCore.Entities
 	    /// </summary>
 	    [JsonProperty("disverbose")]
 	    public bool NotifyDisabledCommand = true;
-	    
-		[JsonProperty("motd")]
-		public MotdSettings Motd { get; private set; } = new MotdSettings();
 
 		[JsonProperty("welcome")]
 		public WelcomeSettings Welcome { get; private set; } = new WelcomeSettings();
@@ -197,24 +188,6 @@ namespace ModCore.Entities
     }
 
     /// <summary>
-    /// Represents configuration for JoinLog
-    /// </summary>
-    public class GuildJoinLogSettings
-    {
-	    /// <summary>
-	    /// Gets or sets whether JoinLog should be enabled.
-	    /// </summary>
-	    [JsonProperty("enabled")] 
-	    public bool Enable;
-
-        /// <summary>
-        /// Gets or sets the JoinLog channel ID.
-        /// </summary>
-        [JsonProperty("channel_id")]
-        public ulong ChannelId { get; set; }
-    }
-
-    /// <summary>
     /// Represents configuration for AutoRole.
     /// </summary>
     public class GuildAutoRoleSettings
@@ -235,25 +208,34 @@ namespace ModCore.Entities
     /// <summary>
     /// Represents configuration for the ActionLog.
     /// </summary>
-    public class GuildActionLogSettings
+    public class GuildLogSettings
     {
 	    /// <summary>
-	    /// Gets or sets whether the ActionLog should be enabled.
+	    /// Gets or sets whether the JoinLog should be enabled.
 	    /// </summary>
-	    [JsonProperty("enabled")]
-	    public bool Enable;
+	    [JsonProperty("joinlog_enabled")]
+	    public bool JoinLog_Enable;
+
+        [JsonProperty("editlog_enabled")]
+        public bool EditLog_Enable;
+
+        [JsonProperty("nicknamelog_enabled")]
+        public bool NickameLog_Enable;
+
+        [JsonProperty("invitelog_enabled")]
+        public bool InviteLog_Enable;
+
+        [JsonProperty("avatarlog_enabled")]
+        public bool AvatarLog_Enable;
+
+        [JsonProperty("modlog_enabled")]
+        public bool ModLog_Enable;
 
         /// <summary>
-        /// Gets or sets the ActionLog's webhook ID.
+        /// Gets or sets logging channel ID
         /// </summary>
-        [JsonProperty("webhook_id")]
-        public ulong WebhookId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the ActionLog's webhook token.
-        /// </summary>
-        [JsonProperty("webhook_token")]
-        public string WebhookToken { get; set; } = "";
+        [JsonProperty("channel_id")]
+        public ulong ChannelId { get; set; }
     }
 
     public class GuildCommandErrorSettings
@@ -498,13 +480,5 @@ namespace ModCore.Entities
 
 		[JsonProperty("is_embed")]
 		public bool IsEmbed { get; set; }
-	}
-
-	/// <summary>
-	/// Represents MOTD settings.
-	/// </summary>
-	public class MotdSettings
-	{
-
 	}
 }

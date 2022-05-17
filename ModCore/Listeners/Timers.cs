@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Humanizer;
 using Microsoft.Extensions.Logging;
 using ModCore.Database;
 using ModCore.Entities;
@@ -175,40 +176,46 @@ namespace ModCore.Listeners
 						}
 
 						var settings = guild.GetGuildSettings(db);
-						await client.LogAutoActionAsync(guild, db, $"Member unbanned: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
+
+						var embed = new DiscordEmbedBuilder()
+							.WithTitle($"Tempban Expired")
+							.WithDescription($"{data.DisplayName}#{data.Discriminator} has been unbanned. ({data.UserId})")
+							.WithColor(DiscordColor.Green);
+						await guild.ModLogAsync(db, embed);
 					}
 				}
 			}
 			else if (timer.ActionType == TimerActionType.Unmute)
 			{
-				var data = timer.GetData<TimerUnmuteData>();
-				if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
-				{
-					using (var db = tdata.Database.CreateContext())
-					{
-						var guild = client.Guilds[(ulong)timer.GuildId];
-						var member = await guild.GetMemberAsync((ulong)data.UserId);
-						var role = (DiscordRole)null;
-						try
-						{
-							role = guild.GetRole((ulong)data.MuteRoleId);
-						}
-						catch (Exception)
-						{
-							try
-							{
-								role = guild.GetRole(guild.GetGuildSettings(db).MuteRoleId);
-							}
-							catch (Exception)
-							{
-								await client.LogAutoActionAsync(guild, db, $"**[IMPORTANT]**\nFailed to unmute member: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})\nMute role does not exist!");
-								return;
-							}
-						}
-						await member.RevokeRoleAsync(role, "");
-						await client.LogAutoActionAsync(guild, db, $"Member unmuted: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
-					}
-				}
+				// DEPRECATED
+				//var data = timer.GetData<TimerUnmuteData>();
+				//if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
+				//{
+				//	using (var db = tdata.Database.CreateContext())
+				//	{
+				//		var guild = client.Guilds[(ulong)timer.GuildId];
+				//		var member = await guild.GetMemberAsync((ulong)data.UserId);
+				//		var role = (DiscordRole)null;
+				//		try
+				//		{
+				//			role = guild.GetRole((ulong)data.MuteRoleId);
+				//		}
+				//		catch (Exception)
+				//		{
+				//			try
+				//			{
+				//				role = guild.GetRole(guild.GetGuildSettings(db).MuteRoleId);
+				//			}
+				//			catch (Exception)
+				//			{
+				//				await client.LogAutoActionAsync(guild, db, $"**[IMPORTANT]**\nFailed to unmute member: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})\nMute role does not exist!");
+				//				return;
+				//			}
+				//		}
+				//		await member.RevokeRoleAsync(role, "");
+				//		await client.LogAutoActionAsync(guild, db, $"Member unmuted: {data.DisplayName}#{data.Discriminator} (ID: {data.UserId})");
+				//	}
+				//}
 			}
 			else if (timer.ActionType == TimerActionType.Pin)
 			{
@@ -221,7 +228,14 @@ namespace ModCore.Listeners
 						var channel = guild.GetChannel((ulong)data.ChannelId);
 						var message = await channel.GetMessageAsync((ulong)data.MessageId);
 						await message.PinAsync();
-						await client.LogAutoActionAsync(guild, db, $"Scheduled pin: Message with ID: {data.MessageId} in Channel #{channel.Name} ({channel.Id})");
+
+						var embed = new DiscordEmbedBuilder()
+								.WithTitle($"Message pin scheduled")
+								.AddField("Channel", $"<#{channel.Id}>")
+								.AddField("Message", $"{message.Id}")
+								.AddField("Content", $"{message.Content.Truncate(1000)}")
+								.WithColor(DiscordColor.Purple);
+						await guild.ModLogAsync(db, embed);
 					}
 				}
 			}
@@ -236,7 +250,13 @@ namespace ModCore.Listeners
 						var channel = guild.GetChannel((ulong)data.ChannelId);
 						var message = await channel.GetMessageAsync((ulong)data.MessageId);
 						await message.UnpinAsync();
-						await client.LogAutoActionAsync(guild, db, $"Scheduled unpin: Message with ID: {data.MessageId} in Channel #{channel.Name} ({channel.Id})");
+						var embed = new DiscordEmbedBuilder()
+								.WithTitle($"Message unpin scheduled")
+								.AddField("Channel", $"<#{channel.Id}>")
+								.AddField("Message", $"{message.Id}")
+								.AddField("Content", $"{message.Content.Truncate(1000)}")
+								.WithColor(DiscordColor.Purple);
+						await guild.ModLogAsync(db, embed);
 					}
 				}
 			}

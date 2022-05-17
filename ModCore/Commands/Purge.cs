@@ -11,6 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ModCore.Logic.Extensions;
+using ModCore.Database;
 
 namespace ModCore.Commands
 {
@@ -20,10 +21,12 @@ namespace ModCore.Commands
 		private static readonly Regex SpaceReplacer = new Regex(" {2,}", RegexOptions.Compiled);
 
 		public SharedData Shared { get; }
+		public DatabaseContextBuilder Database { get; }
 
-		public Purge(SharedData shared)
+		public Purge(SharedData shared, DatabaseContextBuilder db)
 		{
 			this.Shared = shared;
+			this.Database = db;
 		}
 
 		[GroupCommand, Description("Delete an amount of messages from the current channel.")]
@@ -47,9 +50,14 @@ namespace ModCore.Commands
 			var resp = await context.SafeRespondUnformattedAsync($"✅ {messages.Count()} messages were deleted.");
 			await Task.Delay(2000);
 			await resp.DeleteAsync("Purge command executed.");
-			await context.Message.DeleteAsync("Purge command executed.");
 
-			await context.LogActionAsync($"Purged messages.\nChannel: #{context.Channel.Name} ({context.Channel.Id})");
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Purged messages")
+				.AddField("Amount", $"{messages.Count()} messages")
+				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+				.AddField("Channel", context.Channel.Mention)
+				.WithColor(DiscordColor.PhthaloBlue);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("user"), Description("Delete an amount of messages by an user."), Aliases("u", "pu"), CheckDisable]
@@ -74,10 +82,15 @@ namespace ModCore.Commands
 			var response = await context.SafeRespondAsync($"✅ {messages.Count()} messages by {user?.Mention} (ID:{user?.Id}) deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Purge command executed.");
-			await context.Message.DeleteAsync("Purge command executed.");
 
-			await context.LogActionAsync(
-				$"Purged messages.\nUser: {user?.Username}#{user?.Discriminator} (ID:{user?.Id})\nChannel: #{context.Channel.Name} ({context.Channel.Id})");
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Purged messages by user")
+				.AddField("Amount", $"{messages.Count()} messages")
+				.AddField("Member", $"{user.Mention}")
+				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+				.AddField("Channel", context.Channel.Mention)
+				.WithColor(DiscordColor.PhthaloBlue);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("regexp"), Description(
@@ -193,14 +206,19 @@ namespace ModCore.Commands
 			var response = await context.SafeRespondUnformattedAsync(resultString);
 			await Task.Delay(2000);
 			await response.DeleteAsync("Purge command executed.");
-			await context.Message.DeleteAsync("Purge command executed.");
 
-			await context.LogActionAsync(
-				$"Purged {messages.Count()} messages.\nRegex: ```\n{regex}```\nFlags: {flags}\nChannel: #{context.Channel.Name} ({context.Channel.Id})");
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Purged messages by Regex")
+				.AddField("Amount", $"{messages.Count()} messages")
+				.AddField("Regex", $"{regex}")
+				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+				.AddField("Channel", context.Channel.Mention)
+				.WithColor(DiscordColor.PhthaloBlue);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("commands"), Description("Purge ModCore's messages."), Aliases("c", "self", "own"),
-	 RequirePermissions(Permissions.ManageMessages), CheckDisable]
+			RequirePermissions(Permissions.ManageMessages), CheckDisable]
 		public async Task CleanAsync(CommandContext context)
 		{
 			await context.Message.DeleteAsync();
@@ -224,9 +242,14 @@ namespace ModCore.Commands
 			var response = await context.SafeRespondUnformattedAsync($"✅ {messages.Count()} messages deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Clean command executed.");
-			await context.Message.DeleteAsync("Clean command executed.");
 
-			await context.LogActionAsync();
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Purged messages containing ModCore commands")
+				.AddField("Amount", $"{messages.Count()} messages")
+				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+				.AddField("Channel", context.Channel.Mention)
+				.WithColor(DiscordColor.PhthaloBlue);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("bots"), Description("Purge messages from all bots in this channel"), Aliases("b", "bot"),
@@ -253,9 +276,14 @@ namespace ModCore.Commands
 			var response = await context.SafeRespondUnformattedAsync($"✅ {messages.Count()} messages deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Purge bot command executed.");
-			await context.Message.DeleteAsync("Purge bot command executed.");
 
-			await context.LogActionAsync();
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Purged messages by Bots")
+				.AddField("Amount", $"{messages.Count()} messages")
+				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+				.AddField("Channel", context.Channel.Mention)
+				.WithColor(DiscordColor.PhthaloBlue);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("images"), Description("Purge messages with images or attachments on them."), Aliases("i", "imgs", "img"),
@@ -282,9 +310,14 @@ namespace ModCore.Commands
 			var response = await context.SafeRespondUnformattedAsync($"✅ {messages.Count()} messages deleted.");
 			await Task.Delay(2000);
 			await response.DeleteAsync("Image purge command executed.");
-			await context.Message.DeleteAsync("Image purge command executed.");
 
-			await context.LogActionAsync();
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Purged messages with Attachments and Images")
+				.AddField("Amount", $"{messages.Count()} messages")
+				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+				.AddField("Channel", context.Channel.Mention)
+				.WithColor(DiscordColor.PhthaloBlue);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		private static List<string> Tokenize(string value, char sep, char block)

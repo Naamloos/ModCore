@@ -75,6 +75,10 @@ namespace ModCore.Commands
 			await context.ElevatedRespondAsync(embed: eb);
 		}
 
+		[Command("avatar")]
+		public Task AvatarAsync(CommandContext ctx)
+			=> ctx.RespondAsync(ctx.Member.GetGuildAvatarUrl(ImageFormat.Auto));
+
 		[Command("ping"), Description("Check ModCore's API connection status."), CheckDisable]
 		public async Task PingAsync(CommandContext context)
 		{
@@ -135,7 +139,13 @@ namespace ModCore.Commands
 			await ctx.Guild.BanMemberAsync(member, 7, $"{userstring}{reasonstring}");
 			await ctx.SafeRespondAsync($"🚓 Banned user {member.DisplayName} (ID:{member.Id}).\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
-			await ctx.LogActionAsync($"🚓 Banned user {member.DisplayName} (ID:{member.Id})\n{reasonstring}");
+			var embed = new DiscordEmbedBuilder()
+								.WithTitle($"Banned Member")
+								.AddField("Member", $"{member.DisplayName} ({member.Id}, <@{member.Id}>)")
+								.AddField("Reason", $"{reasonstring}")
+								.AddField("Responsible Moderator", $"<@{ctx.Member.Id}>")
+								.WithColor(DiscordColor.Red);
+			await ctx.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("nukeban")]
@@ -185,7 +195,13 @@ namespace ModCore.Commands
 			await context.Guild.BanMemberAsync(id, 7, $"{userstring}{reasonstring}");
 			await context.SafeRespondUnformattedAsync("🚓 User hackbanned successfully.");
 
-			await context.LogActionAsync($"🚓 Hackbanned ID: {id}\n{reasonstring}");
+			var embed = new DiscordEmbedBuilder()
+								.WithTitle($"Hackbanned Member")
+								.AddField("Member", $"{id}, <@{id}>")
+								.AddField("Reason", $"{reasonstring}")
+								.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+								.WithColor(DiscordColor.Red);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("kick"), Description("Kicks a member from the guild. Can optionally provide a reason for kick."),
@@ -212,7 +228,13 @@ namespace ModCore.Commands
 			await member.RemoveAsync($"{userstring}{reasonstring}");
 			await context.SafeRespondAsync($"🚓 Kicked user {member.DisplayName} (ID:{member.Id}).\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
-			await context.LogActionAsync($"🚓 Kicked user {member.DisplayName} (ID:{member.Id})\n{reasonstring}");
+			var embed = new DiscordEmbedBuilder()
+					.WithTitle($"Kicked Member")
+					.AddField("Member", $"{member.Id}, <@{member.Id}>")
+					.AddField("Reason", $"{reasonstring}")
+					.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+					.WithColor(DiscordColor.Red);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("softban"),
@@ -242,7 +264,13 @@ namespace ModCore.Commands
 			await member.UnbanAsync(context.Guild, $"{userstring}{reasonstring}");
 			await context.SafeRespondAsync($"🚓 Softbanned user {member.DisplayName} (ID:{member.Id}).\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
-			await context.LogActionAsync($"🚓 Softbanned user {member.DisplayName} (ID:{member.Id})\n{reasonstring}");
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Softbanned Member")
+				.AddField("Member", $"{member.DisplayName} ({member.Id}, <@{member.Id}>)")
+				.AddField("Reason", $"{reasonstring}")
+				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+				.WithColor(DiscordColor.Red);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("leave"), Description("Makes this bot leave the current server. Goodbye."),
@@ -259,7 +287,11 @@ namespace ModCore.Commands
 			else if (message.Result.Content.ToLowerInvariant() == "yes")
 			{
 				await context.SafeRespondUnformattedAsync("❤️ Thanks for using ModCore. Leaving this guild.");
-				await context.LogActionAsync("Left your server. Thanks for using ModCore.");
+				var embed = new DiscordEmbedBuilder()
+					.WithTitle($"ModCore left your server")
+					.WithDescription("Thank you for using ModCore! 💕")
+					.WithColor(DiscordColor.HotPink);
+				await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 				await context.Guild.LeaveAsync();
 			}
 			else
@@ -321,12 +353,20 @@ namespace ModCore.Commands
 
 			await Timers.RescheduleTimers(context.Client, this.Database, this.Shared);
 
+			var banEnd = DateTimeOffset.UtcNow.Add(timespan);
+
 			// End of Timer adding
 			await context.SafeRespondAsync(
-				$"🚓 Tempbanned user {member.DisplayName} (ID:{member.Id}) to be unbanned in {timespan.Humanize(4, minUnit: TimeUnit.Second)}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
+				$"🚓 Tempbanned user {member.DisplayName} (ID:{member.Id}) to be unbanned <t:{banEnd.ToUnixTimeSeconds()}:R>.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
-			await context.LogActionAsync(
-				$"🚓 Tempbanned user {member.DisplayName} (ID:{member.Id}) to be unbanned in {timespan.Humanize(4, minUnit: TimeUnit.Second)}");
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Temporarily Banned Member")
+				.AddField("Member", $"{member.Id}, <@{member.Id}>")
+				.AddField("Reason", $"{reasonstring}")
+				.AddField("Unban Date/Time", $"<t:{banEnd.ToUnixTimeSeconds()}:R>")
+				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+				.WithColor(DiscordColor.Red);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("timeout"), Aliases("mute", "tempmute", "tm", "m"), Description("Temporarily mutes a member. They will be automatically " +
@@ -359,19 +399,25 @@ namespace ModCore.Commands
 			
 			// End of Timer adding
 			await context.SafeRespondAsync(
-				$"🚓 Tempmuted user {member.DisplayName} (ID:{member.Id}) to be unmuted in {timespan.Humanize(4, minUnit: TimeUnit.Second)}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
+				$"🚓 Tempmuted user {member.DisplayName} (ID:{member.Id}) to be unmuted <t:{timeoutEnd.ToUnixTimeSeconds()}:R>.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
-			await context.LogActionAsync(
-				$"🚓 Tempmuted user {member.DisplayName} (ID:{member.Id}) to be unmuted in {timespan.Humanize(4, minUnit: TimeUnit.Second)}");
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Timed out Member")
+				.AddField("Member", $"{member.Id}, <@{member.Id}>")
+				.AddField("Reason", $"{reasonstring}")
+				.AddField("Unban Date/Time", $"<t:{timeoutEnd.ToUnixTimeSeconds()}:R>")
+				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+				.WithColor(DiscordColor.Red);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("unmute"), Description("Unmutes an user previously muted with the mute command. Let them speak!"),
 		 Aliases("um"), RequirePermissions(Permissions.MuteMembers),
 		 RequireBotPermissions(Permissions.ManageRoles), CheckDisable]
-		public async Task UnmuteAsync(CommandContext context, [Description("Member to unmute")] DiscordMember message,
+		public async Task UnmuteAsync(CommandContext context, [Description("Member to unmute")] DiscordMember member,
 			[RemainingText, Description("Reason to unmute this member")] string reason = "")
 		{
-			if (context.Member.Id == message.Id)
+			if (context.Member.Id == member.Id)
 			{
 				await context.SafeRespondUnformattedAsync("⚠️ You can't really execute this command if you're muted yourself...");
 				return;
@@ -382,17 +428,22 @@ namespace ModCore.Commands
 			var sent_dm = false;
 			try
 			{
-				await message.ElevatedMessageAsync($"🚓 You've been unmuted in {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+				await member.ElevatedMessageAsync($"🚓 You've been unmuted in {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
 				sent_dm = true;
 			}
 			catch (Exception) { }
 
-			await message.TimeoutAsync(null, $"{userstring}{reasonstring} (unmute)");
+			await member.TimeoutAsync(null, $"{userstring}{reasonstring} (unmute)");
 			await context.SafeRespondAsync(
-				$"🚓 Unmuted user {message.DisplayName} (ID:{message.Id}) {(reason != "" ? "With reason: " + reason : "")}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
+				$"🚓 Unmuted user {member.DisplayName} (ID:{member.Id}) {(reason != "" ? "With reason: " + reason : "")}.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
 
-			await context.LogActionAsync(
-				$"🚓 Unmuted user {message.DisplayName} (ID:{message.Id}) {(reason != "" ? "With reason: " + reason : "")}");
+			var embed = new DiscordEmbedBuilder()
+				.WithTitle($"Pre-emptively unmuted Member")
+				.AddField("Member", $"{member.Id}, <@{member.Id}>")
+				.AddField("Reason", $"{reasonstring}")
+				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+				.WithColor(DiscordColor.Red);
+			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
 		[Command("schedulepin"), Aliases("sp"), Description("Schedules a pinned message. _I really don't know why " +
@@ -531,13 +582,17 @@ namespace ModCore.Commands
 
 				await role.ModifyAsync(mentionable: false);
 				await context.Message.DeleteAsync();
-				await context.LogActionAsync($"✅ Announced {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
+
+				var embed = new DiscordEmbedBuilder()
+					.WithTitle($"Posted Announcement")
+					.AddField("Content", message.Truncate(1000))
+					.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
+					.WithColor(DiscordColor.Cyan) ;
+				await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 			}
 			else
 			{
 				await context.Channel.SafeMessageUnformattedAsync("⚠️ You can't announce to that role because it is mentionable!", true);
-				await context.LogActionAsync(
-					$"⚠️ Failed announcement\nMessage: {message}\nTo channel: #{channel.Name}\nTo role: {role.Name}");
 			}
 		}
 
@@ -1048,6 +1103,7 @@ namespace ModCore.Commands
 		// TODO: use database timer system??
 		// TODO: multiple winners
 		[Command("giveaway")]
+        [Aliases("raffle")]
 		[Description("Creates a giveaway")]
 		[RequireUserPermissions(Permissions.ManageGuild)]
 		[RequireBotPermissions(Permissions.ManageMessages | Permissions.AddReactions)]
