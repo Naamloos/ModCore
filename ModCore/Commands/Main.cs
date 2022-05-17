@@ -1233,6 +1233,41 @@ namespace ModCore.Commands
 			await ctx.RespondAsync("🤨");
         }
 
+        [Command("offtopic")]
+        [Description("Moves off-topic chat to an appropriate channel.")]
+		public async Task OffTopicAsync(CommandContext ctx, DiscordChannel channel, params DiscordMember[] members)
+        {
+			IEnumerable<DiscordMessage> messages = await ctx.Channel.GetMessagesAsync(100);
+
+			string offtopic = $"❗ Your current conversation is off-topic! Most recent messages have been copied to {channel.Mention}. ";
+
+			if (members.Any())
+			{
+				messages = messages.Where(x => members.Any(y => y.Id == x.Author.Id));
+
+				offtopic += string.Join(" ", members.Select(x => x.DisplayName));
+			}
+			messages = messages.Take(20).Reverse();
+
+			await ctx.Channel.SendMessageAsync(offtopic);
+			await channel.SendMessageAsync($"⚠️ Copying off-topic messages from {ctx.Channel.Mention}!");
+			var webhook = await channel.CreateWebhookAsync($"offtopic-move-{new Random().Next()}");
+			foreach (var message in messages)
+            {
+				if (string.IsNullOrEmpty(message.Content))
+					continue;
+
+				var webhookMessage = new DiscordWebhookBuilder()
+					.WithContent(message.Content)
+					.WithAvatarUrl(message.Author.GetAvatarUrl(ImageFormat.Auto))
+					.WithUsername((message.Author as DiscordMember).DisplayName);
+
+				await webhook.ExecuteAsync(webhookMessage);
+            }
+			await webhook.DeleteAsync();
+			await channel.SendMessageAsync($"⚠❗ Off topic chat has been copied from {ctx.Channel.Mention}! Please continue conversation here.");
+		}
+
 		private async Task stealieEmoji(CommandContext ctx, string name, ulong id, bool animated)
         {
 			using HttpClient _client = new HttpClient();
