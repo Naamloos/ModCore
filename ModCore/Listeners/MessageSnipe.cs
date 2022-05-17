@@ -32,6 +32,9 @@ namespace ModCore.Listeners
         {
             await Task.Yield();
 
+            if (eventargs.MessageBefore == null)
+                return;
+
             if ((!string.IsNullOrEmpty(eventargs.MessageBefore.Content) || eventargs.Message.Embeds.Count > 0) && !eventargs.Message.Author.IsBot)
             {
                 if (bot.SharedData.EditedMessages.ContainsKey(eventargs.Channel.Id))
