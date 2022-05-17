@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -47,12 +48,18 @@ namespace ModCore
 
             var input = File.ReadAllText("settings.json", new UTF8Encoding(false));
             Settings = JsonConvert.DeserializeObject<Settings>(input);
+			GlobalContextBuilder = Settings.Database.CreateContextBuilder();
+
+			if (args.Contains("--migrate"))
+            {
+				this.migrate();
+				return;
+            }
 
 			// Saving config with same values but updated fields
 			var newjson = JsonConvert.SerializeObject(Settings, Formatting.Indented);
 			File.WriteAllText("settings.json", newjson, new UTF8Encoding(false));
 
-			GlobalContextBuilder = Settings.Database.CreateContextBuilder();
             PerspectiveApi = new Perspective(Settings.PerspectiveToken);
 
             Shards = new List<ModCoreShard>();
@@ -162,5 +169,48 @@ namespace ModCore
 	    {
 		    return GlobalContextBuilder.CreateContext();
 	    }
+
+		private void migrate()
+        {
+			using var db = this.CreateGlobalContext();
+			var pending = db.Database.GetPendingMigrations();
+
+			if(pending.Count() < 1)
+            {
+				Console.WriteLine("No migrations pending.");
+				return;
+            }
+
+			Console.WriteLine("Pending migrations:");
+			foreach(var migration in pending)
+            {
+				Console.WriteLine(migration);
+            }
+
+			Console.WriteLine("Please ensure you have made a backup of your database. Migrate? (Y/n)");
+			var response = Console.ReadKey();
+			if (response.KeyChar == 'y')
+			{
+				Console.WriteLine("Attempting to apply migrations...");
+				try
+				{
+					this.CreateGlobalContext().Database.Migrate();
+				}
+				catch(Exception ex)
+                {
+					Console.WriteLine("Migrations failed...");
+					Console.WriteLine(ex.Message);
+                }
+                finally
+                {
+					Console.WriteLine("Migrations applied.");
+				}
+			}
+			else
+			{
+				Console.WriteLine("Operation canceled.");
+			}
+			return;
+		}
 	}
 }
