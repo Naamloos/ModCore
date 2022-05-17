@@ -1225,6 +1225,14 @@ namespace ModCore.Commands
 			} 
 		}
 
+        [Command("generatepassword")]
+        [Description("Generates a password for you!")]
+        [Hidden]
+		public async Task GeneratePasswordAsync(CommandContext ctx)
+        {
+			await ctx.RespondAsync("🤨");
+        }
+
 		private async Task stealieEmoji(CommandContext ctx, string name, ulong id, bool animated)
         {
 			using HttpClient _client = new HttpClient();
