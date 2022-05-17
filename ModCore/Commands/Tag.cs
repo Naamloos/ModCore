@@ -41,6 +41,7 @@ namespace ModCore.Commands
             if(tryGetTag(name, context.Channel, out DatabaseTag tag))
             {
                 await context.RespondAsync($"🏷 `{name}`:\n\n{tag.Contents}");
+                return;
             }
 
             await context.SafeRespondAsync($"⚠️ No such tag exists!");
