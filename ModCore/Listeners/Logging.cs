@@ -9,10 +9,12 @@ namespace ModCore.Listeners
     public class Logging
     {
         [AsyncListener(EventTypes.GuildMemberUpdated)]
-        public static async Task CheckLevelUpdates(ModCoreShard bot, GuildMemberUpdateEventArgs eventargs)
+        public static async Task LogNickames(ModCoreShard bot, GuildMemberUpdateEventArgs eventargs)
         {
             using var db = bot.Database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
+            if (cfg == null)
+                return;
             DiscordChannel channel = eventargs.Guild.GetChannel(cfg.Logging.ChannelId);
             if (channel == null)
                 return;
