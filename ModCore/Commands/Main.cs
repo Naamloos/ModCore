@@ -1233,9 +1233,11 @@ namespace ModCore.Commands
 			await ctx.RespondAsync("🤨");
         }
 
+        [Priority(0)]
         [Command("offtopic")]
         [Description("Moves off-topic chat to an appropriate channel.")]
-		public async Task OffTopicAsync(CommandContext ctx, DiscordChannel channel, params DiscordMember[] members)
+        [Cooldown(1, 60 * 5, CooldownBucketType.Guild)]
+		public async Task OffTopicAsync(CommandContext ctx, DiscordChannel channel, int limit, params DiscordMember[] members)
         {
 			IEnumerable<DiscordMessage> messages = await ctx.Channel.GetMessagesAsync(100);
 
@@ -1247,7 +1249,7 @@ namespace ModCore.Commands
 
 				offtopic += string.Join(" ", members.Select(x => x.DisplayName));
 			}
-			messages = messages.Take(20).Reverse();
+			messages = messages.Take(limit).Reverse();
 
 			await ctx.Channel.SendMessageAsync(offtopic);
 			await channel.SendMessageAsync($"⚠️ Copying off-topic messages from {ctx.Channel.Mention}!");
@@ -1267,6 +1269,13 @@ namespace ModCore.Commands
 			await webhook.DeleteAsync();
 			await channel.SendMessageAsync($"⚠❗ Off topic chat has been copied from {ctx.Channel.Mention}! Please continue conversation here.");
 		}
+
+        [Priority(1)]
+		[Command("offtopic")]
+		[Description("Moves off-topic chat to an appropriate channel.")]
+		[Cooldown(1, 60 * 5, CooldownBucketType.Guild)]
+		public async Task OffTopicAsync(CommandContext ctx, DiscordChannel channel, params DiscordMember[] members)
+			=> await OffTopicAsync(ctx, channel, 20, members);
 
 		private async Task stealieEmoji(CommandContext ctx, string name, ulong id, bool animated)
         {
