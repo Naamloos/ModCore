@@ -27,6 +27,9 @@ namespace ModCore.Listeners
             if (eventargs.Author == null || eventargs.Channel == null)
                 return;
 
+            if (eventargs.Message.WebhookMessage)
+                return;
+
             if ((eventargs.Channel.PermissionsFor(eventargs.Author as DiscordMember) & Permissions.ManageMessages) != 0) return;
 
             if (eventargs.Channel.Guild == null)
