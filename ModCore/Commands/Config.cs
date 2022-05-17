@@ -853,8 +853,8 @@ namespace ModCore.Commands
 				{
 					cfg.Logging.ChannelId = channel.Id;
 				});
-				await ctx.ElevatedRespondAsync("Log channel configured.");
-			}
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("✅"));
+            }
 
             [Command("avatar"), Aliases("a")]
             public async Task SetAvatarLogAsync(CommandContext ctx, bool enabled)
@@ -863,7 +863,7 @@ namespace ModCore.Commands
                 {
                     cfg.Logging.AvatarLog_Enable = enabled;
                 });
-                await ctx.ElevatedRespondAsync("✅");
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("✅"));
             }
 
             [Command("join"), Aliases("j")]
@@ -873,7 +873,7 @@ namespace ModCore.Commands
                 {
                     cfg.Logging.JoinLog_Enable = enabled;
                 });
-                await ctx.ElevatedRespondAsync("✅");
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("✅"));
             }
 
             [Command("nickname"), Aliases("n")]
@@ -883,7 +883,7 @@ namespace ModCore.Commands
                 {
                     cfg.Logging.NickameLog_Enable = enabled;
                 });
-                await ctx.ElevatedRespondAsync("✅");
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("✅"));
             }
 
             [Command("edit"), Aliases("e")]
@@ -893,7 +893,7 @@ namespace ModCore.Commands
                 {
                     cfg.Logging.EditLog_Enable = enabled;
                 });
-                await ctx.ElevatedRespondAsync("✅");
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("✅"));
             }
 
             [Command("invite"), Aliases("i")]
@@ -903,7 +903,7 @@ namespace ModCore.Commands
                 {
                     cfg.Logging.InviteLog_Enable = enabled;
                 });
-                await ctx.ElevatedRespondAsync("✅");
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("✅"));
             }
 
             [Command("moderation"), Aliases("m", "mod")]
@@ -913,7 +913,7 @@ namespace ModCore.Commands
                 {
                     cfg.Logging.ModLog_Enable = enabled;
                 });
-                await ctx.ElevatedRespondAsync("✅");
+                await ctx.Message.CreateReactionAsync(DiscordEmoji.FromUnicode("✅"));
             }
         }
 
