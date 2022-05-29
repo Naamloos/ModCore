@@ -148,6 +148,27 @@ namespace ModCore.Commands
 			await ctx.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
+        [Command("massban")]
+        [Description("mass bans a group of users- either by ID or mention")]
+        [RequirePermissions(Permissions.BanMembers)]
+		public async Task MassBanAsync(CommandContext ctx, params ulong[] users)
+        {
+			List<ulong> failed = new List<ulong>();
+			for(int i = 0; i < users.Length; i++)
+            {
+				try
+				{
+					await ctx.Guild.BanMemberAsync(users[i]);
+				}
+				catch(Exception)
+                {
+					failed.Add(users[i]);
+                }
+            }
+
+			await ctx.RespondAsync($"Banned users." + (failed.Count > 0? $" Failed to ban: {string.Join(" ", failed.Select(x => $" <@{x}> "))}" : ""));
+        }
+
 		[Command("nukeban")]
 		[Description("Bans a member from all servers you own that have ModCore")]
 		public async Task NukeBanAsync(CommandContext context, ulong userId, string reason = "")
