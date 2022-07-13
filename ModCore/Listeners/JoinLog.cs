@@ -13,7 +13,7 @@ namespace ModCore.Listeners
 {
 	public static class JoinLog
 	{
-		private static readonly Regex WelcomeRegex = new Regex("{{(.*?)}}", RegexOptions.Compiled);
+		private static readonly Regex WelcomeRegex = new("{{(.*?)}}", RegexOptions.Compiled);
 
 		[AsyncListener(EventTypes.GuildMemberAdded)]
 		public static async Task LogNewMember(ModCoreShard bot, GuildMemberAddEventArgs eventargs)

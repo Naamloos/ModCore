@@ -19,7 +19,7 @@ namespace ModCore.Listeners
     public static class Timers
 	{
 		[AsyncListener(EventTypes.Ready)]
-		public static async Task OnReady(ModCoreShard shard, ReadyEventArgs eventargs)
+		public static async Task OnReady(ModCoreShard shard)
 		{
 			using (var db = shard.Database.CreateContext())
 			{

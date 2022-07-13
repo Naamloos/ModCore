@@ -172,19 +172,12 @@ namespace ModCore.Commands
                     return;
                 }
 
-                var captcha = GetUniqueKey(32);
-
-                /*await ctx.RespondWithFileAsync(
-				    $"{GetUniqueKey(64)}.png",
-				    new MemoryStream(CaptchaProvider.DrawCaptcha(captcha, "#99AAB5", "#23272A", 24, "sans-serif")),
-				    "You are about to reset the configuration for this guild. **This change is irreversible.** " +
-				    "Type the characters in the image to continue. You have 45 seconds.");*/
-
-                await ctx.RespondAsync(captcha);
+                await ctx.RespondAsync("You are about to reset the configuration for this guild. **This change is irreversible.** Continue?");
 
                 var msg = await this.Interactivity
-                    .WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && xm.Content.ToUpperInvariant() == captcha, TimeSpan.FromSeconds(45));
-                if (msg.Result == null)
+                    .WaitForMessageAsync(xm => xm.Author.Id == ctx.User.Id && xm.ChannelId == ctx.Channel.Id, TimeSpan.FromSeconds(45));
+
+                if (msg.TimedOut || !InteractivityUtil.Confirm(msg.Result))
                 {
                     await ctx.SafeRespondUnformattedAsync("Operation aborted.");
                     return;
@@ -195,23 +188,6 @@ namespace ModCore.Commands
             }
 
             await ctx.SafeRespondUnformattedAsync("Configuration reset.");
-        }
-
-        private string GetUniqueKey(int maxSize)
-        {
-            var chars = "ABCDEFGHMPRSTUVWXYZ23456789".ToCharArray();
-            var data = new byte[1];
-
-            RandomNumberProvider.GetNonZeroBytes(data);
-            data = new byte[maxSize];
-            RandomNumberProvider.GetNonZeroBytes(data);
-
-            var result = new StringBuilder(maxSize);
-            foreach (var b in data)
-            {
-                result.Append(chars[b % chars.Length]);
-            }
-            return result.ToString();
         }
     }
 }

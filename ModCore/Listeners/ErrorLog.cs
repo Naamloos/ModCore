@@ -68,7 +68,7 @@ namespace ModCore.Listeners
 		private static async Task<bool> NotifyCommandNotFound(ModCoreShard bot, CommandErrorEventArgs eventargs,
 			GuildSettings config, CommandContext context)
 		{
-			if (!(eventargs.Exception is CommandNotFoundException commandNotFound)) return false;
+			if (eventargs.Exception is not CommandNotFoundException commandNotFound) return false;
 
 			// return instead of proceeding, since qualifiedName below this will throw
 			// (since there is no Command obj) 
@@ -88,14 +88,14 @@ namespace ModCore.Listeners
 				var everything = bot.SharedData.Commands.Select(x => x.cmd).ToList();
 				var some_of_them = new List<Command>();
 
-				for(int i = 0; i < everything.Count(); i++)
+				for(int i = 0; i < everything.Count; i++)
 				{
 					if (await CanExecute(everything[i], context))
 						some_of_them.Add(everything[i]);
 				}
 
 				var ordered = some_of_them
-					.Where(c => !(c is CommandGroup group) || @group.IsExecutableWithoutSubcommands)
+					.Where(c => c is not CommandGroup group || @group.IsExecutableWithoutSubcommands)
 					.Select(c => (qualifiedName: c.QualifiedName, description: c.Description))
 					.OrderBy(c => leveshtein.Distance(attemptedName, c.qualifiedName))
 					.Take(1).ToArray();
@@ -135,7 +135,7 @@ namespace ModCore.Listeners
 		private static async Task<bool> NotifyCommandDisabled(CommandErrorEventArgs eventargs, GuildSettings config,
 			CommandContext ctx)
 		{
-			if (!(eventargs.Exception is ChecksFailedException checksFailed) ||
+			if (eventargs.Exception is not ChecksFailedException checksFailed ||
 				!checksFailed.FailedChecks.Any(x => x is CheckDisableAttribute)) return false;
 
 			if (config.NotifyDisabledCommand)

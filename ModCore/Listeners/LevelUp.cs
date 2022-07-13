@@ -17,9 +17,6 @@ namespace ModCore.Listeners
 {
     public static class LevelUp
     {
-        private static ConcurrentDictionary<(ulong server, ulong user), DateTimeOffset> LastXpGrants 
-            = new ConcurrentDictionary<(ulong server, ulong user), DateTimeOffset>();
-
         [AsyncListener(EventTypes.MessageCreated)]
         public static async Task CheckLevelUpdates(ModCoreShard bot, MessageCreateEventArgs eventargs)
         {

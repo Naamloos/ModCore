@@ -26,7 +26,11 @@ namespace ModCore.Logic
                 {
                     try
                     {
-                        await (Task) listener.Invoke(null, new[] {bot, e});
+                        // TODO proper injection, possibly dependency injection?
+                        if(listener.GetParameters().Length == 2)
+                            await (Task) listener.Invoke(null, new[] {bot, e});
+                        else
+                            await (Task)listener.Invoke(null, new[] { bot });
                     }
                     catch (Exception ex)
                     {
