@@ -11,10 +11,10 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using ModCore.Database;
+using ModCore.Database.Entities;
 using ModCore.Entities;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
-using ModCore.Logic.Utils.Captcha;
 
 namespace ModCore.Commands
 {
@@ -27,17 +27,15 @@ namespace ModCore.Commands
 		public static DiscordEmoji CheckMark { get; } = DiscordEmoji.FromUnicode("✅");
 
 		public DatabaseContextBuilder Database { get; }
+
 		public InteractivityExtension Interactivity { get; }
 
-		private RandomNumberProvider RandomNumberProvider { get; } = new RandomNumberProvider();
-		private CaptchaImageProvider CaptchaProvider { get; }
         public SharedData Shared { get; }
 
         public Config(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive)
 		{
 			this.Database = db;
 			this.Interactivity = interactive;
-			this.CaptchaProvider = new CaptchaImageProvider(RandomNumberProvider);
             this.Shared = shared;
 		}
 

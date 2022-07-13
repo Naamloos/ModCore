@@ -6,6 +6,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using ModCore.Database;
+using ModCore.Database.Entities;
 using ModCore.Entities;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;

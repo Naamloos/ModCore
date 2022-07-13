@@ -3,24 +3,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ModCore.CoreApi;
 using ModCore.Database;
+using ModCore.Database.Entities;
 using ModCore.Entities;
-using ModCore.Listeners;
-using ModCore.Web;
 using Newtonsoft.Json;
-using ApiStartup = ModCore.Web.ApiStartup;
+using ApiStartup = ModCore.Api.ApiStartup;
 
 namespace ModCore
 {
@@ -100,7 +94,6 @@ namespace ModCore
             {
                 CancellationTokenSource = CTS,
                 ProcessStartTime = Process.GetCurrentProcess().StartTime,
-                BotManagers = Settings.BotManagers,
                 DefaultPrefix = Settings.DefaultPrefix,
                 ModCore = this
             };

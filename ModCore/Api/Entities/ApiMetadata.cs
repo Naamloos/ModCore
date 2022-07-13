@@ -1,6 +1,6 @@
 ﻿namespace ModCore.Api.Entities
 {
-    public class ApiMetadata
+    public struct ApiMetadata
     {
         public int Shards { get; set; }
         public int Guilds { get; set; }

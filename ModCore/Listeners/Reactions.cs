@@ -5,6 +5,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Humanizer;
 using ModCore.Database;
+using ModCore.Database.Entities;
 using ModCore.Entities;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;

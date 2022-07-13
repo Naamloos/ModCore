@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ModCore.Database.Entities;
 using ModCore.Entities;
 using ModCore.Logic;
 using ModCore.Logic.EntityFramework;

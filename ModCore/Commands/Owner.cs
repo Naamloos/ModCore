@@ -58,7 +58,7 @@ namespace ModCore.Commands
 	    [Command("exit"), Aliases("e"), Hidden]
         public async Task ExitAsync(CommandContext context)
         {
-            if (!Shared.BotManagers.Contains(context.Member.Id) && !context.Client.CurrentApplication.Owners.Any(x => x.Id == context.User.Id))
+            if (!context.Client.CurrentApplication.Owners.Any(x => x.Id == context.User.Id))
             {
                 await context.SafeRespondUnformattedAsync("⚠️ You do not have permission to use this command!");
                 return;
@@ -88,7 +88,7 @@ namespace ModCore.Commands
         [Command("sudo"), Aliases("s"), Hidden]
         public async Task SudoAsync(CommandContext context, [Description("Member to sudo")]DiscordMember member, [Description("Command to sudo"), RemainingText]string command)
         {
-            if (!Shared.BotManagers.Contains(context.Member.Id) && !context.Client.CurrentApplication.Owners.Any(x => x.Id == context.User.Id))
+            if (!context.Client.CurrentApplication.Owners.Any(x => x.Id == context.User.Id))
             {
                 await context.SafeRespondUnformattedAsync("⚠️ You do not have permission to use this command!");
                 return;
@@ -103,7 +103,7 @@ namespace ModCore.Commands
         [Command("sudoowner"), Aliases("so"), Hidden]
         public async Task SudoOwnerAsync(CommandContext context, [RemainingText, Description("Command to sudo")]string command)
         {
-            if (!Shared.BotManagers.Contains(context.Member.Id) && !context.Client.CurrentApplication.Owners.Any(x => x.Id == context.User.Id))
+            if (!context.Client.CurrentApplication.Owners.Any(x => x.Id == context.User.Id))
             {
                 await context.SafeRespondUnformattedAsync("⚠️ You do not have permission to use this command!");
                 return;

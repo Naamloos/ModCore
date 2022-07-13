@@ -1,6 +1,6 @@
 ﻿namespace ModCore.Api.Entities
 {
-    public class ApiPrefix
+    public struct ApiPrefix
     {
         public string Prefix { get; set; }
     }

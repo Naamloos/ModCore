@@ -5,7 +5,7 @@ using ModCore.Entities;
 using ModCore.Logic.EntityFramework.AttributeImpl;
 using Newtonsoft.Json;
 
-namespace ModCore.Database
+namespace ModCore.Database.Entities
 {
     [Table("mcore_userdata")]
     public class DatabaseUserData
@@ -24,9 +24,9 @@ namespace ModCore.Database
         public string Data { get; set; } = "";
 
         public UserData GetData() =>
-            JsonConvert.DeserializeObject<UserData>(this.Data);
+            JsonConvert.DeserializeObject<UserData>(Data);
 
         public void SetData(UserData data) =>
-            this.Data = JsonConvert.SerializeObject(data);
+            Data = JsonConvert.SerializeObject(data);
     }
 }

@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using Humanizer;
-using Humanizer.Localisation;
 using ModCore.Database;
+using ModCore.Database.Entities;
 using ModCore.Entities;
-using ModCore.Listeners;
 using ModCore.Logic;
-using ModCore.Logic.Extensions;
-using ModCore.Logic.Utils;
 
 namespace ModCore.Commands
 {

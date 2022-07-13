@@ -10,6 +10,7 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
+using ModCore.Database.Entities;
 using ModCore.Entities;
 using ModCore.Logic;
 

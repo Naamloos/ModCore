@@ -1,23 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ModCore.CoreApi.Entities;
-using ModCore.Database;
-using ModCore.Entities;
-using ModCore.Logic.Extensions;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using ModCore.Api.Entities;
-using ModCore.Web.Entities;
 
-namespace ModCore.Web.Controllers
+namespace ModCore.Api.Controllers
 {
     [Route("api")]
     public class ApiController : Controller

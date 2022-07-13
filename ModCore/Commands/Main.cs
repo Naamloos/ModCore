@@ -9,6 +9,7 @@ using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using Humanizer.Localisation;
 using ModCore.Database;
+using ModCore.Database.Entities;
 using ModCore.Entities;
 using ModCore.Listeners;
 using ModCore.Logic;

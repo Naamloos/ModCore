@@ -17,17 +17,8 @@ namespace ModCore.Entities
         [JsonProperty("shard_count")]
         public int ShardCount { get; private set; }
 
-        [JsonProperty("use_perspective")]
-        public bool UsePerspective { get; private set; }
-
-        [JsonProperty("perspective_token")]
-        internal string PerspectiveToken { get; private set; }
-
         [JsonProperty("database")]
         internal DatabaseSettings Database { get; private set; }
-
-		[JsonProperty("bot_managers")]
-		public List<ulong> BotManagers { get; private set; } = new List<ulong>();
 
 		[JsonProperty("bot_id")]
 		public ulong BotId { get; private set; } = 359828546719449109;

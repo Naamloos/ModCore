@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 using ModCore.Entities;
 using ModCore.Logic.EntityFramework.AttributeImpl;
 
-namespace ModCore.Database
+namespace ModCore.Database.Entities
 {
-    [Table("mcore_rolestate_nicks")]
-    public class DatabaseRolestateNick
+    [Table("mcore_rolestate_roles")]
+    public class DatabaseRolestateRoles
     {
         #region Index
         [Index("member_id_guild_id_key", IsUnique = true, IsLocal = true)]
@@ -21,7 +21,8 @@ namespace ModCore.Database
         [Column("id")]
         public int Id { get; set; }
 
-        [Column("nickname")]
-        public string Nickname { get; set; }
+        [Column("role_ids")]
+        [IgnoreIfProviderNot(DatabaseProvider.PostgreSql)]
+        public long[] RoleIds { get; set; }
     }
 }

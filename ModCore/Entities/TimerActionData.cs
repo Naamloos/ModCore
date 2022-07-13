@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
 using ModCore.Database;
+using ModCore.Database.Entities;
 using Newtonsoft.Json;
 
 namespace ModCore.Entities
