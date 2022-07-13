@@ -1,5 +1,8 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using ModCore.Database;
+using ModCore.Extensions.AsyncListeners.Attributes;
+using ModCore.Extensions.AsyncListeners.Enums;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
 using System.Threading.Tasks;
@@ -8,10 +11,10 @@ namespace ModCore.Listeners
 {
     public class Logging
     {
-        [AsyncListener(EventTypes.GuildMemberUpdated)]
-        public static async Task LogNickames(ModCoreShard bot, GuildMemberUpdateEventArgs eventargs)
+        [AsyncListener(EventType.GuildMemberUpdated)]
+        public static async Task LogNickames(GuildMemberUpdateEventArgs eventargs, DatabaseContextBuilder database)
         {
-            using var db = bot.Database.CreateContext();
+            using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
             if (cfg == null)
                 return;
@@ -51,10 +54,10 @@ namespace ModCore.Listeners
             }
         }
 
-        [AsyncListener(EventTypes.InviteCreate)]
-        public static async Task InviteUpdates(ModCoreShard bot, InviteCreateEventArgs eventargs)
+        [AsyncListener(EventType.InviteCreate)]
+        public static async Task InviteUpdates(InviteCreateEventArgs eventargs, DatabaseContextBuilder database)
         {
-            using var db = bot.Database.CreateContext();
+            using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
             DiscordChannel channel = eventargs.Guild.GetChannel(cfg.Logging.ChannelId);
             if (channel == null)

@@ -8,8 +8,11 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using ModCore.Database;
 using ModCore.Database.Entities;
 using ModCore.Entities;
+using ModCore.Extensions.AsyncListeners.Attributes;
+using ModCore.Extensions.AsyncListeners.Enums;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
 
@@ -17,8 +20,8 @@ namespace ModCore.Listeners
 {
     public static class LevelUp
     {
-        [AsyncListener(EventTypes.MessageCreated)]
-        public static async Task CheckLevelUpdates(ModCoreShard bot, MessageCreateEventArgs eventargs)
+        [AsyncListener(EventType.MessageCreated)]
+        public static async Task CheckLevelUpdates(MessageCreateEventArgs eventargs, DatabaseContextBuilder database, Settings settings)
         {
             // Storing vars for quick reference
             var server = eventargs.Guild;
@@ -31,14 +34,14 @@ namespace ModCore.Listeners
             GuildSettings config;
             DatabaseLevel leveldata = null;
 
-            using (var db = bot.Database.CreateContext())
+            using (var db = database.CreateContext())
             {
                 config = eventargs.Guild.GetGuildSettings(db);
                 if (config == null)
                     return;
                 if (!config.Levels.Enabled)
                     return;
-                if (eventargs.Message.Content.StartsWith(string.IsNullOrEmpty(config.Prefix) ? bot.Settings.DefaultPrefix : config.Prefix))
+                if (eventargs.Message.Content.StartsWith(string.IsNullOrEmpty(config.Prefix) ? settings.DefaultPrefix : config.Prefix))
                     return;
 
                 // Get level xp data and assign new when null

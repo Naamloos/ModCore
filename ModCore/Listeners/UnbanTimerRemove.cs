@@ -1,18 +1,22 @@
 ﻿using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.EventArgs;
+using ModCore.Database;
 using ModCore.Entities;
+using ModCore.Extensions.AsyncListeners.Attributes;
+using ModCore.Extensions.AsyncListeners.Enums;
 using ModCore.Logic;
 
 namespace ModCore.Listeners
 {
     public class UnbanTimerRemove
     {
-        [AsyncListener(EventTypes.GuildBanRemoved)]
-        public static async Task CommandError(ModCoreShard bot, GuildBanRemoveEventArgs eventargs)
+        [AsyncListener(EventType.GuildBanRemoved)]
+        public static async Task CommandError(GuildBanRemoveEventArgs eventargs, DatabaseContextBuilder database, DiscordClient client, SharedData sharedData)
         {
-            var timer = Timers.FindNearestTimer(TimerActionType.Unban, eventargs.Member.Id, 0, eventargs.Guild.Id, bot.Database);
+            var timer = Timers.FindNearestTimer(TimerActionType.Unban, eventargs.Member.Id, 0, eventargs.Guild.Id, database);
             if (timer != null)
-                await Timers.UnscheduleTimerAsync(timer, bot.Client, bot.Database, bot.SharedData);
+                await Timers.UnscheduleTimerAsync(timer, client, database, sharedData);
         }
     }
 }

@@ -1,6 +1,10 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Humanizer;
+using ModCore.Database;
+using ModCore.Entities;
+using ModCore.Extensions.AsyncListeners.Attributes;
+using ModCore.Extensions.AsyncListeners.Enums;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
 using System;
@@ -12,27 +16,27 @@ namespace ModCore.Listeners
 {
     public static class MessageSnipe
     {
-        [AsyncListener(EventTypes.MessageDeleted)]
-        public static async Task MessageSniped(ModCoreShard bot, MessageDeleteEventArgs eventargs)
+        [AsyncListener(EventType.MessageDeleted)]
+        public static async Task MessageSniped(MessageDeleteEventArgs eventargs, SharedData sharedData, DatabaseContextBuilder database)
         {
             await Task.Yield();
 
             if((!string.IsNullOrEmpty(eventargs.Message?.Content) || eventargs.Message.Embeds.Count > 0) && !eventargs.Message.Author.IsBot)
             {
-                if (bot.SharedData.DeletedMessages.ContainsKey(eventargs.Channel.Id))
+                if (sharedData.DeletedMessages.ContainsKey(eventargs.Channel.Id))
                 {
-                    bot.SharedData.DeletedMessages[eventargs.Channel.Id] = eventargs.Message;
+                    sharedData.DeletedMessages[eventargs.Channel.Id] = eventargs.Message;
                 }
                 else
                 {
-                    bot.SharedData.DeletedMessages.TryAdd(eventargs.Channel.Id, eventargs.Message);
+                    sharedData.DeletedMessages.TryAdd(eventargs.Channel.Id, eventargs.Message);
                 }
             }
 
             if (eventargs.Message == null)
                 return;
 
-            using var db = bot.Database.CreateContext();
+            using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
             if (cfg.Logging.EditLog_Enable)
             {
@@ -50,24 +54,24 @@ namespace ModCore.Listeners
             }
         }
 
-        [AsyncListener(EventTypes.MessageUpdated)]
-        public static async Task MessageEdited(ModCoreShard bot, MessageUpdateEventArgs eventargs)
+        [AsyncListener(EventType.MessageUpdated)]
+        public static async Task MessageEdited(MessageUpdateEventArgs eventargs, SharedData sharedData, DatabaseContextBuilder database)
         {
             await Task.Yield();
 
             if ((!string.IsNullOrEmpty(eventargs.MessageBefore?.Content) || eventargs.Message.Embeds.Count > 0) && !eventargs.Message.Author.IsBot)
             {
-                if (bot.SharedData.EditedMessages.ContainsKey(eventargs.Channel.Id))
+                if (sharedData.EditedMessages.ContainsKey(eventargs.Channel.Id))
                 {
-                    bot.SharedData.EditedMessages[eventargs.Channel.Id] = eventargs.MessageBefore;
+                    sharedData.EditedMessages[eventargs.Channel.Id] = eventargs.MessageBefore;
                 }
                 else
                 {
-                    bot.SharedData.EditedMessages.TryAdd(eventargs.Channel.Id, eventargs.MessageBefore);
+                    sharedData.EditedMessages.TryAdd(eventargs.Channel.Id, eventargs.MessageBefore);
                 }
             }
 
-            using var db = bot.Database.CreateContext();
+            using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
             if(cfg.Logging.EditLog_Enable)
             {

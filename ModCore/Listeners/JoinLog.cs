@@ -5,7 +5,10 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using ModCore.Database;
 using ModCore.Entities;
+using ModCore.Extensions.AsyncListeners.Attributes;
+using ModCore.Extensions.AsyncListeners.Enums;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
 
@@ -15,11 +18,11 @@ namespace ModCore.Listeners
 	{
 		private static readonly Regex WelcomeRegex = new("{{(.*?)}}", RegexOptions.Compiled);
 
-		[AsyncListener(EventTypes.GuildMemberAdded)]
-		public static async Task LogNewMember(ModCoreShard bot, GuildMemberAddEventArgs eventargs)
+		[AsyncListener(EventType.GuildMemberAdded)]
+		public static async Task LogNewMember(GuildMemberAddEventArgs eventargs, DatabaseContextBuilder database)
 		{
 			GuildSettings config;
-			using (var db = bot.Database.CreateContext())
+			using (var db = database.CreateContext())
 				config = eventargs.Guild.GetGuildSettings(db);
 
             if(config == null)
@@ -139,11 +142,11 @@ namespace ModCore.Listeners
 			}
 		}
 
-		[AsyncListener(EventTypes.GuildMemberRemoved)]
-		public static async Task LogLeaveMember(ModCoreShard bot, GuildMemberRemoveEventArgs eventargs)
+		[AsyncListener(EventType.GuildMemberRemoved)]
+		public static async Task LogLeaveMember(GuildMemberRemoveEventArgs eventargs, DatabaseContextBuilder database)
 		{
 			GuildSettings config;
-			using (var db = bot.Database.CreateContext())
+			using (var db = database.CreateContext())
 				config = eventargs.Guild.GetGuildSettings(db);
 			
 			if (config == null || !config.Logging.JoinLog_Enable)

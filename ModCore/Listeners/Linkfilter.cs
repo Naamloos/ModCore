@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using ModCore.Database;
 using ModCore.Entities;
+using ModCore.Extensions.AsyncListeners.Attributes;
+using ModCore.Extensions.AsyncListeners.Enums;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
 
@@ -21,8 +24,8 @@ namespace ModCore.Listeners
         public static ConcurrentDictionary<string, DiscordInvite> InviteCache { get; } =
             new ConcurrentDictionary<string, DiscordInvite>();
 
-        [AsyncListener(EventTypes.MessageCreated)]
-        public static async Task RemoveSuspiciousLinks(ModCoreShard bot, MessageCreateEventArgs eventargs)
+        [AsyncListener(EventType.MessageCreated)]
+        public static async Task RemoveSuspiciousLinks(MessageCreateEventArgs eventargs, DatabaseContextBuilder database, DiscordClient client)
         {
             if (eventargs.Author == null || eventargs.Channel == null)
                 return;
@@ -36,7 +39,7 @@ namespace ModCore.Listeners
                 return;
 
             GuildSettings config;
-            using (var db = bot.Database.CreateContext())
+            using (var db = database.CreateContext())
                 config = eventargs.Guild.GetGuildSettings(db);
             if (config == null)
                 return;
@@ -53,7 +56,7 @@ namespace ModCore.Listeners
                 return;
 
             if (lfSettings.BlockInviteLinks)
-                await FindAndPurgeInvites(bot, eventargs, lfSettings);
+                await FindAndPurgeInvites(client, eventargs, lfSettings);
 
             if (lfSettings.BlockIpLoggers)
             {
@@ -97,7 +100,7 @@ namespace ModCore.Listeners
                 await MatchUrlShorteners(eventargs);
         }
 
-        private static async Task FindAndPurgeInvites(ModCoreShard bot, MessageCreateEventArgs eventargs,
+        private static async Task FindAndPurgeInvites(DiscordClient client, MessageCreateEventArgs eventargs,
             GuildLinkfilterSettings linkfilter)
         {
             var matches = InviteRegex.Matches(eventargs.Message.Content);
@@ -109,7 +112,7 @@ namespace ModCore.Listeners
                 var invk = match.Groups[1].Value;
                 if (!InviteCache.TryGetValue(invk, out var inv))
                 {
-                    inv = await bot.Client.GetInviteByCodeAsync(invk);
+                    inv = await client.GetInviteByCodeAsync(invk);
                     InviteCache.TryAdd(invk, inv);
                 }
 

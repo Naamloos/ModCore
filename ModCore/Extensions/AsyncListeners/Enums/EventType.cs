@@ -1,7 +1,6 @@
-﻿namespace ModCore.Logic
+﻿namespace ModCore.Extensions.AsyncListeners.Enums
 {
-    // CNext doesn't need all the fiddling, so we dont need those events.
-    public enum EventTypes
+    public enum EventType
     {
         ClientErrored, // AsyncEventHandler<ClientErrorEventArgs>
         SocketErrored, // AsyncEventHandler<SocketErrorEventArgs>

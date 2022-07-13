@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using ModCore.Database;
 using ModCore.Database.Entities;
 using ModCore.Entities;
+using ModCore.Extensions.AsyncListeners.Attributes;
+using ModCore.Extensions.AsyncListeners.Enums;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
 
@@ -18,21 +20,21 @@ namespace ModCore.Listeners
 {
     public static class Timers
 	{
-		[AsyncListener(EventTypes.Ready)]
-		public static async Task OnReady(ModCoreShard shard)
+		[AsyncListener(EventType.Ready)]
+		public static async Task OnReady(DatabaseContextBuilder database, DiscordClient client, SharedData sharedData)
 		{
-			using (var db = shard.Database.CreateContext())
+			using (var db = database.CreateContext())
 			{
 				if (!db.Timers.Any())
 					return;
 
-				var guildids = shard.Client.Guilds.Select(xg => (long)xg.Key).ToArray();
+				var guildids = client.Guilds.Select(xg => (long)xg.Key).ToArray();
 				var timers = db.Timers.Where(xt => guildids.Contains(xt.GuildId)).ToArray();
 				if (!timers.Any())
 					return;
 
 				// lock timers
-				await shard.SharedData.TimerSempahore.WaitAsync();
+				await sharedData.TimerSempahore.WaitAsync();
 				try
 				{
 					var now = DateTimeOffset.UtcNow;
@@ -42,7 +44,7 @@ namespace ModCore.Listeners
 						foreach (var timer in pasttimers)
 						{
 							// dispatch past timers
-							_ = DispatchTimer(new TimerData(null, timer, shard.Client, shard.Database, shard.SharedData, null));
+							_ = DispatchTimer(new TimerData(null, timer, client, database, sharedData, null));
 						}
 
 						db.Timers.RemoveRange(pasttimers);
@@ -51,16 +53,16 @@ namespace ModCore.Listeners
 				}
 				catch (Exception ex)
 				{
-					shard.Client.Logger.Log(LogLevel.Error, "ModCore", 
+					client.Logger.Log(LogLevel.Error, "ModCore", 
 						$"Caught Exception in Timer Ready: {ex.GetType().ToString()}\n{ex.StackTrace}", DateTime.UtcNow);
 				}
 				finally
 				{
 					// unlock the timers
-					shard.SharedData.TimerSempahore.Release();
+					sharedData.TimerSempahore.Release();
 				}
 
-				await RescheduleTimers(shard.Client, shard.Database, shard.SharedData);
+				await RescheduleTimers(client, database, sharedData);
 			}
 		}
 

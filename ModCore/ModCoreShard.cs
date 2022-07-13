@@ -89,10 +89,11 @@ namespace ModCore
             // Add the instances we need to dependencies
             var deps = new ServiceCollection()
                 .AddSingleton(this.SharedData)
-                //.AddInstance(this.Settings)
+                .AddSingleton(this.Settings)
                 .AddSingleton(this.Interactivity)
                 .AddSingleton(this.StartTimes)
                 .AddSingleton(this.Database)
+                .AddSingleton(this)
                 .BuildServiceProvider();
 
             // enable commandsnext
@@ -147,11 +148,12 @@ namespace ModCore
 
             this.Modals = this.Client.UseModals(deps);
 
+            var asyncListeners = this.Client.UseAsyncListeners(deps);
+            asyncListeners.RegisterListeners(this.GetType().Assembly);
+
             this.Client.GuildCreated += onGuildCreated;
             // register event handlers
             this.Client.Ready += onClientReady;
-
-            AsyncListenerHandler.InstallListeners(Client, this);
         }
 
         private async Task onGuildCreated(DiscordClient c, GuildCreateEventArgs e)

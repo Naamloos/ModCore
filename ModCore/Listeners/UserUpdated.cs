@@ -1,6 +1,9 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using ModCore.Database;
 using ModCore.Entities;
+using ModCore.Extensions.AsyncListeners.Attributes;
+using ModCore.Extensions.AsyncListeners.Enums;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
 using Newtonsoft.Json;
@@ -28,14 +31,14 @@ namespace ModCore.Listeners
             return false;
         }
 
-        [AsyncListener(EventTypes.PresenceUpdated)]
-        public static async Task PresenceUpdated(ModCoreShard bot, PresenceUpdateEventArgs eventargs)
+        [AsyncListener(EventType.PresenceUpdated)]
+        public static async Task PresenceUpdated(PresenceUpdateEventArgs eventargs, DatabaseContextBuilder database, SharedData sharedData)
         {
             // TODO fix me
-            var db = bot.SharedData.ModCore.CreateGlobalContext();
+            var db = database.CreateContext();
             var loggers = db.GuildConfig.Where(x => x.GetSettings().LogUpdates).Select(x => x.GuildId);
 
-            var guilds = bot?.Parent?.Shards?.SelectMany(x => x.Client?.Guilds?.Where(y => y.Value.GetGuildSettings(db)?.LogUpdates ?? false));
+            var guilds = sharedData?.ModCore?.Shards?.SelectMany(x => x.Client?.Guilds?.Where(y => y.Value.GetGuildSettings(db)?.LogUpdates ?? false));
             if (guilds != null)
                 foreach (var g in guilds.Select(x => x.Value))
                 {
@@ -72,10 +75,10 @@ namespace ModCore.Listeners
                 }
         }
 
-        [AsyncListener(EventTypes.GuildMemberUpdated)]
-        public static async Task MemberUpdated(ModCoreShard bot, GuildMemberUpdateEventArgs eventargs)
+        [AsyncListener(EventType.GuildMemberUpdated)]
+        public static async Task MemberUpdated(GuildMemberUpdateEventArgs eventargs, DatabaseContextBuilder database)
         {
-            var db = bot.SharedData.ModCore.CreateGlobalContext();
+            var db = database.CreateContext();
             var guildsettings = eventargs.Guild.GetGuildSettings(db);
 
             if(guildsettings == null)
