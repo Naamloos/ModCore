@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ModCore.Logic.EntityFramework
+namespace ModCore.Utils.EntityFramework
 {
     [AttributeUsage(AttributeTargets.Property)]
     public abstract class EfPropertyBaseAttribute : Attribute

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace ModCore.Logic.EntityFramework
+namespace ModCore.Utils.EntityFramework
 {
     public sealed class EfPropertyDefinition
     {

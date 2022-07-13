@@ -8,7 +8,7 @@ using DSharpPlus.Entities;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using ModCore.Entities;
-using ModCore.Logic.Extensions;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Commands
 {

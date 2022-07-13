@@ -1,4 +1,4 @@
-﻿namespace ModCore.Logic
+﻿namespace ModCore.Utils
 {
     public class DateLexer
     {

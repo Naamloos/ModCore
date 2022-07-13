@@ -13,9 +13,9 @@ using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
 using ModCore.Entities;
-using ModCore.Logic;
+using ModCore.Utils;
 
-namespace ModCore.Logic.Extensions
+namespace ModCore.Utils.Extensions
 {
     public static class Extensions
     {

@@ -4,7 +4,7 @@ using DSharpPlus.Entities;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace ModCore.Logic
+namespace ModCore.Utils
 {
     public class MentionUlongConverter : IArgumentConverter<ulong>
     {

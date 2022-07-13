@@ -1,7 +1,7 @@
 ﻿using System;
 using DSharpPlus;
 
-namespace ModCore.Logic
+namespace ModCore.Utils
 {
     public abstract class ModCoreSnowflake
     {

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Entities;
 
-namespace ModCore.Logic
+namespace ModCore.Utils
 {
     public class Overwrite : ModCoreSnowflake
     {

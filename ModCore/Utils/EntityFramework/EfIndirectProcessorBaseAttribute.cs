@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ModCore.Logic.EntityFramework
+namespace ModCore.Utils.EntityFramework
 {
     /// <summary>
     /// Represents a type processor that is applied as an attribute to one or more properties. Properties where

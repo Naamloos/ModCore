@@ -4,7 +4,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using ModCore.Database;
 using ModCore.Entities;
-using ModCore.Logic;
+using ModCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;

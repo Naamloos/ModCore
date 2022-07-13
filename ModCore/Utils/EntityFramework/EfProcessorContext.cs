@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ModCore.Database;
 
-namespace ModCore.Logic.EntityFramework
+namespace ModCore.Utils.EntityFramework
 {
     public sealed class EfProcessorContext
     {

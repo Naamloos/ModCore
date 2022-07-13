@@ -2,9 +2,8 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Chronic;
-using ModCore.Logic.Utils;
 
-namespace ModCore.Logic
+namespace ModCore.Utils
 {
     public static class Dates
     {

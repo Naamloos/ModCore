@@ -14,8 +14,8 @@ using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
 using ModCore.Entities;
 using ModCore.Listeners;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Commands
 {

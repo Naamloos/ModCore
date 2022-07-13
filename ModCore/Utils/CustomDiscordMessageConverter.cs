@@ -5,7 +5,7 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
 using DSharpPlus.Entities;
 
-namespace ModCore.Logic
+namespace ModCore.Utils
 {
 	public class CustomDiscordMessageConverter : IArgumentConverter<DiscordMessage>
 	{

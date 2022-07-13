@@ -13,8 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Commands
 {

@@ -3,8 +3,8 @@ using DSharpPlus.EventArgs;
 using ModCore.Database;
 using ModCore.Extensions.AsyncListeners.Attributes;
 using ModCore.Extensions.AsyncListeners.Enums;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 using System.Threading.Tasks;
 
 namespace ModCore.Listeners

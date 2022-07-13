@@ -5,7 +5,7 @@ using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using ModCore.Entities;
 using ModCore.Extensions;
-using ModCore.Logic.Extensions;
+using ModCore.Utils.Extensions;
 using ModCore.Modals;
 using System;
 using System.Collections.Generic;

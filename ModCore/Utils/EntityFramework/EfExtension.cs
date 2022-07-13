@@ -28,7 +28,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using ModCore.Database;
 
-namespace ModCore.Logic.EntityFramework
+namespace ModCore.Utils.EntityFramework
 {
     public static class EfExtension
     {

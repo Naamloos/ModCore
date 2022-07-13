@@ -2,7 +2,7 @@
 using System.Linq;
 using ModCore.Entities;
 
-namespace ModCore.Logic.EntityFramework.AttributeImpl
+namespace ModCore.Utils.EntityFramework.AttributeImpl
 {
     /// <inheritdoc />
     /// <summary>

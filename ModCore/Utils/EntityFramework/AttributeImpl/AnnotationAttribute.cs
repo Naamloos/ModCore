@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace ModCore.Logic.EntityFramework.AttributeImpl
+namespace ModCore.Utils.EntityFramework.AttributeImpl
 {
     /// <inheritdoc />
     /// <summary>

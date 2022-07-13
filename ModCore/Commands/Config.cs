@@ -12,8 +12,8 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using ModCore.Database;
 using ModCore.Entities;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
 

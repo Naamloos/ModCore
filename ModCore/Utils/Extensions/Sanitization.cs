@@ -7,7 +7,7 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 
-namespace ModCore.Logic.Extensions
+namespace ModCore.Utils.Extensions
 {
     public static class Sanitization
     {

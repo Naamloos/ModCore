@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ModCore.Logic
+namespace ModCore.Utils
 {
     /// <summary>
     /// String tokenizer by uwx

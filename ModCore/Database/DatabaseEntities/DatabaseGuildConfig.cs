@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using ModCore.Database.JsonEntities;
 using ModCore.Entities;
-using ModCore.Logic.EntityFramework.AttributeImpl;
+using ModCore.Utils.EntityFramework.AttributeImpl;
 using Newtonsoft.Json;
 
 namespace ModCore.Database.DatabaseEntities

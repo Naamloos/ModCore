@@ -1,6 +1,6 @@
 ﻿using ModCore.Entities;
 
-namespace ModCore.Logic.EntityFramework
+namespace ModCore.Utils.EntityFramework
 {
     public interface IEfCustomContext
     {

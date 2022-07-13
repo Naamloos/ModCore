@@ -1,8 +1,8 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
-using ModCore.Logic.Extensions;
+using ModCore.Utils.Extensions;
 
-namespace ModCore.Logic
+namespace ModCore.Utils
 {
     public static class InteractivityUtil
     {

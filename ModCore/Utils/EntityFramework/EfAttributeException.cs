@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ModCore.Logic.EntityFramework
+namespace ModCore.Utils.EntityFramework
 {
     public sealed class EfAttributeException : Exception
     {

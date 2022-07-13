@@ -4,13 +4,13 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using ModCore.Database;
 using ModCore.Entities;
-using ModCore.Logic;
+using ModCore.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ModCore.Logic.Extensions;
+using ModCore.Utils.Extensions;
 using ModCore.Database.JsonEntities;
 
 namespace ModCore.Commands

@@ -11,8 +11,8 @@ using ModCore.Database.JsonEntities;
 using ModCore.Entities;
 using ModCore.Extensions.AsyncListeners.Attributes;
 using ModCore.Extensions.AsyncListeners.Enums;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Listeners
 {

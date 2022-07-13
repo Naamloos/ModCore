@@ -12,8 +12,8 @@ using DSharpPlus.Interactivity.EventHandling;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Entities;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Commands
 {

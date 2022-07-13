@@ -3,7 +3,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using ModCore.Entities;
 
-namespace ModCore.Logic.EntityFramework.AttributeImpl
+namespace ModCore.Utils.EntityFramework.AttributeImpl
 {
     /// <inheritdoc />
     /// <summary>
