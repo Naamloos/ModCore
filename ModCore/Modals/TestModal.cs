@@ -7,27 +7,27 @@ using System.Threading.Tasks;
 
 namespace ModCore.Modals
 {
-    [Modal("dummy")]
-    public class DummyModal : IModal
+    [Modal("test")]
+    public class TestModal : IModal
     {
-        [ModalField("test field for testing", "test")]
+        [ModalField("This is a visible field!", "visible")]
         public string TestField { get; set; }
 
         [ModalHiddenField("hidden")]
         public string TestHiddenField { get; set; }
 
-        private SharedData shared;
+        private Settings settings;
 
-        public DummyModal(SharedData shared)
+        public TestModal(Settings settings)
         {
-            this.shared = shared;
+            this.settings = settings;
         }
 
         public async Task HandleAsync(DiscordInteraction interaction)
         {
             await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, 
                 new DiscordInteractionResponseBuilder()
-                .WithContent($"Working!\ntestfield=`{TestField}`\ntesthiddenfield=`{TestHiddenField}`\ndependency injection, bot id from shareddate=`{shared.ModCore.Settings.BotId}`")
+                .WithContent($"Working!\ntestfield=`{TestField}`\ntesthiddenfield=`{TestHiddenField}`\ndependency injection, bot id from shareddate=`{settings.BotId}`")
                 .AsEphemeral());
         }
     }

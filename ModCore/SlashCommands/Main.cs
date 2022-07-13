@@ -52,14 +52,5 @@ namespace ModCore.SlashCommands
 
             await ctx.CreateResponseAsync(eb, true);
         }
-
-        [SlashCommand("Test", "Test Command Ignore Me.")]
-        public async Task TestAsync(InteractionContext ctx)
-        {
-            await ctx.Client.GetModalExtension().RespondWithModalAsync<DummyModal>(ctx.Interaction, "Dummy Modal", new Dictionary<string, string>()
-            {
-                { "hidden", "test hidden" }
-            });
-        }
     }
 }
