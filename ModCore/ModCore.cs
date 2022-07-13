@@ -20,7 +20,7 @@ using ModCore.Entities;
 using ModCore.Listeners;
 using ModCore.Web;
 using Newtonsoft.Json;
-using Startup = ModCore.Web.Startup;
+using ApiStartup = ModCore.Web.ApiStartup;
 
 namespace ModCore
 {
@@ -137,24 +137,19 @@ namespace ModCore
 
         private IHost BuildWebHost()
         {
-            var container = new CoreContainer
-            {
-                mcore = this
-            };
-
-            var mservice = new ServiceDescriptor(container.GetType(), container);
+            var mservice = new ServiceDescriptor(this.GetType(), this);
 
             return new HostBuilder()
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
-                     {
-                         config.AddJsonFile(
-                             "appconfig.json", optional: false, reloadOnChange: false);
-                     });
+                    //webBuilder.ConfigureAppConfiguration((hostingContext, config) =>
+                    // {
+                    //     config.AddJsonFile(
+                    //         "appconfig.json", optional: false, reloadOnChange: false);
+                    // });
 
-                    webBuilder.UseStartup<Startup>()
+                    webBuilder.UseStartup<ApiStartup>()
                         .ConfigureServices(x => x.Add(mservice))
                         .UseUrls("http://0.0.0.0:6969");
                 })

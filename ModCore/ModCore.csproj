@@ -14,13 +14,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Web\Pages\include\script.js" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Web\Pages\include\script.js" />
-    <EmbeddedResource Include="Web\Pages\include\style.css" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Chronic-netstandard" Version="0.3.2.4" />
     <PackageReference Include="DSharpPlus" Version="4.3.0-nightly-01151" />
     <PackageReference Include="DSharpPlus.CommandsNext" Version="4.3.0-nightly-01151" />

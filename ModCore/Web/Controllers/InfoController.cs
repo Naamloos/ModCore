@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using ModCore.CoreApi.Entities;
 using ModCore.Database;
 using ModCore.Entities;
+using ModCore.Web.Entities;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -17,11 +18,11 @@ namespace ModCore.Web.Controllers
 	[Route("info")]
 	public class InfoController : Controller
     {
-		private ModCore core;
+		private ModCore ModCore;
 
-		public InfoController(CoreContainer cont)
+		public InfoController(ModCore modcore)
 		{
-			this.core = cont.mcore;
+			ModCore = modcore;
 		}
 
 		public string Index()
@@ -39,28 +40,29 @@ namespace ModCore.Web.Controllers
 		[HttpGet("permissions")]
 		public ActionResult Perms()
 		{
+			List<ApiCommand> apiCmd = new List<ApiCommand>();
 			// TODO optimize (cache the info)
-			var cmd = this.core.SharedData.Commands.Select(x => x.cmd);
-			StringBuilder data = new StringBuilder();
-			data.AppendLine("<h1>Commands and their required permissions</h1>");
-			data.AppendLine("<ul>");
+			var cmd = this.ModCore.SharedData.Commands.Select(x => x.cmd);
 
 			foreach(var c in cmd)
 			{
-				if(!c.ExecutionChecks.Any(x => x.GetType() == typeof(RequireOwnerAttribute)))
-				data.AppendLine($"<li><h4>{c.QualifiedName}</h4> Bot+User: {GetAllCmdPerms(c)}" +
-					$" Bot: {GetAllCmdBotPerms(c)} User: {GetAllCmdUsrPerms(c)}</li>");
+				if (!c.ExecutionChecks.Any(x => x.GetType() == typeof(RequireOwnerAttribute)))
+					apiCmd.Add(new ApiCommand()
+					{
+						FullName = c.QualifiedName,
+						UserPerms = GetAllCmdUsrPerms(c).ToPermissionString(),
+						BotPerms = GetAllCmdBotPerms(c).ToPermissionString(),
+						BothPerms = GetAllCmdPerms(c).ToPermissionString()
+					});
 			}
 
-			data.AppendLine("</ul>");
-
-			return Content(data.ToString(), "text/html");
+			return Content(JsonConvert.SerializeObject(apiCmd), "application/json");
 		}
 
 		[HttpGet("guilds")]
 		public string Guilds()
 		{
-			return $"ModCore is currently serving {core.Shards.Select(x => x.Client.Guilds.Count).Sum()} guilds over {core.Shards.Count} shards!";
+			return $"ModCore is currently serving {ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()} guilds over {ModCore.Shards.Count} shards!";
 		}
 
 		private Permissions GetAllCmdPerms(Command cmd)

@@ -16,9 +16,9 @@ using Microsoft.Extensions.Options;
 
 namespace ModCore.Web
 {
-	public class Startup
+	public class ApiStartup
 	{
-		public Startup(IConfiguration configuration)
+		public ApiStartup(IConfiguration configuration)
 		{
 			Configuration = configuration;
 		}
@@ -28,16 +28,12 @@ namespace ModCore.Web
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-            //Taken from https://github.com/stefanprodan/AspNetCoreRateLimit/wiki/IpRateLimitMiddleware#setup
             services.AddOptions();
             services.AddMemoryCache();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-            services.AddRazorPages();
-
-            services.AddControllersWithViews()
-                .AddNewtonsoftJson()
-                .AddRazorPagesOptions(x => x.RootDirectory = "/Web/Pages");
+			services.AddControllers()
+				.AddNewtonsoftJson();
         }
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,15 +44,14 @@ namespace ModCore.Web
 				app.UseDeveloperExceptionPage();
 			}
 
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                FileProvider = new EmbeddedFileProvider(typeof(Web.Pages.IndexModel).Assembly, "ModCore.Web.Pages")
-            });
+            //app.UseStaticFiles(new StaticFileOptions()
+            //{
+            //    FileProvider = new EmbeddedFileProvider(typeof(Web.Pages.IndexModel).Assembly, "ModCore.Web.Pages")
+            //});
 
 			app.UseRouting();
 			app.UseEndpoints(x => {
 				x.MapControllers();
-                x.MapRazorPages();
 			});
 		}
 	}

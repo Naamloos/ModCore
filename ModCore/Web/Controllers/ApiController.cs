@@ -18,11 +18,11 @@ namespace ModCore.Web.Controllers
     [Route("api")]
     public class ApiController : Controller
     {
-        private ModCore core;
+        private ModCore ModCore;
 
-        public ApiController(CoreContainer cont)
+        public ApiController(ModCore modcore)
         {
-            this.core = cont.mcore;
+            ModCore = modcore;
         }
 
         public string Index()
@@ -40,7 +40,7 @@ namespace ModCore.Web.Controllers
         [HttpGet("default")]
         public string Dp()
         {
-            return "Default prefix: " + core.SharedData.DefaultPrefix;
+            return "Default prefix: " + ModCore.SharedData.DefaultPrefix;
         }
     }
 }
