@@ -22,7 +22,7 @@ namespace ModCore.Logic.EntityFramework
         public sealed override bool CanHaveMultiple => true;
         
         public abstract bool PropertyMatches(EfProcessorContext ctx, EfPropertyDefinition definition);
-        public abstract void Process(EfProcessorContext ctx, IReadOnlyCollection<EfPropertyDefinition> properties);
+        public abstract void Process(EfProcessorContext ctx, IEnumerable<EfPropertyDefinition> properties);
 
         // only compare equality and hash code based on the own type and prevent overriding it
         // this makes it possible to index attributes as keys in a dictionary

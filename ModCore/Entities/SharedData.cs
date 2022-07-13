@@ -6,7 +6,6 @@ using System.Threading;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
-using ModCore.Api;
 using ModCore.CoreApi;
 using ModCore.Listeners;
 
@@ -18,7 +17,6 @@ namespace ModCore.Entities
         public DateTime ProcessStartTime { get; internal set; }
         public SemaphoreSlim TimerSempahore { get; internal set; }
         public TimerData TimerData { get; internal set; }
-        public Perspective Perspective { get; internal set; }
         public List<ulong> BotManagers { get; internal set; }
         public string DefaultPrefix { get; internal set; }
 		public int ReadysReceived { get; internal set; } = 0;

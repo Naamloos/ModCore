@@ -25,7 +25,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Collections.Extensions;
 using Microsoft.EntityFrameworkCore;
 using ModCore.Database;
 
@@ -108,7 +107,7 @@ namespace ModCore.Logic.EntityFramework
                                 {
                                     if (matches == null)
                                         matches = new MultiValueDictionary<EfIndirectProcessorBaseAttribute, EfPropertyDefinition>();
-                                    matches.Add(indirectProcessor, definition);
+                                    matches.AddValue(indirectProcessor, definition);
                                 }
                                 break;
                         }

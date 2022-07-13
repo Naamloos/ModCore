@@ -244,7 +244,7 @@ namespace ModCore.Commands
 				await member.ElevatedMessageAsync($"🚓 You've been kicked from {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
 				sent_dm = true;
 			}
-			catch (Exception ex) { }
+			catch (Exception) { }
 
 			await member.RemoveAsync($"{userstring}{reasonstring}");
 			await context.SafeRespondAsync($"🚓 Kicked user {member.DisplayName} (ID:{member.Id}).\n{(sent_dm ? "Said user has been notified of this action." : "")}");

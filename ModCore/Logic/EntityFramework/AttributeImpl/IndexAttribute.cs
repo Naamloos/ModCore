@@ -88,7 +88,7 @@ namespace ModCore.Logic.EntityFramework.AttributeImpl
 
         public override bool PropertyMatches(EfProcessorContext ctx, EfPropertyDefinition definition) => true;
 
-        public override void Process(EfProcessorContext ctx, IReadOnlyCollection<EfPropertyDefinition> properties)
+        public override void Process(EfProcessorContext ctx, IEnumerable<EfPropertyDefinition> properties)
         {
             var indexParams = properties
                 .Select(def => (prop: def.Property, attr: def.Source as IndexAttribute))
@@ -120,11 +120,11 @@ namespace ModCore.Logic.EntityFramework.AttributeImpl
                         prefix = ctx.ClrType.GetCustomAttribute<TableAttribute>()?.Name
                                  ?? throw new EfAttributeException("");
                         
-                        indexBuilder.HasName($"{prefix}_{indexParam.IndexName}");
+                        indexBuilder.HasDatabaseName($"{prefix}_{indexParam.IndexName}");
                     }
                     else
                     {
-                        indexBuilder.HasName(indexParam.IndexName);
+                        indexBuilder.HasDatabaseName(indexParam.IndexName);
                     }
                 }
             }

@@ -14,7 +14,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ModCore.Api;
 using ModCore.CoreApi;
 using ModCore.Database;
 using ModCore.Entities;
@@ -33,7 +32,6 @@ namespace ModCore
 
         private DatabaseContextBuilder GlobalContextBuilder { get; set; }
         private CancellationTokenSource CTS { get; set; }
-        private Perspective PerspectiveApi { get; set; }
 
         internal async Task InitializeAsync(string[] args)
         {
@@ -59,8 +57,6 @@ namespace ModCore
             // Saving config with same values but updated fields
             var newjson = JsonConvert.SerializeObject(Settings, Formatting.Indented);
             File.WriteAllText("settings.json", newjson, new UTF8Encoding(false));
-
-            PerspectiveApi = new Perspective(Settings.PerspectiveToken);
 
             Shards = new List<ModCoreShard>();
             InitializeSharedData(args);
@@ -104,7 +100,6 @@ namespace ModCore
             {
                 CancellationTokenSource = CTS,
                 ProcessStartTime = Process.GetCurrentProcess().StartTime,
-                Perspective = PerspectiveApi,
                 BotManagers = Settings.BotManagers,
                 DefaultPrefix = Settings.DefaultPrefix,
                 ModCore = this
