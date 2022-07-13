@@ -6,7 +6,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using ModCore.Database;
-using ModCore.Database.Entities;
+using ModCore.Database.DatabaseEntities;
 using ModCore.Entities;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
@@ -27,7 +27,7 @@ namespace ModCore.Commands
             this.Database = db;
         }
 
-        [Command("info"), Aliases("i", "data", "information"), Description("Returns stardata for a specified user."), CheckDisable]
+        [Command("info"), Aliases("i", "data", "information"), Description("Returns stardata for a specified user.")]
         public async Task ListGivenAsync(CommandContext context, [Description("User to show stardata information about.")] DiscordMember member)
         {
             var embed = new DiscordEmbedBuilder()

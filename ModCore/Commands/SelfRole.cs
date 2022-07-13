@@ -11,10 +11,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ModCore.Logic.Extensions;
+using ModCore.Database.JsonEntities;
 
 namespace ModCore.Commands
 {
-	[Group("selfrole"), Description("Commands to give or take selfroles."), RequireBotPermissions(Permissions.ManageRoles), CheckDisable]
+	[Group("selfrole"), Description("Commands to give or take selfroles."), RequireBotPermissions(Permissions.ManageRoles)]
 	public class SelfRole : BaseCommandModule
 	{
 		private DatabaseContextBuilder Database { get; }
@@ -25,7 +26,7 @@ namespace ModCore.Commands
 		}
 
 		[Command("give"), Aliases("g"), Description("Gives the command callee a specified role, if " +
-																 "ModCore has been configured to allow so."), CheckDisable]
+																 "ModCore has been configured to allow so.")]
 		public async Task GiveAsync(CommandContext context, [RemainingText, Description("Role you want to give to yourself")] DiscordRole role)
 		{
 			var config = context.GetGuildSettings() ?? new GuildSettings(); ;
@@ -51,7 +52,7 @@ namespace ModCore.Commands
 		}
 
 		[Command("take"), Aliases("t"), Description("Removes a specified role from the command callee, if " +
-																 "ModCore has been configured to allow so."), CheckDisable]
+																 "ModCore has been configured to allow so.")]
 		public async Task TakeAsync(CommandContext context, [RemainingText, Description("Role you want to take from yourself")] DiscordRole role)
 		{
 			var config = context.GetGuildSettings() ?? new GuildSettings(); ;
@@ -77,7 +78,7 @@ namespace ModCore.Commands
 			}
 		}
 
-		[Command("list"), Aliases("l"), Description("Lists all available selfroles, if any."), CheckDisable]
+		[Command("list"), Aliases("l"), Description("Lists all available selfroles, if any.")]
 		public async Task ListAsync(CommandContext context)
 		{
 			GuildSettings config;

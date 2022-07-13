@@ -11,10 +11,11 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using ModCore.Database;
-using ModCore.Database.Entities;
 using ModCore.Entities;
 using ModCore.Logic;
 using ModCore.Logic.Extensions;
+using ModCore.Database.DatabaseEntities;
+using ModCore.Database.JsonEntities;
 
 namespace ModCore.Commands
 {
@@ -1205,133 +1206,6 @@ namespace ModCore.Commands
 						await ctx.ElevatedRespondAsync("No reaction was linked to that role!");
 				});
 			}
-		}
-
-		[Group("commandsettings"), Aliases("commands", "cmds", "cs", "c"), Description("Command settings commands.")]
-		public class CommandSettings : BaseCommandModule
-		{
-			public DatabaseContextBuilder Database { get; }
-
-			public CommandSettings(DatabaseContextBuilder db)
-			{
-				this.Database = db;
-			}
-			
-			[Command("disable"), Aliases("d")]
-			public async Task DisableAsync(CommandContext ctx, [RemainingText] string cmd)
-			{
-				var command = cmd.ToLowerInvariant();
-				if (command.StartsWith("config"))
-				{
-					await ctx.ElevatedRespondAsync("You can't disable configuration commands!");
-					return;
-				}
-				if (command.StartsWith("owner"))
-				{
-					await ctx.ElevatedRespondAsync("You can't disable owner commands!");
-					return;
-				}
-				if (ctx.CommandsNext.RegisteredCommands.Any(x => CheckCommand(command, x.Value)))
-				{
-                    await ctx.WithGuildSettings(async cfg =>
-                    {
-                        using (var db = Database.CreateContext())
-					    {
-						    cfg.DisabledCommands.Add((await db.CommandIds.FindAsync(command)).Id);
-					    }
-                    });
-					await ctx.SafeRespondAsync($"Disabled command `{command}` from use in this guild!");
-				}
-				else
-				{
-					await ctx.SafeRespondAsync($"No such command! `{command}`");
-				}
-			}
-
-			public static bool CheckCommand(string command, Command cmd)
-			{
-				if (cmd.QualifiedName.StartsWith(command))
-					return true;
-				if (cmd is CommandGroup group)
-					return group.Children.Any(e => CheckCommand(command, e));
-				return false;
-			}
-
-			[Command("enable"), Aliases("e")]
-			public async Task EnableAsync(CommandContext ctx, [RemainingText]string cmd)
-			{
-				var command = cmd.ToLowerInvariant();
-				await ctx.WithGuildSettings(async cfg =>
-				{
-					short id = 0; 
-					using (var db = Database.CreateContext())
-					{
-						id = (await db.CommandIds.FindAsync(command)).Id;
-					}
-
-					if (cfg.DisabledCommands.RemoveWhere(x => x == id) > 0)
-						await ctx.SafeRespondAsync($"Enabled command `{command}` in this guild!");
-					else
-						await ctx.ElevatedRespondAsync("That command does not exist!");
-				});
-			}
-
-			[Command("list"), Aliases("l")]
-			public async Task ListAsync(CommandContext ctx)
-			{
-				var cfg = ctx.GetGuildSettings() ?? new GuildSettings();
-				if (cfg.DisabledCommands.Count == 0)
-				{
-					await ctx.ElevatedRespondAsync("No commands are currently disabled!");
-					return;
-				}
-				// TODO List disabled commands
-			}
-			
-			[Group("notify"), Aliases("warn", "not", "log", "n", "w", "l"), 
-			 Description("Whether or not to send a message in chat when someone tries to execute a disabled command.")]
-			public class Notify : BaseCommandModule
-            {
-				string CurrentModuleName => "notify on disabled command call";
-				
-				ref bool GetSetting(GuildSettings cfg) => ref cfg.NotifyDisabledCommand;
-
-                string EnabledState => "Enabled";
-                string DisabledState => "Disabled";
-
-                [GroupCommand, Description("Sets whether this module is enabled or not.")]
-                public async Task ExecuteGroupAsync(CommandContext ctx, [Description(
-                    "Leave empty to toggle, set to one of `on`, `enable`, `enabled`, `1`, `true`, `yes` or `y` to enable, or " +
-                    "set to one of `off`, `disable`, `disabled`, `0`, `false`, `no` or `n` to disable. "
-                    )] bool? enableOrDisable = null)
-                {
-                    // we can't access ref inside an async method, so make a copy
-                    var resultingVariable = false;
-
-                    await ctx.WithGuildSettings(cfg =>
-                    {
-                        ref var configVariable = ref GetSetting(cfg);
-
-                        resultingVariable = configVariable = enableOrDisable ?? !configVariable;
-                    });
-
-                    if (resultingVariable)
-                        await AfterEnable(ctx);
-                    else
-                        await AfterDisable(ctx);
-
-                    // if toggling, tell the user what the new value is
-                    if (!enableOrDisable.HasValue)
-                        await ctx.ElevatedRespondAsync(
-                            $"**{(resultingVariable ? EnabledState : DisabledState)}** the {CurrentModuleName} module.");
-
-                    await ctx.Message.CreateReactionAsync(Config.CheckMark);
-                }
-
-                Task AfterEnable(CommandContext ctx) => Task.CompletedTask;
-
-                Task AfterDisable(CommandContext ctx) => Task.CompletedTask;
-            }
 		}
 
 		[Group("welcome"), Aliases("w"), Description("Welcome message settings commands.")]

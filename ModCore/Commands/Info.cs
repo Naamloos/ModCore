@@ -13,7 +13,7 @@ using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands
 {
-    [Group("info"), Aliases("i"), Description("Information commands"), CheckDisable]
+    [Group("info"), Aliases("i"), Description("Information commands")]
     public class Info : BaseCommandModule
 	{
         public SharedData Shared { get; }
@@ -35,7 +35,7 @@ namespace ModCore.Commands
             await context.CommandsNext.ExecuteCommandAsync(fakecontext);
         }
 
-        [Command("user"), Aliases("u"), Description("Returns information about a specific user."), CheckDisable]
+        [Command("user"), Aliases("u"), Description("Returns information about a specific user.")]
         public async Task UserInfoAsync(CommandContext context, [Description("Member to get information about")]DiscordMember member)
         {
 
@@ -80,7 +80,7 @@ namespace ModCore.Commands
             await context.ElevatedRespondAsync(embed: embed);
         }
 
-        [Command("guild"), Aliases("g"), Description("Returns information about this guild."), CheckDisable]
+        [Command("guild"), Aliases("g"), Description("Returns information about this guild.")]
         public async Task GuildInfoAsync(CommandContext context)
         {
             await context.SafeRespondUnformattedAsync("The following embed might flood this channel. Do you want to proceed?");
@@ -153,7 +153,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("role"), Aliases("r"), Description("Returns information about a specific role."), CheckDisable]
+        [Command("role"), Aliases("r"), Description("Returns information about a specific role.")]
         public async Task RoleInfoAsync(CommandContext context, [Description("Role to get information about")]DiscordRole role)
         {
             var embed = new DiscordEmbedBuilder();
@@ -169,7 +169,7 @@ namespace ModCore.Commands
             await context.ElevatedRespondAsync(embed: embed);
         }
 
-        [Command("channel"), Aliases("c"), Description("Returns information about a specific channel."), CheckDisable]
+        [Command("channel"), Aliases("c"), Description("Returns information about a specific channel.")]
         public async Task ChannelInfoAsync(CommandContext context, [Description("Channel to get information about")]DiscordChannel channel)
         {
             var embed = new DiscordEmbedBuilder();

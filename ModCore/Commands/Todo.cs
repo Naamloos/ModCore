@@ -8,25 +8,24 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using ModCore.Database;
-using ModCore.Database.Entities;
+using ModCore.Database.DatabaseEntities;
+using ModCore.Database.JsonEntities;
 using ModCore.Entities;
 using ModCore.Logic;
 
 namespace ModCore.Commands
 {
-    [Group("todo"), CheckDisable]
+    [Group("todo")]
     public class Todo : BaseCommandModule
     {
-        public SharedData Shared { get; }
         public DatabaseContextBuilder Database { get; }
         public InteractivityExtension Interactivity { get; }
         public StartTimes StartTimes { get; }
 
-        public Todo(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive,
+        public Todo(DatabaseContextBuilder db, InteractivityExtension interactive,
             StartTimes starttimes)
         {
             this.Database = db;
-            this.Shared = shared;
             this.Interactivity = interactive;
             this.StartTimes = starttimes;
         }

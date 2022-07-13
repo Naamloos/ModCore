@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ModCore.Database;
-using ModCore.Database.Entities;
+using ModCore.Database.DatabaseEntities;
 using ModCore.Entities;
 using Newtonsoft.Json;
 using ApiStartup = ModCore.Api.ApiStartup;
@@ -21,10 +21,11 @@ namespace ModCore
     public class ModCore
     {
         public Settings Settings { get; private set; }
+
         public SharedData SharedData { get; private set; }
+
         public List<ModCoreShard> Shards { get; set; }
 
-        private DatabaseContextBuilder GlobalContextBuilder { get; set; }
         private CancellationTokenSource CTS { get; set; }
 
         internal async Task InitializeAsync(string[] args)
@@ -40,11 +41,12 @@ namespace ModCore
 
             var input = File.ReadAllText("settings.json", new UTF8Encoding(false));
             Settings = JsonConvert.DeserializeObject<Settings>(input);
-            GlobalContextBuilder = Settings.Database.CreateContextBuilder();
 
             if (args.Contains("--migrate"))
             {
+                Console.WriteLine("Applying migrations...");
                 this.migrate();
+                Console.WriteLine("Done applying migrations.");
                 return;
             }
 
@@ -61,10 +63,6 @@ namespace ModCore
                 var shard = new ModCoreShard(Settings, i, SharedData);
                 shard.Initialize();
                 Shards.Add(shard);
-                if (i == 0)
-                {
-                    SharedData.Initialize(shard);
-                }
             }
 
             await InitializeDatabaseAsync();
@@ -103,25 +101,8 @@ namespace ModCore
         {
             // Fix for legacy timestamp behavior. This might need a "proper" fix in the future
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-            // add command id mappings if they don't already exist
-            var modifications = new List<string>();
-            using (var db = this.CreateGlobalContext())
-            {
-                foreach (var (name, _) in SharedData.Commands)
-                {
-                    if (db.CommandIds.FirstOrDefault(e => e.Command == name) != null) continue;
-                    Console.WriteLine($"Registering new command in db: {name}");
-
-                    modifications.Add(name);
-                    await db.CommandIds.AddAsync(new DatabaseCommandId()
-                    {
-                        Command = name
-                    });
-                }
-                await db.SaveChangesAsync();
-            }
-
         }
+
         public async Task WaitForCancellation()
         {
             while (!CTS.IsCancellationRequested)
@@ -149,14 +130,9 @@ namespace ModCore
                 .Build();
         }
 
-        public DatabaseContext CreateGlobalContext()
-        {
-            return GlobalContextBuilder.CreateContext();
-        }
-
         private void migrate()
         {
-            using var db = this.CreateGlobalContext();
+            var db = Settings.Database.CreateContextBuilder().CreateContext();
             var pending = db.Database.GetPendingMigrations();
 
             if (pending.Count() < 1)
@@ -178,7 +154,7 @@ namespace ModCore
                 Console.WriteLine("Attempting to apply migrations...");
                 try
                 {
-                    this.CreateGlobalContext().Database.Migrate();
+                    db.Database.Migrate();
                 }
                 catch (Exception ex)
                 {

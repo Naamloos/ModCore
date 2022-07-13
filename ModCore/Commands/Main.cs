@@ -9,7 +9,8 @@ using DSharpPlus.Interactivity.Extensions;
 using Humanizer;
 using Humanizer.Localisation;
 using ModCore.Database;
-using ModCore.Database.Entities;
+using ModCore.Database.DatabaseEntities;
+using ModCore.Database.JsonEntities;
 using ModCore.Entities;
 using ModCore.Listeners;
 using ModCore.Logic;
@@ -80,13 +81,13 @@ namespace ModCore.Commands
 		public Task AvatarAsync(CommandContext ctx)
 			=> ctx.RespondAsync(ctx.Member.GetGuildAvatarUrl(ImageFormat.Auto));
 
-		[Command("ping"), Description("Check ModCore's API connection status."), CheckDisable]
+		[Command("ping"), Description("Check ModCore's API connection status.")]
 		public async Task PingAsync(CommandContext context)
 		{
 			await context.SafeRespondAsync($"🏓 Pong: ({context.Client.Ping}) ms.");
 		}
 
-		[Command("prefix"), Description("Check ModCore's current prefix."), CheckDisable]
+		[Command("prefix"), Description("Check ModCore's current prefix.")]
 		public async Task PrefixAsync(CommandContext context)
 		{
 			await context.IfGuildSettings(
@@ -94,7 +95,7 @@ namespace ModCore.Commands
 				async () => await context.SafeRespondAsync($"ℹ️ Current prefix: {this.Shared.DefaultPrefix}"));
 		}
 
-		[Command("uptime"), Description("Check ModCore's uptime."), Aliases("u"), CheckDisable]
+		[Command("uptime"), Description("Check ModCore's uptime."), Aliases("u")]
 		public async Task UptimeAsync(CommandContext context)
 		{
 			var starttimes = this.StartTimes;
@@ -104,7 +105,7 @@ namespace ModCore.Commands
 				$"⏱️ Socket start: {string.Format("<t:{0}:R>", starttimes.SocketStartTime.ToUnixTimeSeconds())}");
 		}
 
-		[Command("invite"), Description("Get an invite to this ModCore instance. Sharing is caring!"), Aliases("inv"), CheckDisable]
+		[Command("invite"), Description("Get an invite to this ModCore instance. Sharing is caring!"), Aliases("inv")]
 		public async Task InviteAsync(CommandContext context)
 		{
 			//TODO replace with a link to a nice invite builder!
@@ -117,7 +118,7 @@ namespace ModCore.Commands
 				await context.SafeRespondUnformattedAsync("⚠️ I'm sorry Mario, but this instance of ModCore has been set to private!");
 		}
 
-		[Command("ban"), Description("Bans a member."), Aliases("b"), RequirePermissions(Permissions.BanMembers), CheckDisable]
+		[Command("ban"), Description("Bans a member."), Aliases("b"), RequirePermissions(Permissions.BanMembers)]
 		public async Task BanAsync(CommandContext ctx, [Description("Member to ban")] DiscordMember member,
 			[RemainingText, Description("Reason to ban this member")] string reason = "")
 		{
@@ -202,7 +203,7 @@ namespace ModCore.Commands
 		}
 
 		[Command("hackban"), Description("Ban an user by their ID. The user does not need to be in the guild."),
-		 Aliases("hb"), RequirePermissions(Permissions.BanMembers), CheckDisable]
+		 Aliases("hb"), RequirePermissions(Permissions.BanMembers)]
 		public async Task HackBanAsync(CommandContext context, [Description("ID of user to ban")]ulong id,
 			[RemainingText, Description("Reason to ban this member")] string reason = "")
 		{
@@ -227,7 +228,7 @@ namespace ModCore.Commands
 		}
 
 		[Command("kick"), Description("Kicks a member from the guild. Can optionally provide a reason for kick."),
-		 Aliases("k"), RequirePermissions(Permissions.KickMembers), CheckDisable]
+		 Aliases("k"), RequirePermissions(Permissions.KickMembers)]
 		public async Task KickAsync(CommandContext context, [Description("Member to kick")]DiscordMember member,
 			[RemainingText, Description("Reason to kick this member")] string reason = "")
 		{
@@ -262,7 +263,7 @@ namespace ModCore.Commands
 		[Command("softban"),
 		 Description("Bans then unbans an user from the guild. " +
 					 "This will delete their recent messages, but they can join back."), Aliases("sb"),
-		 RequireUserPermissions(Permissions.KickMembers), RequireBotPermissions(Permissions.BanMembers), CheckDisable]
+		 RequireUserPermissions(Permissions.KickMembers), RequireBotPermissions(Permissions.BanMembers)]
 		public async Task SoftbanAsync(CommandContext context, [Description("Member to softban")]DiscordMember member,
 			[RemainingText, Description("Reason to softban this member")] string reason = "")
 		{
@@ -296,7 +297,7 @@ namespace ModCore.Commands
 		}
 
 		[Command("leave"), Description("Makes this bot leave the current server. Goodbye."),
-		 RequireUserPermissions(Permissions.Administrator), CheckDisable]
+		 RequireUserPermissions(Permissions.Administrator)]
 		public async Task LeaveAsync(CommandContext context)
 		{
 			var interactivity = this.Interactivity;
@@ -323,7 +324,7 @@ namespace ModCore.Commands
 		[Command("tempban"), Aliases("tb"), Description(
 			 "Temporarily bans a member. They will be automatically unbanned " +
 			 "after a set amount of time."),
-		 RequirePermissions(Permissions.BanMembers), CheckDisable]
+		 RequirePermissions(Permissions.BanMembers)]
 		public async Task TempBanAsync(CommandContext context, [Description("Member to ban temporarily")]DiscordMember member,
 			[Description("How long this member will be banned")]TimeSpan timespan, [Description("Why this member got banned")]string reason = "")
 		{
@@ -394,7 +395,7 @@ namespace ModCore.Commands
 		[Command("timeout"), Aliases("mute", "tempmute", "tm", "m"), Description("Temporarily mutes a member. They will be automatically " +
 														 "unmuted after a set amount of time. This will prevent them " +
 														 "from speaking in chat."),
-		 RequirePermissions(Permissions.MuteMembers), CheckDisable]
+		 RequirePermissions(Permissions.MuteMembers)]
 		public async Task TempMuteAsync(CommandContext context, [Description("Member to temporarily mute")]DiscordMember member,
 			[Description("How long this member will be muted")]TimeSpan timespan, [Description("Reason to temp mute this member")]string reason = "")
 		{
@@ -435,7 +436,7 @@ namespace ModCore.Commands
 
 		[Command("unmute"), Description("Unmutes an user previously muted with the mute command. Let them speak!"),
 		 Aliases("um"), RequirePermissions(Permissions.MuteMembers),
-		 RequireBotPermissions(Permissions.ManageRoles), CheckDisable]
+		 RequireBotPermissions(Permissions.ManageRoles)]
 		public async Task UnmuteAsync(CommandContext context, [Description("Member to unmute")] DiscordMember member,
 			[RemainingText, Description("Reason to unmute this member")] string reason = "")
 		{
@@ -470,7 +471,7 @@ namespace ModCore.Commands
 
 		[Command("schedulepin"), Aliases("sp"), Description("Schedules a pinned message. _I really don't know why " +
 															"you'd want to do this._"),
-		 RequirePermissions(Permissions.ManageMessages), CheckDisable]
+		 RequirePermissions(Permissions.ManageMessages)]
 		public async Task SchedulePinAsync(CommandContext context, [Description("Message to schedule a pin for")]DiscordMessage message,
 			[Description("How long it will take for this message to get pinned")]TimeSpan timespan)
 		{
@@ -503,7 +504,7 @@ namespace ModCore.Commands
 
 		[Command("scheduleunpin"), Aliases("sup"), Description("Schedules unpinning a pinned message. This command " +
 															   "really is useless, isn't it?"),
-		 RequirePermissions(Permissions.ManageMessages), CheckDisable]
+		 RequirePermissions(Permissions.ManageMessages)]
 		public async Task ScheduleUnpinAsync(CommandContext context, [Description("Message to schedule unpinning for")]DiscordMessage message,
 			[Description("Time it will take before this message gets unpinned")]TimeSpan timespan)
 		{
@@ -536,7 +537,7 @@ namespace ModCore.Commands
 				$"✅ This message will be unpinned <t:{DateTimeOffset.UtcNow.Add(timespan).ToUnixTimeSeconds()}:R>.");
 		}
 
-		[Command("listbans"), Aliases("lb"), Description("Lists banned users. Real complex stuff."), RequireUserPermissions(Permissions.ViewAuditLog), CheckDisable]
+		[Command("listbans"), Aliases("lb"), Description("Lists banned users. Real complex stuff."), RequireUserPermissions(Permissions.ViewAuditLog)]
 		[RequireBotPermissions(Permissions.BanMembers)]
         public async Task ListBansAsync(CommandContext context)
 		{
@@ -590,7 +591,7 @@ namespace ModCore.Commands
 		}
 
 		[Command("announce"), Description("Announces a message to a channel, additionally mentioning a role.")]
-		[RequireBotPermissions(Permissions.ManageRoles), RequireUserPermissions(Permissions.MentionEveryone), CheckDisable]
+		[RequireBotPermissions(Permissions.ManageRoles), RequireUserPermissions(Permissions.MentionEveryone)]
 		public async Task AnnounceAsync(CommandContext context, [Description("Role to announce for")]DiscordRole role,
 			[Description("Channel to announce to")]DiscordChannel channel, [RemainingText, Description("Announcement text")] string message)
 		{
@@ -618,7 +619,7 @@ namespace ModCore.Commands
 			}
 		}
 
-		[Command("poll"), Description("Creates a reaction-based poll."), CheckDisable]
+		[Command("poll"), Description("Creates a reaction-based poll.")]
 		[RequireBotPermissions(Permissions.ManageMessages)]
 		public async Task PollAsync(CommandContext context, [Description("Question to ask")]string message, 
 			[Description("Time to run poll")]TimeSpan timespan, [Description("Reaction options")]params DiscordEmoji[] options)
@@ -636,7 +637,7 @@ namespace ModCore.Commands
 			await context.SafeModifyUnformattedAsync(pollmessage, sb.ToString());
 		}
 
-		[Command("buildmessage"), Description("Builds a message for you, complete with embeds."), CheckDisable]
+		[Command("buildmessage"), Description("Builds a message for you, complete with embeds.")]
 		[RequirePermissions(Permissions.ManageMessages)]
 		public async Task BuildMessageAsync(CommandContext context)
 		{

@@ -12,10 +12,11 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ModCore.Logic.Extensions;
 using ModCore.Database;
+using ModCore.Database.JsonEntities;
 
 namespace ModCore.Commands
 {
-	[Group("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages), CheckDisable]
+	[Group("purge"), Aliases("p"), RequirePermissions(Permissions.ManageMessages)]
 	public class Purge : BaseCommandModule
 	{
 		private static readonly Regex SpaceReplacer = new Regex(" {2,}", RegexOptions.Compiled);
@@ -60,7 +61,7 @@ namespace ModCore.Commands
 			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
-		[Command("user"), Description("Delete an amount of messages by an user."), Aliases("u", "pu"), CheckDisable]
+		[Command("user"), Description("Delete an amount of messages by an user."), Aliases("u", "pu")]
 		public async Task PurgeUserAsync(CommandContext context, [Description("User to delete messages from")]DiscordUser user,
 		[Description("Amount of messages to remove (max 100)")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
 		{
@@ -96,7 +97,7 @@ namespace ModCore.Commands
 		[Command("regexp"), Description(
 		 "For power users! Delete messages from the current channel by regular expression match. " +
 		 "Pass a Regexp in ECMAScript ( /expression/flags ) format, or simply a regex string " +
-		 "in quotes."), Aliases("purgeregex", "pr", "r", "regex"), CheckDisable]
+		 "in quotes."), Aliases("purgeregex", "pr", "r", "regex")]
 		public async Task PurgeRegexpAsync(CommandContext context, [Description("Your regex")] string regex,
 		[Description("Amount of messages to remove (max 100)")]int limit = 50, [Description("Amount of messages to skip")]int skip = 0)
 		{
@@ -218,7 +219,7 @@ namespace ModCore.Commands
 		}
 
 		[Command("commands"), Description("Purge ModCore's messages."), Aliases("c", "self", "own"),
-			RequirePermissions(Permissions.ManageMessages), CheckDisable]
+			RequirePermissions(Permissions.ManageMessages)]
 		public async Task CleanAsync(CommandContext context)
 		{
 			await context.Message.DeleteAsync();
@@ -253,7 +254,7 @@ namespace ModCore.Commands
 		}
 
 		[Command("bots"), Description("Purge messages from all bots in this channel"), Aliases("b", "bot"),
-	 RequirePermissions(Permissions.ManageMessages), CheckDisable]
+	 RequirePermissions(Permissions.ManageMessages)]
 		public async Task PurgeBotsAsync(CommandContext context)
 		{
 			await context.Message.DeleteAsync();
@@ -287,7 +288,7 @@ namespace ModCore.Commands
 		}
 
 		[Command("images"), Description("Purge messages with images or attachments on them."), Aliases("i", "imgs", "img"),
-	 RequirePermissions(Permissions.ManageMessages), CheckDisable]
+	 RequirePermissions(Permissions.ManageMessages)]
 		public async Task PurgeImagesAsync(CommandContext context)
 		{
 			await context.Message.DeleteAsync();

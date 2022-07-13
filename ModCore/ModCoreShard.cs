@@ -19,9 +19,10 @@ using ModCore.Logic.Extensions;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
 using DSharpPlus.SlashCommands;
-using ModCore.Interactions;
+using ModCore.SlashCommands;
 using ModCore.Modals;
 using ModCore.Extensions;
+using ModCore.Database.JsonEntities;
 
 namespace ModCore
 {

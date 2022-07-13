@@ -10,12 +10,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
-using ModCore.Database.Entities;
+using ModCore.Database.DatabaseEntities;
 
 namespace ModCore.Commands
 {
 	// TODO: Reconsider required permissions
-	[Group("note"), Aliases("n"), Description("Information commands"), CheckDisable, RequireUserPermissions(DSharpPlus.Permissions.BanMembers)]
+	[Group("note"), Aliases("n"), Description("Information commands"), RequireUserPermissions(DSharpPlus.Permissions.BanMembers)]
 	public class Note : BaseCommandModule
 	{
 		public SharedData Shared { get; }

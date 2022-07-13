@@ -15,7 +15,7 @@ using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands
 {
-    [Group("level"), CheckDisable]
+    [Group("level")]
     public class Level : BaseCommandModule
     {
         public SharedData Shared { get; }

@@ -10,7 +10,8 @@ using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
-using ModCore.Database.Entities;
+using ModCore.Database.DatabaseEntities;
+using ModCore.Database.JsonEntities;
 using ModCore.Entities;
 using ModCore.Logic;
 
@@ -251,18 +252,6 @@ namespace ModCore.Logic.Extensions
             }
 
             return true;
-        }
-
-        /// <summary>
-        /// Gets permission overwrites for this channel as <see cref="Overwrite"/> objects.
-        /// </summary>
-        /// <param name="channel">the channel to get the overwrites from</param>
-        /// <returns>a <see cref="FillingList{Overwrite}"/> object mapping the overwrites</returns>
-        public static IReadOnlyList<Overwrite> GetPermissionOverwrites(this DiscordChannel channel)
-        {
-            return new FillingList<Overwrite>(
-                channel.PermissionOverwrites.Select(overwrite => new Overwrite(overwrite, channel.Guild)),
-                channel.PermissionOverwrites.Count);
         }
 
         public static bool EqualsIgnoreCase(this string a, string b)

@@ -14,7 +14,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
-namespace ModCore.Interactions
+namespace ModCore.SlashCommands
 {
     public class Main : ApplicationCommandModule
     {

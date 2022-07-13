@@ -1,10 +1,10 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using ModCore.Entities;
+using ModCore.Database.JsonEntities;
 using Newtonsoft.Json;
 
-namespace ModCore.Database.Entities
+namespace ModCore.Database.DatabaseEntities
 {
     [Table("mcore_timers")]
     public class DatabaseTimer

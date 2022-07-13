@@ -58,7 +58,7 @@ namespace ModCore.Api.Controllers
 		{
 			List<ApiCommandData> apiCmd = new List<ApiCommandData>();
 			// TODO optimize (cache the info)
-			var cmd = this.ModCore.SharedData.Commands.Select(x => x.cmd);
+			var cmd = this.ModCore.Shards[0].Commands.RegisteredCommands.Values;
 
 			foreach (var c in cmd)
 			{

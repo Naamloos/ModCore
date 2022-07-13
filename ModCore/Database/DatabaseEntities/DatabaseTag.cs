@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using ModCore.Logic.EntityFramework.AttributeImpl;
 
-namespace ModCore.Database.Entities
+namespace ModCore.Database.DatabaseEntities
 {
     [Table("mcore_tags")]
     public class DatabaseTag

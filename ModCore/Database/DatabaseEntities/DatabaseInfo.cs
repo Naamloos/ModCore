@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using ModCore.Logic.EntityFramework.AttributeImpl;
 
-namespace ModCore.Database.Entities
+namespace ModCore.Database.DatabaseEntities
 {
     [Table("mcore_database_info")]
     public class DatabaseInfo

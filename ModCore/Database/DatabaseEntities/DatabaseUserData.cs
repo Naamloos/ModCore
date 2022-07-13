@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using ModCore.Entities;
+using ModCore.Database.JsonEntities;
 using ModCore.Logic.EntityFramework.AttributeImpl;
 using Newtonsoft.Json;
 
-namespace ModCore.Database.Entities
+namespace ModCore.Database.DatabaseEntities
 {
     [Table("mcore_userdata")]
     public class DatabaseUserData
