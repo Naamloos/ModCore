@@ -18,6 +18,10 @@ using ModCore.Logic;
 using ModCore.Logic.Extensions;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
+using DSharpPlus.SlashCommands;
+using ModCore.Interactions;
+using ModCore.Modals;
+using ModCore.Extensions;
 
 namespace ModCore
 {
@@ -29,6 +33,8 @@ namespace ModCore
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
+        public SlashCommandsExtension Slashies { get; private set; }
+        public ModalExtension Modals { get; private set; }
 
         public SharedData SharedData { get; set; }
 		public Settings Settings { get; }
@@ -124,12 +130,22 @@ namespace ModCore
 				}
 			}
 
+            this.Slashies = this.Client.UseSlashCommands(new SlashCommandsConfiguration()
+            {
+                Services = deps
+            });
+
+            this.Slashies.RegisterCommands(Assembly.GetExecutingAssembly());
+
             // Update the SocketStartTime
             this.Client.SocketOpened += async (c, e) =>
             {
                 await Task.Yield();
                 StartTimes.SocketStartTime = DateTime.Now;
+                await this.Slashies.RefreshCommands();
             };
+
+            this.Modals = this.Client.UseModals(deps);
 
             this.Client.GuildCreated += onGuildCreated;
             // register event handlers
