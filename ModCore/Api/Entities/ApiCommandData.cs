@@ -1,6 +1,6 @@
 ﻿namespace ModCore.Web.Entities
 {
-    public class ApiCommand
+    public class ApiCommandData
     {
         public string FullName { get; set; }
         public string BotPerms { get; set; }
