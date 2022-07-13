@@ -30,6 +30,31 @@ namespace ModCore.Commands
             this.Database = db;
         }
 
+        [Command("clear"), Hidden]
+        public async Task ClearCommandsAsync(CommandContext context)
+        {
+            await context.SafeRespondUnformattedAsync("❓ Are you sure you want to clear application commands? This will also shutdown the bot.");
+
+            var cancellationtokensource = context.Services.GetService<SharedData>().CancellationTokenSource;
+            var interactivity = context.Services.GetService<InteractivityExtension>();
+            var message = await interactivity.WaitForMessageAsync(x => x.ChannelId == context.Channel.Id && x.Author.Id == context.Member.Id, TimeSpan.FromSeconds(30));
+
+            if (message.TimedOut)
+            {
+                await context.SafeRespondUnformattedAsync("⚠️⌛ Timed out.");
+            }
+            else if (InteractivityUtil.Confirm(message.Result))
+            {
+                await context.Client.BulkOverwriteGlobalApplicationCommandsAsync(new List<DiscordApplicationCommand>());
+                await context.SafeRespondUnformattedAsync("✅ Cleared commands, shutting down.");
+                cancellationtokensource.Cancel(false);
+            }
+            else
+            {
+                await context.SafeRespondUnformattedAsync("✅ Operation cancelled by user.");
+            }
+        }
+
 	    [Command("exit"), Aliases("e"), Hidden]
         public async Task ExitAsync(CommandContext context)
         {
@@ -112,107 +137,5 @@ namespace ModCore.Commands
                 }
             }
         }
-
-        [Command("query"), Aliases("q"), Hidden]
-        public async Task QueryAsync(CommandContext context, string table, [RemainingText] string query)
-        {
-            using (var db = Database.CreateContext())
-            {
-                var obj = new BoxingList(await QueryTableAsync(table, query, db));
-	            await context.ElevatedRespondAsync($@"✅
-{obj.Count} results of query onto {table}:
-{obj.Aggregate((current, next) => $"{current}, {next}")}
-");
-            }
-        }
-
-	    private static async Task<IList> QueryTableAsync(string table, string query, DatabaseContext db)
-	    {
-	        switch (table.ToUpperInvariant())
-	        {
-	            case "DATABASEINFO":
-                    return await QueryAsync(db.Info, query);
-
-                case "GUILDCONFIG":
-	            case "DATABASEGUILDCONFIG":
-                    return await QueryAsync(db.GuildConfig, query);
-
-                case "MODNOTE":
-	            case "NOTE":
-	            case "DATABASEMODNOTE":
-                    return await QueryAsync(db.Modnotes, query);
-
-                case "ROLESTATEOVERRIDE":
-	            case "DATABASEROLESTATEOVERRIDE":
-                    return await QueryAsync(db.RolestateOverrides, query);
-
-                case "ROLESTATEROLES":
-	            case "DATABASEROLESTATEROLES":
-	                return await QueryAsync(db.RolestateRoles, query);
-
-	            case "TIMER":
-	            case "DATABASETIMER":
-                    return await QueryAsync(db.Timers, query);
-
-                case "STARDATA":
-	            case "STAR":
-	            case "DATABASESTARDATA":
-	                return await QueryAsync(db.StarDatas, query);
-
-	            case "TAG": 
-	            case "DATABASETAG":
-                    return await QueryAsync(db.Tags, query);
-
-                case "COMMANDID":
-                    return await QueryAsync(db.CommandIds, query);
-
-                default: 
-                    throw new ArgumentException();
-	        }
-	    }
-
-		private static Task<List<T>> QueryAsync<T>(DbSet<T> set, string query) where T : class 
-			=> set.FromSqlRaw(query).ToListAsync();
-		
-		private class BoxingList : IList, IList<object>, IReadOnlyList<object>
-		{
-			private readonly IList _inner;
-
-			public BoxingList(IList list) => _inner = list;
-
-			IEnumerator<object> IEnumerable<object>.GetEnumerator() => _inner.Cast<object>().GetEnumerator();
-			bool ICollection<object>.Remove(object item)
-			{
-				if (!_inner.Contains(item)) return false;
-				_inner.Remove(item);
-				return true;
-			}
-
-			public IEnumerator GetEnumerator() => _inner.GetEnumerator();
-			public void CopyTo(Array array, int index) => _inner.CopyTo(array, index);
-			public int Count => _inner.Count;
-			public bool IsSynchronized => _inner.IsSynchronized;
-			public object SyncRoot => _inner.SyncRoot;
-			public int Add(object value) => _inner.Add(value);
-			void ICollection<object>.Add(object item) => _inner.Add(item);
-			public void Clear() => _inner.Clear();
-			public bool Contains(object value) => _inner.Contains(value);
-			public void CopyTo(object[] array, int arrayIndex) => _inner.CopyTo(array, arrayIndex);
-			public int IndexOf(object value) => _inner.IndexOf(value);
-			public void Insert(int index, object value) => _inner.Insert(index, value);
-			public void Remove(object value) => _inner.Remove(value);
-			public void RemoveAt(int index) => _inner.RemoveAt(index);
-			public bool IsFixedSize => _inner.IsFixedSize;
-			public bool IsReadOnly => _inner.IsReadOnly;
-
-			public object this[int index]
-			{
-				get => _inner[index];
-				set => _inner[index] = value;
-			}
-
-			public override string ToString() => _inner.ToString();
-			public override int GetHashCode() => _inner.GetHashCode();
-		}
 	}
 }
