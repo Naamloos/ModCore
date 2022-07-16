@@ -46,7 +46,7 @@ namespace ModCore.Modals
                 {
                     try
                     {
-                        await interaction.Guild.BanMemberAsync(parsed, 14, string.IsNullOrWhiteSpace(Reason) ? null : Reason);
+                        await interaction.Guild.BanMemberAsync(parsed, 7, string.IsNullOrWhiteSpace(Reason) ? null : Reason);
                         banned.Add(parsed);
                         continue;
                     }

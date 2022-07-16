@@ -238,11 +238,6 @@ namespace ModCore.Utils.Extensions
             }
         }
 
-        public static string ToDiscordTag(this DiscordUser user)
-        {
-            return $"{user.Username}#{user.Discriminator}";
-        }
-
         public static bool IsNullOrWhitespace(this StringBuilder sb)
         {
             int l;
