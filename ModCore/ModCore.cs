@@ -6,10 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Entities;
@@ -57,8 +59,17 @@ namespace ModCore
             Shards = new List<ModCoreShard>();
             InitializeSharedData(args);
 
+            var clnt = new DiscordRestClient(new DiscordConfiguration()
+            {
+                Token = Settings.Token,
+                TokenType = TokenType.Bot
+            });
+            var gateway = await clnt.GetGatewayInfoAsync();
+            clnt.Logger.LogInformation($"Recommended shard count according to Discord: {gateway.ShardCount}");
+            clnt.Dispose();
+
             // cnext data that is consistent across shards, so it's fine to share it
-            for (var i = 0; i < Settings.ShardCount; i++)
+            for (var i = 0; i < gateway.ShardCount; i++)
             {
                 var shard = new ModCoreShard(Settings, i, SharedData);
                 shard.Initialize();

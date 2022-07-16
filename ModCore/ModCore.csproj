@@ -15,10 +15,11 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Chronic-netstandard" Version="0.3.2.4" />
-    <PackageReference Include="DSharpPlus" Version="4.3.0-nightly-01151" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.3.0-nightly-01151" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.3.0-nightly-01151" />
-    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.3.0-nightly-01151" />
+    <PackageReference Include="DSharpPlus" Version="4.3.0-nightly-01152" />
+    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.3.0-nightly-01152" />
+    <PackageReference Include="DSharpPlus.Interactivity" Version="4.3.0-nightly-01152" />
+    <PackageReference Include="DSharpPlus.Rest" Version="4.3.0-nightly-01152" />
+    <PackageReference Include="DSharpPlus.SlashCommands" Version="4.3.0-nightly-01152" />
     <PackageReference Include="F23.StringSimilarity" Version="5.0.0" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.4" />
