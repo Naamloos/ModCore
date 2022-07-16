@@ -154,39 +154,6 @@ namespace ModCore.Commands
 			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
 		}
 
-		[Command("kick"), Description("Kicks a member from the guild. Can optionally provide a reason for kick."),
-		 Aliases("k"), RequirePermissions(Permissions.KickMembers)]
-		public async Task KickAsync(CommandContext context, [Description("Member to kick")]DiscordMember member,
-			[RemainingText, Description("Reason to kick this member")] string reason = "")
-		{
-			if (context.Member.Id == member.Id)
-			{
-				await context.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
-				return;
-			}
-
-			var userstring = $"{context.User.Username}#{context.User.Discriminator} ({context.User.Id})";
-			var reasonstring = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			var sent_dm = false;
-			try
-			{
-				await member.ElevatedMessageAsync($"🚓 You've been kicked from {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
-				sent_dm = true;
-			}
-			catch (Exception) { }
-
-			await member.RemoveAsync($"{userstring}{reasonstring}");
-			await context.SafeRespondAsync($"🚓 Kicked user {member.DisplayName} (ID:{member.Id}).\n{(sent_dm ? "Said user has been notified of this action." : "")}");
-
-			var embed = new DiscordEmbedBuilder()
-					.WithTitle($"Kicked Member")
-					.AddField("Member", $"{member.Id}, <@{member.Id}>")
-					.AddField("Reason", $"{reasonstring}")
-					.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
-					.WithColor(DiscordColor.Red);
-			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
-		}
-
 		[Command("softban"),
 		 Description("Bans then unbans an user from the guild. " +
 					 "This will delete their recent messages, but they can join back."), Aliases("sb"),
@@ -218,102 +185,6 @@ namespace ModCore.Commands
 				.WithTitle($"Softbanned Member")
 				.AddField("Member", $"{member.DisplayName} ({member.Id}, <@{member.Id}>)")
 				.AddField("Reason", $"{reasonstring}")
-				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
-				.WithColor(DiscordColor.Red);
-			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
-		}
-
-		[Command("leave"), Description("Makes this bot leave the current server. Goodbye."),
-		 RequireUserPermissions(Permissions.Administrator)]
-		public async Task LeaveAsync(CommandContext context)
-		{
-			var interactivity = this.Interactivity;
-			await context.SafeRespondUnformattedAsync("❓ Are you sure you want to remove modcore from your guild?");
-			var message = await interactivity.WaitForMessageAsync(
-				x => x.ChannelId == context.Channel.Id && x.Author.Id == context.Member.Id, TimeSpan.FromSeconds(30));
-
-			if (message.Result == null)
-				await context.SafeRespondUnformattedAsync("Timed out.");
-			else if (message.Result.Content.ToLowerInvariant() == "yes")
-			{
-				await context.SafeRespondUnformattedAsync("❤️ Thanks for using ModCore. Leaving this guild.");
-				var embed = new DiscordEmbedBuilder()
-					.WithTitle($"ModCore left your server")
-					.WithDescription("Thank you for using ModCore! 💕")
-					.WithColor(DiscordColor.HotPink);
-				await context.Guild.ModLogAsync(Database.CreateContext(), embed);
-				await context.Guild.LeaveAsync();
-			}
-			else
-				await context.SafeRespondUnformattedAsync("Operation canceled by user.");
-		}
-
-		[Command("tempban"), Aliases("tb"), Description(
-			 "Temporarily bans a member. They will be automatically unbanned " +
-			 "after a set amount of time."),
-		 RequirePermissions(Permissions.BanMembers)]
-		public async Task TempBanAsync(CommandContext context, [Description("Member to ban temporarily")]DiscordMember member,
-			[Description("How long this member will be banned")]TimeSpan timespan, [Description("Why this member got banned")]string reason = "")
-		{
-			if (context.Member.Id == member.Id)
-			{
-				await context.SafeRespondUnformattedAsync("⚠️ You can't do that to yourself! You have so much to live for!");
-				return;
-			}
-
-			var unbanmoment = DateTimeOffset.UtcNow.Add(timespan);
-
-			var userstring = $"{context.User.Username}#{context.User.Discriminator} ({context.User.Id})";
-			var reasonstring = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
-			var sent_dm = false;
-			try
-			{
-				await member.ElevatedMessageAsync($"🚓 You've been temporarily banned from {context.Guild.Name}{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}" +
-					$"\nYou can rejoin <t:{unbanmoment.ToUnixTimeSeconds()}:R>");
-				sent_dm = true;
-			}
-			catch (Exception) { }
-
-			await member.BanAsync(7, $"{userstring}{reasonstring}");
-			// Add timer
-			var currentTime = DateTimeOffset.UtcNow;
-			var dispatchTime = currentTime + timespan;
-
-			var reminder = new DatabaseTimer
-			{
-				GuildId = (long)context.Guild.Id,
-				ChannelId = 0,
-				UserId = (long)member.Id,
-				DispatchAt = dispatchTime.LocalDateTime,
-				ActionType = TimerActionType.Unban
-			};
-
-			reminder.SetData(new TimerUnbanData
-			{
-				Discriminator = member.Discriminator,
-				DisplayName = member.Username,
-				UserId = (long)member.Id
-			});
-
-			using (var db = this.Database.CreateContext())
-			{
-				db.Timers.Add(reminder);
-				await db.SaveChangesAsync();
-			}
-
-			await Timers.RescheduleTimers(context.Client, this.Database, this.Shared);
-
-			var banEnd = DateTimeOffset.UtcNow.Add(timespan);
-
-			// End of Timer adding
-			await context.SafeRespondAsync(
-				$"🚓 Tempbanned user {member.DisplayName} (ID:{member.Id}) to be unbanned <t:{banEnd.ToUnixTimeSeconds()}:R>.\n{(sent_dm ? "Said user has been notified of this action." : "")}");
-
-			var embed = new DiscordEmbedBuilder()
-				.WithTitle($"Temporarily Banned Member")
-				.AddField("Member", $"{member.Id}, <@{member.Id}>")
-				.AddField("Reason", $"{reasonstring}")
-				.AddField("Unban Date/Time", $"<t:{banEnd.ToUnixTimeSeconds()}:R>")
 				.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
 				.WithColor(DiscordColor.Red);
 			await context.Guild.ModLogAsync(Database.CreateContext(), embed);
@@ -464,88 +335,6 @@ namespace ModCore.Commands
 				$"✅ This message will be unpinned <t:{DateTimeOffset.UtcNow.Add(timespan).ToUnixTimeSeconds()}:R>.");
 		}
 
-		[Command("listbans"), Aliases("lb"), Description("Lists banned users. Real complex stuff."), RequireUserPermissions(Permissions.ViewAuditLog)]
-		[RequireBotPermissions(Permissions.BanMembers)]
-        public async Task ListBansAsync(CommandContext context)
-		{
-			var bans = await context.Guild.GetBansAsync();
-			if (bans.Count == 0)
-			{
-				await context.SafeRespondUnformattedAsync("No user is banned.");
-				return;
-			}
-
-			var interactivity = this.Interactivity;
-			var page = 1;
-			var total = bans.Count / 10 + (bans.Count % 10 == 0 ? 0 : 1);
-			var pages = new List<Page>();
-			var currentEmbed = new DiscordEmbedBuilder
-			{
-				Title = "🔨 Banned users:",
-				Footer = new DiscordEmbedBuilder.EmbedFooter
-				{
-					Text = $"Page {page} of {total}"
-				}
-			};
-
-			foreach (var ban in bans)
-			{
-				var user = ban.User;
-				var reason = (string.IsNullOrWhiteSpace(ban.Reason) ? "No reason given." : ban.Reason);
-				currentEmbed.AddField(
-					$"{user.Username}#{user.Discriminator} (ID: {user.Id})",
-					$"{reason}");
-				if (currentEmbed.Fields.Count < 10) continue;
-				page++;
-				pages.Add(new Page("", currentEmbed));
-				currentEmbed = new DiscordEmbedBuilder
-				{
-					Title = "🔨 Banned users",
-					Footer = new DiscordEmbedBuilder.EmbedFooter
-					{
-						Text = $"Page {page} of {total}"
-					}
-				};
-			}
-
-			if (currentEmbed.Fields.Count > 0)
-				pages.Add(new Page("", currentEmbed));
-
-			if (pages.Count > 1)
-				await interactivity.SendPaginatedMessageAsync(context.Channel, context.User, pages.ToArray(), new PaginationEmojis());
-			else
-				await context.ElevatedRespondAsync(embed: pages.First().Embed);
-		}
-
-		[Command("announce"), Description("Announces a message to a channel, additionally mentioning a role.")]
-		[RequireBotPermissions(Permissions.ManageRoles), RequireUserPermissions(Permissions.MentionEveryone)]
-		public async Task AnnounceAsync(CommandContext context, [Description("Role to announce for")]DiscordRole role,
-			[Description("Channel to announce to")]DiscordChannel channel, [RemainingText, Description("Announcement text")] string message)
-		{
-			if (!role.IsMentionable)
-			{
-				await role.ModifyAsync(mentionable: true);
-				var discordMessage = await channel.SafeMessageAsync($"{role.Mention} {message}", context);
-
-				if (channel.Type == ChannelType.News)
-					await channel.CrosspostMessageAsync(discordMessage);
-
-				await role.ModifyAsync(mentionable: false);
-				await context.Message.DeleteAsync();
-
-				var embed = new DiscordEmbedBuilder()
-					.WithTitle($"Posted Announcement")
-					.AddField("Content", message.Truncate(1000))
-					.AddField("Responsible Moderator", $"<@{context.Member.Id}>")
-					.WithColor(DiscordColor.Cyan) ;
-				await context.Guild.ModLogAsync(Database.CreateContext(), embed);
-			}
-			else
-			{
-				await context.Channel.SafeMessageUnformattedAsync("⚠️ You can't announce to that role because it is mentionable!", true);
-			}
-		}
-
 		[Command("poll"), Description("Creates a reaction-based poll.")]
 		[RequireBotPermissions(Permissions.ManageMessages)]
 		public async Task PollAsync(CommandContext context, [Description("Question to ask")]string message, 
@@ -562,30 +351,6 @@ namespace ModCore.Commands
 				sb.Append($"{emoji.Emoji.ToString()}: {emoji.Total}");
 			}
 			await context.SafeModifyUnformattedAsync(pollmessage, sb.ToString());
-		}
-
-		[Command("distance")]
-		[Description("Counts the amount of messages until a specific Message")]
-		public async Task DistanceAsync(CommandContext context, DiscordMessage message)
-		{
-			if(DateTimeOffset.Now.Subtract(message.Timestamp).TotalDays > 1)
-			{
-				await context.RespondAsync("⚠️ Yeah.. Can't do that for messages older than a day");
-				return;
-			}
-
-			var ms = new List<ulong>();
-			while (!ms.Contains(context.Message.Id))
-			{
-				var m = await context.Channel.GetMessagesAfterAsync(message.Id, 100);
-				foreach(var mm in m)
-				{
-					if (!ms.Contains(mm.Id))
-						ms.Add(mm.Id);
-				}
-			}
-
-			await context.RespondAsync($"📃 Counted {ms.Count} Messages.");
 		}
 
 		[Command("nick")]
@@ -757,68 +522,6 @@ namespace ModCore.Commands
             await context.RespondAsync($"⚠️ Invalid cooldown: {cooldown}");
         }
 
-        [Command("yoink")]
-        [Description("Copies an emoji from a different server to this one")]
-        [RequirePermissions(Permissions.ManageEmojis)]
-		public async Task YoinkAsync(CommandContext ctx, DiscordEmoji emoji, [RemainingText]string name = "")
-        {
-			if(!emoji.ToString().StartsWith('<'))
-            {
-				await ctx.RespondAsync("⚠️ This is not a valid guild emoji!");
-				return;
-            }				
-			await stealieEmoji(ctx, string.IsNullOrEmpty(name)? emoji.Name : name, emoji.Id, emoji.IsAnimated);
-		}
-
-		const string EMOJI_REGEX = @"<a?:(.+?):(\d+)>";
-        [Command("yoink")]
-		[RequirePermissions(Permissions.ManageEmojis)]
-		public async Task YoinkAsync(CommandContext ctx, int index = 1)
-        {
-			if(ctx.Message.ReferencedMessage != null)
-            {
-				var matches = Regex.Matches(ctx.Message.ReferencedMessage.Content, EMOJI_REGEX);
-				if(matches.Count < index || index < 1)
-                {
-					await ctx.RespondAsync("⚠️ Referenced emoji not found!");
-					return;
-                }
-
-				var split = matches[index-1].Groups[2].Value;
-				var emojiName = matches[index-1].Groups[1].Value;
-				var animated = matches[index-1].Value.StartsWith("<a");
-
-				if (ulong.TryParse(split, out ulong emoji_id))
-                {
-					await stealieEmoji(ctx, emojiName, emoji_id, animated);
-					return;
-                }
-                else
-                {
-					await ctx.RespondAsync("⚠️ Failed to fetch your new emoji.");
-					return;
-				}
-            }
-			await ctx.RespondAsync("⚠️ You need to reply to an existing message to use this command!");
-		}
-
-		[Command("yeet")]
-		[Description("Deletes an emoji from this server.")]
-		[RequirePermissions(Permissions.ManageEmojis)]
-		public async Task YeetAsync(CommandContext ctx, DiscordEmoji emoji)
-		{
-			try
-			{
-				var guildEmoji = await ctx.Guild.GetEmojiAsync(emoji.Id);
-				await ctx.Guild.DeleteEmojiAsync(guildEmoji);
-				await ctx.RespondAsync($"⚠️ Deleted emoji {emoji.Name}!");
-			}
-			catch (Exception) 
-			{
-				await ctx.RespondAsync("⚠️ This emoji does not belong to this server!");
-			} 
-		}
-
         [Command("generatepassword")]
         [Description("Generates a password for you!")]
         [Hidden]
@@ -826,61 +529,5 @@ namespace ModCore.Commands
         {
 			await ctx.RespondAsync("🤨");
         }
-
-        [Priority(0)]
-        [Command("offtopic")]
-        [Description("Moves off-topic chat to an appropriate channel.")]
-        [Cooldown(1, 60 * 5, CooldownBucketType.Guild)]
-        [RequirePermissions(Permissions.ManageMessages | Permissions.ManageWebhooks)]
-		public async Task OffTopicAsync(CommandContext ctx, DiscordChannel channel, int limit, params DiscordMember[] members)
-        {
-			IEnumerable<DiscordMessage> messages = await ctx.Channel.GetMessagesAsync(100);
-
-			string offtopic = $"❗ Your current conversation is off-topic! Most recent messages have been copied to {channel.Mention}. ";
-
-			if (members.Any())
-			{
-				messages = messages.Where(x => members.Any(y => y.Id == x.Author.Id));
-
-				offtopic += string.Join(" ", members.Select(x => x.DisplayName));
-			}
-			messages = messages.Take(limit).Reverse();
-
-			await ctx.Channel.SendMessageAsync(offtopic);
-			await channel.SendMessageAsync($"⚠️ Copying off-topic messages from {ctx.Channel.Mention}!");
-			var webhook = await channel.CreateWebhookAsync($"offtopic-move-{new Random().Next()}");
-			foreach (var message in messages)
-            {
-				if (string.IsNullOrEmpty(message.Content))
-					continue;
-
-				var webhookMessage = new DiscordWebhookBuilder()
-					.WithContent(message.Content)
-					.WithAvatarUrl(message.Author.GetAvatarUrl(ImageFormat.Auto))
-					.WithUsername((message.Author as DiscordMember).DisplayName);
-
-				await webhook.ExecuteAsync(webhookMessage);
-            }
-			await webhook.DeleteAsync();
-			await channel.SendMessageAsync($"⚠❗ Off topic chat has been copied from {ctx.Channel.Mention}! Please continue conversation here.");
-		}
-
-        [Priority(1)]
-		[Command("offtopic")]
-		[Description("Moves off-topic chat to an appropriate channel.")]
-		[Cooldown(1, 60 * 5, CooldownBucketType.Guild)]
-		public async Task OffTopicAsync(CommandContext ctx, DiscordChannel channel, params DiscordMember[] members)
-			=> await OffTopicAsync(ctx, channel, 20, members);
-
-		private async Task stealieEmoji(CommandContext ctx, string name, ulong id, bool animated)
-        {
-			using HttpClient _client = new HttpClient();
-			var downloadedEmoji = await _client.GetStreamAsync($"https://cdn.discordapp.com/emojis/{id}.{(animated ? "gif" : "png")}");
-			using MemoryStream memory = new MemoryStream();
-			downloadedEmoji.CopyTo(memory);
-			downloadedEmoji.Dispose();
-			var newEmoji = await ctx.Guild.CreateEmojiAsync(name, memory);
-			await ctx.RespondAsync($"✅ Yoink! This emoji has been added to your server: {newEmoji.ToString()}");
-		}
     }
 }
