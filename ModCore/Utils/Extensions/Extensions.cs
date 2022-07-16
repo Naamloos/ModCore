@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
+using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
+using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
@@ -304,6 +306,62 @@ namespace ModCore.Utils.Extensions
             if (target == null) throw new ArgumentNullException(nameof(target));
             
             return target.Position < @this.Position;
+        }
+
+        public static async Task<(bool TimedOut, bool Accepted, DiscordMessage FollowupMessage)> ConfirmAsync(this BaseContext ctx, 
+            DiscordFollowupMessageBuilder message, string confirmText, string denyText,
+            InteractivityExtension interactivity, DiscordEmoji confirmEmoji = null, DiscordEmoji DenyEmoji = null)
+        {
+            var confirmationId = Math.Abs(new Random().Next()).ToString();
+
+            var accept = new DiscordButtonComponent(ButtonStyle.Danger, confirmationId + "confirm", confirmText, false,
+                confirmEmoji != null ? new DiscordComponentEmoji(confirmEmoji) : null);
+            var deny = new DiscordButtonComponent(ButtonStyle.Secondary, confirmationId + "deny", denyText, false,
+                DenyEmoji != null ? new DiscordComponentEmoji(DenyEmoji) : null);
+
+            message.AddComponents(accept, deny);
+            await ctx.DeferAsync(true);
+            var msg = await ctx.FollowUpAsync(message);
+
+            var confirmation = await interactivity.WaitForEventArgsAsync<ComponentInteractionCreateEventArgs>(
+                x => x.Interaction.Data.ComponentType == ComponentType.Button 
+                && x.Interaction.Data.CustomId.StartsWith(confirmationId)
+                && x.User.Id == ctx.User.Id);
+
+            if (confirmation.TimedOut)
+                return (true, false, msg);
+
+            var confirmed = confirmation.Result.Interaction.Data.CustomId.EndsWith("confirm");
+
+            return (false, confirmed, msg);
+        }
+
+        public static async Task<(bool TimedOut, T choice, DiscordMessage FollowupMessage)> MakeChoiceAsync<T>(this BaseContext ctx,
+            DiscordFollowupMessageBuilder message, IDictionary<string, T> choices, InteractivityExtension interactivity)
+        {
+            var choiceId = Math.Abs(new Random().Next()).ToString();
+            List<DiscordSelectComponentOption> options = new List<DiscordSelectComponentOption>();
+
+            foreach(var choice in choices)
+            {
+                options.Add(new DiscordSelectComponentOption(choice.Key, choice.Key));
+            }
+
+            var select = new DiscordSelectComponent(choiceId, choices.First().Key, options);
+
+            message.AddComponents(select);
+
+            var msg = await ctx.FollowUpAsync(message);
+
+            var confirmation = await interactivity.WaitForEventArgsAsync<ComponentInteractionCreateEventArgs>(
+                x => x.Interaction.Data.ComponentType == ComponentType.Select
+                && x.Values.Any(x => choices.Any(y => y.Key == x))
+                && x.User.Id == ctx.User.Id);
+
+            if (confirmation.TimedOut)
+                return (true, default(T), msg);
+
+            return (false, choices.First(x => x.Key == confirmation.Result.Values[0]).Value, msg);
         }
     }
 }

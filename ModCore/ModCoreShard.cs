@@ -182,13 +182,8 @@ namespace ModCore
 
         public Task<int> GetPrefixPositionAsync(DiscordMessage msg)
         {
-            GuildSettings cfg = null;
-            using (var db = Database.CreateContext())
-                cfg = msg.Channel.Guild.GetGuildSettings(db);
-            if (cfg?.Prefix != null)
-                return Task.FromResult(msg.GetStringPrefixLength(cfg.Prefix));
-
-            return Task.FromResult(msg.GetStringPrefixLength(Settings.DefaultPrefix));
+            // Force ModCore to only accept mentions.
+            return Task.FromResult(-1);
         }
     }
 }
