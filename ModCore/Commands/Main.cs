@@ -167,45 +167,16 @@ namespace ModCore.Commands
 			});
 		}
 
-		// TODO: use database timer system??
-		// TODO: multiple winners
-		[Command("giveaway")]
-        [Aliases("raffle")]
-		[Description("Creates a giveaway")]
-		[RequireUserPermissions(Permissions.ManageGuild)]
-		[RequireBotPermissions(Permissions.ManageMessages | Permissions.AddReactions)]
-		[Cooldown(1, 600, CooldownBucketType.Channel)]
-		public async Task GiveawayAsync(CommandContext context, string prize, TimeSpan timespan)
-		{
-			await context.Message.DeleteAsync();
-			var trophy = DiscordEmoji.FromName(context.Client, ":trophy:");
-			var giveaway = await context.RespondAsync($"Hey! {context.Member.Mention} is giving away {prize}!\nReact with {trophy.ToString()} to join in!");
-			await giveaway.CreateReactionAsync(trophy);
+  //      [Command("snoop"), Hidden]
+  //      public async Task SnoopAsync(CommandContext ctx)
+  //          => await ctx.RespondAsync("🍃🔥🚬 https://media1.tenor.com/images/48ab2af082ad3d41aa34646e4c467fc1/tenor.gif");
 
-			await Task.Delay(timespan);
-
-			var members = (await giveaway.GetReactionsAsync(trophy)).ToList();
-			members.RemoveAll(x => x.Id == context.Client.CurrentUser.Id);
-
-			var winnerindex = new Random().Next(0, members.Count() - 1);
-			var winner = members[winnerindex];
-
-			var tada = DiscordEmoji.FromName(context.Client, ":tada:");
-			await giveaway.ModifyAsync($"{tada.ToString()}{tada.ToString()} " +
-				$"{winner.Mention}, you won! Contact {context.Member.Mention} for your price! " +
-				$"{trophy.ToString()}{trophy.ToString()}");
-		}
-
-        [Command("snoop"), Hidden]
-        public async Task SnoopAsync(CommandContext ctx)
-            => await ctx.RespondAsync("🍃🔥🚬 https://media1.tenor.com/images/48ab2af082ad3d41aa34646e4c467fc1/tenor.gif");
-
-        [Command("generatepassword")]
-        [Description("Generates a password for you!")]
-        [Hidden]
-		public async Task GeneratePasswordAsync(CommandContext ctx)
-        {
-			await ctx.RespondAsync("🤨");
-        }
+  //      [Command("generatepassword")]
+  //      [Description("Generates a password for you!")]
+  //      [Hidden]
+		//public async Task GeneratePasswordAsync(CommandContext ctx)
+  //      {
+		//	await ctx.RespondAsync("🤨");
+  //      }
     }
 }
