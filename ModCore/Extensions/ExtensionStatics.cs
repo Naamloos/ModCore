@@ -28,6 +28,16 @@ namespace ModCore.Extensions
         public static AsyncListenerExtension GetAsyncListenerExtension(this DiscordClient client)
             => client.GetExtension<AsyncListenerExtension>();
 
+        public static ButtonExtension UseButtons(this DiscordClient client, IServiceProvider services)
+        {
+            var extension = new ButtonExtension(services);
+            client.AddExtension(extension);
+            return extension;
+        }
+
+        public static ButtonExtension GetButtons(this DiscordClient client)
+            => client.GetExtension<ButtonExtension>();
+
         public static string GenerateIdString(string Id, IDictionary<string, string> values)
         {
             if (values == null)

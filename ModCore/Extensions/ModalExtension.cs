@@ -28,7 +28,11 @@ namespace ModCore.Extensions
         }
 
         protected override void Setup(DiscordClient client)
-            => client.ModalSubmitted += (sender, e) => Task.Run(async () => await handleModalSubmission(sender, e));
+            => client.ModalSubmitted += (sender, e) =>
+            {
+                _ = Task.Run(async () => await handleModalSubmission(sender, e));
+                return Task.CompletedTask;
+            };
 
         private ModalHandler RegisterHandler(Type type)
         {

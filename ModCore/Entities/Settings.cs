@@ -22,6 +22,9 @@ namespace ModCore.Entities
 
 		[JsonProperty("bot_id")]
 		public ulong BotId { get; private set; } = 359828546719449109;
+
+        [JsonProperty("contact_channel_id")]
+        public ulong ContactChannelId { get; private set; } = 998624821653033051;
     }
 
     public struct DatabaseSettings

@@ -33,6 +33,7 @@ namespace ModCore
         public CommandsNextExtension Commands { get; private set; }
         public SlashCommandsExtension Slashies { get; private set; }
         public ModalExtension Modals { get; private set; }
+        public ButtonExtension Buttons { get; private set; }
 
         public SharedData SharedData { get; set; }
 		public Settings Settings { get; }
@@ -92,6 +93,7 @@ namespace ModCore
                 .AddSingleton(this.StartTimes)
                 .AddSingleton(this.Database)
                 .AddSingleton(this)
+                .AddSingleton(this.Client)
                 .BuildServiceProvider();
 
             // enable commandsnext
@@ -145,6 +147,7 @@ namespace ModCore
             };
 
             this.Modals = this.Client.UseModals(deps);
+            this.Buttons = this.Client.UseButtons(deps);
 
             var asyncListeners = this.Client.UseAsyncListeners(deps);
             asyncListeners.RegisterListeners(this.GetType().Assembly);

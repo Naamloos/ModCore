@@ -20,6 +20,7 @@ namespace ModCore.SlashCommands
     {
         public SharedData Shared { private get; set; }
         public StartTimes StartTimes { private get; set; }
+        public Settings Settings { private get; set; }
 
         [SlashCommand("about", "Prints information about ModCore.")]
         public async Task AboutAsync(InteractionContext ctx)
@@ -129,6 +130,33 @@ namespace ModCore.SlashCommands
                     $"🛡 Add ModCore to your server!\n<https://modcore.naamloos.dev/info/invite>", true);
             else
                 await ctx.CreateResponseAsync("⚠️ I'm sorry Mario, but this instance of ModCore has been set to private!", true);
+        }
+
+        [SlashCommand("contact", "Contact ModCore developers.")]
+        public async Task ContactAsync(InteractionContext ctx)
+        {
+            await ctx.DeferAsync(true);
+
+            var msg = new DiscordFollowupMessageBuilder()
+                .WithContent("❓ Which category does your support request fit in?")
+                .AsEphemeral();
+
+            var response = await ctx.MakeEnumChoiceAsync<FeedbackType>(msg);
+
+            if(response.TimedOut)
+            {
+                await ctx.EditFollowupAsync(response.FollowupMessage.Id, new DiscordWebhookBuilder().WithContent("🙈 Okay, never mind."));
+                return;
+            }
+
+            await ctx.EditFollowupAsync(response.FollowupMessage.Id, new DiscordWebhookBuilder().WithContent("Thank you for your feedback! 💖"));
+
+            var feedbackTypeString = Enum.GetName(response.Choice.GetType(), response.Choice);
+            await ctx.Client.GetModalExtension().RespondWithModalAsync<FeedbackModal>(response.interaction, 
+                $"Feedback: {feedbackTypeString}", new Dictionary<string, string>()
+            {
+                { "c", feedbackTypeString }
+            });
         }
     }
 }
