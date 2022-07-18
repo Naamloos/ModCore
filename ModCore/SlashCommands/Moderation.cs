@@ -141,5 +141,56 @@ namespace ModCore.SlashCommands
             await ctx.Client.GetModalExtension()
                 .RespondWithModalAsync<MassBanModal>(ctx.Interaction, "Mass ban users");
         }
+
+        [SlashCommand("hackban", "Bans a user by ID. This user does not have to be part of this server.")]
+        [SlashCommandPermissions(Permissions.BanMembers)]
+        public async Task HackbanAsync(InteractionContext ctx, 
+            [Option("userid", "ID of the user to ban.")]string userId,
+            [Option("reason", "Reason to ban this user.")]string reason = null)
+        {
+            if(!ulong.TryParse(userId, out var id))
+            {
+                await ctx.CreateResponseAsync("⚠️ Invalid ID!", true);
+                return;
+            }
+
+            try
+            {
+                await ctx.Guild.BanMemberAsync(id, 7, reason);
+                await ctx.CreateResponseAsync($"🚓 User with ID {userId} was banned.", true);
+            }
+            catch(Exception)
+            {
+                await ctx.CreateResponseAsync($"⚠️ Failed to ban user with ID {userId}.", true);
+            }
+        }
+
+        [SlashCommand("softban", "Bans and unbans a member from this server. Deletes messages.")]
+        public async Task SoftbanAsync(InteractionContext ctx, 
+            [Option("user", "User to softban.")]DiscordUser user,
+            [Option("reason", "Reason this user was soft banned.")]string reason = null)
+        {
+            var member = await ctx.Guild.GetMemberAsync(user.Id);
+            if (ctx.User.Id == member.Id)
+            {
+                await ctx.CreateResponseAsync("⚠️ You can't do that to yourself! You have so much to live for!", true);
+                return;
+            }
+
+            var userstring = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
+            var reasonstring = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
+            var sent_dm = false;
+            try
+            {
+                await member.SendMessageAsync($"🚓 You've been kicked from {ctx.Guild.Name}" +
+                    $"{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+                sent_dm = true;
+            }
+            catch (Exception) { }
+
+            await member.BanAsync(7, $"{userstring}{reasonstring} (softban)");
+            await member.UnbanAsync(ctx.Guild, $"{userstring}{reasonstring}");
+            await ctx.CreateResponseAsync($"🚓 Softbanned user {member.DisplayName} (ID:{member.Id}).\n{(sent_dm ? "Said user has been notified of this action." : "")}", true);
+        }
     }
 }

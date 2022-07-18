@@ -5,10 +5,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
@@ -85,36 +87,6 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("sudo"), Aliases("s"), Hidden]
-        public async Task SudoAsync(CommandContext context, [Description("Member to sudo")]DiscordMember member, [Description("Command to sudo"), RemainingText]string command)
-        {
-            if (!context.Client.CurrentApplication.Owners.Any(x => x.Id == context.User.Id))
-            {
-                await context.SafeRespondUnformattedAsync("⚠️ You do not have permission to use this command!");
-                return;
-            }
-
-            var commandobject = context.CommandsNext.FindCommand(command, out string args);
-            var prefix = context.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
-            var fakecontext = context.CommandsNext.CreateFakeContext(member, context.Channel, command, prefix, commandobject, args);
-            await context.CommandsNext.ExecuteCommandAsync(fakecontext);
-        }
-
-        [Command("sudoowner"), Aliases("so"), Hidden]
-        public async Task SudoOwnerAsync(CommandContext context, [RemainingText, Description("Command to sudo")]string command)
-        {
-            if (!context.Client.CurrentApplication.Owners.Any(x => x.Id == context.User.Id))
-            {
-                await context.SafeRespondUnformattedAsync("⚠️ You do not have permission to use this command!");
-                return;
-            }
-
-            var commandobject = context.CommandsNext.FindCommand(command, out string args);
-            var prefix = context.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
-            var fakecontext = context.CommandsNext.CreateFakeContext(context.Guild.Owner, context.Channel, command, prefix, commandobject, args);
-            await context.CommandsNext.ExecuteCommandAsync(fakecontext);
-        }
-
         [Command("grantxp"), Aliases("gxp"), Hidden]
         public async Task GrantXpAsync(CommandContext context, DiscordMember member, int experience)
         {
@@ -137,5 +109,36 @@ namespace ModCore.Commands
                 }
             }
         }
-	}
+
+        [Command("nukeban")]
+        [Description("Bans a member from all servers you own that have ModCore")]
+        public async Task NukeBanAsync(CommandContext context, ulong userId, string reason = "")
+        {
+            await context.RespondAsync($"‼️ This will ban the user with ID {userId} from all servers you own. Proceed?" +
+                $"\n**Be wary that this will ACTUALLY ban them from all servers you own, whether they are part of this server or not.**");
+            var response = await context.Message.GetNextMessageAsync();
+            if (!response.TimedOut && (response.Result?.Content.ToLower() == "yes" || response.Result?.Content.ToLower() == "y"))
+            {
+                int skip = 0;
+                var servers = this.Shared.ModCore.Shards.SelectMany(x => x.Client.Guilds.Values).Where(x => x.Owner.Id == context.Member.Id);
+                foreach (var server in servers)
+                {
+                    if (server.CurrentMember.Roles.Any(x => x.CheckPermission(Permissions.BanMembers) == PermissionLevel.Allowed))
+                    {
+                        await server.BanMemberAsync(userId, 0, $"[ModCore NukeBan] {reason}");
+                    }
+                    else
+                    {
+                        skip++;
+                    }
+                }
+                await context.RespondAsync($"🚓 Succesfully nukebanned member from {servers.Count()} servers." +
+                    $"{(skip > 0 ? $" Skipped {skip} servers due to lacking permissions" : "")}");
+            }
+            else
+            {
+                await context.RespondAsync("Action canceled.");
+            }
+        }
+    }
 }

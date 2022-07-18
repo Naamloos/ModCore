@@ -2,6 +2,7 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.SlashCommands;
 using Humanizer;
 using Humanizer.Localisation;
@@ -126,7 +127,7 @@ namespace ModCore.SlashCommands
             if (currentembed.Fields.Count > 0)
                 pages.Add(new Page("", currentembed));
 
-            await interactivity.SendPaginatedResponseAsync(ctx.Interaction, true, ctx.User, pages.ToArray());
+            await interactivity.SendPaginatedResponseAsync(ctx.Interaction, true, ctx.User, pages.ToArray(), deletion: ButtonPaginationBehavior.DeleteButtons);
         }
 
         [SlashCommand("stop", "Stops a specific reminder by it's ID.")]
@@ -161,7 +162,7 @@ namespace ModCore.SlashCommands
                 .WithContent("❓ Are you sure you want to clear all your active reminders? This action cannot be undone!")
                 .AsEphemeral();
 
-            var confirmed = await ctx.ConfirmAsync(confirm, "Yes, get rid of it!", "Never mind.", Interactivity, DiscordEmoji.FromUnicode("💣"));
+            var confirmed = await ctx.ConfirmAsync(confirm, "Yes, get rid of it!", "Never mind.", DiscordEmoji.FromUnicode("💣"));
 
             if (confirmed.TimedOut)
             {
@@ -176,7 +177,8 @@ namespace ModCore.SlashCommands
                     var count = timers.Count;
                     await Timers.UnscheduleTimersAsync(timers, ctx.Client, this.Database, this.Shared);
 
-                    await ctx.EditFollowupAsync(confirmed.FollowupMessage.Id, new DiscordWebhookBuilder().WithContent("✅ Alright, cleared " + count + " timers."));
+                    await ctx.EditFollowupAsync(confirmed.FollowupMessage.Id, new DiscordWebhookBuilder()
+                        .WithContent("✅ Alright, cleared " + count + $" timer{(count > 1? "s" : "")}."));
                 }
             }
             else

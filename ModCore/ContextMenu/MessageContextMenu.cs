@@ -51,7 +51,7 @@ namespace ModCore.ContextMenu
                         choices.Add(currentmatch.Groups[1].Value, currentmatch);
                     }
 
-                    var selection = await ctx.MakeChoiceAsync<Match>(message, choices, interactivity);
+                    var selection = await ctx.MakeChoiceAsync<Match>(message, choices);
                     if(selection.TimedOut)
                     {
                         await ctx.EditFollowupAsync(selection.FollowupMessage.Id, new DiscordWebhookBuilder().WithContent("⚠️ Timed out selection."));

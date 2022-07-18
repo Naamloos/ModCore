@@ -51,51 +51,6 @@ namespace ModCore.Database.JsonEntities
     }
 
     /// <summary>
-    /// Represents unmute data for a timer.
-    /// </summary>
-    public class TimerUnmuteData : ITimerData
-    {
-        /// <summary>
-        /// Gets or sets the unbanned user's Id.
-        /// </summary>
-        [JsonProperty("user_id")]
-        public long UserId { get; set; }
-
-        [JsonProperty("displayname")]
-        public string DisplayName { get; set; }
-
-        [JsonProperty("discriminator")]
-        public string Discriminator { get; set; }
-
-        [JsonProperty("muterole_id")]
-        public long MuteRoleId { get; set; }
-    }
-
-    /// <summary>
-    /// Represents pin data for a timer.
-    /// </summary>
-    public class TimerPinData : ITimerData
-    {
-        [JsonProperty("message_id")]
-        public long MessageId { get; set; }
-
-        [JsonProperty("channel_id")]
-        public long ChannelId { get; set; }
-    }
-
-    /// <summary>
-    /// Represents unpin data for a timer.
-    /// </summary>
-    public class TimerUnpinData : ITimerData
-    {
-        [JsonProperty("message_id")]
-        public long MessageId { get; set; }
-
-        [JsonProperty("channel_id")]
-        public long ChannelId { get; set; }
-    }
-
-    /// <summary>
     /// Represents timer action type.
     /// </summary>
     public enum TimerActionType
@@ -103,8 +58,11 @@ namespace ModCore.Database.JsonEntities
         Unknown = 0, // Action type that is not known
         Reminder = 1, // Reminders
         Unban = 2, // Temp ban unban action
+        [Obsolete("Timeouts are now a built-in Discord feature.")]
         Unmute = 3, // Temp mute unmute action
+        [Obsolete("Nobody used this.")]
         Pin = 4, // Timed pin action
+        [Obsolete("Nobody used this.")]
         Unpin = 5, // Temporary pin unpin action
     }
 

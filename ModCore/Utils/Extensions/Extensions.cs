@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -303,10 +304,11 @@ namespace ModCore.Utils.Extensions
             return target.Position < @this.Position;
         }
 
-        public static async Task<(bool TimedOut, bool Accepted, DiscordMessage FollowupMessage)> ConfirmAsync(this BaseContext ctx, 
+        public static async Task<(bool TimedOut, bool Accepted, DiscordMessage FollowupMessage, DiscordInteraction interaction)> ConfirmAsync(this BaseContext ctx, 
             DiscordFollowupMessageBuilder message, string confirmText, string denyText,
-            InteractivityExtension interactivity, DiscordEmoji confirmEmoji = null, DiscordEmoji DenyEmoji = null)
+            DiscordEmoji confirmEmoji = null, DiscordEmoji DenyEmoji = null)
         {
+            var interactivity = ctx.Client.GetInteractivity();
             var confirmationId = Math.Abs(new Random().Next()).ToString();
 
             var accept = new DiscordButtonComponent(ButtonStyle.Danger, confirmationId + "confirm", confirmText, false,
@@ -324,16 +326,17 @@ namespace ModCore.Utils.Extensions
                 && x.User.Id == ctx.User.Id);
 
             if (confirmation.TimedOut)
-                return (true, false, msg);
+                return (true, false, msg, null);
 
             var confirmed = confirmation.Result.Interaction.Data.CustomId.EndsWith("confirm");
 
-            return (false, confirmed, msg);
+            return (false, confirmed, msg, confirmation.Result.Interaction);
         }
 
-        public static async Task<(bool TimedOut, T choice, DiscordMessage FollowupMessage)> MakeChoiceAsync<T>(this BaseContext ctx,
-            DiscordFollowupMessageBuilder message, IDictionary<string, T> choices, InteractivityExtension interactivity)
+        public static async Task<(bool TimedOut, T choice, DiscordMessage FollowupMessage, DiscordInteraction interaction)> MakeChoiceAsync<T>(this BaseContext ctx,
+            DiscordFollowupMessageBuilder message, IDictionary<string, T> choices)
         {
+            var interactivity = ctx.Client.GetInteractivity();
             var choiceId = Math.Abs(new Random().Next()).ToString();
             List<DiscordSelectComponentOption> options = new List<DiscordSelectComponentOption>();
 
@@ -354,9 +357,40 @@ namespace ModCore.Utils.Extensions
                 && x.User.Id == ctx.User.Id);
 
             if (confirmation.TimedOut)
-                return (true, default(T), msg);
+                return (true, default(T), msg, null);
 
-            return (false, choices.First(x => x.Key == confirmation.Result.Values[0]).Value, msg);
+            return (false, choices.First(x => x.Key == confirmation.Result.Values[0]).Value, msg, confirmation.Result.Interaction);
+        }
+
+        public static Task<(bool TimedOut, T Choice, DiscordMessage FollowupMessage, DiscordInteraction interaction)> MakeEnumChoiceAsync<T>(this BaseContext ctx, 
+            DiscordFollowupMessageBuilder message)
+            where T : struct, Enum
+        {
+            var choices = new Dictionary<string, T>();
+
+            foreach (var value in Enum.GetValues<T>())
+            {
+                choices.Add(Regex.Replace(Enum.GetName(typeof(T), value), "([A-Z])", " $1").Trim(), value);
+            }
+
+            return MakeChoiceAsync<T>(ctx, message, choices);
+        }
+
+        public static Task<(bool TimedOut, DiscordChannel channel, DiscordMessage FollowupMessage, DiscordInteraction interaction)> PickChannelAsync(this BaseContext ctx, 
+            DiscordFollowupMessageBuilder message, params ChannelType[] types)
+        {
+            var channelTypes = types.Length > 0 ? types : new ChannelType[1] { ChannelType.Text };
+
+            Dictionary<string, DiscordChannel> channels = new Dictionary<string, DiscordChannel>();
+            foreach(var channel in ctx.Guild.Channels)
+            {
+                if (channelTypes.Any(x => x == channel.Value.Type))
+                {
+                    channels.Add($"#{channel.Value.Name}", channel.Value);
+                }
+            }
+
+            return MakeChoiceAsync<DiscordChannel>(ctx, message, channels);
         }
     }
 }
