@@ -26,11 +26,19 @@ namespace ModCore.Extensions
         }
 
         protected override void Setup(DiscordClient client)
-            => client.ComponentInteractionCreated += (sender, e) =>
+        {
+            var handlers = this.GetType().Assembly.GetTypes().Where(x => x.IsAssignableTo(typeof(IButton)) && !x.IsInterface);
+            foreach(var handler in handlers)
+            {
+                RegisterHandler(handler);
+            }    
+            
+            client.ComponentInteractionCreated += (sender, e) =>
             {
                 _ = Task.Run(async () => await handleButtonAsync(sender, e));
                 return Task.CompletedTask;
             };
+        }
 
         public string GenerateCommand<T>(IDictionary<string, string> values) where T : IButton
         {

@@ -28,11 +28,19 @@ namespace ModCore.Extensions
         }
 
         protected override void Setup(DiscordClient client)
-            => client.ModalSubmitted += (sender, e) =>
+        {
+            var handlers = this.GetType().Assembly.GetTypes().Where(x => x.IsAssignableTo(typeof(IModal)) && !x.IsInterface);
+            foreach (var handler in handlers)
+            {
+                RegisterHandler(handler);
+            }
+
+            client.ModalSubmitted += (sender, e) =>
             {
                 _ = Task.Run(async () => await handleModalSubmission(sender, e));
                 return Task.CompletedTask;
             };
+        }
 
         private ModalHandler RegisterHandler(Type type)
         {
