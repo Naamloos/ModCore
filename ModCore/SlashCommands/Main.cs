@@ -163,7 +163,7 @@ namespace ModCore.SlashCommands
             });
         }
 
-        [SlashCommand("nickname", "Requests nickname change, if nickname change is disabled")]
+        [SlashCommand("nick", "Requests nickname change, if nickname change is disabled")]
         public async Task NicknameAsync(InteractionContext ctx, [Option("nickname", "New nickname you want to request.")] string nickname)
         {
             if(nickname.Length < 1 || nickname.Length > 32)
