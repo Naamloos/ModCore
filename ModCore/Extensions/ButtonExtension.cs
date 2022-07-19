@@ -115,7 +115,7 @@ namespace ModCore.Extensions
                 fields.First(x => x.Key.Name == field.Key).Value.SetValue(button, field.Value);
             }
 
-            await button.HandleAsync(e.Interaction);
+            await button.HandleAsync(e.Interaction, e.Message);
         }
     }
 }

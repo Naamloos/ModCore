@@ -392,5 +392,8 @@ namespace ModCore.Utils.Extensions
 
             return MakeChoiceAsync<DiscordChannel>(ctx, message, channels);
         }
+
+        public static string GetProfileUri(this DiscordUser user)
+            => $"discord://-/users/{user.Id}/";
     }
 }

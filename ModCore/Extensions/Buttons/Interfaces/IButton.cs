@@ -5,6 +5,6 @@ namespace ModCore.Extensions.Buttons.Interfaces
 {
     public interface IButton
     {
-        Task HandleAsync(DiscordInteraction interaction);
+        Task HandleAsync(DiscordInteraction interaction, DiscordMessage message);
     }
 }

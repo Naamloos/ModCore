@@ -26,7 +26,7 @@ namespace ModCore.Buttons
             this.client = client;
         }
 
-        public async Task HandleAsync(DiscordInteraction interaction)
+        public async Task HandleAsync(DiscordInteraction interaction, DiscordMessage msg)
         {
             if(ulong.TryParse(UserId, out _) && ulong.TryParse(GuildId, out _))
             {
