@@ -166,6 +166,7 @@ namespace ModCore.SlashCommands
         }
 
         [SlashCommand("softban", "Bans and unbans a member from this server. Deletes messages.")]
+        [SlashCommandPermissions(Permissions.BanMembers)]
         public async Task SoftbanAsync(InteractionContext ctx, 
             [Option("user", "User to softban.")]DiscordUser user,
             [Option("reason", "Reason this user was soft banned.")]string reason = null)

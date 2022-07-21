@@ -20,16 +20,15 @@ namespace ModCore.SlashCommands
 
         [SlashCommand("get", "Gets a tag in this channel.")]
         public async Task GetAsync(InteractionContext ctx,
-            [Option("name", "Tag name.")]string name,
-            [Option("display", "Whether to display in chat or not")]bool display = false)
+            [Option("name", "Tag name.")]string name)
         {
             if (tryGetTag(name, ctx.Channel, out DatabaseTag tag))
             {
-                await ctx.CreateResponseAsync($"🏷 `{name}`:\n\n{tag.Contents}", !display);
+                await ctx.CreateResponseAsync($"🏷 `{name}`:\n\n{tag.Contents}");
                 return;
             }
 
-            await ctx.CreateResponseAsync($"⚠️ No such tag exists!", !display);
+            await ctx.CreateResponseAsync($"⚠️ No such tag exists!", true);
         }
 
         [SlashCommand("set", "Sets a tag's content.")]
