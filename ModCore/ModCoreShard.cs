@@ -50,7 +50,7 @@ namespace ModCore
             ShardId = id;
         }
 
-        internal void Initialize()
+        internal void Initialize(int shardCount)
         {
             // Store the Start Times to use in DI
             // SocketStartTime will be updated in the SocketOpened event,
@@ -66,7 +66,7 @@ namespace ModCore
                 MinimumLogLevel = LogLevel.Debug,
                 Token = Settings.Token,
                 TokenType = TokenType.Bot,
-                ShardCount = this.Settings.ShardCount,
+                ShardCount = shardCount,
                 ShardId = this.ShardId,
                 Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMessages | DiscordIntents.GuildMembers
             };

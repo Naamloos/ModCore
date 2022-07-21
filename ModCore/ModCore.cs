@@ -72,7 +72,7 @@ namespace ModCore
             for (var i = 0; i < gateway.ShardCount; i++)
             {
                 var shard = new ModCoreShard(Settings, i, SharedData);
-                shard.Initialize();
+                shard.Initialize(gateway.ShardCount);
                 Shards.Add(shard);
             }
 
