@@ -24,7 +24,6 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseStarData> StarDatas { get; set; }
         public virtual DbSet<DatabaseTag> Tags { get; set; }
         public virtual DbSet<DatabaseCommandId> CommandIds { get; set; }
-        public virtual DbSet<DatabaseUserData> UserDatas { get; set; }
         public virtual DbSet<DatabaseLevel> Levels { get; set; }
 
         public DatabaseProvider Provider { get; }
