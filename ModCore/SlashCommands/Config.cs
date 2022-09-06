@@ -280,7 +280,6 @@ namespace ModCore.SlashCommands
                     config.Welcome.ChannelId = channel != null ? channel.Id : 0;
                     if (channel != null)
                     {
-                        await ctx.DeferAsync(true);
                         await ctx.Client.GetModalExtension().RespondWithModalAsync<WelcomeMessageModal>(ctx.Interaction, "Set welcome message");
                     }
                     else
