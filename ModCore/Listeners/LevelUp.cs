@@ -42,8 +42,6 @@ namespace ModCore.Listeners
                     return;
                 if (!config.Levels.Enabled)
                     return;
-                if (eventargs.Message.Content.StartsWith(string.IsNullOrEmpty(config.Prefix) ? settings.DefaultPrefix : config.Prefix))
-                    return;
 
                 // Get level xp data and assign new when null
                 if (db.Levels.Any(x => x.UserId == (long)user.Id && x.GuildId == (long)server.Id))

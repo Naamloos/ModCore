@@ -9,18 +9,6 @@ namespace ModCore.Database.JsonEntities
     public partial class GuildSettings
     {
         /// <summary>
-        /// Gets or sets the command prefix for the guild.
-        /// </summary>
-        [JsonProperty("prefix")]
-        public string Prefix { get; set; }
-
-        /// <summary>
-        /// Gets or sets the ID of the role used to mute users from chat. Setting this to 0 will disable muting.
-        /// </summary>
-        [JsonProperty("mute_role_id")]
-        public ulong MuteRoleId { get; set; }
-
-        /// <summary>
         /// Gets the configuration of Linkfilter™. The Linkfilter™ is the all-new system for Filtering Bad Links out of,
         /// your guild. It'll do everything, from trashing invite links to ruthlessly annihilating IP loggers, URL shorteners
         /// and other suspicious sites.

@@ -22,7 +22,7 @@ namespace ModCore.Listeners
             if (channel == null)
                 return;
 
-            if (cfg.Logging.EditLog_Enable)
+            if (cfg.Logging.NickameLog_Enable)
             {
                 if(eventargs.NicknameBefore != eventargs.NicknameAfter)
                 {
@@ -33,6 +33,7 @@ namespace ModCore.Listeners
                         iconUrl: eventargs.Member.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
                     .AddField("Original Nickname", eventargs.NicknameBefore ?? eventargs.Member.Username)
                     .AddField("New Nickname", eventargs.NicknameAfter ?? eventargs.Member.Username)
+                    .AddField("IDs", $"```ini\nUser = {eventargs.Member.Id}\n```")
                     .WithColor(DiscordColor.Sienna);
                     await channel.ElevatedMessageAsync(embed);
                 }
@@ -48,7 +49,8 @@ namespace ModCore.Listeners
                         .WithAuthor($"{eventargs.Member.DisplayName}",
                             iconUrl: eventargs.Member.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
                         .WithImageUrl(eventargs.Member.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
-                        .WithColor(DiscordColor.Sienna);
+                        .WithColor(DiscordColor.Sienna)
+                        .AddField("IDs", $"```ini\nUser = {eventargs.Member.Id}\n```");
                     await channel.ElevatedMessageAsync(embed);
                 }
             }
@@ -65,13 +67,16 @@ namespace ModCore.Listeners
 
             if (cfg.Logging.InviteLog_Enable)
             {
+                var inv = eventargs.Invite;
                 var embed = new DiscordEmbedBuilder()
                 .WithTitle("Invite Created")
+                .WithDescription($"Max Uses: {inv.MaxUses}\nMax Age: {inv.MaxAge}\nTemporary membership: {inv.IsTemporary}\nExpires At:{inv.ExpiresAt}\nCreated At:{inv.CreatedAt}")
                 .WithAuthor($"{eventargs.Invite.Inviter.Username}",
                     iconUrl: eventargs.Invite.Inviter.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
                 .AddField("Invite", eventargs.Invite.ToString())
                 .AddField("Channel", eventargs.Channel.Mention)
-                .WithColor(DiscordColor.Goldenrod);
+                .WithColor(DiscordColor.Goldenrod)
+                .AddField("IDs", $"```ini\nUser = {eventargs.Invite.Inviter.Id}\nChannel = {eventargs.Channel.Id}```");
                 await channel.ElevatedMessageAsync(embed);
             }
         }

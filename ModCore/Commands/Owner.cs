@@ -20,7 +20,7 @@ using ModCore.Utils.Extensions;
 
 namespace ModCore.Commands
 {
-    [Group("owner"), Aliases("o"), Hidden]
+    [Group("owner"), Aliases("o"), Hidden, RequireOwner]
     public class Owner : BaseCommandModule
 	{
         public SharedData Shared { get; }
@@ -32,7 +32,7 @@ namespace ModCore.Commands
             this.Database = db;
         }
 
-        [Command("clear"), Hidden]
+        [Command("clear"), Hidden, RequireOwner]
         public async Task ClearCommandsAsync(CommandContext context)
         {
             await context.SafeRespondUnformattedAsync("❓ Are you sure you want to clear application commands? This will also shutdown the bot.");
@@ -57,7 +57,7 @@ namespace ModCore.Commands
             }
         }
 
-	    [Command("exit"), Aliases("e"), Hidden]
+	    [Command("exit"), Aliases("e"), Hidden, RequireOwner]
         public async Task ExitAsync(CommandContext context)
         {
             if (!context.Client.CurrentApplication.Owners.Any(x => x.Id == context.User.Id))
@@ -87,7 +87,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("grantxp"), Aliases("gxp"), Hidden]
+        [Command("grantxp"), Aliases("gxp"), Hidden, RequireOwner]
         public async Task GrantXpAsync(CommandContext context, DiscordMember member, int experience)
         {
             using (var db = Database.CreateContext())
@@ -110,7 +110,7 @@ namespace ModCore.Commands
             }
         }
 
-        [Command("nukeban")]
+        [Command("nukeban"), RequireOwner]
         [Description("Bans a member from all servers you own that have ModCore")]
         public async Task NukeBanAsync(CommandContext context, ulong userId, string reason = "")
         {

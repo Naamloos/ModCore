@@ -46,7 +46,8 @@ namespace ModCore.Listeners
 							iconUrl: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
 						.AddField("Join Date", $"{m.JoinedAt.DateTime}")
 						.AddField("Register Date", $"{m.CreationTimestamp.DateTime}")
-						.WithColor(newUser ? DiscordColor.Red : DiscordColor.Green);
+						.WithColor(newUser ? DiscordColor.Red : DiscordColor.Green)
+                        .AddField("IDs", $"```ini\nUser = {eventargs.Member.Id}```"); ;
 					await channel.ElevatedMessageAsync(embed);
 				}
 			}
@@ -63,6 +64,9 @@ namespace ModCore.Listeners
 				return;
 
 			var message = config.Welcome.Message;
+			if (string.IsNullOrEmpty(message))
+				return;
+
 			string attachment = null;
 			string embedtitle = null;
 			var isEmbed = false;
@@ -93,9 +97,6 @@ namespace ModCore.Listeners
 
 					case "membercount":
 						return eventargs.Guild.MemberCount.ToString();
-
-					case "prefix":
-						return config.Prefix ?? "?>";
 
 					case "owner-username":
 						return eventargs.Guild.Owner.Username;
@@ -163,7 +164,8 @@ namespace ModCore.Listeners
 				.WithTitle("Member left")
 				.WithDescription($"ID: ({member.Id})")
 				.WithAuthor($"{member.Username}#{member.Discriminator}",
-					iconUrl: string.IsNullOrEmpty(member.AvatarHash) ? member.DefaultAvatarUrl : member.AvatarUrl);
+					iconUrl: string.IsNullOrEmpty(member.AvatarHash) ? member.DefaultAvatarUrl : member.AvatarUrl)
+                .AddField("IDs", $"```ini\nUser = {eventargs.Member.Id}\n```"); ;
 
 			if (member.JoinedAt.DateTime == DateTime.MinValue)
 				embed.AddField("Join Date", $"{member.JoinedAt.DateTime}");

@@ -34,12 +34,6 @@ namespace ModCore.Commands
                         Description = "ModCore configuration for this guild:"
                     };
 
-                    embed.AddField("Command Prefix", gcfg.Prefix != null ? $"\"{gcfg.Prefix}\"" : "Not configured",
-                        true);
-
-                    var muted = gcfg.MuteRoleId != 0 ? ctx.Guild.GetRole(gcfg.MuteRoleId) : null;
-                    embed.AddField("Muted Role", muted != null ? muted.Mention : "Not configured or missing", true);
-
                     var logs = gcfg.Logging;
                     embed.AddField("Logging",
                         $"Member join/leave: " + (logs.JoinLog_Enable ? "Enabled" : "Disabled") +

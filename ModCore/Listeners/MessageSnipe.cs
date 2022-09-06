@@ -49,7 +49,8 @@ namespace ModCore.Listeners
                             iconUrl: eventargs.Message.Author.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
                         .AddField("Content", eventargs.Message != null ? eventargs.Message.Content.Truncate(1000) : "Original Content Unknown.")
                         .AddField("Channel", eventargs.Message.Channel.Mention)
-                        .WithColor(DiscordColor.Orange);
+                        .WithColor(DiscordColor.Orange)
+                        .AddField("IDs", $"```ini\nUser = {eventargs.Message.Author.Id}\nChannel = {eventargs.Channel.Id}\nMessage = {eventargs.Message.Id}```");
                 await channel.ElevatedMessageAsync(embed);
             }
         }
@@ -85,7 +86,12 @@ namespace ModCore.Listeners
                         .AddField("Original Message", eventargs.MessageBefore != null ? eventargs.MessageBefore.Content.Truncate(1000) : "Original Content Unknown.")
                         .AddField("Edited Message", eventargs.Message.Content.Truncate(1000))
                         .AddField("Channel", eventargs.Message.Channel.Mention)
-                        .WithColor(DiscordColor.Orange);
+                        .WithColor(DiscordColor.Orange)
+                        .AddField("IDs", $"```ini\nUser = {eventargs.Message.Author.Id}\nChannel = {eventargs.Channel.Id}\nMessage = {eventargs.Message.Id}```");
+
+                var msg = new DiscordMessageBuilder()
+                    .WithEmbed(embed)
+                    .AddComponents(new DiscordLinkButtonComponent(eventargs.Message.JumpLink.ToString(), "Go to message"));
                 await channel.ElevatedMessageAsync(embed);
             }
         }

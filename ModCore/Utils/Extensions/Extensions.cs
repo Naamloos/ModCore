@@ -39,6 +39,35 @@ namespace ModCore.Utils.Extensions
             return context;
         }
 
+        public static async Task<InteractionContext> WithGuildSettingsAsync(this InteractionContext ctx, Func<GuildSettings, Task> exec)
+        {
+            var db = ctx.Services.GetService<DatabaseContextBuilder>().CreateContext();
+            var newConfig = false;
+            var config = db.GuildConfig.FirstOrDefault(x => x.GuildId == (long)ctx.Guild.Id);
+            if(config == null)
+            {
+                config = new DatabaseGuildConfig()
+                {
+                    GuildId = (long)ctx.Guild.Id
+                };
+                config.SetSettings(new GuildSettings());
+                newConfig = true;
+            }
+            var settings = config.GetSettings();
+            await exec(settings);
+            config.SetSettings(settings);
+            if(newConfig)
+            {
+                db.GuildConfig.Add(config);
+            }
+            else
+            {
+                db.GuildConfig.Update(config);
+            }
+            await db.SaveChangesAsync();
+            return ctx;
+        }
+
         public static async Task<(bool Success, T Result)> RequestArgumentAsync<T>(this CommandContext ctx, string question)
         {
             var interactivity = ctx.Client.GetInteractivity();

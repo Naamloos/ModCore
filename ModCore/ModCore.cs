@@ -32,16 +32,18 @@ namespace ModCore
 
         internal async Task InitializeAsync(string[] args)
         {
-            if (!File.Exists("settings.json"))
+            var configPath = Path.Combine(Path.GetDirectoryName(this.GetType().Assembly.Location), "settings.json");
+
+            if (!File.Exists(configPath))
             {
                 var json = JsonConvert.SerializeObject(new Settings(), Formatting.Indented);
-                File.WriteAllText("settings.json", json, new UTF8Encoding(false));
+                File.WriteAllText(configPath, json, new UTF8Encoding(false));
                 Console.WriteLine("Config file was not found, a new one was generated. Fill it with proper values and rerun this program");
                 Console.ReadKey();
                 return;
             }
 
-            var input = File.ReadAllText("settings.json", new UTF8Encoding(false));
+            var input = File.ReadAllText(configPath, new UTF8Encoding(false));
             Settings = JsonConvert.DeserializeObject<Settings>(input);
 
             if (args.Contains("--migrate"))
@@ -54,7 +56,7 @@ namespace ModCore
 
             // Saving config with same values but updated fields
             var newjson = JsonConvert.SerializeObject(Settings, Formatting.Indented);
-            File.WriteAllText("settings.json", newjson, new UTF8Encoding(false));
+            File.WriteAllText(configPath, newjson, new UTF8Encoding(false));
 
             Shards = new List<ModCoreShard>();
             InitializeSharedData(args);

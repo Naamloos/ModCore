@@ -49,13 +49,14 @@ namespace ModCore.Listeners
                 else
                     discordemoji = DiscordEmoji.FromUnicode(client, emoji.EmojiName);
 
-                if (!config.Starboard.AllowNSFW && eventargs.Channel.IsNSFW)
-                    return;
-
                 if (config.Starboard.Enable && eventargs.Emoji == discordemoji)
                 {
                     long starboardmessageid = 0;
                     var channel = eventargs.Channel.Guild.Channels.First(x => x.Key == (ulong)config.Starboard.ChannelId).Value;
+
+                    if ((!channel.IsNSFW) && eventargs.Channel.IsNSFW)
+                        return;
+
                     if (channel.Id != eventargs.Channel.Id) // star on starboard entry
                     {
                         // fetch REST message (cache sometimes fails)
