@@ -40,7 +40,7 @@ namespace ModCore.Extensions
             };
         }
 
-        public string GenerateCommand<T>(IDictionary<string, string> values) where T : IButton
+        public string GenerateCommand<T>(IDictionary<string, string> values = null) where T : IButton
         {
             var handler = handlers.FirstOrDefault(x => x.HandlerType == typeof(T));
             if (handler == null)

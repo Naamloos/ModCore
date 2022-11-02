@@ -381,7 +381,7 @@ namespace ModCore.Utils.Extensions
             var msg = await ctx.FollowUpAsync(message);
 
             var confirmation = await interactivity.WaitForEventArgsAsync<ComponentInteractionCreateEventArgs>(
-                x => x.Interaction.Data.ComponentType == ComponentType.Select
+                x => x.Interaction.Data.ComponentType == ComponentType.StringSelect
                 && x.Values.Any(x => choices.Any(y => y.Key == x))
                 && x.User.Id == ctx.User.Id);
 
