@@ -138,7 +138,7 @@ namespace ModCore.SlashCommands
         [SlashCommandPermissions(Permissions.BanMembers)]
         public async Task MassBanAsync(InteractionContext ctx)
         {
-            await ctx.Client.GetModalExtension()
+            await ctx.Client.GetInteractionExtension()
                 .RespondWithModalAsync<MassBanModal>(ctx.Interaction, "Mass ban users");
         }
 

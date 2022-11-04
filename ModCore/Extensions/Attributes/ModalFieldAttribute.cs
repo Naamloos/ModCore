@@ -1,7 +1,7 @@
 ﻿using System;
 using DSharpPlus;
 
-namespace ModCore.Extensions.Modals.Attributes
+namespace ModCore.Extensions.Attributes
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class ModalFieldAttribute : Attribute

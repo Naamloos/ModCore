@@ -1,7 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using ModCore.Extensions.Modals.Attributes;
-using ModCore.Extensions.Modals.Interfaces;
+using ModCore.Extensions.Interfaces;
+using ModCore.Extensions.Attributes;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

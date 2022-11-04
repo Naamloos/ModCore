@@ -1,10 +1,13 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using ModCore.Database;
+using ModCore.Database.JsonEntities;
 using ModCore.Extensions;
-using ModCore.Extensions.Buttons.Attributes;
-using ModCore.Extensions.Buttons.Interfaces;
+using ModCore.Extensions.Attributes;
+using ModCore.Extensions.Interfaces;
+using ModCore.Utils;
 using ModCore.Utils.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -29,20 +32,23 @@ namespace ModCore.Buttons
 
             var settings = interaction.Guild.GetGuildSettings(database.CreateContext());
 
-            List<DiscordComponent> options = new List<DiscordComponent>();
-
             var currentConfig = new DiscordEmbedBuilder()
                 .WithTitle("Starboard Configuration")
                 .WithDescription(settings.Starboard.Enable ? "✅ Module Enabled" : "⛔ Module Disabled")
                 .AddField("Selected Channel", settings.Starboard.ChannelId > 0 ? $"<#{settings.Starboard.ChannelId}>" : "‼️ Not yet configured");
 
+            var enablePropertyPath = ConfigValueSerialization.GetConfigPropertyPath(x => x.Starboard.Enable);
+            var interactions = client.GetInteractionExtension();
+            var enable = interactions.GenerateButton<ConfigValueButton>(("p", enablePropertyPath), ("v", $"{true}"));
+            var disable = interactions.GenerateButton<ConfigValueButton>(("p", enablePropertyPath), ("v", $"{false}"));
+
             var menu = new DiscordInteractionResponseBuilder()
                 .AddEmbed(currentConfig)
                 .AddComponents(
-                    new DiscordButtonComponent(ButtonStyle.Success, "config_sb_enable", "Enable Module", emoji: new DiscordComponentEmoji("✅")),
-                    new DiscordButtonComponent(ButtonStyle.Danger, "config_sb_disable", "Disable Module", emoji: new DiscordComponentEmoji("⛔")))
+                    new DiscordButtonComponent(ButtonStyle.Success, enable, "Enable Module", emoji: new DiscordComponentEmoji("✅")),
+                    new DiscordButtonComponent(ButtonStyle.Danger, disable, "Disable Module", emoji: new DiscordComponentEmoji("⛔")))
                 .AddComponents(new DiscordChannelSelectComponent("config_sb_channel", "Change Starboard Channel...", new List<ChannelType>() { ChannelType.Text }))
-                .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, client.GetButtons().GenerateCommand<ConfigMenu>(), "Back to menu", emoji: new DiscordComponentEmoji("👈")));
+                .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, interactions.GenerateButton<ConfigMenu>(), "Back to menu", emoji: new DiscordComponentEmoji("👈")));
 
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, menu);
         }

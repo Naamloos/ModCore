@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ModCore.Extensions.Modals.Attributes
+namespace ModCore.Extensions.Attributes
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class ModalHiddenFieldAttribute : Attribute

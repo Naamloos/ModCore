@@ -17,7 +17,7 @@ namespace ModCore.SlashCommands
         // TODO these commands need to be migrated to use the timer system instead.
         [SlashCommand("poll", "Starts a poll in this channel.")]
         public async Task PollAsync(InteractionContext ctx)
-            => await ctx.Client.GetModalExtension().RespondWithModalAsync<PollModal>(ctx.Interaction, "Create poll...");
+            => await ctx.Client.GetInteractionExtension().RespondWithModalAsync<PollModal>(ctx.Interaction, "Create poll...");
 
         [SlashCommand("raffle", "Starts a raffle / giveaway.")]
         public async Task RaffleAsync(InteractionContext ctx, 

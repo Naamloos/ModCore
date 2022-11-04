@@ -1,7 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using ModCore.Extensions.Buttons.Attributes;
-using ModCore.Extensions.Buttons.Interfaces;
+using ModCore.Extensions.Attributes;
+using ModCore.Extensions.Interfaces;
 using System;
 using System.Threading.Tasks;
 

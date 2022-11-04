@@ -8,15 +8,15 @@ namespace ModCore.Extensions
 {
     public static class ExtensionStatics
     {
-        public static ModalExtension UseModals(this DiscordClient client, IServiceProvider services)
+        public static InteractionExtension UseInteractions(this DiscordClient client, IServiceProvider services)
         {
-            var extension = new ModalExtension(services);
+            var extension = new InteractionExtension(services);
             client.AddExtension(extension);
             return extension;
         }
 
-        public static ModalExtension GetModalExtension(this DiscordClient client)
-            => client.GetExtension<ModalExtension>();
+        public static InteractionExtension GetInteractionExtension(this DiscordClient client)
+            => client.GetExtension<InteractionExtension>();
 
         public static AsyncListenerExtension UseAsyncListeners(this DiscordClient client, IServiceProvider services)
         {
@@ -27,16 +27,6 @@ namespace ModCore.Extensions
 
         public static AsyncListenerExtension GetAsyncListenerExtension(this DiscordClient client)
             => client.GetExtension<AsyncListenerExtension>();
-
-        public static ButtonExtension UseButtons(this DiscordClient client, IServiceProvider services)
-        {
-            var extension = new ButtonExtension(services);
-            client.AddExtension(extension);
-            return extension;
-        }
-
-        public static ButtonExtension GetButtons(this DiscordClient client)
-            => client.GetExtension<ButtonExtension>();
 
         public static string GenerateIdString(string Id, IDictionary<string, string> values)
         {

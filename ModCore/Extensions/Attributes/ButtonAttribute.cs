@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ModCore.Extensions.Buttons.Attributes
+namespace ModCore.Extensions.Attributes
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class ButtonAttribute : Attribute
@@ -9,7 +9,7 @@ namespace ModCore.Extensions.Buttons.Attributes
 
         public ButtonAttribute(string id)
         {
-            this.Id = id;
+            Id = id;
         }
     }
 }

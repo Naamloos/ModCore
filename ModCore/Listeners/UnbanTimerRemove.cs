@@ -4,8 +4,8 @@ using DSharpPlus.EventArgs;
 using ModCore.Database;
 using ModCore.Database.JsonEntities;
 using ModCore.Entities;
-using ModCore.Extensions.AsyncListeners.Attributes;
-using ModCore.Extensions.AsyncListeners.Enums;
+using ModCore.Extensions.Attributes;
+using ModCore.Extensions.Enums;
 using ModCore.Utils;
 
 namespace ModCore.Listeners

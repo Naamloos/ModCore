@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ModCore.Extensions.Buttons.Attributes
+namespace ModCore.Extensions.Attributes
 {
     public class ButtonFieldAttribute : Attribute
     {

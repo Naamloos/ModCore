@@ -64,12 +64,12 @@ namespace ModCore.Database.JsonEntities
 	    /// Gets whether spelling helper is enabled or disabled for this guild.
 	    /// </summary>
 	    [JsonProperty("spellhelp")]
-	    public bool SpellingHelperEnabled;
+	    public bool SpellingHelperEnabled { get; set; }
 
-		/// <summary>
-		/// Gets the list of Reaction Roles for this guild.
-		/// </summary>
-		[JsonProperty("reactionroles")]
+        /// <summary>
+        /// Gets the list of Reaction Roles for this guild.
+        /// </summary>
+        [JsonProperty("reactionroles")]
 		public List<GuildReactionRole> ReactionRoles { get; private set; } = new List<GuildReactionRole>();
 
 	    /// <summary>
@@ -82,15 +82,15 @@ namespace ModCore.Database.JsonEntities
 	    /// Gets or sets whether or not to show a message when a disabled command is attempted to be executed
 	    /// </summary>
 	    [JsonProperty("disverbose")]
-	    public bool NotifyDisabledCommand = true;
+	    public bool NotifyDisabledCommand { get; set; } = true;
 
 		[JsonProperty("welcome")]
 		public WelcomeSettings Welcome { get; private set; } = new WelcomeSettings();
 
 	    [JsonProperty("nickconf")]
-	    public bool RequireNicknameChangeConfirmation;
-	    
-	    [JsonProperty("nickchn")]
+	    public bool RequireNicknameChangeConfirmation { get; set; }
+
+        [JsonProperty("nickchn")]
 	    public ulong NicknameChangeConfirmationChannel { get; set; }
 
 		[JsonProperty("jailrole")]
@@ -100,10 +100,10 @@ namespace ModCore.Database.JsonEntities
         public ulong UpdateChannel { get; set; }
 
         [JsonProperty("logupdates")]
-        public bool LogUpdates;
+        public bool LogUpdates { get; set; }
 
         [JsonProperty("webhooktoken")]
-        public string WebhookToken;
+        public string WebhookToken { get; set; }
 
         [JsonProperty("levels")]
         public LevelSettings Levels = new LevelSettings();
@@ -112,31 +112,31 @@ namespace ModCore.Database.JsonEntities
     public class LevelSettings
     {
         [JsonProperty("levels_enabled")]
-        public bool Enabled;
+        public bool Enabled { get; set; }
 
         [JsonProperty("messages_enabled")]
-        public bool MessagesEnabled;
+        public bool MessagesEnabled { get; set; }
 
         [JsonProperty("redirect_messages")]
-        public bool RedirectMessages;
+        public bool RedirectMessages { get; set; }
 
         [JsonProperty("message_channel_id")]
-        public ulong ChannelId;
+        public ulong ChannelId { get; set; }
     }
 
     public class GuildChangeLogSettings
     {
         [JsonProperty("log_channel")]
-        public long LogChannel = 0;
+        public long LogChannel { get; set; } = 0;
 
         [JsonProperty("log_nickname")]
-        public bool LogNickname = false;
+        public bool LogNickname { get; set; } = false;
 
         [JsonProperty("log_avatar")]
-        public bool LogAvatar = false;
+        public bool LogAvatar { get; set; } = false;
 
         [JsonProperty("log_username")]
-        public bool LogRoles = false;
+        public bool LogRoles { get; set; } = false;
     }
 
 	public class GuildStarboardSettings
@@ -157,13 +157,13 @@ namespace ModCore.Database.JsonEntities
 	    /// Gets or sets whether starboard should be enabled.
 	    /// </summary>
 	    [JsonProperty("enabled")]
-	    public bool Enable;
+        public bool Enable { get; set; }
 
         [JsonProperty("minimum")]
         public int Minimum { get; set; } = 3;
 
 	    [JsonProperty("allow_nsfw")] 
-	    public bool AllowNSFW;
+	    public bool AllowNSFW { get; set; }
     }
 
     public class GuildEmoji
@@ -184,7 +184,7 @@ namespace ModCore.Database.JsonEntities
 	    /// Gets or sets whether AutoRole should be enabled.
 	    /// </summary>
 	    [JsonProperty("enables")] 
-	    public bool Enable;
+	    public bool Enable { get; set; }
 
         /// <summary>
         /// Gets or sets the AutoRole role ID.
@@ -202,22 +202,22 @@ namespace ModCore.Database.JsonEntities
 	    /// Gets or sets whether the JoinLog should be enabled.
 	    /// </summary>
 	    [JsonProperty("joinlog_enabled")]
-	    public bool JoinLog_Enable;
+	    public bool JoinLog_Enable { get; set; }
 
         [JsonProperty("editlog_enabled")]
-        public bool EditLog_Enable;
+        public bool EditLog_Enable { get; set; }
 
         [JsonProperty("nicknamelog_enabled")]
-        public bool NickameLog_Enable;
+        public bool NickameLog_Enable { get; set; }
 
         [JsonProperty("invitelog_enabled")]
-        public bool InviteLog_Enable;
+        public bool InviteLog_Enable { get; set; }
 
         [JsonProperty("avatarlog_enabled")]
-        public bool AvatarLog_Enable;
+        public bool AvatarLog_Enable { get; set; }
 
         [JsonProperty("modlog_enabled")]
-        public bool ModLog_Enable;
+        public bool ModLog_Enable { get; set; }
 
         /// <summary>
         /// Gets or sets logging channel ID
@@ -258,7 +258,7 @@ namespace ModCore.Database.JsonEntities
 	    /// Gets or sets whether Linkfilter™ should be enabled.
 	    /// </summary>
 	    [JsonProperty("enabled")]
-	    public bool Enable;
+	    public bool Enable { get; set; }
 
         /// <summary>
         /// Gets or sets the number of invites after which the user gets automatically banned for ads. Set to 0 to disable automatic bans.
@@ -294,32 +294,32 @@ namespace ModCore.Database.JsonEntities
         /// Toggles blocking invite links, unless posted by a member with 'Manage Messages' permission or equivalent.
         /// </summary>
         [JsonProperty("block_invite_links")]
-        public bool BlockInviteLinks = true;
+        public bool BlockInviteLinks { get; set; } = true;
         
         /// <summary>
         /// Toggles blocking IP logging sites, unless posted by a member with 'Manage Messages' permission or equivalent.
         /// </summary>
         [JsonProperty("block_ip_loggers")]
-        public bool BlockIpLoggers = true;
+        public bool BlockIpLoggers { get; set; } = true;
         
         /// <summary>
         /// Toggles blocking DDoS sites, unless posted by a member with 'Manage Messages' permission or equivalent.
         /// </summary>
         [JsonProperty("block_booters")]
-        public bool BlockBooters = true;
+        public bool BlockBooters { get; set; } = true;
         
         /// <summary>
         /// Toggles blocking URL shorteners, unless posted by a member with 'Manage Messages' permission or equivalent.
         /// </summary>
         [JsonProperty("block_url_shorteners")]
-        public bool BlockUrlShorteners;
-        
+        public bool BlockUrlShorteners { get; set; }
+
         /// <summary>
         /// Toggles blocking shock sites, screamers and gore sites, unless posted by a member with 'Manage Messages'
         /// permission or equivalent.
         /// </summary>
         [JsonProperty("block_shock_sites")]
-        public bool BlockShockSites = true;
+        public bool BlockShockSites { get; set; } = true;
     }
 
     /// <summary>
@@ -331,9 +331,9 @@ namespace ModCore.Database.JsonEntities
 	    /// Gets or sets whether InvisiCop should be enabled.
 	    /// </summary>
 	    [JsonProperty("enabled")]
-	    public bool Enable;
+	    public bool Enable { get; set; }
 
-	    // TODO these are not configurable
+        // TODO these are not configurable
         /// <summary>
         /// Gets the list of roles which are exempt from InvisiCop checks.
         /// </summary>
@@ -356,7 +356,7 @@ namespace ModCore.Database.JsonEntities
 	    /// Gets or sets whether Role State should be enabled.
 	    /// </summary>
 	    [JsonProperty("enabled")] 
-	    public bool Enable;
+	    public bool Enable { get; set; }
 
         /// <summary>
         /// Gets the list of roles which are ignored by Role State. These roles won't be saved or restored.
@@ -375,7 +375,7 @@ namespace ModCore.Database.JsonEntities
         /// Restores nicknames on rejoin
         /// </summary>
         [JsonProperty("nickname")]
-        public bool Nickname;
+        public bool Nickname { get; set; }
     }
 
     public class GuildGlobalWarnSettings
@@ -384,7 +384,7 @@ namespace ModCore.Database.JsonEntities
 	    /// Gets or sets whether GlobalWarn should be enabled.
 	    /// </summary>
 	    [JsonProperty("enabled")] 
-	    public bool Enable;
+	    public bool Enable { get; set; }
 
         /// <summary>
         /// Gets or sets the GlobalWarn 
@@ -458,9 +458,9 @@ namespace ModCore.Database.JsonEntities
 	public class WelcomeSettings
 	{
 		[JsonProperty("enabled")]
-		public bool Enable;
+		public bool Enable { get; set; }
 
-		[JsonProperty("message")]
+        [JsonProperty("message")]
 		public string Message { get; set; } = "";
 
 		[JsonProperty("channel_id")]

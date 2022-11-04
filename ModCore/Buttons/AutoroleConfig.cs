@@ -1,8 +1,8 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using ModCore.Extensions;
-using ModCore.Extensions.Buttons.Attributes;
-using ModCore.Extensions.Buttons.Interfaces;
+using ModCore.Extensions.Attributes;
+using ModCore.Extensions.Interfaces;
 using System.Threading.Tasks;
 
 namespace ModCore.Buttons
@@ -24,7 +24,7 @@ namespace ModCore.Buttons
 
             var menu = new DiscordInteractionResponseBuilder()
                 .WithContent("TODO: Configuration module...")
-                .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, client.GetButtons().GenerateCommand<ConfigMenu>(), "Back to menu", emoji: new DiscordComponentEmoji("👈")));
+                .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, client.GetInteractionExtension().GenerateButton<ConfigMenu>(), "Back to menu", emoji: new DiscordComponentEmoji("👈")));
 
             await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, menu);
         }

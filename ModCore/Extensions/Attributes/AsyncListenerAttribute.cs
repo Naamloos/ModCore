@@ -1,13 +1,13 @@
 ﻿using DSharpPlus;
 using Emzi0767.Utilities;
 using Microsoft.Extensions.Logging;
-using ModCore.Extensions.AsyncListeners.Enums;
+using ModCore.Extensions.Enums;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace ModCore.Extensions.AsyncListeners.Attributes
+namespace ModCore.Extensions.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class AsyncListenerAttribute : Attribute
@@ -16,7 +16,7 @@ namespace ModCore.Extensions.AsyncListeners.Attributes
 
         public AsyncListenerAttribute(EventType target)
         {
-            this.Target = target;
+            Target = target;
         }
 
         public void Register(DiscordClient client, MethodInfo listener, IServiceProvider services)

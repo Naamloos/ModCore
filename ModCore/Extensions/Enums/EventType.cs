@@ -1,4 +1,4 @@
-﻿namespace ModCore.Extensions.AsyncListeners.Enums
+﻿namespace ModCore.Extensions.Enums
 {
     public enum EventType
     {

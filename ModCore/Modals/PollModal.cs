@@ -2,8 +2,8 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
-using ModCore.Extensions.Modals.Attributes;
-using ModCore.Extensions.Modals.Interfaces;
+using ModCore.Extensions.Interfaces;
+using ModCore.Extensions.Attributes;
 using ModCore.Utils;
 using System;
 using System.Collections.Generic;

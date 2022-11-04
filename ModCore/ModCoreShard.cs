@@ -32,8 +32,7 @@ namespace ModCore
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
         public SlashCommandsExtension Slashies { get; private set; }
-        public ModalExtension Modals { get; private set; }
-        public ButtonExtension Buttons { get; private set; }
+        public InteractionExtension Interactions { get; private set; }
 
         public SharedData SharedData { get; set; }
 		public Settings Settings { get; }
@@ -146,8 +145,7 @@ namespace ModCore
                 await this.Slashies.RefreshCommands();
             };
 
-            this.Modals = this.Client.UseModals(deps);
-            this.Buttons = this.Client.UseButtons(deps);
+            this.Interactions = this.Client.UseInteractions(deps);
 
             var asyncListeners = this.Client.UseAsyncListeners(deps);
             asyncListeners.RegisterListeners(this.GetType().Assembly);

@@ -1,5 +1,5 @@
 ﻿using DSharpPlus;
-using ModCore.Extensions.AsyncListeners.Attributes;
+using ModCore.Extensions.Attributes;
 using System;
 using System.Linq;
 using System.Reflection;

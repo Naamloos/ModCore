@@ -1,8 +1,8 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using ModCore.Extensions;
-using ModCore.Extensions.Buttons.Attributes;
-using ModCore.Extensions.Buttons.Interfaces;
+using ModCore.Extensions.Attributes;
+using ModCore.Extensions.Interfaces;
 using ModCore.Modals;
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,7 @@ namespace ModCore.Buttons
         {
             if(ulong.TryParse(UserId, out _) && ulong.TryParse(GuildId, out _))
             {
-                await client.GetModalExtension().RespondWithModalAsync<FeedbackResponseModal>(interaction, "Response to feedback.",
+                await client.GetInteractionExtension().RespondWithModalAsync<FeedbackResponseModal>(interaction, "Response to feedback.",
                     new Dictionary<string, string>()
                     {
                         { "g", GuildId },

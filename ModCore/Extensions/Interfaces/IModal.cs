@@ -1,7 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using System.Threading.Tasks;
 
-namespace ModCore.Extensions.Modals.Interfaces
+namespace ModCore.Extensions.Interfaces
 {
     public interface IModal
     {

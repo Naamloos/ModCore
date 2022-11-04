@@ -1,8 +1,8 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using ModCore.Extensions;
-using ModCore.Extensions.Buttons.Attributes;
-using ModCore.Extensions.Buttons.Interfaces;
+using ModCore.Extensions.Attributes;
+using ModCore.Extensions.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -21,10 +21,10 @@ namespace ModCore.Buttons
 
         public async Task HandleAsync(DiscordInteraction interaction, DiscordMessage message)
         {
-            await SendConfigMenuAsync(interaction, client.GetButtons());
+            await SendConfigMenuAsync(interaction, client.GetInteractionExtension());
         }
 
-        public static async Task SendConfigMenuAsync(DiscordInteraction interaction, ButtonExtension buttons, InteractionResponseType responsetype = InteractionResponseType.UpdateMessage)
+        public static async Task SendConfigMenuAsync(DiscordInteraction interaction, InteractionExtension buttons, InteractionResponseType responsetype = InteractionResponseType.UpdateMessage)
         {
             var embed = new DiscordEmbedBuilder()
                 .WithTitle("<:modcore:996915638545158184> Welcome to the ModCore Configuration Utility!")
@@ -36,14 +36,14 @@ namespace ModCore.Buttons
                 .WithContent("")
                 .AsEphemeral();
 
-            var starboard = buttons.GenerateCommand<StarboardConfig>();
-            var rolestate = buttons.GenerateCommand<RolestateConfig>();
-            var linkfilter = buttons.GenerateCommand<LinkfilterConfig>();
-            var autorole = buttons.GenerateCommand<AutoroleConfig>();
-            var rolemenu = buttons.GenerateCommand<RolemenuConfig>();
-            var welcomer = buttons.GenerateCommand<WelcomerConfig>();
-            var levels = buttons.GenerateCommand<LevelsConfig>();
-            var logging = buttons.GenerateCommand<LoggingConfig>();
+            var starboard = buttons.GenerateButton<StarboardConfig>();
+            var rolestate = buttons.GenerateButton<RolestateConfig>();
+            var linkfilter = buttons.GenerateButton<LinkfilterConfig>();
+            var autorole = buttons.GenerateButton<AutoroleConfig>();
+            var rolemenu = buttons.GenerateButton<RolemenuConfig>();
+            var welcomer = buttons.GenerateButton<WelcomerConfig>();
+            var levels = buttons.GenerateButton<LevelsConfig>();
+            var logging = buttons.GenerateButton<LoggingConfig>();
 
             resp.AddComponents(
                 new DiscordButtonComponent(ButtonStyle.Secondary, starboard, "Starboard", emoji: new DiscordComponentEmoji("⭐")),

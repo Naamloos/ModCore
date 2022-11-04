@@ -24,7 +24,7 @@ namespace ModCore.SlashCommands
         [SlashCommandPermissions(Permissions.ManageGuild)]
         public async Task ConfigAsync(InteractionContext ctx)
         {
-            var buttons = ctx.Client.GetButtons();
+            var buttons = ctx.Client.GetInteractionExtension();
 
             var databaseContext = Database.CreateContext();
             var settings = ctx.Guild.GetGuildSettings(databaseContext);

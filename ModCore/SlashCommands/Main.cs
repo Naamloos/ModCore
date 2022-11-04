@@ -156,7 +156,7 @@ namespace ModCore.SlashCommands
             await ctx.EditFollowupAsync(response.FollowupMessage.Id, new DiscordWebhookBuilder().WithContent("Thank you for your feedback! 💖"));
 
             var feedbackTypeString = Enum.GetName(response.Choice.GetType(), response.Choice);
-            await ctx.Client.GetModalExtension().RespondWithModalAsync<FeedbackModal>(response.interaction,
+            await ctx.Client.GetInteractionExtension().RespondWithModalAsync<FeedbackModal>(response.interaction,
                 $"Feedback: {feedbackTypeString}", new Dictionary<string, string>()
             {
                 { "c", feedbackTypeString }
@@ -240,13 +240,13 @@ namespace ModCore.SlashCommands
                 .AddField("Old nickname", member.DisplayName)
                 .WithColor(DiscordColor.LightGray);
 
-            var approve = ctx.Client.GetButtons().GenerateCommand<ApproveNickname>(new Dictionary<string, string>()
+            var approve = ctx.Client.GetInteractionExtension().GenerateButton<ApproveNickname>(new Dictionary<string, string>()
             {
                 { "n", nickname },
                 { "u", member.Id.ToString() }
             });
 
-            var deny = ctx.Client.GetButtons().GenerateCommand<DisapproveNickname>(new Dictionary<string, string>()
+            var deny = ctx.Client.GetInteractionExtension().GenerateButton<DisapproveNickname>(new Dictionary<string, string>()
             {
                 { "n", nickname },
                 { "u", member.Id.ToString() }
