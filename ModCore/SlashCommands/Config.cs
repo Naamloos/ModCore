@@ -3,6 +3,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Microsoft.VisualBasic;
 using ModCore.Buttons;
+using ModCore.Components;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
@@ -24,8 +25,6 @@ namespace ModCore.SlashCommands
         [SlashCommandPermissions(Permissions.ManageGuild)]
         public async Task ConfigAsync(InteractionContext ctx)
         {
-            var buttons = ctx.Client.GetInteractionExtension();
-
             var databaseContext = Database.CreateContext();
             var settings = ctx.Guild.GetGuildSettings(databaseContext);
             if(settings == null)
@@ -41,7 +40,7 @@ namespace ModCore.SlashCommands
                 await databaseContext.SaveChangesAsync();
             }
 
-            await ConfigMenu.SendConfigMenuAsync(ctx.Interaction, buttons, InteractionResponseType.ChannelMessageWithSource);
+            await ConfigComponents.PostMenuAsync(ctx.Interaction, InteractionResponseType.ChannelMessageWithSource);
         }
     }
 }

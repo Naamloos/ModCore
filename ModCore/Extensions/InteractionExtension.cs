@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Handlers;
 using ModCore.Extensions.Interfaces;
@@ -18,6 +19,8 @@ namespace ModCore.Extensions
     {
         private readonly ConcurrentBag<ButtonHandler> buttonHandlers;
         private readonly ConcurrentBag<ModalHandler> modalHandlers;
+        private readonly ConcurrentBag<ComponentHandler> componentHandlers;
+        private DiscordClient client;
 
         private readonly IServiceProvider services;
 
@@ -26,6 +29,7 @@ namespace ModCore.Extensions
             this.services = services;
             this.buttonHandlers = new ConcurrentBag<ButtonHandler>();
             this.modalHandlers = new ConcurrentBag<ModalHandler>();
+            this.componentHandlers = new ConcurrentBag<ComponentHandler>();
         }
 
         public string GenerateButton<T>(params (string Key, string Value)[] values) where T : IButton
@@ -64,10 +68,61 @@ namespace ModCore.Extensions
             await handler.CreateAsync(interaction, title, hiddenValues);
         }
 
+        public string GenerateId(string id, params (string Key, string Value)[] values)
+        {
+            Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
+            foreach (var value in values)
+            {
+                keyValuePairs.Add(value.Key, value.Value);
+            }
+
+            return GenerateIdWithValues(id, keyValuePairs);
+        }
+
+        public string GenerateIdWithValues(string id, IDictionary<string, string> values)
+        {
+            return ExtensionStatics.GenerateIdString(id, values);
+        }
+
         protected override void Setup(DiscordClient client)
         {
+            this.client = client;
+
             setupButtons(client);
             setupModals(client);
+            setupComponents(client);
+        }
+
+        private void setupComponents(DiscordClient client)
+        {
+            var handlers = this.GetType().Assembly.GetTypes().Where(x => x.IsAssignableTo(typeof(BaseComponentModule)) && !x.IsAbstract);
+            foreach(var handler in handlers)
+            {
+                registerComponentHandler(handler);
+            }
+
+            client.ComponentInteractionCreated += (sender, e) =>
+            {
+                _ = Task.Run(async () => await handleComponentAsync(sender, e));
+                return Task.CompletedTask;
+            };
+        }
+
+        private void registerComponentHandler(Type type)
+        {
+            componentHandlers.Add(new ComponentHandler(type, services, this.client));
+        }
+
+        private async Task handleComponentAsync(DiscordClient sender, ComponentInteractionCreateEventArgs e)
+        {
+            var deciphered = ExtensionStatics.DecipherIdString(e.Interaction.Data.CustomId);
+
+            foreach(var handler in componentHandlers)
+            {
+                if (!handler.HasHandlerFor(deciphered.Id, e.Interaction.Data.ComponentType))
+                    continue;
+                await handler.HandleAsync(e, deciphered.Id, deciphered.Values);
+            }
         }
 
         private void setupButtons(DiscordClient client)

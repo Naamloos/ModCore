@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace ModCore.Database.JsonEntities
@@ -173,6 +174,11 @@ namespace ModCore.Database.JsonEntities
 
         [JsonProperty("name")]
         public string EmojiName { get; set; } = "⭐";
+
+        public string GetStringRepresentation()
+        {
+            return EmojiId > 1 ? $"<:{EmojiName}:{EmojiId}>" : EmojiName;
+        }
     }
 
     /// <summary>
