@@ -76,7 +76,7 @@ namespace ModCore.Components
         [Component("cfg.reset", ComponentType.Button)]
         public async Task ResetConfigAsync(ComponentInteractionCreateEventArgs e)
         {
-            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
                 .WithContent("❓ Are you sure you want to reset your server's config? You will lose your ModCore setup!")
                 .AddComponents(new DiscordComponent[]
                 {
@@ -93,8 +93,9 @@ namespace ModCore.Components
             var settings = db.GuildConfig.FirstOrDefault(x => x.GuildId == (long)e.Guild.Id);
             settings.SetSettings(new GuildSettings());
             db.GuildConfig.Update(settings);
+            await db.SaveChangesAsync();
 
-            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
                 .WithContent("♻️ Your ModCore Guild configuration was reset!")
                 .AddComponents(new DiscordComponent[]
                 {
