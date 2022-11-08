@@ -15,7 +15,6 @@ using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using ModCore.Database;
 using ModCore.Database.JsonEntities;
-using ModCore.Buttons;
 
 namespace ModCore.SlashCommands
 {
@@ -240,13 +239,13 @@ namespace ModCore.SlashCommands
                 .AddField("Old nickname", member.DisplayName)
                 .WithColor(DiscordColor.LightGray);
 
-            var approve = ctx.Client.GetInteractionExtension().GenerateButton<ApproveNickname>(new Dictionary<string, string>()
+            var approve = ExtensionStatics.GenerateIdString("nick.yes", new Dictionary<string, string>()
             {
                 { "n", nickname },
                 { "u", member.Id.ToString() }
             });
 
-            var deny = ctx.Client.GetInteractionExtension().GenerateButton<DisapproveNickname>(new Dictionary<string, string>()
+            var deny = ExtensionStatics.GenerateIdString("nick.no", new Dictionary<string, string>()
             {
                 { "n", nickname },
                 { "u", member.Id.ToString() }

@@ -28,7 +28,7 @@ namespace ModCore.Components
 
         [Component("rs", ComponentType.Button)]
         public async Task RoleStateAsync(ComponentInteractionCreateEventArgs e)
-            => await WipAsync(e);
+            => await RoleStateConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
 
         [Component("lf", ComponentType.Button)]
         public async Task LinkFiltersAsync(ComponentInteractionCreateEventArgs e)
@@ -36,7 +36,7 @@ namespace ModCore.Components
 
         [Component("ar", ComponentType.Button)]
         public async Task AutoRoleAsync(ComponentInteractionCreateEventArgs e)
-            => await WipAsync(e);
+            => await AutoRoleConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
 
         [Component("rm", ComponentType.Button)]
         public async Task RoleMenuAsync(ComponentInteractionCreateEventArgs e)
@@ -44,20 +44,20 @@ namespace ModCore.Components
 
         [Component("wc", ComponentType.Button)]
         public async Task WelcomerAsync(ComponentInteractionCreateEventArgs e)
-            => await WipAsync(e);
+            => await WelcomerConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
 
-        [Component("ls", ComponentType.Button)]
+        [Component("lv", ComponentType.Button)]
         public async Task LevelSystemAsync(ComponentInteractionCreateEventArgs e)
-            => await WipAsync(e);
+            => await LevelSystemConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
 
-        [Component("ul", ComponentType.Button)]
+        [Component("lg", ComponentType.Button)]
         public async Task UpdateLoggerAsync(ComponentInteractionCreateEventArgs e)
-            => await WipAsync(e);
+            => await LoggerConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
 
         private async Task WipAsync(ComponentInteractionCreateEventArgs e, [CallerMemberName] string caller = "")
         {
             await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
-                .WithContent($"Page WIP {caller}")
+                .WithContent($"This configuration option is currently not available yet {caller}")
                 .AsEphemeral()
                 .AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "cfg", "Back to Main Menu", emoji: new DiscordComponentEmoji("🏃"))));
         }
@@ -73,16 +73,17 @@ namespace ModCore.Components
                 .AddComponents(new DiscordComponent[]
                 {
                     new DiscordButtonComponent(ButtonStyle.Secondary, "sb", "Starboard", emoji: new DiscordComponentEmoji("⭐")),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, "rs", "Role State", emoji: new DiscordComponentEmoji("🗿")),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, "lf", "Link Filters", emoji: new DiscordComponentEmoji("🔗")),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, "ar", "Auto Role", emoji: new DiscordComponentEmoji("🤖"))
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "rs", "Member States", emoji: new DiscordComponentEmoji("🗿")),
+                    //new DiscordButtonComponent(ButtonStyle.Secondary, "lf", "Link Filters", emoji: new DiscordComponentEmoji("🔗")),
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "ar", "Auto Role", emoji: new DiscordComponentEmoji("🤖")),
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "wc", "Welcomer", emoji: new DiscordComponentEmoji("👋"))
                 })
                 .AddComponents(new DiscordComponent[]
                 {
-                    new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Role Menu", emoji: new DiscordComponentEmoji("📖")),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, "wc", "Welcomer", emoji: new DiscordComponentEmoji("👋")),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, "ls", "Level System", emoji: new DiscordComponentEmoji("📈")),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, "ul", "Update Logger", emoji: new DiscordComponentEmoji("🪵"))
+                    //new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Role Menu", emoji: new DiscordComponentEmoji("📖")),
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "lv", "Level System", emoji: new DiscordComponentEmoji("📈")),
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "lg", "Update Logger", emoji: new DiscordComponentEmoji("🪵")),
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "msc", "Miscellaneous", emoji: new DiscordComponentEmoji("🤷"))
                 });
 
             await interaction.CreateResponseAsync(responseType, response);

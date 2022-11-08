@@ -1,14 +1,13 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using ModCore.Buttons;
 using ModCore.Entities;
 using ModCore.Extensions;
-using ModCore.Extensions.Interfaces;
 using ModCore.Extensions.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ModCore.Extensions.Abstractions;
 
 namespace ModCore.Modals
 {
@@ -43,7 +42,7 @@ namespace ModCore.Modals
                 .WithDescription(Feedback)
                 .WithColor(GetColor());
 
-            var button = client.GetInteractionExtension().GenerateButton<RespondFeedback>(new Dictionary<string, string>()
+            var button = ExtensionStatics.GenerateIdString("fb", new Dictionary<string, string>()
             {
                 {"u", interaction.User.Id.ToString() },
                 {"g", interaction.Guild.Id.ToString() }

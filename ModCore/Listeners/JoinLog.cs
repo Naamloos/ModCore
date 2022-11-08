@@ -69,7 +69,7 @@ namespace ModCore.Listeners
 
 			string attachment = null;
 			string embedtitle = null;
-			var isEmbed = false;
+			var isEmbed = config.Welcome.IsEmbed;
 
 			message = WelcomeRegex.Replace(message, match =>
 			{
@@ -112,10 +112,6 @@ namespace ModCore.Listeners
 
 					case "role-count":
 						return eventargs.Guild.Roles.Count.ToString();
-
-					case "isembed":
-						isEmbed = true;
-						return "";
 
 					default:
 						if (welcome.StartsWith("image:"))

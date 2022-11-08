@@ -44,7 +44,7 @@ namespace ModCore.Components
                 await db.SaveChangesAsync();
             }
 
-            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"{(enabled ? "Enabled" : "Disabled")} the starboard module.")
+            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"👍 {(enabled ? "Enabled" : "Disabled")} the starboard module.")
                     .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "sb", "Back to Starboard config", emoji: new DiscordComponentEmoji("🏃"))));
         }
 
@@ -65,7 +65,7 @@ namespace ModCore.Components
                 await db.SaveChangesAsync();
             }
 
-            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"✅ Set your starboard channel to <#{value.Key}>.")
+            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"👍 Set your starboard channel to <#{value.Key}>.")
                     .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "sb", "Back to Starboard config", emoji: new DiscordComponentEmoji("🏃"))));
         }
 
@@ -99,7 +99,7 @@ namespace ModCore.Components
                 await db.SaveChangesAsync();
             }
 
-            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"✅ Set your starboard minimum to {value}.")
+            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"👍 Set your starboard minimum to {value}.")
                     .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "sb", "Back to Starboard config", emoji: new DiscordComponentEmoji("🏃"))));
         }
 
@@ -167,7 +167,7 @@ namespace ModCore.Components
                 await db.SaveChangesAsync();
             }
 
-            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"✅ Set starboard emoji to {emoji}!")
+            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"👍 Set starboard emoji to {emoji}!")
                     .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "sb", "Back to Starboard config", emoji: new DiscordComponentEmoji("🏃"))));
         }
 
@@ -179,10 +179,12 @@ namespace ModCore.Components
 
                 var embed = new DiscordEmbedBuilder()
                     .WithTitle("⭐ Starboard Configuration")
-                    .WithDescription($"{(settings.Enable ? "✅" : "⛔")} This module is currently **{(settings.Enable ? "enabled" : "disabled")}**.")
-                    .AddField("Channel", $"<#{settings.ChannelId}>")
-                    .AddField("Minimum Amount", $"Currently set to **{settings.Minimum}**.")
-                    .AddField("Emoji", settings.Emoji.GetStringRepresentation());
+                    .WithDescription("Starboard allows members to respond to a message with a specific emoji, sending it to a special starboard channel." +
+                        " Starboards can serve as an archive of sorts, listing the community's favorite messages.")
+                    .AddField("Enabled", $"{(settings.Enable ? "✅" : "⛔")} This module is currently **{(settings.Enable ? "enabled" : "disabled")}**.")
+                    .AddField("Starboard channel", $"<#{settings.ChannelId}>")
+                    .AddField("Minimum amount of reactions", $"Currently set to **{settings.Minimum}**.")
+                    .AddField("Star emoji", settings.Emoji.GetStringRepresentation());
 
                 var enableId = ExtensionStatics.GenerateIdString("sb.toggle", new Dictionary<string, string>() { { "on", "true" } });
                 var disableId = ExtensionStatics.GenerateIdString("sb.toggle", new Dictionary<string, string>() { { "on", "false" } });

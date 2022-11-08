@@ -57,7 +57,7 @@ namespace ModCore.SlashCommands
                 foreach (var leveldata in top10)
                 {
                     top10string += $"{index}. <@{leveldata.UserId}>: Level " +
-                        $"{Listeners.LevelUp.CalculateLevel(leveldata.Experience)} ({leveldata.Experience} xp)";
+                        $"{Listeners.LevelUp.CalculateLevel(leveldata.Experience)} ({leveldata.Experience} xp)\n";
                     index++;
                 }
 

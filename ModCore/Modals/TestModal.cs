@@ -1,9 +1,9 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using ModCore.Entities;
-using ModCore.Extensions.Interfaces;
 using ModCore.Extensions.Attributes;
 using System.Threading.Tasks;
+using ModCore.Extensions.Abstractions;
 
 namespace ModCore.Modals
 {

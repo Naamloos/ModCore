@@ -195,8 +195,8 @@ namespace ModCore.Database.JsonEntities
         /// <summary>
         /// Gets or sets the AutoRole role ID.
         /// </summary>
-        [JsonProperty("role_id")]
-        public ulong RoleId { get; set; }
+        [JsonProperty("role_ids")]
+        public List<ulong> RoleIds { get; set; } = new List<ulong>();
     }
 
     /// <summary>

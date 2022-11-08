@@ -1,8 +1,8 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
-using ModCore.Extensions.Interfaces;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;

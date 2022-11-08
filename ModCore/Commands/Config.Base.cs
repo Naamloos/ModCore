@@ -43,8 +43,8 @@ namespace ModCore.Commands
                         );
 
                     var autorole = gcfg.AutoRole;
-                    embed.AddField("Auto Role",
-                        autorole.Enable ? $"Enabled with Role ID {autorole.RoleId}." : "Disabled");
+                    //embed.AddField("Auto Role",
+                    //    autorole.Enable ? $"Enabled with Role ID {autorole.RoleId}." : "Disabled");
 
                     var commanderror = gcfg.CommandError;
                     embed.AddField("Command Error logging",

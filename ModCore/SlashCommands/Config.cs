@@ -2,7 +2,6 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Microsoft.VisualBasic;
-using ModCore.Buttons;
 using ModCore.Components;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;

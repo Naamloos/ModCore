@@ -1,10 +1,10 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Microsoft.Extensions.Logging;
 using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Handlers;
-using ModCore.Extensions.Interfaces;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -17,42 +17,18 @@ namespace ModCore.Extensions
 {
     public class InteractionExtension : BaseExtension
     {
-        private readonly ConcurrentBag<ButtonHandler> buttonHandlers;
         private readonly ConcurrentBag<ModalHandler> modalHandlers;
         private readonly ConcurrentBag<ComponentHandler> componentHandlers;
         private DiscordClient client;
+        private ILogger logger;
 
         private readonly IServiceProvider services;
 
         public InteractionExtension(IServiceProvider services)
         {
             this.services = services;
-            this.buttonHandlers = new ConcurrentBag<ButtonHandler>();
             this.modalHandlers = new ConcurrentBag<ModalHandler>();
             this.componentHandlers = new ConcurrentBag<ComponentHandler>();
-        }
-
-        public string GenerateButton<T>(params (string Key, string Value)[] values) where T : IButton
-        {
-            Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
-            foreach (var value in values)
-            {
-                keyValuePairs.Add(value.Key, value.Value);
-            }
-
-            return GenerateButton<T>(keyValuePairs);
-        }
-
-        public string GenerateButton<T>(IDictionary<string, string> values = null) where T : IButton
-        {
-            var handler = buttonHandlers.FirstOrDefault(x => x.HandlerType == typeof(T));
-            if (handler == null)
-            {
-                // Cache for next call :^)
-                handler = registerButtonHandler(typeof(T));
-            }
-
-            return handler.Create(values);
         }
 
         public async Task RespondWithModalAsync<T>(DiscordInteraction interaction, string title,
@@ -88,7 +64,6 @@ namespace ModCore.Extensions
         {
             this.client = client;
 
-            setupButtons(client);
             setupModals(client);
             setupComponents(client);
         }
@@ -121,56 +96,14 @@ namespace ModCore.Extensions
             {
                 if (!handler.HasHandlerFor(deciphered.Id, e.Interaction.Data.ComponentType))
                     continue;
-                await handler.HandleAsync(e, deciphered.Id, deciphered.Values);
-            }
-        }
 
-        private void setupButtons(DiscordClient client)
-        {
-            var handlers = this.GetType().Assembly.GetTypes().Where(x => x.IsAssignableTo(typeof(IButton)) && !x.IsInterface);
-            foreach (var handler in handlers)
-            {
-                registerButtonHandler(handler);
-            }
-
-            client.ComponentInteractionCreated += (sender, e) =>
-            {
-                _ = Task.Run(async () => await handleButtonAsync(sender, e));
-                return Task.CompletedTask;
-            };
-        }
-
-        private ButtonHandler registerButtonHandler(Type type)
-        {
-            var buttonAttributes = type.GetCustomAttributes(typeof(ButtonAttribute), false);
-            if (buttonAttributes.Length != 1)
-            {
-                throw new Exception($"{type} has no {typeof(ButtonAttribute)}!");
-            }
-
-            var buttonAttribute = buttonAttributes[0] as ButtonAttribute;
-
-            if (type.GetConstructors().Length != 1)
-                throw new Exception($"{type} has more than 1 constructor!");
-
-            if (buttonHandlers.Any(x => x.HandlerType == type))
-                throw new Exception($"Modal with type {type} already registered!");
-
-            var handler = new ButtonHandler(buttonAttribute, type);
-            buttonHandlers.Add(handler);
-
-            return handler;
-        }
-
-        private async Task handleButtonAsync(DiscordClient sender, ComponentInteractionCreateEventArgs e)
-        {
-            if (e.Interaction.Data.ComponentType == ComponentType.Button)
-            {
-                var deciphered = ExtensionStatics.DecipherIdString(e.Interaction.Data.CustomId);
-
-                var handler = buttonHandlers.FirstOrDefault(x => x.Data.Id == deciphered.Id);
-                if (handler != null)
-                    await handler.ExecuteAsync(e, deciphered.Values, services);
+                try
+                {
+                    await handler.HandleAsync(e, deciphered.Id, deciphered.Values);
+                }catch(Exception ex)
+                {
+                    this.logger.LogError(new EventId(6969, "Interactions"), ex, $"Component with id {deciphered.Id} errored!");
+                }
             }
         }
 
