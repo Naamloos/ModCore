@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ModCore.SlashCommands
+namespace ModCore.Commands
 {
     [SlashCommandGroup("remind", "Reminder-related commands")]
     public class Reminders : ApplicationCommandModule

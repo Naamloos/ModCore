@@ -10,7 +10,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ModCore.SlashCommands
+namespace ModCore.Commands
 {
     [SlashCommandGroup("tag", "Commands for tags.")]
     public class Tags : ApplicationCommandModule

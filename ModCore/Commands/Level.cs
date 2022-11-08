@@ -4,7 +4,7 @@ using ModCore.Database;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ModCore.SlashCommands
+namespace ModCore.Commands
 {
     [SlashCommandGroup("level", "Commands relating to the level system.")]
     public class Level : ApplicationCommandModule

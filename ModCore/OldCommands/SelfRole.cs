@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using ModCore.Utils.Extensions;
 using ModCore.Database.JsonEntities;
 
-namespace ModCore.Commands
+namespace ModCore.OldCommands
 {
 	[Group("selfrole"), Description("Commands to give or take selfroles."), RequireBotPermissions(Permissions.ManageRoles)]
 	public class SelfRole : BaseCommandModule

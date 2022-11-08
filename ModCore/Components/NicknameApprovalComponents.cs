@@ -4,7 +4,7 @@ using DSharpPlus.EventArgs;
 using Microsoft.VisualBasic;
 using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
-using ModCore.SlashCommands;
+using ModCore.Commands;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

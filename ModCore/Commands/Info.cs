@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModCore.SlashCommands
+namespace ModCore.Commands
 {
     [SlashCommandGroup("info", "List information about specific entities.")]
     public class Info : ApplicationCommandModule

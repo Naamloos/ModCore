@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace ModCore.SlashCommands
+namespace ModCore.Commands
 {
     [SlashCommandGroup("purge", "Commands for clearing chat.")]
     [SlashRequirePermissions(Permissions.ManageMessages)]

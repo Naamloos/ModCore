@@ -18,7 +18,7 @@ using ModCore.Entities;
 using ModCore.Utils;
 using ModCore.Utils.Extensions;
 
-namespace ModCore.Commands
+namespace ModCore.OldCommands
 {
     [Group("owner"), Aliases("o"), Hidden, RequireOwner]
     public class Owner : BaseCommandModule

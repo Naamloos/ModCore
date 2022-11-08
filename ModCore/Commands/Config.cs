@@ -14,7 +14,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ModCore.SlashCommands
+namespace ModCore.Commands
 {
     public class Config : ApplicationCommandModule
     {

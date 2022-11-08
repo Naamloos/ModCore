@@ -17,7 +17,7 @@ using ModCore.Database;
 using ModCore.Database.JsonEntities;
 using System.Runtime.InteropServices;
 
-namespace ModCore.SlashCommands
+namespace ModCore.Commands
 {
     public class Main : ApplicationCommandModule
     {
