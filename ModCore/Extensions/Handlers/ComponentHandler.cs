@@ -78,6 +78,13 @@ namespace ModCore.Extensions.Handlers
                 return;
             var handler = this.handlerMethods[handlerKey];
 
+            var perms = handler.GetCustomAttribute<ComponentPermissionsAttribute>();
+            if (perms != null)
+            {
+                if (!e.Channel.PermissionsFor(e.User as DiscordMember).HasPermission(perms.Permissions))
+                    return;
+            }
+
             if (handler.GetParameters().Length == 2)
                 await (Task)(handler.Invoke(instance, new object[] { e, commandArgs }));
             await (Task)(handler.Invoke(instance, new object[] { e }));

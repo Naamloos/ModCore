@@ -80,9 +80,9 @@ namespace ModCore.SlashCommands
             var winner = members[winnerindex];
 
             var tada = DiscordEmoji.FromUnicode("🎉");
-            await ctx.EditFollowupAsync(giveaway.Id, new DiscordWebhookBuilder().WithContent($"{tada.ToString()}{trophy.ToString()} " +
+            await ctx.EditFollowupAsync(giveaway.Id, new DiscordWebhookBuilder().WithContent($"{tada}{trophy} " +
                 $"{winner.Mention}, you won `{prize.Replace('`', '\'')}`! Contact {ctx.User.Mention} for your price! " +
-                $"{trophy.ToString()}{tada.ToString()}"));
+                $"{trophy}{tada}"));
         }
     }
 }

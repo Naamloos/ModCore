@@ -20,7 +20,7 @@ namespace ModCore.SlashCommands
     {
         public DatabaseContextBuilder Database { private get; set; }
 
-        [SlashCommand("config", "Launches the ModCore Configuration Utility.")]
+        [SlashCommand("config", "Launches the ModCore Server Configuration Utility.")]
         [SlashCommandPermissions(Permissions.ManageGuild)]
         public async Task ConfigAsync(InteractionContext ctx)
         {

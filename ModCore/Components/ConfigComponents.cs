@@ -3,6 +3,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Microsoft.VisualBasic;
 using ModCore.Database;
+using ModCore.Database.JsonEntities;
 using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
 using ModCore.Utils.Extensions;
@@ -36,17 +37,9 @@ namespace ModCore.Components
         public async Task RoleStateAsync(ComponentInteractionCreateEventArgs e)
             => await RoleStateConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
 
-        [Component("lf", ComponentType.Button)]
-        public async Task LinkFiltersAsync(ComponentInteractionCreateEventArgs e)
-            => await WipAsync(e);
-
         [Component("ar", ComponentType.Button)]
         public async Task AutoRoleAsync(ComponentInteractionCreateEventArgs e)
             => await AutoRoleConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
-
-        [Component("rm", ComponentType.Button)]
-        public async Task RoleMenuAsync(ComponentInteractionCreateEventArgs e)
-            => await WipAsync(e);
 
         [Component("wc", ComponentType.Button)]
         public async Task WelcomerAsync(ComponentInteractionCreateEventArgs e)
@@ -64,7 +57,7 @@ namespace ModCore.Components
         public async Task NicknameAsync(ComponentInteractionCreateEventArgs e)
             => await NicknameApprovalConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
 
-        [Component("dump", ComponentType.Button)]
+        [Component("cfg.dump", ComponentType.Button)]
         public async Task DumpConfigAsync(ComponentInteractionCreateEventArgs e)
         {
             using var db = database.CreateContext();
@@ -80,12 +73,34 @@ namespace ModCore.Components
                 .AddFile($"config_{e.Guild.Id}.json", ms).AsEphemeral());
         }
 
-        private async Task WipAsync(ComponentInteractionCreateEventArgs e, [CallerMemberName] string caller = "")
+        [Component("cfg.reset", ComponentType.Button)]
+        public async Task ResetConfigAsync(ComponentInteractionCreateEventArgs e)
         {
-            await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
-                .WithContent($"This configuration option is currently not available yet {caller}")
-                .AsEphemeral()
-                .AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, "cfg", "Back to Main Menu", emoji: new DiscordComponentEmoji("🏃"))));
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                .WithContent("❓ Are you sure you want to reset your server's config? You will lose your ModCore setup!")
+                .AddComponents(new DiscordComponent[]
+                {
+                    new DiscordButtonComponent(ButtonStyle.Primary, "cfg.reset.confirm", "Yes, I am sure!", emoji: new DiscordComponentEmoji("🗑")),
+                    new DiscordButtonComponent(ButtonStyle.Danger, "cfg", "Oops, I didn't mean to click this!", emoji: new DiscordComponentEmoji("😨"))
+                })
+                .AsEphemeral());
+        }
+
+        [Component("cfg.reset.confirm", ComponentType.Button)]
+        public async Task ResetConfigConfirmAsync(ComponentInteractionCreateEventArgs e)
+        {
+            using var db = database.CreateContext();
+            var settings = db.GuildConfig.FirstOrDefault(x => x.GuildId == (long)e.Guild.Id);
+            settings.SetSettings(new GuildSettings());
+            db.GuildConfig.Update(settings);
+
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                .WithContent("♻️ Your ModCore Guild configuration was reset!")
+                .AddComponents(new DiscordComponent[]
+                {
+                    new DiscordButtonComponent(ButtonStyle.Primary, "cfg", "Great! Bring me back to the config!", emoji: new DiscordComponentEmoji("🏃"))
+                })
+                .AsEphemeral());
         }
 
         public static async Task PostMenuAsync(DiscordInteraction interaction, InteractionResponseType responseType)
@@ -93,7 +108,7 @@ namespace ModCore.Components
             var response = new DiscordInteractionResponseBuilder()
                 .WithContent("")
                 .AsEphemeral()
-                .AddEmbed(new DiscordEmbedBuilder().WithTitle($"<:modcore:996915638545158184> Welcome to the ModCore Configuration Utility!")
+                .AddEmbed(new DiscordEmbedBuilder().WithTitle($"<:modcore:996915638545158184> Welcome to the ModCore Server Configuration Utility!")
                     .WithDescription("Select one of the following modules to configure ModCore.")
                     .WithThumbnail("https://i.imgur.com/AzWYXOc.png"))
                 .AddComponents(new DiscordComponent[]
@@ -106,11 +121,14 @@ namespace ModCore.Components
                 })
                 .AddComponents(new DiscordComponent[]
                 {
-                    //new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Role Menu", emoji: new DiscordComponentEmoji("📖")),
                     new DiscordButtonComponent(ButtonStyle.Primary, "lv", "Level System", emoji: new DiscordComponentEmoji("📈")),
                     new DiscordButtonComponent(ButtonStyle.Primary, "lg", "Update Logger", emoji: new DiscordComponentEmoji("🪵")),
                     new DiscordButtonComponent(ButtonStyle.Primary, "wc", "Welcomer", emoji: new DiscordComponentEmoji("👋")),
-                    new DiscordButtonComponent(ButtonStyle.Secondary, "dump", "Dump JSON (Advanced)", emoji: new DiscordComponentEmoji("📩"))
+                })
+                .AddComponents(new DiscordComponent[]
+                {
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "cfg.reset", "Reset Server Configuration", emoji: new DiscordComponentEmoji("🗑")),
+                    new DiscordButtonComponent(ButtonStyle.Secondary, "cfg.dump", "Dump JSON (Advanced)", emoji: new DiscordComponentEmoji("📩"))
                 })
                 .AddFiles(new Dictionary<string, Stream>());
 
