@@ -89,7 +89,7 @@ namespace ModCore.Listeners
             using (var db = database.CreateContext())
             {
                 config = eventargs.Guild.GetGuildSettings(db);
-                if (config == null || !config.RoleState.Enable)
+                if (config == null)
                     return;
                 rolestateconfig = config.RoleState;
 
@@ -98,7 +98,7 @@ namespace ModCore.Listeners
                 nickname = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
             }
 
-            if (roleids?.RoleIds != null)
+            if (!config.RoleState.Enable && roleids?.RoleIds != null)
             {
                 var oroles = roleids.RoleIds
                     .Select(xid => (ulong)xid)
@@ -137,7 +137,7 @@ namespace ModCore.Listeners
                 }
             }
 
-            if(nickname != null)
+            if (!config.RoleState.Nickname && nickname != null)
             {
                 client.Logger.Log(LogLevel.Debug, "ModCore", $"Set new old nick: {nickname.Nickname}", System.DateTime.Now);
                 var member = await eventargs.Guild.GetMemberAsync(eventargs.Member.Id);
