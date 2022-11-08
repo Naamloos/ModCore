@@ -15,6 +15,7 @@ using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using ModCore.Database;
 using ModCore.Database.JsonEntities;
+using System.Runtime.InteropServices;
 
 namespace ModCore.SlashCommands
 {
@@ -157,15 +158,15 @@ namespace ModCore.SlashCommands
             var feedbackTypeString = Enum.GetName(response.Choice.GetType(), response.Choice);
             await ctx.Client.GetInteractionExtension().RespondWithModalAsync<FeedbackModal>(response.interaction,
                 $"Feedback: {feedbackTypeString}", new Dictionary<string, string>()
-            {
-                { "c", feedbackTypeString }
-            });
+                {
+                    { "c", feedbackTypeString }
+                });
         }
 
         [SlashCommand("nick", "Requests nickname change, if nickname change is disabled")]
         public async Task NicknameAsync(InteractionContext ctx, [Option("nickname", "New nickname you want to request.")] string nickname)
         {
-            if(nickname.Length < 1 || nickname.Length > 32)
+            if (nickname.Length < 1 || nickname.Length > 32)
             {
                 await ctx.CreateResponseAsync("⚠️ Nicknames have to be at least 1 character and at most 32 characters long!", true);
                 return;
@@ -203,11 +204,11 @@ namespace ModCore.SlashCommands
             var config = ctx.Guild.GetGuildSettings(Database.CreateContext()) ?? new GuildSettings();
 
             // don't change the member's nickname here, as that violates the hierarchy of permissions
-            if (!config.RequireNicknameChangeConfirmation)
+            if (!config.NicknameConfirm.Enable)
             {
                 if (member == ctx.Guild.Owner)
                 {
-                    await ctx.CreateResponseAsync("⚠️ Use the `config nickchange enable` command to enable nickname " +
+                    await ctx.CreateResponseAsync("⚠️ Use the `config` command to enable nickname " +
                                                    "change requests.", true);
                 }
                 else
@@ -225,6 +226,15 @@ namespace ModCore.SlashCommands
             {
                 await ctx.CreateResponseAsync("⚠️ Unable to process nickname change because the bot lacks the " +
                                                "required permissions, or cannot action on this member.", true);
+                return;
+            }
+
+            var channel = ctx.Guild.GetChannel(config.NicknameConfirm.ChannelId);
+
+            if (channel == null)
+            {
+                await ctx.CreateResponseAsync(
+                    "⛔ This server has not correctly configured nickname approval. **Ask the server owner to correctly configure the approval channel!**", true);
                 return;
             }
 
@@ -258,7 +268,7 @@ namespace ModCore.SlashCommands
                     new DiscordButtonComponent(ButtonStyle.Danger, deny, "Deny", emoji: new DiscordComponentEmoji(DiscordEmoji.FromUnicode("🗑️")))
                     );
 
-            await ctx.Guild.GetChannel(config.NicknameChangeConfirmationChannel).SendMessageAsync(msg);
+            channel.SendMessageAsync(msg);
         }
     }
 }

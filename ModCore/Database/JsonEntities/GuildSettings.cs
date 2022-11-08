@@ -18,13 +18,6 @@ namespace ModCore.Database.JsonEntities
         public GuildLinkfilterSettings Linkfilter { get; private set; } = new GuildLinkfilterSettings();
 
         /// <summary>
-        /// Gets the configuration for InvisiCop. InvisiCop removes messages from users set to invisible, since they 
-        /// break user caches.
-        /// </summary>
-        [JsonProperty("invisicop")]
-        public GuildInvisiCopSettings InvisiCop { get; private set; } = new GuildInvisiCopSettings();
-
-        /// <summary>
         /// Gets the configuration for Role State. Role State is used to persist roles and overwrites for users who 
         /// leave the guild.
         /// </summary>
@@ -44,12 +37,6 @@ namespace ModCore.Database.JsonEntities
         public GuildAutoRoleSettings AutoRole { get; private set; } = new GuildAutoRoleSettings();
 
         /// <summary>
-        /// Gets the configuration for CommandError. CommandErrors logs command errors to chat or action log.
-        /// </summary>
-        [JsonProperty("commanderror")]
-        public GuildCommandErrorSettings CommandError { get; private set; } = new GuildCommandErrorSettings();
-
-        /// <summary>
         /// Gets the SelfRoles for this guild. SelfRoles are roles members can grant themselves.
         /// </summary>
         [JsonProperty("selfroles")]
@@ -61,53 +48,29 @@ namespace ModCore.Database.JsonEntities
         [JsonProperty]
         public GuildStarboardSettings Starboard { get; private set; } = new GuildStarboardSettings();
 
-	    /// <summary>
-	    /// Gets whether spelling helper is enabled or disabled for this guild.
-	    /// </summary>
-	    [JsonProperty("spellhelp")]
-	    public bool SpellingHelperEnabled { get; set; }
-
         /// <summary>
         /// Gets the list of Reaction Roles for this guild.
         /// </summary>
         [JsonProperty("reactionroles")]
 		public List<GuildReactionRole> ReactionRoles { get; private set; } = new List<GuildReactionRole>();
 
-	    /// <summary>
-	    /// Gets the disabled command ids for this guild.
-	    /// </summary>
-	    [JsonProperty("disablcommands2")]
-	    public HashSet<short> DisabledCommands { get; private set; } = new HashSet<short>();
-
-	    /// <summary>
-	    /// Gets or sets whether or not to show a message when a disabled command is attempted to be executed
-	    /// </summary>
-	    [JsonProperty("disverbose")]
-	    public bool NotifyDisabledCommand { get; set; } = true;
-
 		[JsonProperty("welcome")]
 		public WelcomeSettings Welcome { get; private set; } = new WelcomeSettings();
 
-	    [JsonProperty("nickconf")]
-	    public bool RequireNicknameChangeConfirmation { get; set; }
-
-        [JsonProperty("nickchn")]
-	    public ulong NicknameChangeConfirmationChannel { get; set; }
-
-		[JsonProperty("jailrole")]
-		public long JailRole { get; set; }
-
-        [JsonProperty("updatechn")]
-        public ulong UpdateChannel { get; set; }
-
-        [JsonProperty("logupdates")]
-        public bool LogUpdates { get; set; }
-
-        [JsonProperty("webhooktoken")]
-        public string WebhookToken { get; set; }
+        [JsonProperty("nicknameconfirm")]
+        public NicknameConfirmSettings NicknameConfirm { get; set; } = new NicknameConfirmSettings();
 
         [JsonProperty("levels")]
         public LevelSettings Levels = new LevelSettings();
+    }
+
+    public class NicknameConfirmSettings
+    {
+        [JsonProperty("enable")]
+        public bool Enable { get; set; }
+
+        [JsonProperty("channel_id")]
+        public ulong ChannelId { get; set; }
     }
 
     public class LevelSettings
@@ -326,31 +289,6 @@ namespace ModCore.Database.JsonEntities
         /// </summary>
         [JsonProperty("block_shock_sites")]
         public bool BlockShockSites { get; set; } = true;
-    }
-
-    /// <summary>
-    /// Represents configuration for InvisiCop.
-    /// </summary>
-    public class GuildInvisiCopSettings
-    {
-	    /// <summary>
-	    /// Gets or sets whether InvisiCop should be enabled.
-	    /// </summary>
-	    [JsonProperty("enabled")]
-	    public bool Enable { get; set; }
-
-        // TODO these are not configurable
-        /// <summary>
-        /// Gets the list of roles which are exempt from InvisiCop checks.
-        /// </summary>
-        [JsonProperty("exempt_role_ids")]
-        public List<ulong> ExemptRoleIds { get; private set; } = new List<ulong>();
-
-        /// <summary>
-        /// Gets the list of users who are exempt from InvisiCop checks.
-        /// </summary>
-        [JsonProperty("exempt_user_ids")]
-        public List<ulong> ExemptUserIds { get; private set; } = new List<ulong>();
     }
 
     /// <summary>
