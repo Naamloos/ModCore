@@ -69,6 +69,40 @@ namespace ModCore.Components
                     .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "sb", "Back to Starboard config", emoji: new DiscordComponentEmoji("🏃"))));
         }
 
+        [Component("sb.min", ComponentType.StringSelect)]
+        public async Task SetMinimumAsync(ComponentInteractionCreateEventArgs e)
+        {
+            if (!int.TryParse(e.Interaction.Data.Values[0], out int value))
+            {
+                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"⛔ {e.Interaction.Data.Values[0]} is an invalid integer!")
+                    .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "sb", "Back to Starboard config", emoji: new DiscordComponentEmoji("🏃"))));
+                return;
+            }
+
+            if(value < 1 || value > 10)
+            {
+                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"⛔ {value} is out of range! (1-10)")
+                    .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "sb", "Back to Starboard config", emoji: new DiscordComponentEmoji("🏃"))));
+                return;
+            }
+
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+
+            using (var db = database.CreateContext())
+            {
+                var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
+                var settings = guild.GetSettings();
+
+                settings.Starboard.Minimum = value;
+                guild.SetSettings(settings);
+                db.GuildConfig.Update(guild);
+                await db.SaveChangesAsync();
+            }
+
+            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"✅ Set your starboard minimum to {value}.")
+                    .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "sb", "Back to Starboard config", emoji: new DiscordComponentEmoji("🏃"))));
+        }
+
         // regex borrowed:tm: from dsharpplus
         private static Regex EmoteRegex = new Regex(@"^<(?<animated>a)?:(?<name>[a-zA-Z0-9_]+?):(?<id>\d+?)>$", RegexOptions.ECMAScript | RegexOptions.Compiled);
 
@@ -145,23 +179,28 @@ namespace ModCore.Components
 
                 var embed = new DiscordEmbedBuilder()
                     .WithTitle("⭐ Starboard Configuration")
-                    .WithDescription($"{(settings.Enable ? "✅" : "⛔")} This module is currently {(settings.Enable ? "enabled" : "disabled")}")
+                    .WithDescription($"{(settings.Enable ? "✅" : "⛔")} This module is currently **{(settings.Enable ? "enabled" : "disabled")}**.")
                     .AddField("Channel", $"<#{settings.ChannelId}>")
+                    .AddField("Minimum Amount", $"Currently set to **{settings.Minimum}**.")
                     .AddField("Emoji", settings.Emoji.GetStringRepresentation());
 
                 var enableId = ExtensionStatics.GenerateIdString("sb.toggle", new Dictionary<string, string>() { { "on", "true" } });
                 var disableId = ExtensionStatics.GenerateIdString("sb.toggle", new Dictionary<string, string>() { { "on", "false" } });
+
+                var minimumOptions = new List<DiscordSelectComponentOption>();
+                for (int i = 1; i <= 10; i++)
+                    minimumOptions.Add(new DiscordSelectComponentOption($"{i}", $"{i}", $"Set Starboard minimum to {i}."));
 
                 await interaction.CreateResponseAsync(responseType, new DiscordInteractionResponseBuilder()
                     .AddEmbed(embed)
                     .WithContent("")
                     .AddComponents(new DiscordComponent[]
                     {
-                        new DiscordButtonComponent(ButtonStyle.Primary, enableId, "Enable"),
-                        new DiscordButtonComponent(ButtonStyle.Danger, disableId, "Disable")
+                        new DiscordButtonComponent(settings.Enable? ButtonStyle.Danger : ButtonStyle.Success, settings.Enable? disableId : enableId, settings.Enable? "Disable Starboard" : "Enable Starboard"),
+                        new DiscordButtonComponent(ButtonStyle.Primary, "sb.emoji", "Change Emoji...")
                     })
                     .AddComponents(new DiscordChannelSelectComponent("sb.channel", "Change Channel...", new List<ChannelType>() { ChannelType.Text }))
-                    .AddComponents(new DiscordButtonComponent(ButtonStyle.Primary, "sb.emoji", "Change Emoji..."))
+                    .AddComponents(new DiscordSelectComponent("sb.min", "Set Starboard minimum...", minimumOptions))
                     .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "cfg", "Back to Config", emoji: new DiscordComponentEmoji("🏃"))));
             }
         }
