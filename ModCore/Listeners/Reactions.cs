@@ -1,23 +1,28 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Humanizer;
 using ModCore.Database;
+using ModCore.Database.DatabaseEntities;
+using ModCore.Database.JsonEntities;
 using ModCore.Entities;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Extensions.Attributes;
+using ModCore.Extensions.Enums;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Listeners
 {
     public class Reactions
     {
-        [AsyncListener(EventTypes.MessageReactionAdded)]
-        public static async Task ReactionAdd(ModCoreShard bot, MessageReactionAddEventArgs eventargs)
+        [AsyncListener(EventType.MessageReactionAdded)]
+        public static async Task ReactionAdd(MessageReactionAddEventArgs eventargs, DatabaseContextBuilder database, DiscordClient client)
         {
             GuildSettings config = null;
-            using (var db = bot.Database.CreateContext())
+            using (var db = database.CreateContext())
             {
                 config = eventargs.Channel.Guild.GetGuildSettings(db);
                 if (config == null)
@@ -40,17 +45,18 @@ namespace ModCore.Listeners
                 var emoji = config.Starboard.Emoji;
                 DiscordEmoji discordemoji = null;
                 if (emoji.EmojiId != 0)
-                    discordemoji = DiscordEmoji.FromGuildEmote(bot.Client, (ulong)emoji.EmojiId);
+                    discordemoji = DiscordEmoji.FromGuildEmote(client, (ulong)emoji.EmojiId);
                 else
-                    discordemoji = DiscordEmoji.FromUnicode(bot.Client, emoji.EmojiName);
-
-                if (!config.Starboard.AllowNSFW && eventargs.Channel.IsNSFW)
-                    return;
+                    discordemoji = DiscordEmoji.FromUnicode(client, emoji.EmojiName);
 
                 if (config.Starboard.Enable && eventargs.Emoji == discordemoji)
                 {
                     long starboardmessageid = 0;
                     var channel = eventargs.Channel.Guild.Channels.First(x => x.Key == (ulong)config.Starboard.ChannelId).Value;
+
+                    if ((!channel.IsNSFW) && eventargs.Channel.IsNSFW)
+                        return;
+
                     if (channel.Id != eventargs.Channel.Id) // star on starboard entry
                     {
                         // fetch REST message (cache sometimes fails)
@@ -69,7 +75,7 @@ namespace ModCore.Listeners
                                 var other = db.StarDatas.First(x => (ulong)x.MessageId == message.Id && x.StarboardMessageId != 0);
                                 var oldsbmessage = await channel.GetMessageAsync((ulong)other.StarboardMessageId);
 
-                                var starboardmessage = await oldsbmessage.ModifyAsync(BuildMessage(message, eventargs.Emoji, count + 1));
+                                var starboardmessage = await oldsbmessage.ModifyAsync(buildMessage(message, eventargs.Emoji, count + 1));
                                 starboardmessageid = (long)starboardmessage.Id;
                             }
                             else
@@ -77,14 +83,14 @@ namespace ModCore.Listeners
                                 if(count + 1 >= config.Starboard.Minimum)
                                 {
                                     // create msg
-                                    var starboardmessage = await channel.SendMessageAsync(BuildMessage(message, eventargs.Emoji, count + 1));
+                                    var starboardmessage = await channel.SendMessageAsync(buildMessage(message, eventargs.Emoji, count + 1));
                                     starboardmessageid = (long)starboardmessage.Id;
                                 }
                             }
                         }
                         else if (config.Starboard.Minimum <= 1)
                         {
-                            var starboardmessage = await channel.SendMessageAsync(BuildMessage(message, eventargs.Emoji, 1));
+                            var starboardmessage = await channel.SendMessageAsync(buildMessage(message, eventargs.Emoji, 1));
                             starboardmessageid = (long)starboardmessage.Id;
                         }
 
@@ -109,11 +115,11 @@ namespace ModCore.Listeners
             }
         }
 
-        [AsyncListener(EventTypes.MessageReactionRemoved)]
-        public static async Task ReactionRemove(ModCoreShard bot, MessageReactionRemoveEventArgs eventargs)
+        [AsyncListener(EventType.MessageReactionRemoved)]
+        public static async Task ReactionRemove(MessageReactionRemoveEventArgs eventargs, DatabaseContextBuilder database, DiscordClient client)
         {
             GuildSettings config = null;
-            using (var db = bot.Database.CreateContext())
+            using (var db = database.CreateContext())
             {
                 config = eventargs.Channel.Guild.GetGuildSettings(db);
                 if (config == null)
@@ -132,9 +138,9 @@ namespace ModCore.Listeners
 				var emoji = config.Starboard.Emoji;
                 DiscordEmoji discordemoji = null;
                 if (emoji.EmojiId != 0)
-                    discordemoji = DiscordEmoji.FromGuildEmote(bot.Client, (ulong)emoji.EmojiId);
+                    discordemoji = DiscordEmoji.FromGuildEmote(client, (ulong)emoji.EmojiId);
                 else
-                    discordemoji = DiscordEmoji.FromUnicode(bot.Client, emoji.EmojiName);
+                    discordemoji = DiscordEmoji.FromUnicode(client, emoji.EmojiName);
 
                 if (config.Starboard.Enable && eventargs.Emoji == discordemoji)
                 {
@@ -159,7 +165,7 @@ namespace ModCore.Listeners
                                 var m = await channel.GetMessageAsync((ulong)starboardmessageid);
                                 if (count - 1 >= config.Starboard.Minimum)
                                 {
-                                    await m.ModifyAsync(BuildMessage(message, eventargs.Emoji, count - 1));
+                                    await m.ModifyAsync(buildMessage(message, eventargs.Emoji, count - 1));
                                     newstarboardmessageid = starboardmessageid;
                                 }
                                 else
@@ -183,11 +189,11 @@ namespace ModCore.Listeners
             }
         }
 
-        [AsyncListener(EventTypes.MessageReactionsCleared)]
-        public static async Task ReactionClear(ModCoreShard bot, MessageReactionsClearEventArgs eventargs)
+        [AsyncListener(EventType.MessageReactionsCleared)]
+        public static async Task ReactionClear(MessageReactionsClearEventArgs eventargs, DiscordClient client, DatabaseContextBuilder database)
         {
             GuildSettings config = null;
-            using (var db = bot.Database.CreateContext())
+            using (var db = database.CreateContext())
             {
                 config = eventargs.Channel.Guild.GetGuildSettings(db);
                 if (config == null)
@@ -196,9 +202,9 @@ namespace ModCore.Listeners
                 var emoji = config.Starboard.Emoji;
                 DiscordEmoji discordemoji = null;
                 if (emoji.EmojiId != 0)
-                    discordemoji = DiscordEmoji.FromGuildEmote(bot.Client, (ulong)emoji.EmojiId);
+                    discordemoji = DiscordEmoji.FromGuildEmote(client, (ulong)emoji.EmojiId);
                 else
-                    discordemoji = DiscordEmoji.FromUnicode(bot.Client, emoji.EmojiName);
+                    discordemoji = DiscordEmoji.FromUnicode(client, emoji.EmojiName);
 
                 if (config.Starboard.Enable)
                 {
@@ -213,7 +219,7 @@ namespace ModCore.Listeners
             }
         }
 
-        public static DiscordMessageBuilder BuildMessage(DiscordMessage message, DiscordEmoji emoji, int count)
+        private static DiscordMessageBuilder buildMessage(DiscordMessage message, DiscordEmoji emoji, int count)
         {
             var embed = new DiscordEmbedBuilder()
                 .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}",

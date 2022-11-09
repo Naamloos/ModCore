@@ -1,8 +1,12 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Humanizer;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Database;
+using ModCore.Entities;
+using ModCore.Extensions.Attributes;
+using ModCore.Extensions.Enums;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,27 +16,27 @@ namespace ModCore.Listeners
 {
     public static class MessageSnipe
     {
-        [AsyncListener(EventTypes.MessageDeleted)]
-        public static async Task MessageSniped(ModCoreShard bot, MessageDeleteEventArgs eventargs)
+        [AsyncListener(EventType.MessageDeleted)]
+        public static async Task MessageSniped(MessageDeleteEventArgs eventargs, SharedData sharedData, DatabaseContextBuilder database)
         {
             await Task.Yield();
 
             if((!string.IsNullOrEmpty(eventargs.Message?.Content) || eventargs.Message.Embeds.Count > 0) && !eventargs.Message.Author.IsBot)
             {
-                if (bot.SharedData.DeletedMessages.ContainsKey(eventargs.Channel.Id))
+                if (sharedData.DeletedMessages.ContainsKey(eventargs.Channel.Id))
                 {
-                    bot.SharedData.DeletedMessages[eventargs.Channel.Id] = eventargs.Message;
+                    sharedData.DeletedMessages[eventargs.Channel.Id] = eventargs.Message;
                 }
                 else
                 {
-                    bot.SharedData.DeletedMessages.TryAdd(eventargs.Channel.Id, eventargs.Message);
+                    sharedData.DeletedMessages.TryAdd(eventargs.Channel.Id, eventargs.Message);
                 }
             }
 
             if (eventargs.Message == null)
                 return;
 
-            using var db = bot.Database.CreateContext();
+            using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
             if (cfg.Logging.EditLog_Enable)
             {
@@ -45,29 +49,33 @@ namespace ModCore.Listeners
                             iconUrl: eventargs.Message.Author.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
                         .AddField("Content", eventargs.Message != null ? eventargs.Message.Content.Truncate(1000) : "Original Content Unknown.")
                         .AddField("Channel", eventargs.Message.Channel.Mention)
-                        .WithColor(DiscordColor.Orange);
+                        .WithColor(DiscordColor.Orange)
+                        .AddField("IDs", $"```ini\nUser = {eventargs.Message.Author.Id}\nChannel = {eventargs.Channel.Id}\nMessage = {eventargs.Message.Id}```");
                 await channel.ElevatedMessageAsync(embed);
             }
         }
 
-        [AsyncListener(EventTypes.MessageUpdated)]
-        public static async Task MessageEdited(ModCoreShard bot, MessageUpdateEventArgs eventargs)
+        [AsyncListener(EventType.MessageUpdated)]
+        public static async Task MessageEdited(MessageUpdateEventArgs eventargs, SharedData sharedData, DatabaseContextBuilder database)
         {
+            if (eventargs.Message.WebhookMessage)
+                return;
+
             await Task.Yield();
 
             if ((!string.IsNullOrEmpty(eventargs.MessageBefore?.Content) || eventargs.Message.Embeds.Count > 0) && !eventargs.Message.Author.IsBot)
             {
-                if (bot.SharedData.EditedMessages.ContainsKey(eventargs.Channel.Id))
+                if (sharedData.EditedMessages.ContainsKey(eventargs.Channel.Id))
                 {
-                    bot.SharedData.EditedMessages[eventargs.Channel.Id] = eventargs.MessageBefore;
+                    sharedData.EditedMessages[eventargs.Channel.Id] = eventargs.MessageBefore;
                 }
                 else
                 {
-                    bot.SharedData.EditedMessages.TryAdd(eventargs.Channel.Id, eventargs.MessageBefore);
+                    sharedData.EditedMessages.TryAdd(eventargs.Channel.Id, eventargs.MessageBefore);
                 }
             }
 
-            using var db = bot.Database.CreateContext();
+            using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
             if(cfg.Logging.EditLog_Enable)
             {
@@ -81,7 +89,12 @@ namespace ModCore.Listeners
                         .AddField("Original Message", eventargs.MessageBefore != null ? eventargs.MessageBefore.Content.Truncate(1000) : "Original Content Unknown.")
                         .AddField("Edited Message", eventargs.Message.Content.Truncate(1000))
                         .AddField("Channel", eventargs.Message.Channel.Mention)
-                        .WithColor(DiscordColor.Orange);
+                        .WithColor(DiscordColor.Orange)
+                        .AddField("IDs", $"```ini\nUser = {eventargs.Message.Author.Id}\nChannel = {eventargs.Channel.Id}\nMessage = {eventargs.Message.Id}```");
+
+                var msg = new DiscordMessageBuilder()
+                    .WithEmbed(embed)
+                    .AddComponents(new DiscordLinkButtonComponent(eventargs.Message.JumpLink.ToString(), "Go to message"));
                 await channel.ElevatedMessageAsync(embed);
             }
         }

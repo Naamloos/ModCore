@@ -5,21 +5,25 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using ModCore.Database;
+using ModCore.Database.JsonEntities;
 using ModCore.Entities;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Extensions.Attributes;
+using ModCore.Extensions.Enums;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Listeners
 {
 	public static class JoinLog
 	{
-		private static readonly Regex WelcomeRegex = new Regex("{{(.*?)}}", RegexOptions.Compiled);
+		private static readonly Regex WelcomeRegex = new("{{(.*?)}}", RegexOptions.Compiled);
 
-		[AsyncListener(EventTypes.GuildMemberAdded)]
-		public static async Task LogNewMember(ModCoreShard bot, GuildMemberAddEventArgs eventargs)
+		[AsyncListener(EventType.GuildMemberAdded)]
+		public static async Task LogNewMember(GuildMemberAddEventArgs eventargs, DatabaseContextBuilder database)
 		{
 			GuildSettings config;
-			using (var db = bot.Database.CreateContext())
+			using (var db = database.CreateContext())
 				config = eventargs.Guild.GetGuildSettings(db);
 
             if(config == null)
@@ -42,7 +46,8 @@ namespace ModCore.Listeners
 							iconUrl: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
 						.AddField("Join Date", $"{m.JoinedAt.DateTime}")
 						.AddField("Register Date", $"{m.CreationTimestamp.DateTime}")
-						.WithColor(newUser ? DiscordColor.Red : DiscordColor.Green);
+						.WithColor(newUser ? DiscordColor.Red : DiscordColor.Green)
+                        .AddField("IDs", $"```ini\nUser = {eventargs.Member.Id}```"); ;
 					await channel.ElevatedMessageAsync(embed);
 				}
 			}
@@ -59,9 +64,12 @@ namespace ModCore.Listeners
 				return;
 
 			var message = config.Welcome.Message;
+			if (string.IsNullOrEmpty(message))
+				return;
+
 			string attachment = null;
 			string embedtitle = null;
-			var isEmbed = false;
+			var isEmbed = config.Welcome.IsEmbed;
 
 			message = WelcomeRegex.Replace(message, match =>
 			{
@@ -90,9 +98,6 @@ namespace ModCore.Listeners
 					case "membercount":
 						return eventargs.Guild.MemberCount.ToString();
 
-					case "prefix":
-						return config.Prefix ?? "?>";
-
 					case "owner-username":
 						return eventargs.Guild.Owner.Username;
 
@@ -107,10 +112,6 @@ namespace ModCore.Listeners
 
 					case "role-count":
 						return eventargs.Guild.Roles.Count.ToString();
-
-					case "isembed":
-						isEmbed = true;
-						return "";
 
 					default:
 						if (welcome.StartsWith("image:"))
@@ -139,11 +140,11 @@ namespace ModCore.Listeners
 			}
 		}
 
-		[AsyncListener(EventTypes.GuildMemberRemoved)]
-		public static async Task LogLeaveMember(ModCoreShard bot, GuildMemberRemoveEventArgs eventargs)
+		[AsyncListener(EventType.GuildMemberRemoved)]
+		public static async Task LogLeaveMember(GuildMemberRemoveEventArgs eventargs, DatabaseContextBuilder database)
 		{
 			GuildSettings config;
-			using (var db = bot.Database.CreateContext())
+			using (var db = database.CreateContext())
 				config = eventargs.Guild.GetGuildSettings(db);
 			
 			if (config == null || !config.Logging.JoinLog_Enable)
@@ -159,7 +160,8 @@ namespace ModCore.Listeners
 				.WithTitle("Member left")
 				.WithDescription($"ID: ({member.Id})")
 				.WithAuthor($"{member.Username}#{member.Discriminator}",
-					iconUrl: string.IsNullOrEmpty(member.AvatarHash) ? member.DefaultAvatarUrl : member.AvatarUrl);
+					iconUrl: string.IsNullOrEmpty(member.AvatarHash) ? member.DefaultAvatarUrl : member.AvatarUrl)
+                .AddField("IDs", $"```ini\nUser = {eventargs.Member.Id}\n```"); ;
 
 			if (member.JoinedAt.DateTime == DateTime.MinValue)
 				embed.AddField("Join Date", $"{member.JoinedAt.DateTime}");

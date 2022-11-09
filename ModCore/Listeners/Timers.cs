@@ -9,29 +9,33 @@ using DSharpPlus.EventArgs;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using ModCore.Database;
+using ModCore.Database.DatabaseEntities;
+using ModCore.Database.JsonEntities;
 using ModCore.Entities;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Extensions.Attributes;
+using ModCore.Extensions.Enums;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Listeners
 {
-	public static class Timers
+    public static class Timers
 	{
-		[AsyncListener(EventTypes.Ready)]
-		public static async Task OnReady(ModCoreShard shard, ReadyEventArgs eventargs)
+		[AsyncListener(EventType.Ready)]
+		public static async Task OnReady(DatabaseContextBuilder database, DiscordClient client, SharedData sharedData)
 		{
-			using (var db = shard.Database.CreateContext())
+			using (var db = database.CreateContext())
 			{
 				if (!db.Timers.Any())
 					return;
 
-				var guildids = shard.Client.Guilds.Select(xg => (long)xg.Key).ToArray();
+				var guildids = client.Guilds.Select(xg => (long)xg.Key).ToArray();
 				var timers = db.Timers.Where(xt => guildids.Contains(xt.GuildId)).ToArray();
 				if (!timers.Any())
 					return;
 
 				// lock timers
-				await shard.SharedData.TimerSempahore.WaitAsync();
+				await sharedData.TimerSempahore.WaitAsync();
 				try
 				{
 					var now = DateTimeOffset.UtcNow;
@@ -41,7 +45,7 @@ namespace ModCore.Listeners
 						foreach (var timer in pasttimers)
 						{
 							// dispatch past timers
-							_ = DispatchTimer(new TimerData(null, timer, shard.Client, shard.Database, shard.SharedData, null));
+							_ = DispatchTimer(new TimerData(null, timer, client, database, sharedData, null));
 						}
 
 						db.Timers.RemoveRange(pasttimers);
@@ -50,16 +54,16 @@ namespace ModCore.Listeners
 				}
 				catch (Exception ex)
 				{
-					shard.Client.Logger.Log(LogLevel.Error, "ModCore", 
+					client.Logger.Log(LogLevel.Error, "ModCore", 
 						$"Caught Exception in Timer Ready: {ex.GetType().ToString()}\n{ex.StackTrace}", DateTime.UtcNow);
 				}
 				finally
 				{
 					// unlock the timers
-					shard.SharedData.TimerSempahore.Release();
+					sharedData.TimerSempahore.Release();
 				}
 
-				await RescheduleTimers(shard.Client, shard.Database, shard.SharedData);
+				await RescheduleTimers(client, database, sharedData);
 			}
 		}
 
@@ -187,6 +191,8 @@ namespace ModCore.Listeners
 			}
 			else if (timer.ActionType == TimerActionType.Unmute)
 			{
+				/* --- DEPRECATED --- */
+
 				// DEPRECATED
 				//var data = timer.GetData<TimerUnmuteData>();
 				//if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
@@ -219,46 +225,50 @@ namespace ModCore.Listeners
 			}
 			else if (timer.ActionType == TimerActionType.Pin)
 			{
-				var data = timer.GetData<TimerPinData>();
-				if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
-				{
-					using (var db = tdata.Database.CreateContext())
-					{
-						var guild = client.Guilds[(ulong)timer.GuildId];
-						var channel = guild.GetChannel((ulong)data.ChannelId);
-						var message = await channel.GetMessageAsync((ulong)data.MessageId);
-						await message.PinAsync();
+				/* --- DEPRECATED --- */
 
-						var embed = new DiscordEmbedBuilder()
-								.WithTitle($"Message pin scheduled")
-								.AddField("Channel", $"<#{channel.Id}>")
-								.AddField("Message", $"{message.Id}")
-								.AddField("Content", $"{message.Content.Truncate(1000)}")
-								.WithColor(DiscordColor.Purple);
-						await guild.ModLogAsync(db, embed);
-					}
-				}
+				//var data = timer.GetData<TimerPinData>();
+				//if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
+				//{
+				//	using (var db = tdata.Database.CreateContext())
+				//	{
+				//		var guild = client.Guilds[(ulong)timer.GuildId];
+				//		var channel = guild.GetChannel((ulong)data.ChannelId);
+				//		var message = await channel.GetMessageAsync((ulong)data.MessageId);
+				//		await message.PinAsync();
+
+				//		var embed = new DiscordEmbedBuilder()
+				//				.WithTitle($"Message pin scheduled")
+				//				.AddField("Channel", $"<#{channel.Id}>")
+				//				.AddField("Message", $"{message.Id}")
+				//				.AddField("Content", $"{message.Content.Truncate(1000)}")
+				//				.WithColor(DiscordColor.Purple);
+				//		await guild.ModLogAsync(db, embed);
+				//	}
+				//}
 			}
 			else if (timer.ActionType == TimerActionType.Unpin)
 			{
-				var data = timer.GetData<TimerPinData>();
-				if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
-				{
-					using (var db = tdata.Database.CreateContext())
-					{
-						var guild = client.Guilds[(ulong)timer.GuildId];
-						var channel = guild.GetChannel((ulong)data.ChannelId);
-						var message = await channel.GetMessageAsync((ulong)data.MessageId);
-						await message.UnpinAsync();
-						var embed = new DiscordEmbedBuilder()
-								.WithTitle($"Message unpin scheduled")
-								.AddField("Channel", $"<#{channel.Id}>")
-								.AddField("Message", $"{message.Id}")
-								.AddField("Content", $"{message.Content.Truncate(1000)}")
-								.WithColor(DiscordColor.Purple);
-						await guild.ModLogAsync(db, embed);
-					}
-				}
+				/* --- DEPRECATED --- */
+
+				//var data = timer.GetData<TimerPinData>();
+				//if (client.Guilds.Any(x => x.Key == (ulong)timer.GuildId))
+				//{
+				//	using (var db = tdata.Database.CreateContext())
+				//	{
+				//		var guild = client.Guilds[(ulong)timer.GuildId];
+				//		var channel = guild.GetChannel((ulong)data.ChannelId);
+				//		var message = await channel.GetMessageAsync((ulong)data.MessageId);
+				//		await message.UnpinAsync();
+				//		var embed = new DiscordEmbedBuilder()
+				//				.WithTitle($"Message unpin scheduled")
+				//				.AddField("Channel", $"<#{channel.Id}>")
+				//				.AddField("Message", $"{message.Id}")
+				//				.AddField("Content", $"{message.Content.Truncate(1000)}")
+				//				.WithColor(DiscordColor.Purple);
+				//		await guild.ModLogAsync(db, embed);
+				//	}
+				//}
 			}
 		}
 

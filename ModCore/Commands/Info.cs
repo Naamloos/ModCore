@@ -1,160 +1,88 @@
-﻿using System;
+﻿using DSharpPlus;
+using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
+using System;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using ModCore.Entities;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands
 {
-    [Group("info"), Aliases("i"), Description("Information commands"), CheckDisable]
-    public class Info : BaseCommandModule
-	{
-        public SharedData Shared { get; }
-        public InteractivityExtension Interactivity { get; }
-
-        public Info(SharedData shared, InteractivityExtension interactive)
+    [SlashCommandGroup("info", "List information about specific entities.")]
+    public class Info : ApplicationCommandModule
+    {
+        [SlashCommand("member", "List information about a member.")]
+        public async Task MemberAsync(InteractionContext ctx, [Option("user", "User to show information about.")]DiscordUser user)
         {
-            this.Shared = shared;
-            this.Interactivity = interactive;
-        }
-
-		[GroupCommand]
-        public async Task ExecuteGroupAsync(CommandContext context)
-        {
-            var prefix = context.GetGuildSettings()?.Prefix ?? this.Shared.DefaultPrefix;
-            var commandstring = "help info";
-            var commandobject = context.CommandsNext.FindCommand(commandstring, out string args);
-            var fakecontext = context.CommandsNext.CreateFakeContext(context.Member, context.Channel, commandstring, prefix, commandobject, args);
-            await context.CommandsNext.ExecuteCommandAsync(fakecontext);
-        }
-
-        [Command("user"), Aliases("u"), Description("Returns information about a specific user."), CheckDisable]
-        public async Task UserInfoAsync(CommandContext context, [Description("Member to get information about")]DiscordMember member)
-        {
+            var member = await ctx.Guild.GetMemberAsync(user.Id);
 
             var embed = new DiscordEmbedBuilder()
                 .WithColor(new DiscordColor("#089FDF"))
-                .WithTitle($"@{member.Username}#{member.Discriminator} - ID: {member.Id}");
+                .WithTitle($"{member.Username}#{member.Discriminator} ({member.Id})");
 
-            if (member.IsBot) 
-                embed.Title += " __[BOT]__ ";
+            if (member.IsBot)
+                embed.Title += " (BOT) ";
 
-            if (member.IsOwner) 
-                embed.Title += " __[OWNER]__ ";
+            if (member.IsOwner)
+                embed.Title += " (OWNER) ";
 
             embed.Description =
-                $"Registered on     : {member.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}\n" +
-                $"Joined Guild on  : {member.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}";
+                $"Registered: <t:{member.CreationTimestamp.ToUnixTimeSeconds()}:F>\n" +
+                $"Joined: <t:{member.JoinedAt.ToUnixTimeSeconds()}:F>";
 
             var roles = new StringBuilder();
 
-            foreach (var r in member.Roles) 
-                roles.Append($"[{r.Name}] ");
+            foreach (var r in member.Roles)
+                roles.Append($"`{r.Name.Replace("`", "'")}`");
 
-            if (roles.Length == 0) 
+            if (roles.Length == 0)
                 roles.Append("*None*");
 
-            embed.AddField("Roles", roles.ToString());
+            var permissionsEnum = member.Permissions;
 
-            var permissionsEnum = member.PermissionsIn(context.Channel);
             var permissions = permissionsEnum.ToPermissionString();
-            if (((permissionsEnum & Permissions.Administrator) | (permissionsEnum & Permissions.AccessChannels)) == 0)
-                permissions = "**[!] User can't see this channel!**\n" + permissions;
 
-            if (permissions == String.Empty) 
-                permissions = "*None*";
-
+            embed.AddField("Roles", roles.ToString());
             embed.AddField("Permissions", permissions);
-
-            embed.WithFooter($"{context.Guild.Name} / #{context.Channel.Name} / {DateTime.Now}");
-
             embed.WithThumbnail(member.GetGuildAvatarUrl(ImageFormat.Auto));
 
-            await context.ElevatedRespondAsync(embed: embed);
+            await ctx.CreateResponseAsync(embed, true);
         }
 
-        [Command("guild"), Aliases("g"), Description("Returns information about this guild."), CheckDisable]
-        public async Task GuildInfoAsync(CommandContext context)
+        [SlashCommand("permissions", "List permissions for a specific user")]
+        public async Task PermsAsync(InteractionContext ctx, [Option("user", "User to show information about.")] DiscordUser user)
         {
-            await context.SafeRespondUnformattedAsync("The following embed might flood this channel. Do you want to proceed?");
-            var message = await Interactivity.WaitForMessageAsync(x => x.Content.ToLower() == "yes" || x.Content.ToLower() == "no");
-            if (message.Result?.Content.ToLowerInvariant() == "yes")
-            {
-                #region yes
-                var guild = context.Guild;
+            var member = await ctx.Guild.GetMemberAsync(user.Id);
 
-                var embed = new DiscordEmbedBuilder()
-                    .WithColor(new DiscordColor("#089FDF"))
-                    .WithTitle($"{guild.Name} ID: ({guild.Id})")
-                    .WithDescription($"Created on: {guild.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}\n" +
-                    $"Member count: {guild.MemberCount}\n" +
-                    $"Joined at: {guild.JoinedAt.DateTime.ToString(CultureInfo.InvariantCulture)}");
+            var embed = new DiscordEmbedBuilder()
+                .WithColor(new DiscordColor("#089FDF"))
+                .WithTitle($"All permissions for {member.Username}#{member.Discriminator} ({member.Id})");
 
-                if (!string.IsNullOrEmpty(guild.IconHash))
-                    embed.WithThumbnail(guild.IconUrl);
+            embed.WithDescription(member.Permissions.ToPermissionString());
+            embed.WithThumbnail(member.GetGuildAvatarUrl(ImageFormat.Auto));
 
-                embed.WithAuthor($"Owner: {guild.Owner.Username}#{guild.Owner.Discriminator}", 
-                    iconUrl: string.IsNullOrEmpty(guild.Owner.AvatarHash) ? null : guild.Owner.AvatarUrl);
-                var channelstring = new StringBuilder();
-                #region channel list string builder
-                foreach (var channel in guild.Channels)
-                {
-                    switch (channel.Value.Type)
-                    {
-                        case ChannelType.Text:
-                            channelstring.Append($"[`#{channel.Value.Name} (💬)`]");
-                            break;
-                        case ChannelType.Voice:
-                            channelstring.Append($"`[{channel.Value.Name} (🔈)]`");
-                            break;
-                        case ChannelType.Category:
-                            channelstring.Append($"`[{channel.Value.Name.ToUpper()} (📁)]`");
-                            break;
-                        default:
-                            channelstring.Append($"`[{channel.Value.Name} (❓)]`");
-                            break;
-                    }
-                }
-                #endregion
-                embed.AddField("Channels", channelstring.ToString());
-
-                var rolestring = new StringBuilder();
-                #region role list string builder
-                foreach (var role in guild.Roles)
-                {
-                    rolestring.Append($"[`{role.Value.Name}`] ");
-                }
-                #endregion
-                embed.AddField("Roles", rolestring.ToString());
-
-                embed.AddField("Misc", $"Large: {(guild.IsLarge ? "yes" : "no")}.\n" +
-                    $"Default Notifications: {guild.DefaultMessageNotifications}.\n" +
-                    $"Explicit content filter: {guild.ExplicitContentFilter}.\n" +
-                    $"MFA Level: {guild.MfaLevel}.\n" +
-                    $"Verification Level: {guild.VerificationLevel}");
-
-                embed.WithThumbnail(guild.GetIconUrl(ImageFormat.Auto));
-
-                await context.ElevatedRespondAsync(embed: embed);
-                #endregion
-            }
-            else
-            {
-                #region no or timeout
-                await context.SafeRespondUnformattedAsync("Okay, I'm not sending the embed.");
-                #endregion
-            }
+            await ctx.CreateResponseAsync(embed, true);
         }
 
-        [Command("role"), Aliases("r"), Description("Returns information about a specific role."), CheckDisable]
-        public async Task RoleInfoAsync(CommandContext context, [Description("Role to get information about")]DiscordRole role)
+        [SlashCommand("channel-permissions", "List channel permissions for a specific user")]
+        public async Task ChannelPermsAsync(InteractionContext ctx, [Option("user", "User to show information about.")] DiscordUser user)
+        {
+            var member = await ctx.Guild.GetMemberAsync(user.Id);
+
+            var embed = new DiscordEmbedBuilder()
+                .WithColor(new DiscordColor("#089FDF"))
+                .WithTitle($"Permissions in current channel for {member.Username}#{member.Discriminator} ({member.Id})");
+
+            var permissionsEnum = member.PermissionsIn(ctx.Channel);
+
+            embed.WithDescription(permissionsEnum.ToPermissionString());
+            embed.WithThumbnail(member.GetGuildAvatarUrl(ImageFormat.Auto));
+
+            await ctx.CreateResponseAsync(embed, true);
+        }
+
+        [SlashCommand("role", "List information about a role.")]
+        public async Task RoleAsync(InteractionContext ctx, [Option("role", "Role to show information about.")]DiscordRole role)
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"{role.Name} ID: ({role.Id})")
@@ -166,11 +94,77 @@ namespace ModCore.Commands
             if (!string.IsNullOrEmpty(role.IconUrl))
                 embed.WithThumbnail(role.IconUrl);
 
-            await context.ElevatedRespondAsync(embed: embed);
+            if (!string.IsNullOrEmpty(role.IconUrl))
+                embed.WithThumbnail(role.IconUrl);
+
+            await ctx.CreateResponseAsync(embed, true);
         }
 
-        [Command("channel"), Aliases("c"), Description("Returns information about a specific channel."), CheckDisable]
-        public async Task ChannelInfoAsync(CommandContext context, [Description("Channel to get information about")]DiscordChannel channel)
+        [SlashCommand("server", "List information about the current server.")]
+        public async Task ServerAsync(InteractionContext ctx)
+        {
+            var guild = ctx.Guild;
+            var member = await guild.GetMemberAsync(ctx.User.Id);
+
+            var embed = new DiscordEmbedBuilder()
+                .WithColor(new DiscordColor("#089FDF"))
+                .WithTitle($"{guild.Name} ID: ({guild.Id})")
+                .WithDescription($"Created: <t:{guild.CreationTimestamp.ToUnixTimeSeconds()}:F>\n" +
+                $"Member count: {guild.MemberCount}\n" +
+                $"Joined: <t:{guild.JoinedAt.ToUnixTimeSeconds()}:F>\n" +
+                $"You joines: <t:{member.JoinedAt.ToUnixTimeSeconds()}:F>");
+
+            if (!string.IsNullOrEmpty(guild.IconHash))
+                embed.WithThumbnail(guild.IconUrl);
+
+            embed.WithAuthor($"Owner: {guild.Owner.Username}#{guild.Owner.Discriminator}",
+                iconUrl: string.IsNullOrEmpty(guild.Owner.AvatarHash) ? null : guild.Owner.AvatarUrl);
+            var channelstring = new StringBuilder();
+            #region channel list string builder
+            foreach (var channel in guild.Channels)
+            {
+                switch (channel.Value.Type)
+                {
+                    case ChannelType.Text:
+                        channelstring.Append($"[`#{channel.Value.Name} (💬)`]");
+                        break;
+                    case ChannelType.Voice:
+                        channelstring.Append($"`[{channel.Value.Name} (🔈)]`");
+                        break;
+                    case ChannelType.Category:
+                        channelstring.Append($"`[{channel.Value.Name.ToUpper()} (📁)]`");
+                        break;
+                    default:
+                        channelstring.Append($"`[{channel.Value.Name} (❓)]`");
+                        break;
+                }
+            }
+            #endregion
+            embed.AddField("Channels", channelstring.ToString());
+
+            var rolestring = new StringBuilder();
+            #region role list string builder
+            foreach (var role in guild.Roles)
+            {
+                rolestring.Append($"[`{role.Value.Name}`] ");
+            }
+            #endregion
+            embed.AddField("Roles", rolestring.ToString());
+
+            embed.AddField("Misc", $"Large: {(guild.IsLarge ? "yes" : "no")}.\n" +
+                $"Default Notifications: {guild.DefaultMessageNotifications}.\n" +
+                $"Explicit content filter: {guild.ExplicitContentFilter}.\n" +
+                $"MFA Level: {guild.MfaLevel}.\n" +
+                $"Verification Level: {guild.VerificationLevel}");
+
+            embed.WithThumbnail(guild.GetIconUrl(ImageFormat.Auto));
+
+            await ctx.CreateResponseAsync(embed, true);
+        }
+
+        // TODO add new channel types
+        [SlashCommand("channel", "List information about a channel")]
+        public async Task ChannelAsync(InteractionContext ctx, [Option("channel", "Channel to list information about.")]DiscordChannel channel)
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"#{channel.Name} ID: ({channel.Id})")
@@ -207,9 +201,9 @@ namespace ModCore.Commands
                 embed.AddField("Voice", $"Bit rate: {channel.Bitrate}\nUser limit: {(channel.UserLimit == 0 ? "Unlimited" : $"{channel.UserLimit}")}");
             }
             embed.AddField("Misc", $"NSFW: {(channel.IsNSFW ? "yes" : "no")}\n" +
-                $"{(channel.Type == ChannelType.Text ? $"Last message ID: {channel.LastMessageId}" : "")}");
+                $"{(channel.Type == ChannelType.Text ? $"Last message ID: {(await channel.GetMessagesAsync(1))[0].Id}" : "")}");
 
-            await context.ElevatedRespondAsync(embed: embed);
+            await ctx.CreateResponseAsync(embed, true);
         }
     }
 }

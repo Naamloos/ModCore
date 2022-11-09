@@ -1,53 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands;
+using ModCore.Database;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.EventHandling;
-using ModCore.Database;
-using ModCore.Entities;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
 
 namespace ModCore.Commands
 {
-    [Group("level"), CheckDisable]
-    public class Level : BaseCommandModule
+    [SlashCommandGroup("level", "Commands relating to the level system.")]
+    public class Level : ApplicationCommandModule
     {
-        public SharedData Shared { get; }
-        public DatabaseContextBuilder Database { get; }
-        public InteractivityExtension Interactivity { get; }
-        public StartTimes StartTimes { get; }
+        public DatabaseContextBuilder Database { private get; set; }
 
-        public Level(SharedData shared, DatabaseContextBuilder db, InteractivityExtension interactive,
-            StartTimes starttimes)
+        [SlashCommand("info", "Information about you or someone else's level in this server.")]
+        public async Task InfoAsync(InteractionContext ctx, [Option("user", "User to get level data from")]DiscordUser user = null)
         {
-            this.Database = db;
-            this.Shared = shared;
-            this.Interactivity = interactive;
-            this.StartTimes = starttimes;
-        }
-
-        [GroupCommand]
-        public async Task ExecuteGroupAsync(CommandContext context,
-            [RemainingText, Description("User to get level data from")] DiscordMember member = null)
-        {
-            DiscordMember localmember = member;
-            if (localmember == null)
-            {
-                localmember = context.Member;
-            }
+            var targetUser = user ?? ctx.User;
+            var targetMember = await ctx.Guild.GetMemberAsync(targetUser.Id);
 
             var experience = 0;
             var level = 0;
 
             using (var db = Database.CreateContext())
             {
-                var data = db.Levels.FirstOrDefault(x => x.UserId == (long)localmember.Id && x.GuildId == (long)context.Guild.Id);
+                var data = db.Levels.FirstOrDefault(x => x.UserId == (long)targetUser.Id && x.GuildId == (long)ctx.Guild.Id);
                 if (data != null)
                 {
                     level = Listeners.LevelUp.CalculateLevel(data.Experience);
@@ -57,40 +32,42 @@ namespace ModCore.Commands
 
             var levelupxp = Listeners.LevelUp.CalculateRequiredXp(level + 1) - experience;
 
-            await context.RespondAsync($"💫 **Currently, {(member == null ? "you are" : $"{member.DisplayName} is")} Level {level} with {experience} xp.**" +
-                $"\n{levelupxp} more xp is required to reach level {level + 1}.");
+            await ctx.CreateResponseAsync($"💫 **Currently, {(user == null ? "you are" : $"{targetMember.DisplayName} is")} Level {level} with {experience} xp.**" +
+                $"\n{levelupxp} more xp is required to reach level {level + 1}.", true);
         }
 
-        [Command("leaderboard"), Aliases("top", "lb", "board")]
-        public async Task LeaderboardAsync(CommandContext context)
+        [SlashCommand("leaderboard", "Shows this server's level leaderboard.")]
+        public async Task LeaderboardAsync(InteractionContext ctx)
         {
-            using (var db = Database.CreateContext()) 
+            using (var db = Database.CreateContext())
             {
-                var top10 = db.Levels.Where(x => x.GuildId == (long)context.Guild.Id)
+                var top10 = db.Levels.Where(x => x.GuildId == (long)ctx.Guild.Id)
                     .OrderByDescending(x => x.Experience)
                     .Take(10)
                     .ToList();
 
+                if(top10.Count == 0)
+                {
+                    await ctx.CreateResponseAsync("⚠️ No level data was found for this server!", true);
+                    return;
+                }
+
                 var top10string = "";
                 int index = 1;
-                foreach(var leveldata in top10)
+                foreach (var leveldata in top10)
                 {
                     top10string += $"{index}. <@{leveldata.UserId}>: Level " +
-                        $"{Listeners.LevelUp.CalculateLevel(leveldata.Experience)} ({leveldata.Experience} xp)";
+                        $"{Listeners.LevelUp.CalculateLevel(leveldata.Experience)} ({leveldata.Experience} xp)\n";
                     index++;
                 }
 
                 var embed = new DiscordEmbedBuilder()
-                    .WithTitle($"{context.Guild.Name} Level Leaderboard")
+                    .WithTitle($"{ctx.Guild.Name} Level Leaderboard")
                     .WithDescription($"These are the users with the most activity!")
                     .WithColor(new DiscordColor())
                     .AddField("Top 10", top10string);
 
-                var message = new DiscordMessageBuilder()
-                    .AddEmbed(embed)
-                    .WithReply(context.Message.Id, true, false);
-
-                await context.RespondAsync(message);
+                await ctx.CreateResponseAsync(embed, true);
             }
         }
     }

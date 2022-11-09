@@ -23,7 +23,7 @@ namespace ModCore.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ModCore.Database.DatabaseCommandId", b =>
+            modelBuilder.Entity("ModCore.Database.DatabaseEntities.DatabaseCommandId", b =>
                 {
                     b.Property<string>("Command")
                         .HasColumnType("text")
@@ -47,7 +47,7 @@ namespace ModCore.Migrations
                     b.ToTable("mcore_cmd_state");
                 });
 
-            modelBuilder.Entity("ModCore.Database.DatabaseGuildConfig", b =>
+            modelBuilder.Entity("ModCore.Database.DatabaseEntities.DatabaseGuildConfig", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -74,7 +74,7 @@ namespace ModCore.Migrations
                     b.ToTable("mcore_guild_config");
                 });
 
-            modelBuilder.Entity("ModCore.Database.DatabaseInfo", b =>
+            modelBuilder.Entity("ModCore.Database.DatabaseEntities.DatabaseInfo", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -102,7 +102,7 @@ namespace ModCore.Migrations
                     b.ToTable("mcore_database_info");
                 });
 
-            modelBuilder.Entity("ModCore.Database.DatabaseLevel", b =>
+            modelBuilder.Entity("ModCore.Database.DatabaseEntities.DatabaseLevel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -136,37 +136,7 @@ namespace ModCore.Migrations
                     b.ToTable("mcore_levels");
                 });
 
-            modelBuilder.Entity("ModCore.Database.DatabaseModNote", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Contents")
-                        .HasColumnType("text")
-                        .HasColumnName("contents");
-
-                    b.Property<long>("GuildId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("guild_id");
-
-                    b.Property<long>("MemberId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("member_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MemberId", "GuildId")
-                        .IsUnique()
-                        .HasDatabaseName("mcore_modnotes_member_id_guild_id_key");
-
-                    b.ToTable("mcore_modnotes");
-                });
-
-            modelBuilder.Entity("ModCore.Database.DatabaseRolestateNick", b =>
+            modelBuilder.Entity("ModCore.Database.DatabaseEntities.DatabaseRolestateNick", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -196,7 +166,7 @@ namespace ModCore.Migrations
                     b.ToTable("mcore_rolestate_nicks");
                 });
 
-            modelBuilder.Entity("ModCore.Database.DatabaseRolestateOverride", b =>
+            modelBuilder.Entity("ModCore.Database.DatabaseEntities.DatabaseRolestateOverride", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -234,7 +204,7 @@ namespace ModCore.Migrations
                     b.ToTable("mcore_rolestate_overrides");
                 });
 
-            modelBuilder.Entity("ModCore.Database.DatabaseRolestateRoles", b =>
+            modelBuilder.Entity("ModCore.Database.DatabaseEntities.DatabaseRolestateRoles", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -264,7 +234,7 @@ namespace ModCore.Migrations
                     b.ToTable("mcore_rolestate_roles");
                 });
 
-            modelBuilder.Entity("ModCore.Database.DatabaseStarData", b =>
+            modelBuilder.Entity("ModCore.Database.DatabaseEntities.DatabaseStarData", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -306,7 +276,7 @@ namespace ModCore.Migrations
                     b.ToTable("mcore_stars");
                 });
 
-            modelBuilder.Entity("ModCore.Database.DatabaseTag", b =>
+            modelBuilder.Entity("ModCore.Database.DatabaseEntities.DatabaseTag", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -348,7 +318,7 @@ namespace ModCore.Migrations
                     b.ToTable("mcore_tags");
                 });
 
-            modelBuilder.Entity("ModCore.Database.DatabaseTimer", b =>
+            modelBuilder.Entity("ModCore.Database.DatabaseEntities.DatabaseTimer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -385,33 +355,6 @@ namespace ModCore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("mcore_timers");
-                });
-
-            modelBuilder.Entity("ModCore.Database.DatabaseUserData", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Data")
-                        .IsRequired()
-                        .HasColumnType("jsonb")
-                        .HasColumnName("usr_data");
-
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("mcore_userdata_user_id_key");
-
-                    b.ToTable("mcore_userdata");
                 });
 #pragma warning restore 612, 618
         }

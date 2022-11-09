@@ -10,14 +10,16 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
-using DSharpPlus.Net.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
-using ModCore.Logic;
-using ModCore.Logic.Extensions;
+using ModCore.Utils;
+using ModCore.Utils.Extensions;
 using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.Logging;
+using DSharpPlus.SlashCommands;
+using ModCore.Extensions;
+using ModCore.Database.JsonEntities;
 
 namespace ModCore
 {
@@ -29,6 +31,8 @@ namespace ModCore
         public DiscordClient Client { get; private set; }
         public InteractivityExtension Interactivity { get; private set; }
         public CommandsNextExtension Commands { get; private set; }
+        public SlashCommandsExtension Slashies { get; private set; }
+        public InteractionExtension Interactions { get; private set; }
 
         public SharedData SharedData { get; set; }
 		public Settings Settings { get; }
@@ -45,7 +49,7 @@ namespace ModCore
             ShardId = id;
         }
 
-        internal void Initialize()
+        internal void Initialize(int shardCount)
         {
             // Store the Start Times to use in DI
             // SocketStartTime will be updated in the SocketOpened event,
@@ -61,9 +65,9 @@ namespace ModCore
                 MinimumLogLevel = LogLevel.Debug,
                 Token = Settings.Token,
                 TokenType = TokenType.Bot,
-                ShardCount = this.Settings.ShardCount,
+                ShardCount = shardCount,
                 ShardId = this.ShardId,
-                Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMessages | DiscordIntents.GuildMembers
+                Intents = DiscordIntents.AllUnprivileged | DiscordIntents.GuildMessages | DiscordIntents.GuildMembers | DiscordIntents.MessageContents
             };
 
             this.Client = new DiscordClient(cfg);
@@ -83,10 +87,12 @@ namespace ModCore
             // Add the instances we need to dependencies
             var deps = new ServiceCollection()
                 .AddSingleton(this.SharedData)
-                //.AddInstance(this.Settings)
+                .AddSingleton(this.Settings)
                 .AddSingleton(this.Interactivity)
                 .AddSingleton(this.StartTimes)
                 .AddSingleton(this.Database)
+                .AddSingleton(this)
+                .AddSingleton(this.Client)
                 .BuildServiceProvider();
 
             // enable commandsnext
@@ -124,18 +130,29 @@ namespace ModCore
 				}
 			}
 
+            this.Slashies = this.Client.UseSlashCommands(new SlashCommandsConfiguration()
+            {
+                Services = deps
+            });
+
+            this.Slashies.RegisterCommands(Assembly.GetExecutingAssembly());
+
             // Update the SocketStartTime
             this.Client.SocketOpened += async (c, e) =>
             {
                 await Task.Yield();
                 StartTimes.SocketStartTime = DateTime.Now;
+                await this.Slashies.RefreshCommands();
             };
+
+            this.Interactions = this.Client.UseInteractions(deps);
+
+            var asyncListeners = this.Client.UseAsyncListeners(deps);
+            asyncListeners.RegisterListeners(this.GetType().Assembly);
 
             this.Client.GuildCreated += onGuildCreated;
             // register event handlers
             this.Client.Ready += onClientReady;
-
-            AsyncListenerHandler.InstallListeners(Client, this);
         }
 
         private async Task onGuildCreated(DiscordClient c, GuildCreateEventArgs e)
@@ -166,13 +183,8 @@ namespace ModCore
 
         public Task<int> GetPrefixPositionAsync(DiscordMessage msg)
         {
-            GuildSettings cfg = null;
-            using (var db = Database.CreateContext())
-                cfg = msg.Channel.Guild.GetGuildSettings(db);
-            if (cfg?.Prefix != null)
-                return Task.FromResult(msg.GetStringPrefixLength(cfg.Prefix));
-
-            return Task.FromResult(msg.GetStringPrefixLength(Settings.DefaultPrefix));
+            // Force ModCore to only accept mentions.
+            return Task.FromResult(-1);
         }
     }
 }

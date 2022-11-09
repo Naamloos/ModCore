@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using ModCore.Database.DatabaseEntities;
 using ModCore.Entities;
-using ModCore.Logic;
-using ModCore.Logic.EntityFramework;
+using ModCore.Utils;
+using ModCore.Utils.EntityFramework;
 
 namespace ModCore.Database
 {
@@ -16,7 +17,6 @@ namespace ModCore.Database
     {
         public virtual DbSet<DatabaseInfo> Info { get; set; }
         public virtual DbSet<DatabaseGuildConfig> GuildConfig { get; set; }
-        public virtual DbSet<DatabaseModNote> Modnotes { get; set; }
         public virtual DbSet<DatabaseRolestateOverride> RolestateOverrides { get; set; }
         public virtual DbSet<DatabaseRolestateRoles> RolestateRoles { get; set; }
         public virtual DbSet<DatabaseRolestateNick> RolestateNicks { get; set; }
@@ -24,7 +24,6 @@ namespace ModCore.Database
         public virtual DbSet<DatabaseStarData> StarDatas { get; set; }
         public virtual DbSet<DatabaseTag> Tags { get; set; }
         public virtual DbSet<DatabaseCommandId> CommandIds { get; set; }
-        public virtual DbSet<DatabaseUserData> UserDatas { get; set; }
         public virtual DbSet<DatabaseLevel> Levels { get; set; }
 
         public DatabaseProvider Provider { get; }
