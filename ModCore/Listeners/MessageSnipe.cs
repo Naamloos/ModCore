@@ -58,6 +58,9 @@ namespace ModCore.Listeners
         [AsyncListener(EventType.MessageUpdated)]
         public static async Task MessageEdited(MessageUpdateEventArgs eventargs, SharedData sharedData, DatabaseContextBuilder database)
         {
+            if (eventargs.Message.WebhookMessage)
+                return;
+
             await Task.Yield();
 
             if ((!string.IsNullOrEmpty(eventargs.MessageBefore?.Content) || eventargs.Message.Embeds.Count > 0) && !eventargs.Message.Author.IsBot)

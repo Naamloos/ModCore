@@ -89,7 +89,7 @@ namespace ModCore.Listeners
             using (var db = database.CreateContext())
             {
                 config = eventargs.Guild.GetGuildSettings(db);
-                if (config == null || !config.RoleState.Enable)
+                if (config == null)
                     return;
                 rolestateconfig = config.RoleState;
 
@@ -98,7 +98,7 @@ namespace ModCore.Listeners
                 nickname = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
             }
 
-            if (roleids?.RoleIds != null)
+            if (config.RoleState.Enable && roleids?.RoleIds != null)
             {
                 var oroles = roleids.RoleIds
                     .Select(xid => (ulong)xid)
@@ -114,15 +114,13 @@ namespace ModCore.Listeners
                     if (roles.Any())
                         await eventargs.Member.ReplaceRolesAsync(roles, "Restoring Role State.");
             }
-            else
+            else if(config.AutoRole.Enable)
             {
                 var autoroleconfig = config.AutoRole;
 
-                if (autoroleconfig.Enable && eventargs.Guild.Roles.Count(x => x.Value.Id == (ulong)autoroleconfig.RoleId) > 0)
-                {
-                    var role = eventargs.Guild.Roles.First(x => x.Value.Id == (ulong)autoroleconfig.RoleId);
-                    await eventargs.Member.GrantRoleAsync(role.Value, "AutoRole");
-                }
+                var roles = eventargs.Guild.Roles.Where(x => autoroleconfig.RoleIds.Any(y => y == x.Key));
+                if(roles.Count() > 0)
+                    await eventargs.Member.ReplaceRolesAsync(roles.Select(x => x.Value), "AutoRole");
             }
 
             if (channelperms.Any())
@@ -137,7 +135,7 @@ namespace ModCore.Listeners
                 }
             }
 
-            if(nickname != null)
+            if (config.RoleState.Nickname && nickname != null)
             {
                 client.Logger.Log(LogLevel.Debug, "ModCore", $"Set new old nick: {nickname.Nickname}", System.DateTime.Now);
                 var member = await eventargs.Guild.GetMemberAsync(eventargs.Member.Id);
@@ -151,40 +149,46 @@ namespace ModCore.Listeners
             using (var db = database.CreateContext())
             {
                 var config = eventargs.Guild.GetGuildSettings(db);
-                if (config == null || !config.RoleState.Enable)
+                if (config == null)
                     return;
                 var rolestate = config.RoleState;
 
                 var guild = eventargs.Guild;
                 var roleids = db.RolestateRoles.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
 
-                if (roleids == null)
+                if (config.RoleState.Enable)
                 {
-                    roleids = new DatabaseRolestateRoles
+                    if (roleids == null)
                     {
-                        GuildId = (long)eventargs.Guild.Id,
-                        MemberId = (long)eventargs.Member.Id
-                    };
+                        roleids = new DatabaseRolestateRoles
+                        {
+                            GuildId = (long)eventargs.Guild.Id,
+                            MemberId = (long)eventargs.Member.Id
+                        };
+                    }
+
+                    roleids.RoleIds = eventargs.RolesAfter
+                        .Select(xr => xr.Id)
+                        .Except(rolestate.IgnoredRoleIds)
+                        .Select(xid => (long)xid)
+                        .ToArray();
+                    db.RolestateRoles.Update(roleids);
                 }
 
-                roleids.RoleIds = eventargs.RolesAfter
-                    .Select(xr => xr.Id)
-                    .Except(rolestate.IgnoredRoleIds)
-                    .Select(xid => (long)xid)
-                    .ToArray();
-                db.RolestateRoles.Update(roleids);
-
-                var nickname = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
-                if(nickname == null)
+                if (config.RoleState.Nickname)
                 {
-                    nickname = new DatabaseRolestateNick
+                    var nickname = db.RolestateNicks.SingleOrDefault(xs => xs.GuildId == (long)eventargs.Guild.Id && xs.MemberId == (long)eventargs.Member.Id);
+                    if (nickname == null)
                     {
-                        GuildId = (long)eventargs.Guild.Id,
-                        MemberId = (long)eventargs.Member.Id,
-                    };
+                        nickname = new DatabaseRolestateNick
+                        {
+                            GuildId = (long)eventargs.Guild.Id,
+                            MemberId = (long)eventargs.Member.Id,
+                        };
+                    }
+                    nickname.Nickname = eventargs.NicknameAfter;
+                    db.RolestateNicks.Update(nickname);
                 }
-                nickname.Nickname = eventargs.NicknameAfter;
-                db.RolestateNicks.Update(nickname);
 
                 await db.SaveChangesAsync();
             }

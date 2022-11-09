@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace ModCore.Database.JsonEntities
@@ -15,13 +16,6 @@ namespace ModCore.Database.JsonEntities
         /// </summary>
         [JsonProperty("linkfilter")]
         public GuildLinkfilterSettings Linkfilter { get; private set; } = new GuildLinkfilterSettings();
-
-        /// <summary>
-        /// Gets the configuration for InvisiCop. InvisiCop removes messages from users set to invisible, since they 
-        /// break user caches.
-        /// </summary>
-        [JsonProperty("invisicop")]
-        public GuildInvisiCopSettings InvisiCop { get; private set; } = new GuildInvisiCopSettings();
 
         /// <summary>
         /// Gets the configuration for Role State. Role State is used to persist roles and overwrites for users who 
@@ -43,12 +37,6 @@ namespace ModCore.Database.JsonEntities
         public GuildAutoRoleSettings AutoRole { get; private set; } = new GuildAutoRoleSettings();
 
         /// <summary>
-        /// Gets the configuration for CommandError. CommandErrors logs command errors to chat or action log.
-        /// </summary>
-        [JsonProperty("commanderror")]
-        public GuildCommandErrorSettings CommandError { get; private set; } = new GuildCommandErrorSettings();
-
-        /// <summary>
         /// Gets the SelfRoles for this guild. SelfRoles are roles members can grant themselves.
         /// </summary>
         [JsonProperty("selfroles")]
@@ -60,68 +48,68 @@ namespace ModCore.Database.JsonEntities
         [JsonProperty]
         public GuildStarboardSettings Starboard { get; private set; } = new GuildStarboardSettings();
 
-	    /// <summary>
-	    /// Gets whether spelling helper is enabled or disabled for this guild.
-	    /// </summary>
-	    [JsonProperty("spellhelp")]
-	    public bool SpellingHelperEnabled { get; set; }
-
         /// <summary>
         /// Gets the list of Reaction Roles for this guild.
         /// </summary>
         [JsonProperty("reactionroles")]
-		public List<GuildReactionRole> ReactionRoles { get; private set; } = new List<GuildReactionRole>();
+        public List<GuildReactionRole> ReactionRoles { get; private set; } = new List<GuildReactionRole>();
 
-	    /// <summary>
-	    /// Gets the disabled command ids for this guild.
-	    /// </summary>
-	    [JsonProperty("disablcommands2")]
-	    public HashSet<short> DisabledCommands { get; private set; } = new HashSet<short>();
-
-	    /// <summary>
-	    /// Gets or sets whether or not to show a message when a disabled command is attempted to be executed
-	    /// </summary>
-	    [JsonProperty("disverbose")]
-	    public bool NotifyDisabledCommand { get; set; } = true;
-
+        /// <summary>
+        /// Gets Welcomer configuration for this guild
+        /// </summary>
 		[JsonProperty("welcome")]
-		public WelcomeSettings Welcome { get; private set; } = new WelcomeSettings();
+        public WelcomeSettings Welcome { get; private set; } = new WelcomeSettings();
 
-	    [JsonProperty("nickconf")]
-	    public bool RequireNicknameChangeConfirmation { get; set; }
+        /// <summary>
+        /// Gets nickname confirmation configuration for this guild
+        /// </summary>
+        [JsonProperty("nicknameconfirm")]
+        public NicknameConfirmSettings NicknameConfirm { get; set; } = new NicknameConfirmSettings();
 
-        [JsonProperty("nickchn")]
-	    public ulong NicknameChangeConfirmationChannel { get; set; }
-
-		[JsonProperty("jailrole")]
-		public long JailRole { get; set; }
-
-        [JsonProperty("updatechn")]
-        public ulong UpdateChannel { get; set; }
-
-        [JsonProperty("logupdates")]
-        public bool LogUpdates { get; set; }
-
-        [JsonProperty("webhooktoken")]
-        public string WebhookToken { get; set; }
-
+        /// <summary>
+        /// Gets levels configuration for this guild
+        /// </summary>
         [JsonProperty("levels")]
         public LevelSettings Levels = new LevelSettings();
+
+        [JsonProperty("role_menus")]
+        public List<GuildRoleMenu> RoleMenus = new List<GuildRoleMenu>();
+    }
+
+    public class GuildRoleMenu
+    {
+        [JsonProperty("menu_id")]
+        public string Name { get; set; }
+
+        [JsonProperty("creator_id")]
+        public ulong CreatorId { get; set; }
+
+        [JsonProperty("role_ids")]
+        public List<ulong> RoleIds { get; set; } = new List<ulong>();
+    }
+
+    public class NicknameConfirmSettings
+    {
+        [JsonProperty("enable")]
+        public bool Enable { get; set; } = false;
+
+        [JsonProperty("channel_id")]
+        public ulong ChannelId { get; set; } = 0;
     }
 
     public class LevelSettings
     {
         [JsonProperty("levels_enabled")]
-        public bool Enabled { get; set; }
+        public bool Enabled { get; set; } = false;
 
         [JsonProperty("messages_enabled")]
-        public bool MessagesEnabled { get; set; }
+        public bool MessagesEnabled { get; set; } = false;
 
         [JsonProperty("redirect_messages")]
-        public bool RedirectMessages { get; set; }
+        public bool RedirectMessages { get; set; } = false;
 
         [JsonProperty("message_channel_id")]
-        public ulong ChannelId { get; set; }
+        public ulong ChannelId { get; set; } = 0;
     }
 
     public class GuildChangeLogSettings
@@ -139,13 +127,13 @@ namespace ModCore.Database.JsonEntities
         public bool LogRoles { get; set; } = false;
     }
 
-	public class GuildStarboardSettings
+    public class GuildStarboardSettings
     {
         /// <summary>
         /// Gets or sets the Starboard channel ID.
         /// </summary>
         [JsonProperty("channel_id")]
-        public ulong ChannelId { get; set; }
+        public ulong ChannelId { get; set; } = 0;
 
         /// <summary>
         /// Gets or sets the starboard emoji.
@@ -153,26 +141,31 @@ namespace ModCore.Database.JsonEntities
         [JsonProperty("emoji")]
         public GuildEmoji Emoji { get; set; } = new GuildEmoji();
 
-	    /// <summary>
-	    /// Gets or sets whether starboard should be enabled.
-	    /// </summary>
-	    [JsonProperty("enabled")]
-        public bool Enable { get; set; }
+        /// <summary>
+        /// Gets or sets whether starboard should be enabled.
+        /// </summary>
+        [JsonProperty("enabled")]
+        public bool Enable { get; set; } = false;
 
         [JsonProperty("minimum")]
         public int Minimum { get; set; } = 3;
 
-	    [JsonProperty("allow_nsfw")] 
-	    public bool AllowNSFW { get; set; }
+        [JsonProperty("allow_nsfw")]
+        public bool AllowNSFW { get; set; } = false;
     }
 
     public class GuildEmoji
     {
         [JsonProperty("id")]
-        public ulong EmojiId { get; set; }
+        public ulong EmojiId { get; set; } = 0;
 
         [JsonProperty("name")]
         public string EmojiName { get; set; } = "⭐";
+
+        public string GetStringRepresentation()
+        {
+            return EmojiId > 1 ? $"<:{EmojiName}:{EmojiId}>" : EmojiName;
+        }
     }
 
     /// <summary>
@@ -180,17 +173,17 @@ namespace ModCore.Database.JsonEntities
     /// </summary>
     public class GuildAutoRoleSettings
     {
-	    /// <summary>
-	    /// Gets or sets whether AutoRole should be enabled.
-	    /// </summary>
-	    [JsonProperty("enables")] 
-	    public bool Enable { get; set; }
+        /// <summary>
+        /// Gets or sets whether AutoRole should be enabled.
+        /// </summary>
+        [JsonProperty("enables")]
+        public bool Enable { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the AutoRole role ID.
         /// </summary>
-        [JsonProperty("role_id")]
-        public ulong RoleId { get; set; }
+        [JsonProperty("role_ids")]
+        public List<ulong> RoleIds { get; set; } = new List<ulong>();
     }
 
     /// <summary>
@@ -198,55 +191,32 @@ namespace ModCore.Database.JsonEntities
     /// </summary>
     public class GuildLogSettings
     {
-	    /// <summary>
-	    /// Gets or sets whether the JoinLog should be enabled.
-	    /// </summary>
-	    [JsonProperty("joinlog_enabled")]
-	    public bool JoinLog_Enable { get; set; }
+        /// <summary>
+        /// Gets or sets whether the JoinLog should be enabled.
+        /// </summary>
+        [JsonProperty("joinlog_enabled")]
+        public bool JoinLog_Enable { get; set; } = false;
 
         [JsonProperty("editlog_enabled")]
-        public bool EditLog_Enable { get; set; }
+        public bool EditLog_Enable { get; set; } = false;
 
         [JsonProperty("nicknamelog_enabled")]
-        public bool NickameLog_Enable { get; set; }
+        public bool NickameLog_Enable { get; set; } = false;
 
         [JsonProperty("invitelog_enabled")]
-        public bool InviteLog_Enable { get; set; }
+        public bool InviteLog_Enable { get; set; } = false;
 
         [JsonProperty("avatarlog_enabled")]
-        public bool AvatarLog_Enable { get; set; }
+        public bool AvatarLog_Enable { get; set; } = false;
 
         [JsonProperty("modlog_enabled")]
-        public bool ModLog_Enable { get; set; }
+        public bool ModLog_Enable { get; set; } = false;
 
         /// <summary>
         /// Gets or sets logging channel ID
         /// </summary>
         [JsonProperty("channel_id")]
-        public ulong ChannelId { get; set; }
-    }
-
-    public class GuildCommandErrorSettings
-    {
-        /// <summary>
-        /// Gets or sets the command error verbosity for chat
-        /// </summary>
-        [JsonProperty("chatverbosity")]
-        public CommandErrorVerbosity Chat { get; set; } = CommandErrorVerbosity.None;
-
-	    /// <summary>
-	    /// Gets or sets the command error verbosity for the action log (if enabled)
-	    /// </summary>
-	    [JsonProperty("actionverbosity")]
-	    public CommandErrorVerbosity ActionLog { get; set; } = CommandErrorVerbosity.None;
-    }
-
-    public enum CommandErrorVerbosity
-    {
-        None,
-        Name,
-        NameDesc,
-        Exception
+        public ulong ChannelId { get; set; } = 0;
     }
 
     /// <summary>
@@ -254,11 +224,11 @@ namespace ModCore.Database.JsonEntities
     /// </summary>
     public class GuildLinkfilterSettings
     {
-	    /// <summary>
-	    /// Gets or sets whether Linkfilter™ should be enabled.
-	    /// </summary>
-	    [JsonProperty("enabled")]
-	    public bool Enable { get; set; }
+        /// <summary>
+        /// Gets or sets whether Linkfilter™ should be enabled.
+        /// </summary>
+        [JsonProperty("enabled")]
+        public bool Enable { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the number of invites after which the user gets automatically banned for ads. Set to 0 to disable automatic bans.
@@ -283,31 +253,31 @@ namespace ModCore.Database.JsonEntities
         /// </summary>
         [JsonProperty("exempt_invite_guild_ids")]
         public HashSet<ulong> ExemptInviteGuildIds { get; private set; } = new HashSet<ulong>();
-        
+
         /// <summary>
         /// TODO wtf does this do
         /// </summary>
         [JsonProperty("custom_link_filters")]
         public List<string> CustomLinkFilters { get; private set; } = new List<string>();
-        
+
         /// <summary>
         /// Toggles blocking invite links, unless posted by a member with 'Manage Messages' permission or equivalent.
         /// </summary>
         [JsonProperty("block_invite_links")]
         public bool BlockInviteLinks { get; set; } = true;
-        
+
         /// <summary>
         /// Toggles blocking IP logging sites, unless posted by a member with 'Manage Messages' permission or equivalent.
         /// </summary>
         [JsonProperty("block_ip_loggers")]
         public bool BlockIpLoggers { get; set; } = true;
-        
+
         /// <summary>
         /// Toggles blocking DDoS sites, unless posted by a member with 'Manage Messages' permission or equivalent.
         /// </summary>
         [JsonProperty("block_booters")]
         public bool BlockBooters { get; set; } = true;
-        
+
         /// <summary>
         /// Toggles blocking URL shorteners, unless posted by a member with 'Manage Messages' permission or equivalent.
         /// </summary>
@@ -323,40 +293,15 @@ namespace ModCore.Database.JsonEntities
     }
 
     /// <summary>
-    /// Represents configuration for InvisiCop.
-    /// </summary>
-    public class GuildInvisiCopSettings
-    {
-	    /// <summary>
-	    /// Gets or sets whether InvisiCop should be enabled.
-	    /// </summary>
-	    [JsonProperty("enabled")]
-	    public bool Enable { get; set; }
-
-        // TODO these are not configurable
-        /// <summary>
-        /// Gets the list of roles which are exempt from InvisiCop checks.
-        /// </summary>
-        [JsonProperty("exempt_role_ids")]
-        public List<ulong> ExemptRoleIds { get; private set; } = new List<ulong>();
-
-        /// <summary>
-        /// Gets the list of users who are exempt from InvisiCop checks.
-        /// </summary>
-        [JsonProperty("exempt_user_ids")]
-        public List<ulong> ExemptUserIds { get; private set; } = new List<ulong>();
-    }
-
-    /// <summary>
     /// Represents configuration for Role State.
     /// </summary>
     public class GuildRoleStateConfig
     {
-	    /// <summary>
-	    /// Gets or sets whether Role State should be enabled.
-	    /// </summary>
-	    [JsonProperty("enabled")] 
-	    public bool Enable { get; set; }
+        /// <summary>
+        /// Gets or sets whether Role State should be enabled.
+        /// </summary>
+        [JsonProperty("enabled")]
+        public bool Enable { get; set; } = false;
 
         /// <summary>
         /// Gets the list of roles which are ignored by Role State. These roles won't be saved or restored.
@@ -375,98 +320,54 @@ namespace ModCore.Database.JsonEntities
         /// Restores nicknames on rejoin
         /// </summary>
         [JsonProperty("nickname")]
-        public bool Nickname { get; set; }
+        public bool Nickname { get; set; } = false;
     }
 
-    public class GuildGlobalWarnSettings
-    {
-	    /// <summary>
-	    /// Gets or sets whether GlobalWarn should be enabled.
-	    /// </summary>
-	    [JsonProperty("enabled")] 
-	    public bool Enable { get; set; }
-
-        /// <summary>
-        /// Gets or sets the GlobalWarn 
-        /// </summary>
-        [JsonProperty("warnlevel")]
-        public GlobalWarnLevel WarnLevel { get; set; } = GlobalWarnLevel.None;
-    }
-
-    public enum GlobalWarnLevel
-    {
-        None,
-        Owner,
-        JoinLog
-    }
-
-    public class GuildBotManagerSettings
+    /// <summary>
+    /// Represents a ReactionRole.
+    /// </summary>
+    public class GuildReactionRole
     {
         /// <summary>
-        /// Gets or sets whether anyone but the owner has access to scary bot commands.
+        /// Channel message is in.
         /// </summary>
+        [JsonProperty("channel_id")]
+        public ulong ChannelId { get; set; } = 0;
+
+        /// <summary>
+        /// Message reaction is on.
+        /// </summary>
+        [JsonProperty("message_id")]
+        public ulong MessageId { get; set; } = 0;
+
+        /// <summary>
+        /// Role to grant.
+        /// </summary>
+        [JsonProperty("role_id")]
+        public ulong RoleId { get; set; } = 0;
+
+        /// <summary>
+        /// Reaction to grant role on.
+        /// </summary>
+        [JsonProperty("reaction")]
+        public GuildEmoji Reaction { get; set; } = new GuildEmoji();
+    }
+
+    /// <summary>
+    /// Represents settings for welcome messages.
+    /// </summary>
+    public class WelcomeSettings
+    {
         [JsonProperty("enabled")]
-        public bool Enable { get; set; }
-
-        /// <summary>
-        /// Gets or sets the permission level  
-        /// </summary>
-        [JsonProperty("permissionlevel")]
-        public BotManagerPermissionLevel PermissionLevel { get; set; } = BotManagerPermissionLevel.None;
-    }
-
-    public enum BotManagerPermissionLevel
-    {
-        None,
-        Update,
-        All
-    }
-
-	/// <summary>
-	/// Represents a ReactionRole.
-	/// </summary>
-	public class GuildReactionRole
-	{
-		/// <summary>
-		/// Channel message is in.
-		/// </summary>
-		[JsonProperty("channel_id")]
-		public ulong ChannelId { get; set; }
-
-		/// <summary>
-		/// Message reaction is on.
-		/// </summary>
-		[JsonProperty("message_id")]
-		public ulong MessageId { get; set; }
-
-		/// <summary>
-		/// Role to grant.
-		/// </summary>
-		[JsonProperty("role_id")]
-		public ulong RoleId { get; set; }
-
-		/// <summary>
-		/// Reaction to grant role on.
-		/// </summary>
-		[JsonProperty("reaction")]
-		public GuildEmoji Reaction { get; set; }
-	}
-
-	/// <summary>
-	/// Represents settings for welcome messages.
-	/// </summary>
-	public class WelcomeSettings
-	{
-		[JsonProperty("enabled")]
-		public bool Enable { get; set; }
+        public bool Enable { get; set; } = false;
 
         [JsonProperty("message")]
-		public string Message { get; set; } = "";
+        public string Message { get; set; } = "";
 
-		[JsonProperty("channel_id")]
-		public ulong ChannelId { get; set; }
+        [JsonProperty("channel_id")]
+        public ulong ChannelId { get; set; } = 0;
 
-		[JsonProperty("is_embed")]
-		public bool IsEmbed { get; set; }
-	}
+        [JsonProperty("is_embed")]
+        public bool IsEmbed { get; set; } = false;
+    }
 }

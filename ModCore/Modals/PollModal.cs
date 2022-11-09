@@ -2,7 +2,6 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
-using ModCore.Extensions.Interfaces;
 using ModCore.Extensions.Attributes;
 using ModCore.Utils;
 using System;
@@ -10,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Extensions.Abstractions;
 
 namespace ModCore.Modals
 {
