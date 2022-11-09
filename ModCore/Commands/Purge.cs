@@ -15,6 +15,7 @@ namespace ModCore.Commands
 {
     [SlashCommandGroup("purge", "Commands for clearing chat.")]
     [SlashRequirePermissions(Permissions.ManageMessages)]
+    [GuildOnly]
     public class Purge : ApplicationCommandModule
     {
         // regular, user, regex, commands, bots, images

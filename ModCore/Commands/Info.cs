@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace ModCore.Commands
 {
     [SlashCommandGroup("info", "List information about specific entities.")]
+    [GuildOnly]
     public class Info : ApplicationCommandModule
     {
         [SlashCommand("member", "List information about a member.")]

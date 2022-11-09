@@ -12,6 +12,7 @@ using System.Linq;
 
 namespace ModCore.ContextMenu
 {
+    [GuildOnly]
     public class MessageContextMenu : ApplicationCommandModule
     {
         // Message Context Menu commands here. Max 5.

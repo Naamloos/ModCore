@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 namespace ModCore.Commands
 {
     [SlashCommandGroup("starboard", "Starboard-related commands")]
+    [GuildOnly]
     public class Starboard : ApplicationCommandModule
     {
         public DatabaseContextBuilder Database { private get; set; }

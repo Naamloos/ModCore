@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 namespace ModCore.Commands
 {
     [SlashCommandGroup("tag", "Commands for tags.")]
+    [GuildOnly]
     public class Tags : ApplicationCommandModule
     {
         public DatabaseContextBuilder Database { private get; set; }

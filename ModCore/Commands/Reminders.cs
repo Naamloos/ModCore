@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 namespace ModCore.Commands
 {
     [SlashCommandGroup("remind", "Reminder-related commands")]
+    [GuildOnly]
     public class Reminders : ApplicationCommandModule
     {
         public DatabaseContextBuilder Database { private get; set; }

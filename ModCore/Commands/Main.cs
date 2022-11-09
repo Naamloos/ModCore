@@ -19,6 +19,7 @@ using System.Runtime.InteropServices;
 
 namespace ModCore.Commands
 {
+    [GuildOnly]
     public class Main : ApplicationCommandModule
     {
         public SharedData Shared { private get; set; }

@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Commands
 {
+    [GuildOnly]
     public class Config : ApplicationCommandModule
     {
         public DatabaseContextBuilder Database { private get; set; }

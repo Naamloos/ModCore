@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace ModCore.Commands
 {
     [SlashCommandGroup("level", "Commands relating to the level system.")]
+    [GuildOnly]
     public class Level : ApplicationCommandModule
     {
         public DatabaseContextBuilder Database { private get; set; }
