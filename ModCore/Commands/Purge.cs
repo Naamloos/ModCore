@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 namespace ModCore.Commands
 {
     [SlashCommandGroup("purge", "Commands for clearing chat.")]
+    [SlashCommandPermissions(Permissions.ManageMessages)]
     [SlashRequirePermissions(Permissions.ManageMessages)]
     [GuildOnly]
     public class Purge : ApplicationCommandModule

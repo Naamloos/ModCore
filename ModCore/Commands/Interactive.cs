@@ -16,7 +16,7 @@ namespace ModCore.Commands
     public class Interactive : ApplicationCommandModule
     {
         // TODO these commands need to be migrated to use the timer system instead.
-        [SlashCommand("poll", "Starts a poll in this channel.")]\
+        [SlashCommand("poll", "Starts a poll in this channel.")]
         public async Task PollAsync(InteractionContext ctx)
             => await ctx.Client.GetInteractionExtension().RespondWithModalAsync<PollModal>(ctx.Interaction, "Create poll...");
 
