@@ -57,6 +57,10 @@ namespace ModCore.Components
         public async Task NicknameAsync(ComponentInteractionCreateEventArgs e)
             => await NicknameApprovalConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
 
+        [Component("rm", ComponentType.Button)]
+        public async Task RoleMenuAsync(ComponentInteractionCreateEventArgs e)
+            => await RoleMenuConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
+
         [Component("cfg.dump", ComponentType.Button)]
         public async Task DumpConfigAsync(ComponentInteractionCreateEventArgs e)
         {
@@ -125,6 +129,7 @@ namespace ModCore.Components
                     new DiscordButtonComponent(ButtonStyle.Primary, "lv", "Level System", emoji: new DiscordComponentEmoji("📈")),
                     new DiscordButtonComponent(ButtonStyle.Primary, "lg", "Update Logger", emoji: new DiscordComponentEmoji("🪵")),
                     new DiscordButtonComponent(ButtonStyle.Primary, "wc", "Welcomer", emoji: new DiscordComponentEmoji("👋")),
+                    new DiscordButtonComponent(ButtonStyle.Primary, "rm", "Role Menu", emoji: new DiscordComponentEmoji("📖"))
                 })
                 .AddComponents(new DiscordComponent[]
                 {

@@ -79,7 +79,7 @@ namespace ModCore.Components
                     .AddField("Nickname Approval Channel", $"<#{settings.ChannelId}>");
 
                 var enableId = ExtensionStatics.GenerateIdString("nick.toggle", new Dictionary<string, string>() { { "on", "true" } });
-                var disableId = ExtensionStatics.GenerateIdString("snick.toggle", new Dictionary<string, string>() { { "on", "false" } });
+                var disableId = ExtensionStatics.GenerateIdString("nick.toggle", new Dictionary<string, string>() { { "on", "false" } });
 
                 var minimumOptions = new List<DiscordSelectComponentOption>();
                 for (int i = 1; i <= 10; i++)

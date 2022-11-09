@@ -268,7 +268,7 @@ namespace ModCore.Commands
                     new DiscordButtonComponent(ButtonStyle.Danger, deny, "Deny", emoji: new DiscordComponentEmoji(DiscordEmoji.FromUnicode("🗑️")))
                     );
 
-            channel.SendMessageAsync(msg);
+            await channel.SendMessageAsync(msg);
         }
     }
 }

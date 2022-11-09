@@ -50,7 +50,7 @@ namespace ModCore.Modals
                 db.GuildConfig.Update(guildConfig);
                 await db.SaveChangesAsync();
 
-                await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AsEphemeral().WithContent($"✅ Set new welcome message"));
+                await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AsEphemeral().WithContent($"✅ Welcome message was configured!"));
 
                 await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"✅ Welcome message was configured!")
                         .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "wc", "Back to Welcomer config", emoji: new DiscordComponentEmoji("🏃"))));
