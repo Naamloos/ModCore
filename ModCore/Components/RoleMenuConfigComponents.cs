@@ -182,6 +182,7 @@ namespace ModCore.Components
                     .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Back to Role Menu config", emoji: new DiscordComponentEmoji("🏃"))));
         }
 
+        [ComponentPermissions(Permissions.ManageGuild)]
         [Component("rm.post", ComponentType.StringSelect)]
         public async Task PostRoleMenuAsync(ComponentInteractionCreateEventArgs e)
         {

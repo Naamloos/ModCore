@@ -19,6 +19,7 @@ namespace ModCore.ContextMenu
         public InteractivityExtension interactivity { private get; set; }
 
         const string EMOJI_REGEX = @"<a?:(.+?):(\d+)>";
+
         [ContextMenu(ApplicationCommandType.MessageContextMenu, "Copy emoji")]
         [SlashCommandPermissions(Permissions.ManageEmojis)]
         public async Task YoinkAsync(ContextMenuContext ctx)
