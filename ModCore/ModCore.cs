@@ -32,7 +32,7 @@ namespace ModCore
 
         internal async Task InitializeAsync(string[] args)
         {
-            var configPath = Path.Combine(Path.GetDirectoryName(this.GetType().Assembly.Location), "settings.json");
+            var configPath = Path.Combine(Directory.GetCurrentDirectory(), "settings.json");
 
             if (!File.Exists(configPath))
             {
