@@ -8,5 +8,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0
 WORKDIR /app
 COPY --from=build /src/out .
 WORKDIR /config
-COPY /app/appconfig.json .
 ENTRYPOINT ["dotnet", "/app/ModCore.dll"]
