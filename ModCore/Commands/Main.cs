@@ -43,7 +43,7 @@ namespace ModCore.Commands
                     "[DrCreo](https://github.com/DrCreo), " +
                     "[aexolate](https://github.com/aexolate), " +
                     "[Drake103](https://github.com/Drake103), " +
-                    "[Izumemori](https://github.com/Izumemori) and" +
+                    "[Izumemori](https://github.com/Izumemori) and " +
                     "[OoLunar](https://github.com/OoLunar)")
                 .AddField("Environment",
                     $"*OS:* {Environment.OSVersion.VersionString}" +
@@ -89,7 +89,14 @@ namespace ModCore.Commands
         }
 
         [SlashCommand("snipe", "Retrieves the last deleted message from cache.")]
-        public async Task SnipeAsync(InteractionContext ctx, [Option("edit", "Whether to fetch an edited message or a deleted one.")] bool edit = false)
+        public Task SnipeAsync(InteractionContext ctx)
+            => doSnipeAsync(ctx, false);
+
+        [SlashCommand("snipeedit", "Retrieves the last edited message's original content from cache.")]
+        public Task SnipeEditAsync(InteractionContext ctx)
+            => doSnipeAsync(ctx, true);
+
+        private async Task doSnipeAsync(InteractionContext ctx, bool edit)
         {
             var messages = edit ? this.Shared.EditedMessages : this.Shared.DeletedMessages;
             if (messages.ContainsKey(ctx.Channel.Id))
@@ -112,11 +119,7 @@ namespace ModCore.Commands
 
                 if (message.Attachments.Count > 0)
                 {
-                    if (message.Attachments[0].MediaType == "image/png"
-                        || message.Attachments[0].MediaType == "image/jpeg"
-                        || message.Attachments[0].MediaType == "image/gif"
-                        || message.Attachments[0].MediaType == "image/apng"
-                        || message.Attachments[0].MediaType == "image/webp")
+                    if (message.Attachments[0].MediaType.StartsWith("image/"))
                         embed.WithImageUrl(message.Attachments[0].Url);
                 }
 
@@ -125,17 +128,6 @@ namespace ModCore.Commands
             }
 
             await ctx.CreateResponseAsync("⚠️ No message to snipe!", true);
-        }
-
-        [SlashCommand("invite", "Get an invite to this ModCore instance. Sharing is caring!")]
-        public async Task InviteAsync(InteractionContext ctx)
-        {
-            var app = ctx.Client.CurrentApplication;
-            if (app.IsPublic != null && (bool)app.IsPublic)
-                await ctx.CreateResponseAsync(
-                    $"🛡 Add ModCore to your server!\n<https://modcore.naamloos.dev/info/invite>", true);
-            else
-                await ctx.CreateResponseAsync("⚠️ I'm sorry Mario, but this instance of ModCore has been set to private!", true);
         }
 
         [SlashCommand("contact", "Contact ModCore developers.")]
