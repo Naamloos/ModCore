@@ -92,7 +92,7 @@ namespace ModCore.Commands
             await ctx.CreateResponseAsync(embed, true);
         }
 
-        static Regex prettyNameRegex = new Regex("PRETTY_NAME=(.*)");
+        static Regex prettyNameRegex = new Regex("PRETTY_NAME=(.*)", RegexOptions.Compiled);
         private string fetchLinuxName()
         {
             try
