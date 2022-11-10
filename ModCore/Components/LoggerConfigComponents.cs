@@ -212,6 +212,7 @@ namespace ModCore.Components
                     .AddField("Nickname Updates", settings.NickameLog_Enable ? "✅ Enabled" : "⛔ Disabled", true)
                     .AddField("Invite Creation", settings.InviteLog_Enable ? "✅ Enabled" : "⛔ Disabled", true)
                     .AddField("Avatar Updates", settings.AvatarLog_Enable ? "✅ Enabled" : "⛔ Disabled", true)
+                    .AddField("Role Updates", settings.RoleLog_Enable ? "✅ Enabled" : "⛔ Disabled", true)
                     .AddField("Moderator Action", settings.ModLog_Enable ? "✅ Enabled" : "⛔ Disabled", true);
 
                 var enableJoins = ExtensionStatics.GenerateIdString("lg.join", new Dictionary<string, string>() { { "on", "true" } });
