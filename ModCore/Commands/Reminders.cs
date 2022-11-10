@@ -70,17 +70,17 @@ namespace ModCore.Commands
             // reschedule timers
             await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
             await ctx.CreateResponseAsync(
-                $"⏰ Ok, in {duration.Humanize(4, minUnit: TimeUnit.Second)} I will remind you about the following:\n\n{about}", true);
+                $"⏰ Ok, <t:{DateTimeOffset.Now.Add(duration).ToUnixTimeSeconds()}:R> I will remind you about the following:\n\n{about}", true);
         }
 
-        [SlashCommand("list", "Lists reminders you have set.")]
+        [SlashCommand("list", "Lists all reminders you have set.")]
         public async Task ListAsync(InteractionContext ctx)
         {
             DatabaseTimer[] reminders;
 
             using (var db = this.Database.CreateContext())
                 reminders = db.Timers.Where(xt =>
-                    xt.ActionType == TimerActionType.Reminder && xt.GuildId == (long)ctx.Guild.Id &&
+                    xt.ActionType == TimerActionType.Reminder &&
                     xt.UserId == (long)ctx.User.Id).ToArray();
             if (!reminders.Any())
             {
@@ -111,7 +111,7 @@ namespace ModCore.Commands
                     note = string.Concat(note.Substring(0, note.IndexOf('\n')), "...");
 
                 currentembed.AddField(
-                    $"In {(DateTimeOffset.UtcNow - reminder.DispatchAt).Humanize(4, minUnit: TimeUnit.Second)} (ID: #{reminder.Id})",
+                    $"<t:{new DateTimeOffset(reminder.DispatchAt).ToUnixTimeSeconds()}:R> in <#{reminder.ChannelId}> (ID: #{reminder.Id})",
                     $"{note}");
                 if (currentembed.Fields.Count < 5) continue;
                 page++;

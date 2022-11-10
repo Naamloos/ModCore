@@ -16,7 +16,7 @@ namespace ModCore.Commands
     {
         public DatabaseContextBuilder Database { private get; set; }
 
-        [SlashCommand("info", "Starboard information for a specific user.")]
+        [SlashCommand("info", "Shows starboard information for a specific user.")]
         public async Task InfoAsync(InteractionContext ctx, [Option("user", "User to display info about.")]DiscordUser user = null)
         {
             await ctx.DeferAsync(true);
@@ -36,7 +36,7 @@ namespace ModCore.Commands
                 var gotStars = guildStars.Where(x => (ulong)x.AuthorId == member.Id);
 
                 embed.Description =
-                    $"This user has given **{givenStars.Count()}** stars to other users.\n" +
+                    $"This user has given out **{givenStars.Count()}** stars to other users.\n" +
                     $"This user has been given **{gotStars.Count()}** stars by **{gotStars.Select(x => x.StargazerId).Distinct().Count()}** different users, " +
                     $"over **{gotStars.Select(x => x.MessageId).Distinct().Count()}** different messages.";
 
@@ -70,7 +70,7 @@ namespace ModCore.Commands
             }
         }
 
-        [SlashCommand("leaderboard", "Shows star leaderboard for this server.")]
+        [SlashCommand("leaderboard", "Shows starboard leaderboard for this server.")]
         public async Task LeaderboardAsync(InteractionContext ctx)
         {
             await ctx.DeferAsync(true);

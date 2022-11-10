@@ -67,12 +67,12 @@ namespace ModCore.Commands
                 if (isNew)
                 {
                     db.Tags.Add(tag);
-                    await ctx.CreateResponseAsync($"✅ Tag `{name}` succesfully created!", true);
+                    await ctx.CreateResponseAsync($"✅ Server-global tag `{name}` succesfully created!", true);
                 }
                 else
                 {
                     db.Tags.Update(tag);
-                    await ctx.CreateResponseAsync($"✅ Tag `{name}` succesfully modified!", true);
+                    await ctx.CreateResponseAsync($"✅ Server-global tag `{name}` succesfully modified!", true);
                 }
                 await db.SaveChangesAsync();
             }

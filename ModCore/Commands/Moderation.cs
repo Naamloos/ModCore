@@ -166,7 +166,7 @@ namespace ModCore.Commands
             }
         }
 
-        [SlashCommand("softban", "Bans and unbans a member from this server. Deletes messages.")]
+        [SlashCommand("softban", "Bans and immediately unbans a member from this server. Deletes their messages up until a week ago.")]
         [SlashCommandPermissions(Permissions.BanMembers)]
         public async Task SoftbanAsync(InteractionContext ctx, 
             [Option("user", "User to softban.")]DiscordUser user,
@@ -185,7 +185,7 @@ namespace ModCore.Commands
             try
             {
                 await member.SendMessageAsync($"🚓 You've been kicked from {ctx.Guild.Name}" +
-                    $"{(string.IsNullOrEmpty(reason) ? "." : $" with the follwing reason:\n```\n{reason}\n```")}");
+                    $"{(string.IsNullOrEmpty(reason) ? "." : $" with the following reason:\n```\n{reason}\n```")}");
                 sent_dm = true;
             }
             catch (Exception) { }
