@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 using ModCore.Database;
 using ModCore.Database.JsonEntities;
 using System.Runtime.InteropServices;
+using Microsoft.Data.SqlClient;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace ModCore.Commands
 {
@@ -46,6 +49,7 @@ namespace ModCore.Commands
                     "[Izumemori](https://github.com/Izumemori) and " +
                     "[OoLunar](https://github.com/OoLunar)")
                 .AddField("Want to contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
+                .AddField("Donate?", "Currently, ModCore is hosted off my (Naamloos's) own money. Donations are always welcome over at [Ko-Fi](https://ko-fi.com/Naamloos)!")
                 .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl)
                 .Build();
 
@@ -68,6 +72,7 @@ namespace ModCore.Commands
         [SlashCommand("status", "Returns ModCore status info.")]
         public async Task StatusAsync(InteractionContext ctx)
         {
+            var osVersion = Environment.OSVersion.VersionString;
             var embed = new DiscordEmbedBuilder()
                 .WithTitle("ModCore Status")
                 .WithDescription("Information about ModCore's status.")
@@ -79,11 +84,37 @@ namespace ModCore.Commands
                 .AddField("👋 Current Shard", $"{ctx.Client.ShardId}", true)
                 .AddField("⏱️ Program Uptime", string.Format("<t:{0}:R>", StartTimes.ProcessStartTime.ToUnixTimeSeconds()), true)
                 .AddField("⏱️ Socket Uptime", string.Format("<t:{0}:R>", StartTimes.SocketStartTime.ToUnixTimeSeconds()), true)
-                .AddField("💻 Operating System", Environment.OSVersion.VersionString, true)
+                .AddField("💻 Operating System", osVersion.StartsWith("Unix")? fetchLinuxName() : Environment.OSVersion.VersionString, true)
                 .AddField("🪟 Framework", RuntimeInformation.FrameworkDescription, true)
                 .AddField("📖 DSharpPlus", ctx.Client.VersionString, true);
 
             await ctx.CreateResponseAsync(embed, true);
+        }
+
+        static Regex prettyNameRegex = new Regex("^PRETTY_NAME=(.*)$");
+        private string fetchLinuxName()
+        {
+            var cmd = "cat /etc/os-release";
+            var escapedArgs = cmd.Replace("\"", "\\\"");
+
+            var process = new Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/bash",
+                    Arguments = $"-c \"{escapedArgs}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+            process.Start();
+            string result = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            var match = prettyNameRegex.Match(result);
+            if (!match.Success)
+                return Environment.OSVersion.VersionString;
+            return match.Groups[1].Value.Replace("\"", "");
         }
 
         [SlashCommand("snipe", "Retrieves the last deleted message from cache.")]
@@ -261,6 +292,23 @@ namespace ModCore.Commands
                     );
 
             await channel.SendMessageAsync(msg);
+        }
+
+        [SlashCommand("coinflip", "Flips a coin.")]
+        public async Task FlipCoinAsync(InteractionContext ctx)
+        {
+            await ctx.CreateResponseAsync($"Alright! flipping a coin for you...");
+            await Task.Delay(1000);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"​ㅤ\n✊🪙"));
+            await Task.Delay(200);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"​ㅤㅤ🪙ㅤㅤ\n☝️✨"));
+            await Task.Delay(200);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"​ㅤㅤ✨🪙ㅤ\n☝️✨"));
+            await Task.Delay(200);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"ㅤㅤ✨✨\n​☝️✨ㅤㅤ🪙"));
+            await Task.Delay(1000);
+            var rng = new Random().Next(0, 2);
+            await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"​🤔 Hmm... Looks like it landed on {(rng == 0? "heads" : "tails")}!"));
         }
     }
 }

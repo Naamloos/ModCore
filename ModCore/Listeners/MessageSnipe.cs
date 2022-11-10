@@ -43,7 +43,7 @@ namespace ModCore.Listeners
                 var channel = eventargs.Guild.GetChannel(cfg.Logging.ChannelId);
                 if (channel == null)
                     return;
-                if (eventargs.Message != null)
+                if (eventargs.Message != null && eventargs.Message.Author != null)
                 {
                     var embed = new DiscordEmbedBuilder()
                             .WithTitle("Message Deleted")
