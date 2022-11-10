@@ -132,6 +132,28 @@ namespace ModCore.Components
                     .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "lg", "Back to Logger config", emoji: new DiscordComponentEmoji("🏃"))));
         }
 
+        [Component("lg.role", ComponentType.Button)]
+        public async Task ToggleRolesAsync(ComponentInteractionCreateEventArgs e, IDictionary<string, string> values)
+        {
+            var enabled = values["on"] == "true";
+
+            await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
+
+            using (var db = database.CreateContext())
+            {
+                var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
+                var settings = guild.GetSettings();
+
+                settings.Logging.RoleLog_Enable = enabled;
+                guild.SetSettings(settings);
+                db.GuildConfig.Update(guild);
+                await db.SaveChangesAsync();
+            }
+
+            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"👍 {(enabled ? "Enabled" : "Disabled")} Role Update logging.")
+                    .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "lg", "Back to Logger config", emoji: new DiscordComponentEmoji("🏃"))));
+        }
+
         [Component("lg.mod", ComponentType.Button)]
         public async Task ToggleModAsync(ComponentInteractionCreateEventArgs e, IDictionary<string, string> values)
         {
@@ -207,6 +229,9 @@ namespace ModCore.Components
                 var enableAvatars = ExtensionStatics.GenerateIdString("lg.avatar", new Dictionary<string, string>() { { "on", "true" } });
                 var disableAvatars = ExtensionStatics.GenerateIdString("lg.avatar", new Dictionary<string, string>() { { "on", "false" } });
 
+                var enableRoles = ExtensionStatics.GenerateIdString("lg.role", new Dictionary<string, string>() { { "on", "true" } });
+                var disableRoles = ExtensionStatics.GenerateIdString("lg.role", new Dictionary<string, string>() { { "on", "false" } });
+
                 var enableModActions = ExtensionStatics.GenerateIdString("lg.mod", new Dictionary<string, string>() { { "on", "true" } });
                 var disableModAction = ExtensionStatics.GenerateIdString("lg.mod", new Dictionary<string, string>() { { "on", "false" } });
 
@@ -223,14 +248,17 @@ namespace ModCore.Components
 
                         new DiscordButtonComponent(settings.NickameLog_Enable? ButtonStyle.Danger : ButtonStyle.Success,
                             settings.NickameLog_Enable? disableNicknames : enableNicknames, settings.NickameLog_Enable? "Disable Nickname Update" : "Enable Nickname Update"),
+
+                        new DiscordButtonComponent(settings.InviteLog_Enable? ButtonStyle.Danger : ButtonStyle.Success,
+                            settings.InviteLog_Enable? disableInvites : enableInvites, settings.InviteLog_Enable? "Disable Invites" : "Enable Invites"),
                     })
                     .AddComponents(new DiscordComponent[]
                     {
-                        new DiscordButtonComponent(settings.InviteLog_Enable? ButtonStyle.Danger : ButtonStyle.Success,
-                            settings.InviteLog_Enable? disableInvites : enableInvites, settings.InviteLog_Enable? "Disable Invites" : "Enable Invites"),
-
                         new DiscordButtonComponent(settings.AvatarLog_Enable? ButtonStyle.Danger : ButtonStyle.Success,
                             settings.AvatarLog_Enable? disableAvatars : enableAvatars, settings.AvatarLog_Enable? "Disable Avatars" : "Enable Avatars"),
+
+                        new DiscordButtonComponent(settings.RoleLog_Enable? ButtonStyle.Danger : ButtonStyle.Success,
+                            settings.RoleLog_Enable? disableRoles : enableRoles, settings.RoleLog_Enable? "Disable Roles" : "Enable Roles"),
 
                         new DiscordButtonComponent(settings.ModLog_Enable? ButtonStyle.Danger : ButtonStyle.Success,
                             settings.ModLog_Enable? disableModAction : enableModActions, settings.ModLog_Enable? "Disable Mod Actions" : "Enable Mod Actions"),

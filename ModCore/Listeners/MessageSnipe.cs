@@ -43,15 +43,18 @@ namespace ModCore.Listeners
                 var channel = eventargs.Guild.GetChannel(cfg.Logging.ChannelId);
                 if (channel == null)
                     return;
-                var embed = new DiscordEmbedBuilder()
-                        .WithTitle("Message Deleted")
-                        .WithAuthor($"{eventargs.Message.Author.Username}",
-                            iconUrl: eventargs.Message.Author.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
-                        .AddField("Content", eventargs.Message != null ? eventargs.Message.Content.Truncate(1000) : "Original Content Unknown.")
-                        .AddField("Channel", eventargs.Message.Channel.Mention)
-                        .WithColor(DiscordColor.Orange)
-                        .AddField("IDs", $"```ini\nUser = {eventargs.Message.Author.Id}\nChannel = {eventargs.Channel.Id}\nMessage = {eventargs.Message.Id}```");
-                await channel.ElevatedMessageAsync(embed);
+                if (eventargs.Message != null)
+                {
+                    var embed = new DiscordEmbedBuilder()
+                            .WithTitle("Message Deleted")
+                            .WithAuthor($"{eventargs.Message.Author.Username}",
+                                iconUrl: eventargs.Message.Author.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
+                            .AddField("Content", eventargs.Message != null ? eventargs.Message.Content.Truncate(1000) : "Original Content Unknown.")
+                            .AddField("Channel", eventargs.Message.Channel.Mention)
+                            .WithColor(DiscordColor.Orange)
+                            .AddField("IDs", $"```ini\nUser = {eventargs.Message.Author.Id}\nChannel = {eventargs.Channel.Id}\nMessage = {eventargs.Message.Id}```");
+                    await channel.ElevatedMessageAsync(embed);
+                }
             }
         }
 
@@ -82,20 +85,24 @@ namespace ModCore.Listeners
                 var channel = eventargs.Guild.GetChannel(cfg.Logging.ChannelId);
                 if (channel == null)
                     return;
-                var embed = new DiscordEmbedBuilder()
-                        .WithTitle("Message Edited")
-                        .WithAuthor($"{eventargs.Message.Author.Username}",
-                            iconUrl: eventargs.Author.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
-                        .AddField("Original Message", eventargs.MessageBefore != null ? eventargs.MessageBefore.Content.Truncate(1000) : "Original Content Unknown.")
-                        .AddField("Edited Message", eventargs.Message.Content.Truncate(1000))
-                        .AddField("Channel", eventargs.Message.Channel.Mention)
-                        .WithColor(DiscordColor.Orange)
-                        .AddField("IDs", $"```ini\nUser = {eventargs.Message.Author.Id}\nChannel = {eventargs.Channel.Id}\nMessage = {eventargs.Message.Id}```");
 
-                var msg = new DiscordMessageBuilder()
-                    .WithEmbed(embed)
-                    .AddComponents(new DiscordLinkButtonComponent(eventargs.Message.JumpLink.ToString(), "Go to message"));
-                await channel.ElevatedMessageAsync(embed);
+                if (eventargs.Message.Content != eventargs.MessageBefore.Content)
+                {
+                    var embed = new DiscordEmbedBuilder()
+                            .WithTitle("Message Edited")
+                            .WithAuthor($"{eventargs.Message.Author.Username}",
+                                iconUrl: eventargs.Author.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
+                            .AddField("Original Message", eventargs.MessageBefore != null ? eventargs.MessageBefore.Content.Truncate(1000) : "Original Content Unknown.")
+                            .AddField("Edited Message", eventargs.Message.Content.Truncate(1000))
+                            .AddField("Channel", eventargs.Message.Channel.Mention)
+                            .WithColor(DiscordColor.Orange)
+                            .AddField("IDs", $"```ini\nUser = {eventargs.Message.Author.Id}\nChannel = {eventargs.Channel.Id}\nMessage = {eventargs.Message.Id}```");
+
+                    var msg = new DiscordMessageBuilder()
+                        .WithEmbed(embed)
+                        .AddComponents(new DiscordLinkButtonComponent(eventargs.Message.JumpLink.ToString(), "Go to message"));
+                    await channel.ElevatedMessageAsync(embed);
+                }
             }
         }
     }

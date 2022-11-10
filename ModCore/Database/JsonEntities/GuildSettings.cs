@@ -209,6 +209,9 @@ namespace ModCore.Database.JsonEntities
         [JsonProperty("avatarlog_enabled")]
         public bool AvatarLog_Enable { get; set; } = false;
 
+        [JsonProperty("roles_enabled")]
+        public bool RoleLog_Enable { get; set; } = false;
+
         [JsonProperty("modlog_enabled")]
         public bool ModLog_Enable { get; set; } = false;
 
