@@ -52,7 +52,7 @@ namespace ModCore.Components
                     });
 
 
-                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"📖 Role Menu {context["n"]}")
+                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"📖 Role Menu with name: `{context["n"]}`")
                         .AddComponents(new DiscordSelectComponent(customId, "Select roles...", options, maxOptions: options.Count)));
                     return;
                 }

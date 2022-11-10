@@ -28,6 +28,7 @@ namespace ModCore.Modals
 
         public async Task HandleAsync(DiscordInteraction interaction)
         {
+            var name = Name.Replace("`", "").Replace("\\", "");
             var member = await interaction.Guild.GetMemberAsync(interaction.User.Id);
             if (!member.Permissions.HasPermission(Permissions.ManageGuild))
             {
@@ -45,7 +46,7 @@ namespace ModCore.Modals
                     return;
                 }
 
-                if(settings.RoleMenus.Any(x => x.Name == Name))
+                if(settings.RoleMenus.Any(x => x.Name == name))
                 {
                     await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"⛔ A role menu with that name already exists!")
                         .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Back to Role Menu config", emoji: new DiscordComponentEmoji("🏃"))));
@@ -54,11 +55,12 @@ namespace ModCore.Modals
 
                 var customId = ExtensionStatics.GenerateIdString("rm.setroles", new Dictionary<string, string>()
                 {
-                    { "n", Name }
+                    { "n", name }
                 });
 
-                await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"📝 Pick the roles for this new menu...")
-                        .AddComponents(new DiscordRoleSelectComponent(customId, "Select roles...", maxOptions: 25)));
+                await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
+                    .WithContent($"📝 Pick the roles for this new menu...")
+                    .AddComponents(new DiscordRoleSelectComponent(customId, "Select roles...", maxOptions: 25)));
             }
         }
     }
