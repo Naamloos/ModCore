@@ -13,7 +13,7 @@ namespace ModCore.Listeners
 {
     public class NoBotFarm
     {
-        [AsyncListener(EventType.GuildAvailable)]
+        [AsyncListener(EventType.GuildCreated)]
         public static async Task NoBotFarmsPleaseAsync(GuildCreateEventArgs e, DiscordClient client, Settings settings)
         {
             client.Logger.LogInformation($"New guild joined: {e.Guild.Name}. Starting sus-guild check...");
