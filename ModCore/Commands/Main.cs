@@ -32,10 +32,10 @@ namespace ModCore.Commands
         {
             var eb = new DiscordEmbedBuilder()
                 .WithColor(new DiscordColor("#089FDF"))
-                .WithTitle("ModCore")
-                .WithDescription("A powerful moderating bot written on top of DSharpPlus")
+                .WithAuthor("ModCore", null, ctx.Client.CurrentUser.AvatarUrl)
+                .WithDescription("ModCore is a powerful moderating bot written in C# using DSharpPlus.")
                 .AddField("Main developer", "[Naamloos](https://github.com/Naamloos)")
-                .AddField("Special thanks to these contributors:",
+                .AddField("Special thanks to all of these wonderful contributors:",
                     "[uwx](https://github.com/uwx), " +
                     "[jcryer](https://github.com/jcryer), " +
                     "[Emzi0767](https://github.com/Emzi0767), " +
@@ -45,13 +45,7 @@ namespace ModCore.Commands
                     "[Drake103](https://github.com/Drake103), " +
                     "[Izumemori](https://github.com/Izumemori) and " +
                     "[OoLunar](https://github.com/OoLunar)")
-                .AddField("Environment",
-                    $"*OS:* {Environment.OSVersion.VersionString}" +
-                    $"\n*Framework:* {Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName}" +
-                    $"\n*DSharpPlus:* {ctx.Client.VersionString}" +
-                    $"\n*Servers:* {this.Shared.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()}" +
-                    $"\n*Shards:* {this.Shared.ModCore.Shards.Count}")
-                .AddField("Contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
+                .AddField("Want to contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
                 .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl)
                 .Build();
 
@@ -77,13 +71,17 @@ namespace ModCore.Commands
             var embed = new DiscordEmbedBuilder()
                 .WithTitle("ModCore Status")
                 .WithDescription("Information about ModCore's status.")
+                .WithColor(new DiscordColor("#089FDF"))
                 .WithThumbnail(ctx.Client.CurrentUser.GetAvatarUrl(ImageFormat.Png))
                 .AddField("🏓 Socket Ping", $"{ctx.Client.Ping} ms", true)
-                .AddField("⚡ Servers", $"{this.Shared.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()}", true)
-                .AddField("⚡ Shards", $"{ctx.Client.ShardCount}", true)
-                .AddField("⚡ Current Shard", $"{ctx.Client.ShardId}", true)
+                .AddField("🏠 Servers", $"{this.Shared.ModCore.Shards.Select(x => x.Client.Guilds.Count).Sum()}", true)
+                .AddField("🏙 Shards", $"{ctx.Client.ShardCount}", true)
+                .AddField("👋 Current Shard", $"{ctx.Client.ShardId}", true)
                 .AddField("⏱️ Program Uptime", string.Format("<t:{0}:R>", StartTimes.ProcessStartTime.ToUnixTimeSeconds()), true)
-                .AddField("⏱️ Socket Uptime", string.Format("<t:{0}:R>", StartTimes.SocketStartTime.ToUnixTimeSeconds()), true);
+                .AddField("⏱️ Socket Uptime", string.Format("<t:{0}:R>", StartTimes.SocketStartTime.ToUnixTimeSeconds()), true)
+                .AddField("💻 Operating System", Environment.OSVersion.VersionString, true)
+                .AddField("🪟 Framework", RuntimeInformation.FrameworkDescription, true)
+                .AddField("📖 DSharpPlus", ctx.Client.VersionString, true);
 
             await ctx.CreateResponseAsync(embed, true);
         }

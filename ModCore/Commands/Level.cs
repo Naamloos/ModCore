@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using ModCore.Database;
+using ModCore.Utils.Extensions;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,6 +24,11 @@ namespace ModCore.Commands
 
             using (var db = Database.CreateContext())
             {
+                if(!ctx.Guild.GetGuildSettings(db).Levels.Enabled)
+                {
+                    await ctx.CreateResponseAsync("⛔ Levels are disabled in this server!");
+                    return;
+                }
                 var data = db.Levels.FirstOrDefault(x => x.UserId == (long)targetUser.Id && x.GuildId == (long)ctx.Guild.Id);
                 if (data != null)
                 {
@@ -42,6 +48,12 @@ namespace ModCore.Commands
         {
             using (var db = Database.CreateContext())
             {
+                if (!ctx.Guild.GetGuildSettings(db).Levels.Enabled)
+                {
+                    await ctx.CreateResponseAsync("⛔ Levels are disabled in this server!");
+                    return;
+                }
+
                 var top10 = db.Levels.Where(x => x.GuildId == (long)ctx.Guild.Id)
                     .OrderByDescending(x => x.Experience)
                     .Take(10)

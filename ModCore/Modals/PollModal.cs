@@ -22,7 +22,7 @@ namespace ModCore.Modals
         [ModalField("How long will this poll run?", "duration")]
         public string Duration { get; set; }
 
-        [ModalField("Poll options, separated new lines", "options", style: TextInputStyle.Paragraph)]
+        [ModalField("Poll options, separated by new lines", "options", style: TextInputStyle.Paragraph)]
         public string Options { get; set; }
 
         private DiscordClient client;
@@ -63,7 +63,7 @@ namespace ModCore.Modals
                     .WithContent("✅ Creating your poll!").AsEphemeral());
 
             // Build poll with buttons n shit
-            StringBuilder pollText = new StringBuilder($"**✏️ Poll: {Title}**\n\n");
+            StringBuilder pollText = new StringBuilder($"**✏️ Poll: {Title} to be announced <t:{DateTimeOffset.Now.Add(duration).ToUnixTimeSeconds()}:R>**\n\n");
 
             var message = new DiscordMessageBuilder();
 

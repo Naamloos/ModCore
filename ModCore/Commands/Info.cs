@@ -50,7 +50,7 @@ namespace ModCore.Commands
             await ctx.CreateResponseAsync(embed, true);
         }
 
-        [SlashCommand("permissions", "List permissions for a specific user")]
+        [SlashCommand("permissions", "Lists permissions for a specific user")]
         public async Task PermsAsync(InteractionContext ctx, [Option("user", "User to show information about.")] DiscordUser user)
         {
             var member = await ctx.Guild.GetMemberAsync(user.Id);
@@ -65,7 +65,7 @@ namespace ModCore.Commands
             await ctx.CreateResponseAsync(embed, true);
         }
 
-        [SlashCommand("channel-permissions", "List channel permissions for a specific user")]
+        [SlashCommand("channel-permissions", "Lists channel permissions for a specific user")]
         public async Task ChannelPermsAsync(InteractionContext ctx, [Option("user", "User to show information about.")] DiscordUser user)
         {
             var member = await ctx.Guild.GetMemberAsync(user.Id);
@@ -82,12 +82,12 @@ namespace ModCore.Commands
             await ctx.CreateResponseAsync(embed, true);
         }
 
-        [SlashCommand("role", "List information about a role.")]
+        [SlashCommand("role", "Lists information about a role.")]
         public async Task RoleAsync(InteractionContext ctx, [Option("role", "Role to show information about.")]DiscordRole role)
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"{role.Name} ID: ({role.Id})")
-                .WithDescription($"Created at {role.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}")
+                .WithDescription($"Created at <t:{role.CreationTimestamp.ToUnixTimeSeconds()}:F>")
                 .AddField("Permissions", role.Permissions.ToPermissionString())
                 .AddField("Data", $"Mentionable: {(role.IsMentionable ? "yes" : "no")}.\nHoisted: {(role.IsHoisted ? "yes" : "no")}.\nManaged: {(role.IsManaged ? "yes" : "no")}.")
                 .WithColor(role.Color);
@@ -101,7 +101,7 @@ namespace ModCore.Commands
             await ctx.CreateResponseAsync(embed, true);
         }
 
-        [SlashCommand("server", "List information about the current server.")]
+        [SlashCommand("server", "Lists information about the current server.")]
         public async Task ServerAsync(InteractionContext ctx)
         {
             var guild = ctx.Guild;
@@ -135,6 +135,12 @@ namespace ModCore.Commands
                     case ChannelType.Category:
                         channelstring.Append($"`[{channel.Value.Name.ToUpper()} (📁)]`");
                         break;
+                    case ChannelType.News:
+                        channelstring.Append($"`[{channel.Value.Name.ToUpper()} (🗞)]`");
+                        break;
+                    case ChannelType.Private:
+                        channelstring.Append($"`[{channel.Value.Name.ToUpper()} (🤫)]`");
+                        break;
                     default:
                         channelstring.Append($"`[{channel.Value.Name} (❓)]`");
                         break;
@@ -163,13 +169,12 @@ namespace ModCore.Commands
             await ctx.CreateResponseAsync(embed, true);
         }
 
-        // TODO add new channel types
-        [SlashCommand("channel", "List information about a channel")]
+        [SlashCommand("channel", "Lists information about a channel")]
         public async Task ChannelAsync(InteractionContext ctx, [Option("channel", "Channel to list information about.")]DiscordChannel channel)
         {
             var embed = new DiscordEmbedBuilder();
             embed.WithTitle($"#{channel.Name} ID: ({channel.Id})")
-                .WithDescription($"Topic: {channel.Topic}\nCreated at: {channel.CreationTimestamp.DateTime.ToString(CultureInfo.InvariantCulture)}" +
+                .WithDescription($"Topic: {channel.Topic}\nCreated at: <t:{channel.CreationTimestamp.ToUnixTimeSeconds()}:F>" +
                 $"{(channel.ParentId != null ? $"\nChild of `{channel.Parent.Name.ToUpper()}` ID: ({channel.Parent.Id})" : "")}");
 
             if (channel.IsCategory)
@@ -189,6 +194,12 @@ namespace ModCore.Commands
                         case ChannelType.Category:
                             channelstring.Append($"`[{childchannel.Name.ToUpper()} (📁)]`");
                             break;
+                        case ChannelType.News:
+                            channelstring.Append($"`[{childchannel.Name.ToUpper()} (🗞)]`");
+                            break;
+                        case ChannelType.Private:
+                            channelstring.Append($"`[{childchannel.Name.ToUpper()} (🤫)]`");
+                            break;
                         default:
                             channelstring.Append($"`[{childchannel.Name} (❓)]`");
                             break;
@@ -201,7 +212,7 @@ namespace ModCore.Commands
             {
                 embed.AddField("Voice", $"Bit rate: {channel.Bitrate}\nUser limit: {(channel.UserLimit == 0 ? "Unlimited" : $"{channel.UserLimit}")}");
             }
-            embed.AddField("Misc", $"NSFW: {(channel.IsNSFW ? "yes" : "no")}\n" +
+            embed.AddField("Misc", $"NSFW: {(channel.IsNSFW ? "Yes 😏" : "No")}\n" +
                 $"{(channel.Type == ChannelType.Text ? $"Last message ID: {(await channel.GetMessagesAsync(1))[0].Id}" : "")}");
 
             await ctx.CreateResponseAsync(embed, true);
