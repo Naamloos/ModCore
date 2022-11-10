@@ -21,18 +21,22 @@ namespace ModCore.Commands
     {
         // regular, user, regex, commands, bots, images
         [SlashCommand("regular", "Clears chat without any special parameters.")]
-        public async Task RegularPurgeAsync(InteractionContext ctx)
+        public async Task RegularPurgeAsync(InteractionContext ctx, 
+            [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)]long limit = 50,
+            [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)]long skip = 0)
         {
-            IEnumerable<DiscordMessage> messages = await ctx.Channel.GetMessagesAsync();
+            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
 
             await deleteAsync(ctx, messages);
         }
 
         [SlashCommand("user", "Clears chat by a specific user.")]
         public async Task UserPurgeAsync(InteractionContext ctx, 
-            [Option("user", "User to delete messages from.")]DiscordUser user)
+            [Option("user", "User to delete messages from.")]DiscordUser user,
+            [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)] long limit = 50,
+            [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)] long skip = 0)
         {
-            IEnumerable<DiscordMessage> messages = await ctx.Channel.GetMessagesAsync();
+            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
             messages = messages.Where(x => x.Author.Id == user.Id);
 
             await deleteAsync(ctx, messages);
@@ -41,9 +45,11 @@ namespace ModCore.Commands
 		[SlashCommand("regex", "Clears chat using a Regular Expression. (EXPERT USERS ONLY!)")]
         public async Task RegexPurgeAsync(InteractionContext ctx, 
             [Option("regex", "Regular Expression to use.")] string regex,
-            [Option("flags", "Regex flags to use.")] string flags)
+            [Option("flags", "Regex flags to use.")] string flags = "",
+            [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)] long limit = 50,
+            [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)] long skip = 0)
         {
-			IEnumerable<DiscordMessage> messages = await ctx.Channel.GetMessagesAsync();
+			IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
 
 			// TODO add a flag to disable CultureInvariant.
 			var regexOptions = RegexOptions.CultureInvariant;
@@ -82,18 +88,22 @@ namespace ModCore.Commands
 		}
 
         [SlashCommand("bots", "Clears chat messages by bots.")]
-        public async Task BotsPurgeAsync(InteractionContext ctx)
+        public async Task BotsPurgeAsync(InteractionContext ctx,
+            [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)] long limit = 50,
+            [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)] long skip = 0)
         {
-            IEnumerable<DiscordMessage> messages = await ctx.Channel.GetMessagesAsync();
+            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
             messages = messages.Where(x => x.Author.IsBot);
 
             await deleteAsync(ctx, messages);
         }
 
         [SlashCommand("attachments", "Clears chat messages with attachments.")]
-        public async Task AttachmentsPurgeAsync(InteractionContext ctx)
+        public async Task AttachmentsPurgeAsync(InteractionContext ctx,
+            [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)] long limit = 50,
+            [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)] long skip = 0)
         {
-            IEnumerable<DiscordMessage> messages = await ctx.Channel.GetMessagesAsync();
+            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
             messages = messages.Where(x => x.Attachments.Count > 0);
 
             await deleteAsync(ctx, messages);
@@ -102,9 +112,11 @@ namespace ModCore.Commands
         private Regex ImageRegex = new Regex(@"\.(png|gif|jpg|jpeg|tiff|webp)");
 
         [SlashCommand("images", "Clears chat messages with attachments.")]
-        public async Task ImagesPurgeAsync(InteractionContext ctx)
+        public async Task ImagesPurgeAsync(InteractionContext ctx,
+            [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)] long limit = 50,
+            [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)] long skip = 0)
         {
-            IEnumerable<DiscordMessage> messages = await ctx.Channel.GetMessagesAsync();
+            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
             messages = messages.Where(x => x.Attachments.Count > 0);
             messages = messages.Where(m => ImageRegex.IsMatch(m.Content) || m.Attachments.Any(x => ImageRegex.IsMatch(x.FileName)));
             await deleteAsync(ctx, messages);

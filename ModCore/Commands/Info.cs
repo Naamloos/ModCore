@@ -12,7 +12,7 @@ namespace ModCore.Commands
     [GuildOnly]
     public class Info : ApplicationCommandModule
     {
-        [SlashCommand("member", "List information about a member.")]
+        [SlashCommand("member", "Lists information about a member.")]
         public async Task MemberAsync(InteractionContext ctx, [Option("user", "User to show information about.")]DiscordUser user)
         {
             var member = await ctx.Guild.GetMemberAsync(user.Id);
