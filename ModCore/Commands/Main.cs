@@ -42,8 +42,9 @@ namespace ModCore.Commands
                     "[YourAverageBlackGuy](https://github.com/YourAverageBlackGuy), " +
                     "[DrCreo](https://github.com/DrCreo), " +
                     "[aexolate](https://github.com/aexolate), " +
-                    "[Drake103](https://github.com/Drake103) and " +
-                    "[Izumemori](https://github.com/Izumemori)")
+                    "[Drake103](https://github.com/Drake103), " +
+                    "[Izumemori](https://github.com/Izumemori) and" +
+                    "[OoLunar](https://github.com/OoLunar)")
                 .AddField("Environment",
                     $"*OS:* {Environment.OSVersion.VersionString}" +
                     $"\n*Framework:* {Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName}" +

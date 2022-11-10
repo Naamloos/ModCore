@@ -37,5 +37,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ghcr.io/Naamloos/ModCore:latest
-            ghcr.io/Naamloos/ModCore:${{ steps.previoustag.outputs.tag }}
+            ghcr.io/naamloos/modCore:latest
+            ghcr.io/naamloos/modCore:${{ steps.previoustag.outputs.tag }}
