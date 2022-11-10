@@ -19,6 +19,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.IO;
 
 namespace ModCore.Commands
 {
@@ -91,30 +92,20 @@ namespace ModCore.Commands
             await ctx.CreateResponseAsync(embed, true);
         }
 
-        static Regex prettyNameRegex = new Regex("^PRETTY_NAME=(.*)$");
+        static Regex prettyNameRegex = new Regex("PRETTY_NAME=(.*)");
         private string fetchLinuxName()
         {
-            var cmd = "cat /etc/os-release";
-            var escapedArgs = cmd.Replace("\"", "\\\"");
-
-            var process = new Process()
+            try
             {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "/bin/bash",
-                    Arguments = $"-c \"{escapedArgs}\"",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                }
-            };
-            process.Start();
-            string result = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-            var match = prettyNameRegex.Match(result);
-            if (!match.Success)
+                var result = File.ReadAllText("/etc/os-release");
+                var match = prettyNameRegex.Match(result);
+                if (!match.Success)
+                    return Environment.OSVersion.VersionString;
+                return match.Groups[1].Value.Replace("\"", "");
+            }catch(Exception)
+            {
                 return Environment.OSVersion.VersionString;
-            return match.Groups[1].Value.Replace("\"", "");
+            }
         }
 
         [SlashCommand("snipe", "Retrieves the last deleted message from cache.")]
