@@ -131,7 +131,7 @@ namespace ModCore.Components
                 await db.SaveChangesAsync();
             }
 
-            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"👍 Created role menu with name {context["n"]}! Use `/rolemenu` to post it in a channel!")
+            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"👍 Created role menu with name {context["n"]}! Use the Role Menu config to post it in a channel!")
                     .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Back to Role Menu config", emoji: new DiscordComponentEmoji("🏃"))));
         }
 
