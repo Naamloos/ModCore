@@ -25,7 +25,7 @@ namespace ModCore.Commands
             [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)]long limit = 50,
             [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)]long skip = 0)
         {
-            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
+            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)limit)).Skip((int)skip);
 
             await deleteAsync(ctx, messages);
         }
@@ -36,7 +36,7 @@ namespace ModCore.Commands
             [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)] long limit = 50,
             [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)] long skip = 0)
         {
-            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
+            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)limit)).Skip((int)skip);
             messages = messages.Where(x => x.Author.Id == user.Id);
 
             await deleteAsync(ctx, messages);
@@ -49,7 +49,7 @@ namespace ModCore.Commands
             [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)] long limit = 50,
             [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)] long skip = 0)
         {
-			IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
+			IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)limit)).Skip((int)skip);
 
 			// TODO add a flag to disable CultureInvariant.
 			var regexOptions = RegexOptions.CultureInvariant;
@@ -92,7 +92,7 @@ namespace ModCore.Commands
             [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)] long limit = 50,
             [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)] long skip = 0)
         {
-            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
+            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)limit)).Skip((int)skip);
             messages = messages.Where(x => x.Author.IsBot);
 
             await deleteAsync(ctx, messages);
@@ -103,7 +103,7 @@ namespace ModCore.Commands
             [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)] long limit = 50,
             [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)] long skip = 0)
         {
-            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
+            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)limit)).Skip((int)skip);
             messages = messages.Where(x => x.Attachments.Count > 0);
 
             await deleteAsync(ctx, messages);
@@ -116,7 +116,7 @@ namespace ModCore.Commands
             [Option("limit", "Maximum amount of messages to fetch in this Purge")][Maximum(100)][Minimum(1)] long limit = 50,
             [Option("skip", "Amount of newer messages to skip when purging")][Minimum(0)][Maximum(99)] long skip = 0)
         {
-            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)(limit + skip))).Skip((int)skip);
+            IEnumerable<DiscordMessage> messages = (await ctx.Channel.GetMessagesAsync((int)limit)).Skip((int)skip);
             messages = messages.Where(x => x.Attachments.Count > 0);
             messages = messages.Where(m => ImageRegex.IsMatch(m.Content) || m.Attachments.Any(x => ImageRegex.IsMatch(x.FileName)));
             await deleteAsync(ctx, messages);
