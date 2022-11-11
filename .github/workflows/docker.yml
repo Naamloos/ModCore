@@ -39,3 +39,8 @@ jobs:
           tags: |
             ghcr.io/naamloos/modcore:latest
             ghcr.io/naamloos/modcore:${{ steps.previoustag.outputs.tag }}
+      - name: Web Request Action
+        uses: Satak/webrequest-action@v1.2.3
+        with:
+          url: ${{ secrets.PORTAINER_WEBHOOK }}
+          method: POST
