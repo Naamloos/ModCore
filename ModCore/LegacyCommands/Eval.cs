@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using ModCore.Entities;
 using ModCore.Utils.Extensions;
 
-namespace ModCore.OldCommands
+namespace ModCore.LegacyCommands
 {
     public class Eval : BaseCommandModule
 	{
