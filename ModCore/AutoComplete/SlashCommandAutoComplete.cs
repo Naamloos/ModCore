@@ -35,7 +35,10 @@ namespace ModCore.AutoComplete
                 }
             }
 
-            var qualified = qualifiedCommands.Where(x => x.Key.Substring(1).StartsWith(value)).Take(5).Select(x => new DiscordAutoCompleteChoice(x.Key, $"</{x.Key.Substring(1)}:{x.Value}>"));
+            var qualified = qualifiedCommands.Where(x => x.Key.Substring(1).Contains(value))
+                .OrderBy(x => x.Key.IndexOf(value))
+                .Take(25)
+                .Select(x => new DiscordAutoCompleteChoice(x.Key, $"</{x.Key.Substring(1)}:{x.Value}>"));
             return qualified.ToList();
         }
 

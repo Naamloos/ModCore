@@ -3,6 +3,7 @@ using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.SlashCommands;
+using ModCore.AutoComplete;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Utils.Extensions;
@@ -21,7 +22,7 @@ namespace ModCore.Commands
 
         [SlashCommand("get", "Gets a tag in this channel.")]
         public async Task GetAsync(InteractionContext ctx,
-            [Option("name", "Tag name.")]string name)
+            [Option("name", "Tag name.", true)][Autocomplete(typeof(TagAutoComplete))]string name)
         {
             if (tryGetTag(name, ctx.Channel, out DatabaseTag tag))
             {
@@ -123,7 +124,8 @@ namespace ModCore.Commands
         }
 
         [SlashCommand("remove", "Removes a tag.")]
-        public async Task RemoveAsync(InteractionContext ctx, [Option("name", "Name of the tag to remove.")]string name)
+        public async Task RemoveAsync(InteractionContext ctx, 
+            [Option("name", "Name of the tag to remove.", true)][Autocomplete(typeof(TagAutoComplete))] string name)
         {
             if (!tryGetTag(name, ctx.Channel, out DatabaseTag tag))
             {
@@ -160,7 +162,7 @@ namespace ModCore.Commands
 
         [SlashCommand("info", "Shows information about a tag.")]
         public async Task InfoAsync(InteractionContext ctx, 
-            [Option("name", "Name of tag to show information about.")]string name)
+            [Option("name", "Name of tag to show information about.", true)][Autocomplete(typeof(TagAutoComplete))] string name)
         {
             if (!tryGetTag(name, ctx.Channel, out DatabaseTag tag))
             {
@@ -179,7 +181,7 @@ namespace ModCore.Commands
 
         [SlashCommand("transfer", "Transfers a tag to a different user.")]
         public async Task TransferAsync(InteractionContext ctx, 
-            [Option("name", "Name of tag you want to transfer.")]string name, 
+            [Option("name", "Name of tag you want to transfer.", true)][Autocomplete(typeof(TagAutoComplete))] string name, 
             [Option("user", "User to transfer this tag to.")]DiscordUser newowner)
         {
             if (!tryGetTag(name, ctx.Channel, out DatabaseTag tag))
@@ -240,7 +242,7 @@ namespace ModCore.Commands
             }
         }
 
-        private bool canManageTag(DatabaseTag tag, DiscordChannel channel, DiscordMember member)
+        public static bool canManageTag(DatabaseTag tag, DiscordChannel channel, DiscordMember member)
         {
             return tag.OwnerId == (long)member.Id
                 || channel.Guild.OwnerId == member.Id

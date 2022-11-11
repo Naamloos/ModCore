@@ -22,6 +22,7 @@ namespace ModCore.Extensions
         private DiscordClient client;
         private ILogger logger;
 
+        public IServiceProvider Services { get => services; }
         private readonly IServiceProvider services;
 
         public InteractionExtension(IServiceProvider services)
