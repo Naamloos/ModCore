@@ -20,6 +20,7 @@ using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.IO;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace ModCore.Commands
 {
@@ -30,6 +31,8 @@ namespace ModCore.Commands
         public StartTimes StartTimes { private get; set; }
         public Settings Settings { private get; set; }
         public DatabaseContextBuilder Database { private get; set; }
+
+        public IMemoryCache Cache { private get; set; }
 
         [SlashCommand("about", "Prints information about ModCore.")]
         public async Task AboutAsync(InteractionContext ctx)
@@ -118,37 +121,58 @@ namespace ModCore.Commands
 
         private async Task doSnipeAsync(InteractionContext ctx, bool edit)
         {
-            var messages = edit ? this.Shared.EditedMessages : this.Shared.DeletedMessages;
-            if (messages.ContainsKey(ctx.Channel.Id))
-            {
-                var message = this.Shared.DeletedMessages[ctx.Channel.Id];
+            var snipeId = $"{(edit? "esnipe" : "snipe")}_{ctx.Channel.Id}";
 
+            if(Cache.TryGetValue(snipeId, out DiscordMessage message))
+            {
                 var content = message.Content;
                 if (content.Length > 500)
                     content = content.Substring(0, 500) + "...";
 
                 var embed = new DiscordEmbedBuilder()
                     .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}" + (edit ? " (Edited)" : ""),
-                        iconUrl: message.Author.GetAvatarUrl(ImageFormat.Png));
+                        iconUrl: message.Author.GetAvatarUrl(ImageFormat.Png))
+                    .WithFooter($"{(edit? "Edit" : "Deletion")} sniped by {ctx.User.Username}#{ctx.User.Discriminator}", ctx.User.AvatarUrl);
 
-                if (!string.IsNullOrEmpty(message.Content))
+                if (!string.IsNullOrEmpty(content))
                 {
-                    embed.WithDescription(message.Content);
+                    embed.WithDescription(content);
                 }
 
                 embed.WithTimestamp(message.Id);
 
-                if (message.Attachments.Count > 0)
-                {
-                    if (message.Attachments[0].MediaType.StartsWith("image/"))
-                        embed.WithImageUrl(message.Attachments[0].Url);
-                }
+                List<DiscordEmbedBuilder> embeds = new List<DiscordEmbedBuilder>();
+                var attachments = message.Attachments.Where(x => x.MediaType.StartsWith("image/"));
 
-                await ctx.CreateResponseAsync(embed);
+                for (int i = 0; i < attachments.Count(); i++)
+                {
+                    var attachment = attachments.ElementAt(i);
+                    if (i == 0)
+                    {
+                        embed.WithThumbnail(attachment.Url);
+                    }
+                    else
+                    {
+                        embeds.Add(new DiscordEmbedBuilder()
+                            .WithTitle("Additional Image").WithThumbnail(attachment.Url));
+                    }
+                }
+                
+                var response = new DiscordInteractionResponseBuilder()
+                    .AddEmbeds(embeds.Prepend(embed).Select(x => x.Build()));
+
+                var customId = ExtensionStatics.GenerateIdString("del", new Dictionary<string, string>()
+                {
+                    {"u", ctx.User.Id.ToString() }
+                });
+
+                response.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, customId, "", emoji: new DiscordComponentEmoji("🗑")));
+
+                await ctx.CreateResponseAsync(response);
                 return;
             }
 
-            await ctx.CreateResponseAsync("⚠️ No message to snipe!", true);
+            await ctx.CreateResponseAsync("⚠️ No message to snipe! Either nothing was deleted, or the message has expired (12 hours)!", true);
         }
 
         [SlashCommand("contact", "Contact ModCore developers.")]

@@ -93,6 +93,7 @@ namespace ModCore
                 .AddSingleton(this.Database)
                 .AddSingleton(this)
                 .AddSingleton(this.Client)
+                .AddMemoryCache()
                 .BuildServiceProvider();
 
             // enable commandsnext

@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Humanizer;
+using Microsoft.Extensions.Caching.Memory;
 using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Extensions.Attributes;
@@ -17,23 +18,18 @@ namespace ModCore.Listeners
     public static class MessageSnipe
     {
         [AsyncListener(EventType.MessageDeleted)]
-        public static async Task MessageSniped(MessageDeleteEventArgs eventargs, SharedData sharedData, DatabaseContextBuilder database)
+        public static async Task MessageSniped(MessageDeleteEventArgs eventargs, SharedData sharedData, DatabaseContextBuilder database, IMemoryCache cache)
         {
             await Task.Yield();
 
             if (eventargs.Message == null)
                 return;
+            if (eventargs.Message.WebhookMessage)
+                return;
 
             if (((!string.IsNullOrEmpty(eventargs.Message?.Content)) || eventargs.Message.Attachments.Count > 0) && !eventargs.Message.Author.IsBot)
             {
-                if (sharedData.DeletedMessages.ContainsKey(eventargs.Channel.Id))
-                {
-                    sharedData.DeletedMessages[eventargs.Channel.Id] = eventargs.Message;
-                }
-                else
-                {
-                    sharedData.DeletedMessages.TryAdd(eventargs.Channel.Id, eventargs.Message);
-                }
+                cache.Set($"snipe_{eventargs.Channel.Id}", eventargs.Message, TimeSpan.FromHours(12));
             }
 
             using var db = database.CreateContext();
@@ -49,7 +45,7 @@ namespace ModCore.Listeners
                             .WithTitle("Message Deleted")
                             .WithAuthor($"{eventargs.Message.Author.Username}",
                                 iconUrl: eventargs.Message.Author.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
-                            .AddField("Content", eventargs.Message != null ? eventargs.Message.Content.Truncate(1000) : "Original Content Unknown.")
+                            .AddField("Content", string.IsNullOrEmpty(eventargs.Message?.Content) ? eventargs.Message.Content.Truncate(1000) : "Original Content Unknown.")
                             .AddField("Channel", eventargs.Message.Channel.Mention)
                             .WithColor(DiscordColor.Orange)
                             .AddField("IDs", $"```ini\nUser = {eventargs.Message.Author.Id}\nChannel = {eventargs.Channel.Id}\nMessage = {eventargs.Message.Id}```");
@@ -59,8 +55,10 @@ namespace ModCore.Listeners
         }
 
         [AsyncListener(EventType.MessageUpdated)]
-        public static async Task MessageEdited(MessageUpdateEventArgs eventargs, SharedData sharedData, DatabaseContextBuilder database)
+        public static async Task MessageEdited(MessageUpdateEventArgs eventargs, SharedData sharedData, DatabaseContextBuilder database, IMemoryCache cache)
         {
+            if (eventargs.Message == null)
+                return;
             if (eventargs.Message.WebhookMessage)
                 return;
 
@@ -68,14 +66,7 @@ namespace ModCore.Listeners
 
             if (((!string.IsNullOrEmpty(eventargs.MessageBefore?.Content)) || eventargs.MessageBefore.Attachments.Count > 0) && !eventargs.Message.Author.IsBot)
             {
-                if (sharedData.EditedMessages.ContainsKey(eventargs.Channel.Id))
-                {
-                    sharedData.EditedMessages[eventargs.Channel.Id] = eventargs.MessageBefore;
-                }
-                else
-                {
-                    sharedData.EditedMessages.TryAdd(eventargs.Channel.Id, eventargs.MessageBefore);
-                }
+                cache.Set($"esnipe_{eventargs.Channel.Id}", eventargs.MessageBefore, TimeSpan.FromHours(12));
             }
 
             using var db = database.CreateContext();
@@ -92,7 +83,7 @@ namespace ModCore.Listeners
                             .WithTitle("Message Edited")
                             .WithAuthor($"{eventargs.Message.Author.Username}",
                                 iconUrl: eventargs.Author.GetAvatarUrl(DSharpPlus.ImageFormat.Auto))
-                            .AddField("Original Message", eventargs.MessageBefore != null ? eventargs.MessageBefore.Content.Truncate(1000) : "Original Content Unknown.")
+                            .AddField("Original Message", string.IsNullOrEmpty(eventargs.Message?.Content) ? eventargs.MessageBefore.Content.Truncate(1000) : "Original Content Unknown.")
                             .AddField("Edited Message", eventargs.Message.Content.Truncate(1000))
                             .AddField("Channel", eventargs.Message.Channel.Mention)
                             .WithColor(DiscordColor.Orange)
