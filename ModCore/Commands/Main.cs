@@ -21,6 +21,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.IO;
 using Microsoft.Extensions.Caching.Memory;
+using ModCore.AutoComplete;
 
 namespace ModCore.Commands
 {
@@ -325,6 +326,19 @@ namespace ModCore.Commands
             await Task.Delay(1000);
             var rng = new Random().Next(0, 2);
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"​🤔 Hmm... Looks like it landed on {(rng == 0? "heads" : "tails")}!"));
+        }
+
+        private static Regex SlashCommandRegex = new Regex(@"</[-_\p{L}\p{N}]{1,32}:([0-9]+)>", RegexOptions.Compiled);
+        [SlashCommand("command", "Sends a command mention to chat")]
+        public async Task CommandAsync(InteractionContext ctx,
+            [Autocomplete(typeof(SlashCommandAutoComplete))]
+            [Option("command", "Command to mention", true)]
+                string command)
+        {
+            if(SlashCommandRegex.IsMatch(command))
+                await ctx.CreateResponseAsync(command, false);
+            else
+                await ctx.CreateResponseAsync($"⚠️ {command} is not a valid command!", true);
         }
     }
 }
