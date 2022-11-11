@@ -21,7 +21,10 @@ namespace ModCore.Listeners
         {
             await Task.Yield();
 
-            if((!string.IsNullOrEmpty(eventargs.Message?.Content) || eventargs.Message.Embeds.Count > 0) && !eventargs.Message.Author.IsBot)
+            if (eventargs.Message == null)
+                return;
+
+            if (((!string.IsNullOrEmpty(eventargs.Message?.Content)) || eventargs.Message.Attachments.Count > 0) && !eventargs.Message.Author.IsBot)
             {
                 if (sharedData.DeletedMessages.ContainsKey(eventargs.Channel.Id))
                 {
@@ -32,9 +35,6 @@ namespace ModCore.Listeners
                     sharedData.DeletedMessages.TryAdd(eventargs.Channel.Id, eventargs.Message);
                 }
             }
-
-            if (eventargs.Message == null)
-                return;
 
             using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
@@ -66,7 +66,7 @@ namespace ModCore.Listeners
 
             await Task.Yield();
 
-            if ((!string.IsNullOrEmpty(eventargs.MessageBefore?.Content) || eventargs.Message.Embeds.Count > 0) && !eventargs.Message.Author.IsBot)
+            if (((!string.IsNullOrEmpty(eventargs.MessageBefore?.Content)) || eventargs.MessageBefore.Attachments.Count > 0) && !eventargs.Message.Author.IsBot)
             {
                 if (sharedData.EditedMessages.ContainsKey(eventargs.Channel.Id))
                 {

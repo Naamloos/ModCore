@@ -134,8 +134,9 @@ namespace ModCore.Commands
                 if (!string.IsNullOrEmpty(message.Content))
                 {
                     embed.WithDescription(message.Content);
-                    embed.WithTimestamp(message.Id);
                 }
+
+                embed.WithTimestamp(message.Id);
 
                 if (message.Attachments.Count > 0)
                 {
