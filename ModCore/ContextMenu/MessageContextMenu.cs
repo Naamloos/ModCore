@@ -23,6 +23,7 @@ namespace ModCore.ContextMenu
 
         [ContextMenu(ApplicationCommandType.MessageContextMenu, "Copy emoji")]
         [SlashCommandPermissions(Permissions.ManageEmojis)]
+        [GuildOnly]
         public async Task YoinkAsync(ContextMenuContext ctx)
         {
             await ctx.DeferAsync(true);
