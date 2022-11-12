@@ -81,7 +81,16 @@ namespace ModCore.Commands
 				regexOptions |= RegexOptions.RightToLeft;
 			}
 
-			var regexCompiled = new Regex(regex, regexOptions);
+            Regex regexCompiled;
+            try
+            {
+                regexCompiled = new Regex(regex, regexOptions);
+            }
+            catch(Exception)
+            {
+                await ctx.CreateResponseAsync($"⚠️ Invalid Regex!");
+                return;
+            }
 
 			messages = messages.Where(x => regexCompiled.IsMatch(x.Content));
 			await deleteAsync(ctx, messages);

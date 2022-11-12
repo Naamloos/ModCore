@@ -6,6 +6,7 @@ using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.SlashCommands;
 using Humanizer;
 using Humanizer.Localisation;
+using ModCore.AutoComplete;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
@@ -15,6 +16,7 @@ using ModCore.Utils;
 using ModCore.Utils.Extensions;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -132,7 +134,8 @@ namespace ModCore.Commands
         }
 
         [SlashCommand("stop", "Stops a specific reminder by it's ID.")]
-        public async Task StopAsync(InteractionContext ctx, [Option("id", "Reminder ID")]string id)
+        public async Task StopAsync(InteractionContext ctx,
+            [Option("id", "Reminder ID", true)][Autocomplete(typeof(ReminderIdAutoComplete))][Range(0, int.MaxValue)] string id)
         {
             var parsed = int.TryParse(id, out int result);
             DatabaseTimer reminder = null;
