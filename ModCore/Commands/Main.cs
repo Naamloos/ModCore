@@ -328,7 +328,7 @@ namespace ModCore.Commands
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent($"​🤔 Hmm... Looks like it landed on {(rng == 0? "heads" : "tails")}!"));
         }
 
-        private static Regex SlashCommandRegex = new Regex(@"</[-_\p{L}\p{N}]{1,32}:([0-9]+)>", RegexOptions.Compiled);
+        private static Regex SlashCommandRegex = new Regex(@"</[-_\p{L}\p{N} ]{1,32}:([0-9]+)>", RegexOptions.Compiled);
         [SlashCommand("command", "Sends a command mention to chat")]
         public async Task CommandAsync(InteractionContext ctx,
             [Autocomplete(typeof(SlashCommandAutoComplete))]
