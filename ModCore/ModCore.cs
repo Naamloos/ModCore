@@ -68,7 +68,6 @@ namespace ModCore
             });
             var gateway = await clnt.GetGatewayInfoAsync();
             clnt.Logger.LogInformation($"Recommended shard count according to Discord: {gateway.ShardCount}");
-            clnt.Dispose();
 
             // cnext data that is consistent across shards, so it's fine to share it
             for (var i = 0; i < gateway.ShardCount; i++)

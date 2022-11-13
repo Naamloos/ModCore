@@ -322,8 +322,11 @@ namespace ModCore.Listeners
                             db.Timers.Add(new DatabaseTimer()
                             {
                                 ActionType = TimerActionType.Unknown,
-                                ActionData = "",
-                                DispatchAt = DateTime.Now.AddMilliseconds(Int32.MaxValue)
+                                ActionData = "{}",
+                                DispatchAt = DateTime.Now.AddMilliseconds(Int32.MaxValue),
+                                ChannelId = 0,
+                                GuildId = 0,
+                                UserId = 0
                             });
                             await db.SaveChangesAsync();
                         }
