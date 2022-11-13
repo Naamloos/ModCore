@@ -9,6 +9,7 @@ using ModCore.Utils.Extensions;
 using System.Collections.Generic;
 using DSharpPlus.Interactivity;
 using System.Linq;
+using System;
 
 namespace ModCore.ContextMenu
 {
@@ -100,6 +101,80 @@ namespace ModCore.ContextMenu
             downloadedEmoji.CopyTo(memory);
             downloadedEmoji.Dispose();
             return await guild.CreateEmojiAsync(name, memory);
+        }
+
+        [ContextMenu(ApplicationCommandType.MessageContextMenu, "Copy sticker")]
+        [SlashCommandPermissions(Permissions.ManageEmojis)]
+        [GuildOnly]
+        public async Task YoinkStickerAsync(ContextMenuContext ctx)
+        {
+            await ctx.DeferAsync(true);
+            var msg = ctx.TargetMessage;
+
+            if (msg != null)
+            {
+                var stickers = ctx.TargetMessage.Stickers.Where(x => x.FormatType != StickerFormat.LOTTIE);
+
+                if (stickers.Count() < 1)
+                {
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("⚠️ Referenced sticker not found! Do note that ModCore can not copy LOTTIE type stickers!"));
+                    return;
+                }
+
+                var sticker = stickers.First();
+                DiscordMessage followup = null;
+
+                if (stickers.Count() > 1)
+                {
+                    var message = new DiscordFollowupMessageBuilder()
+                        .WithContent("Which sticker do you want to copy?")
+                        .AsEphemeral();
+
+                    var choices = new Dictionary<string, DiscordMessageSticker>();
+                    foreach (DiscordMessageSticker currentSticker in stickers)
+                    {
+                        choices.Add(currentSticker.Name, currentSticker);
+                    }
+
+                    var selection = await ctx.MakeChoiceAsync<DiscordMessageSticker>(message, choices);
+                    if (selection.TimedOut)
+                    {
+                        await ctx.EditFollowupAsync(selection.FollowupMessage.Id, new DiscordWebhookBuilder().WithContent("⚠️ Timed out selection."));
+                        return;
+                    }
+
+                    followup = selection.FollowupMessage;
+                    sticker = selection.choice;
+                }
+
+                var newSticker = await stealieSticker(ctx.Guild, sticker);
+                var response = $"✅ Yoink! Sticker added to this server by <@{ctx.User.Id}>: {newSticker.Name}";
+
+                if (ctx.Channel.PermissionsFor(ctx.Guild.CurrentMember).HasPermission(Permissions.SendMessages))
+                {
+                    await ctx.Interaction.DeleteOriginalResponseAsync();
+                    await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(response).WithReply(ctx.TargetMessage.Id, false, false).WithSticker(newSticker));
+
+                    return;
+                }
+
+
+                if (followup == null)
+                    await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent(response));
+                else
+                    await ctx.EditFollowupAsync(followup.Id, new DiscordWebhookBuilder().WithContent(response));
+            }
+        }
+
+        private async Task<DiscordMessageSticker> stealieSticker(DiscordGuild guild, DiscordMessageSticker sticker)
+        {
+            using HttpClient _client = new HttpClient();
+            var downloadedEmoji = await _client.GetStreamAsync(sticker.StickerUrl);
+            using MemoryStream memory = new MemoryStream();
+            downloadedEmoji.CopyTo(memory);
+            downloadedEmoji.Dispose();
+            memory.Position = 0;
+            return await guild.CreateStickerAsync(sticker.Name ?? "Sticker", sticker.Description ?? "", "🤡", memory, sticker.FormatType);
         }
     }
 }
