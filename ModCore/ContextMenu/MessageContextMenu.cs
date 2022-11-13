@@ -75,6 +75,14 @@ namespace ModCore.ContextMenu
                 {
                     var emoji = await stealieEmoji(ctx.Guild, emojiName, emoji_id, animated);
                     response = $"✅ Yoink! Emoji added to this server: {emoji.ToString()}";
+
+                    if (ctx.Channel.PermissionsFor(ctx.Guild.CurrentMember).HasPermission(Permissions.SendMessages))
+                    {
+                        if (followup != null)
+                            await ctx.Interaction.DeleteOriginalResponseAsync();
+                        await ctx.Channel.SendMessageAsync(response);
+                        return;
+                    }
                 }
 
                 if (followup == null)
