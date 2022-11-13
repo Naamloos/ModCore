@@ -74,13 +74,13 @@ namespace ModCore.ContextMenu
                 if (ulong.TryParse(split, out ulong emoji_id))
                 {
                     var emoji = await stealieEmoji(ctx.Guild, emojiName, emoji_id, animated);
-                    response = $"✅ Yoink! Emoji added to this server: {emoji.ToString()}";
+                    response = $"✅ Yoink! Emoji added to this server by <@{ctx.User.Id}>: {emoji.ToString()}";
 
                     if (ctx.Channel.PermissionsFor(ctx.Guild.CurrentMember).HasPermission(Permissions.SendMessages))
                     {
-                        if (followup != null)
-                            await ctx.Interaction.DeleteOriginalResponseAsync();
-                        await ctx.Channel.SendMessageAsync(response);
+                        await ctx.Interaction.DeleteOriginalResponseAsync();
+                        await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(response).WithReply(ctx.TargetMessage.Id, false, false));
+                        
                         return;
                     }
                 }
