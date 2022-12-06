@@ -72,10 +72,10 @@ namespace ModCore.Commands
 
         [SlashCommand("tempban", "Temporarily bans a member.")]
         [SlashCommandPermissions(Permissions.BanMembers)]
-        public async Task TempbanAsync(InteractionContext ctx, 
-            [Option("user", "User to temporarily ban.")]DiscordUser user, 
-            [Option("unban_in", "When to unban this user.")]string unban_in, 
-            [Option("reason", "Reason why this member was banned.")]string reason = "")
+        public async Task TempbanAsync(InteractionContext ctx,
+            [Option("user", "User to temporarily ban.")] DiscordUser user,
+            [Option("unban_in", "When to unban this user.")] string unban_in,
+            [Option("reason", "Reason why this member was banned.")] string reason = "")
         {
             if (ctx.User.Id == user.Id)
             {
@@ -145,11 +145,11 @@ namespace ModCore.Commands
 
         [SlashCommand("hackban", "Bans a user by ID. This user does not have to be part of this server.")]
         [SlashCommandPermissions(Permissions.BanMembers)]
-        public async Task HackbanAsync(InteractionContext ctx, 
-            [Option("userid", "ID of the user to ban.")]string userId,
-            [Option("reason", "Reason to ban this user.")]string reason = null)
+        public async Task HackbanAsync(InteractionContext ctx,
+            [Option("userid", "ID of the user to ban.")] string userId,
+            [Option("reason", "Reason to ban this user.")] string reason = null)
         {
-            if(!ulong.TryParse(userId, out var id))
+            if (!ulong.TryParse(userId, out var id))
             {
                 await ctx.CreateResponseAsync("⚠️ Invalid ID!", true);
                 return;
@@ -160,7 +160,7 @@ namespace ModCore.Commands
                 await ctx.Guild.BanMemberAsync(id, 7, reason);
                 await ctx.CreateResponseAsync($"🚓 User with ID {userId} was banned.", true);
             }
-            catch(Exception)
+            catch (Exception)
             {
                 await ctx.CreateResponseAsync($"⚠️ Failed to ban user with ID {userId}.", true);
             }
@@ -168,9 +168,9 @@ namespace ModCore.Commands
 
         [SlashCommand("softban", "Bans and immediately unbans a member from this server. Deletes their messages up until a week ago.")]
         [SlashCommandPermissions(Permissions.BanMembers)]
-        public async Task SoftbanAsync(InteractionContext ctx, 
-            [Option("user", "User to softban.")]DiscordUser user,
-            [Option("reason", "Reason this user was soft banned.")]string reason = null)
+        public async Task SoftbanAsync(InteractionContext ctx,
+            [Option("user", "User to softban.")] DiscordUser user,
+            [Option("reason", "Reason this user was soft banned.")] string reason = null)
         {
             var member = await ctx.Guild.GetMemberAsync(user.Id);
             if (ctx.User.Id == member.Id)
@@ -193,6 +193,51 @@ namespace ModCore.Commands
             await member.BanAsync(7, $"{userstring}{reasonstring} (softban)");
             await member.UnbanAsync(ctx.Guild, $"{userstring}{reasonstring}");
             await ctx.CreateResponseAsync($"🚓 Softbanned user {member.DisplayName} (ID:{member.Id}).\n{(sent_dm ? "Said user has been notified of this action." : "")}", true);
+        }
+
+        [SlashCommand("isolate", "Creates a new private thread with a user for moderation.")]
+        [SlashCommandPermissions(Permissions.ManageThreads | Permissions.CreatePrivateThreads | Permissions.KickMembers)]
+        public async Task IsolateAsync(InteractionContext ctx,
+            [Option("user", "User to isolate.")] DiscordUser user,
+            [Option("reason", "Reason to isolate said member.")] string reason = null,
+            [Option("user_2", "Add another user to isolate")] DiscordUser user2 = null,
+            [Option("user_3", "Add another user to isolate")] DiscordUser user3 = null,
+            [Option("user_4", "Add another user to isolate")] DiscordUser user4 = null,
+            [Option("user_5", "Add another user to isolate")] DiscordUser user5 = null)
+        {
+            List<DiscordUser> users = new List<DiscordUser>();
+            users.Add(user);
+            users.Add(user2);
+            users.Add(user3);
+            users.Add(user4);
+            users.Add(user5);
+            users.RemoveAll(x => x == null);
+
+            foreach(var cuser in users)
+            {
+                if (!(cuser as DiscordMember).PermissionsIn(ctx.Channel).HasPermission(Permissions.AccessChannels))
+                {
+                    await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder()
+                        .WithContent($"⛔ One of the selected members can not access this channel. Try executing the command somewhere else!")
+                        .AsEphemeral());
+                    return;
+                }
+            }
+
+            var mentions = string.Join(", ", users.Select(x => x.Mention));
+            var names = string.Join(", ", users.Select(x => x.Username));
+
+            var thread = await ctx.Channel.CreateThreadAsync($"⚠ {names}", AutoArchiveDuration.Day, ChannelType.PrivateThread, reason);
+            await thread.SendMessageAsync($"⚠ {mentions}, a moderator has created an isolated chat with you" +
+                $"{(reason != null ? $" for the following reasoning:\n```\n{reason}\n```" : ".")}" +
+                $"_Said moderator can bring in more members through_ ***@pinging*** _when needed._");
+            
+            // Add the responsible moderator through a ping
+            await (await thread.SendMessageAsync(ctx.Member.Mention)).DeleteAsync();
+            
+            await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder()
+                .WithContent($"✅ Created a new private thread: {thread.Mention}")
+                .AsEphemeral());
         }
     }
 }
