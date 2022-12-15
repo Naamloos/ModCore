@@ -28,7 +28,7 @@ namespace ModCore.Components
                 var allowedUsersMention = string.Join(", ", allowedUsers.Select(x => $"<@{x}>"));
 
                 await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                    new DiscordInteractionResponseBuilder().WithContent($"⚠️ Only {allowedUsersMention} can use this button to delete this message!").AsEphemeral());
+                    new DiscordInteractionResponseBuilder().WithContent($"⚠️ Only {allowedUsersMention} can use this button to delete this message!\nIf you're a moderator, use Discord's delete message feature.").AsEphemeral());
             }
         }
     }
