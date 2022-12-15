@@ -5,6 +5,7 @@ using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ModCore.Components
@@ -14,21 +15,20 @@ namespace ModCore.Components
         [Component("del", ComponentType.Button)]
         public async Task UnSnipeAsync(ComponentInteractionCreateEventArgs e, IDictionary<string, string> context)
         {
-            var allowedUser = context["u"];
+            var allowedUsers = context["u"].Split('|').Select(x => ulong.TryParse(x, out ulong res)? res : 0);
 
-            if(ulong.TryParse(allowedUser, out var userId))
+            if(allowedUsers.Contains(e.User.Id))
             {
-                if(e.User.Id == userId)
-                {
-                    await e.Message.DeleteAsync();
-                    await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                        new DiscordInteractionResponseBuilder().WithContent($"✅ Alright, it's gone!").AsEphemeral());
-                }
-                else
-                {
-                    await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                        new DiscordInteractionResponseBuilder().WithContent($"⚠️ Only <@{userId}> can use this button to delete this message!").AsEphemeral());
-                }
+                await e.Message.DeleteAsync();
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().WithContent($"✅ Alright, it's gone!").AsEphemeral());
+            }
+            else
+            {
+                var allowedUsersMention = string.Join(", ", allowedUsers.Select(x => $"<@{x}>"));
+
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
+                    new DiscordInteractionResponseBuilder().WithContent($"⚠️ Only {allowedUsersMention} can use this button to delete this message!").AsEphemeral());
             }
         }
     }

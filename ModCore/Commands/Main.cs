@@ -164,7 +164,7 @@ namespace ModCore.Commands
 
                 var customId = ExtensionStatics.GenerateIdString("del", new Dictionary<string, string>()
                 {
-                    {"u", ctx.User.Id.ToString() }
+                    {"u", ctx.User.Id.ToString() + "|" + message.Author.ToString() },
                 });
 
                 response.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, customId, "", emoji: new DiscordComponentEmoji("🗑")));
