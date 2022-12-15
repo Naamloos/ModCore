@@ -241,7 +241,7 @@ namespace ModCore.Listeners
             {
                 var refContent = message.ReferencedMessage.Content.Truncate(200, "...").Replace(")[", "​)[") + " ";
 
-                embed.Description += $"\n\n**↳** {message.ReferencedMessage.Author.Mention}: {refContent} {(message.ReferencedMessage.Attachments.Count() > 0 ? "🖼 _<With Attachments>_" : "")}([Jump]({message.ReferencedMessage.JumpLink}))";
+                embed.Description += $"\n\n**➥** {message.ReferencedMessage.Author.Mention}: {refContent} {(message.ReferencedMessage.Attachments.Count() > 0 ? $"_<{message.ReferencedMessage.Attachments.Count()} file(s)>_" : "")}";
             }
 
             var messageBuilder = new DiscordMessageBuilder()
