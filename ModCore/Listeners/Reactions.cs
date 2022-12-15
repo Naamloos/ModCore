@@ -224,7 +224,7 @@ namespace ModCore.Listeners
             var embed = new DiscordEmbedBuilder()
                 .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}",
                 iconUrl: (string.IsNullOrEmpty(message.Author.AvatarHash) ? message.Author.DefaultAvatarUrl : message.Author.AvatarUrl))
-                .WithDescription(message.Content.Truncate(1000))
+                .WithDescription(message.Content.Length > 1000? message.Content.Truncate(1000) + "..." : message.Content)
                 .WithFooter($"ID: {message.Id}")
                 .WithTimestamp(message.Id);
 
@@ -237,8 +237,17 @@ namespace ModCore.Listeners
             var emotename = emoji.GetDiscordName().Replace(":", "");
             emotename = emotename.EndsWith('s') ? emotename : count > 1 ? emotename + "s" : emotename;
 
+            if(message.ReferencedMessage != null)
+            {
+                var refContent = message.ReferencedMessage.Content;
+                refContent = refContent.Length > 200? refContent.Truncate(200) + "..." : refContent;
+
+                embed.AddField("↳ Reply", $"{(message.ReferencedMessage.Attachments.Count() > 0? "📜 " : "")}" +
+                    $"{message.ReferencedMessage.Author.Username}#{message.ReferencedMessage.Author.Discriminator}: {refContent} ([Jump]({message.ReferencedMessage}))");
+            }
+
             var messageBuilder = new DiscordMessageBuilder()
-                .WithEmbed(embed)
+                .AddEmbed(embed)
                 .WithContent($"{emoji} {count} {emotename} in {message.Channel.Mention}");
 
             messageBuilder.AddComponents(new DiscordLinkButtonComponent(message.JumpLink.ToString(), "Go to message"));
