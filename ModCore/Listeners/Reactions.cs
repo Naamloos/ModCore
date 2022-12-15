@@ -239,10 +239,15 @@ namespace ModCore.Listeners
 
             if(message.ReferencedMessage != null)
             {
-                var refContent = message.ReferencedMessage.Content.Truncate(200, "...");
+                var refContent = message.ReferencedMessage.Content.Truncate(200, "...").Replace(")[", "​)[");
 
-                embed.AddField("↳ Reply", $"{(message.ReferencedMessage.Attachments.Count() > 0? "📜 " : "")}" +
-                    $"{message.ReferencedMessage.Author.Username}#{message.ReferencedMessage.Author.Discriminator}: {refContent} ([Jump]({message.ReferencedMessage}))");
+                if(string.IsNullOrEmpty(refContent))
+                {
+                    refContent = "_< no text >_";
+                }
+
+                embed.AddField("↳ Reply to", $"{(message.ReferencedMessage.Attachments.Count() > 0? "🖼 " : "")}" +
+                    $"{message.ReferencedMessage.Author.Username}: {refContent} ([Jump]({message.ReferencedMessage.JumpLink}))");
             }
 
             var messageBuilder = new DiscordMessageBuilder()
