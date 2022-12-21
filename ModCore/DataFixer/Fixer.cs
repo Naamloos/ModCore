@@ -21,6 +21,7 @@ namespace ModCore.DataFixer
 
         public async Task FixDataAsync()
         {
+            Console.WriteLine("Starting fixing data");
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             var rest = new DiscordRestClient(new DiscordConfiguration()
@@ -140,6 +141,8 @@ namespace ModCore.DataFixer
                 await naamloos.SendMessageAsync($"I managed to fix up {fixes} broken channel refs, {alreadyValid} were already valid. " +
                     $"{deleted} no longer existed. This took: `{stopwatch.Elapsed}`.\n\n" +
                     $"In total, I modified `{totalfixed}` datas and deleted `{totaldeleted}` datas.");
+
+                Console.WriteLine("buh bai");
             }
         }
     }
