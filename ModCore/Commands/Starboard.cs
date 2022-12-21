@@ -3,7 +3,9 @@ using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
+using ModCore.Listeners;
 using ModCore.Utils.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -104,6 +106,56 @@ namespace ModCore.Commands
 
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().AddEmbed(embed).AsEphemeral());
             }
+        }
+
+        [SlashCommand("random", "Fetches a random starred message in this guild.")]
+        public async Task RandomAsync(InteractionContext ctx)
+        {
+            var db = Database.CreateContext();
+
+            var settings = ctx.Guild.GetGuildSettings(db);
+
+            var emoji = settings.Starboard.Emoji.EmojiId != 0 ? 
+                (await ctx.Guild.GetEmojiAsync(settings.Starboard.Emoji.EmojiId)) 
+                : DiscordEmoji.FromUnicode(settings.Starboard.Emoji.EmojiName);
+
+            var channelIds = ctx.Guild.Channels.Select(x => x.Key).ToList();
+            var guildStars = db.StarDatas.Where(x => channelIds.Contains((ulong)x.ChannelId)).ToList();
+            var totalStars = guildStars.Count();
+            var randomizedStars = guildStars.OrderBy(x => Guid.NewGuid()).Take(5);
+
+            DatabaseStarData star = null;
+            DiscordMessage msg = null;
+
+            foreach(var guildStar in guildStars)
+            {
+                var channel = ctx.Guild.GetChannel((ulong)guildStar.ChannelId);
+                try
+                {
+                    var message = await channel.GetMessageAsync((ulong)guildStar.MessageId, true);
+                    msg = message;
+                    star = guildStar;
+                }catch(Exception ex)
+                {
+                    var deletion = guildStars.Where(x => x.ChannelId == guildStar.ChannelId && x.MessageId == guildStar.MessageId);
+                    db.StarDatas.RemoveRange(deletion);
+                    await db.SaveChangesAsync();
+                    continue;
+                }
+                break;
+            }
+
+            if(star == null)
+            {
+                await ctx.CreateResponseAsync("⚠️ No stars found! Try again if this is not true!", true);
+                return;
+            }
+
+            var starCount = guildStars.Count(x => x.ChannelId == star.ChannelId && x.MessageId == star.MessageId);
+            var response = Reactions.buildMessage(msg, emoji, starCount);
+            var converted = new DiscordInteractionResponseBuilder(response);
+
+            await ctx.CreateResponseAsync(converted);
         }
     }
 }

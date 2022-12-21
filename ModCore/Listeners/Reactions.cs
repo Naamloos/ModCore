@@ -68,9 +68,9 @@ namespace ModCore.Listeners
 
                         if (db.StarDatas.Any(x => (ulong)x.MessageId == eventargs.Message.Id))
                         {
-                            var count = db.StarDatas.Count(x => (ulong)x.MessageId == eventargs.Message.Id);
+                            var count = db.StarDatas.Count(x => x.ChannelId == (long)eventargs.Channel.Id && (ulong)x.MessageId == eventargs.Message.Id);
 
-                            if (db.StarDatas.Any(x => (ulong)x.MessageId == eventargs.Message.Id && x.StarboardMessageId != 0))
+                            if (db.StarDatas.Any(x => x.ChannelId == (long)eventargs.Channel.Id && (ulong)x.MessageId == eventargs.Message.Id && x.StarboardMessageId != 0))
                             {
                                 var other = db.StarDatas.First(x => (ulong)x.MessageId == message.Id && x.StarboardMessageId != 0);
                                 var oldsbmessage = await channel.GetMessageAsync((ulong)other.StarboardMessageId);
@@ -96,8 +96,8 @@ namespace ModCore.Listeners
 
                         await db.StarDatas.AddAsync(new DatabaseStarData
                         {
-                            ChannelId = (long)channel.Id,
-                            GuildId = (long)channel.Guild.Id,
+                            ChannelId = (long)eventargs.Channel.Id,
+                            GuildId = (long)eventargs.Guild.Id,
                             MessageId = (long)message.Id,
                             AuthorId = (long)message.Author.Id,
                             StarboardMessageId = starboardmessageid,
@@ -154,12 +154,12 @@ namespace ModCore.Listeners
                         long newstarboardmessageid = 0;
                         if (db.StarDatas.Any(x => (ulong)x.MessageId == message.Id && (ulong)x.StargazerId == user.Id && x.StarboardMessageId != 0))
                         {
-                            var star = db.StarDatas.First(x => (ulong)x.MessageId == message.Id && (ulong)x.StargazerId == user.Id);
-                            var count = db.StarDatas.Count(x => (ulong)x.MessageId == message.Id);
+                            var star = db.StarDatas.First(x => x.ChannelId == (long)eventargs.Channel.Id && (ulong)x.MessageId == message.Id && (ulong)x.StargazerId == user.Id);
+                            var count = db.StarDatas.Count(x => x.ChannelId == (long)eventargs.Channel.Id && (ulong)x.MessageId == message.Id);
 
-                            if (db.StarDatas.Any(x => (ulong)x.MessageId == message.Id && (ulong)x.StargazerId == user.Id && x.StarboardMessageId != 0))
+                            if (db.StarDatas.Any(x => x.ChannelId == (long)eventargs.Channel.Id && (ulong)x.MessageId == message.Id && (ulong)x.StargazerId == user.Id && x.StarboardMessageId != 0))
                             {
-                                var starboardmessageid = db.StarDatas.First(x => (ulong)x.MessageId == message.Id && (ulong)x.StargazerId == user.Id && x.StarboardMessageId != 0)
+                                var starboardmessageid = db.StarDatas.First(x => x.ChannelId == (long)eventargs.Channel.Id && (ulong)x.MessageId == message.Id && (ulong)x.StargazerId == user.Id && x.StarboardMessageId != 0)
                                     .StarboardMessageId;
 
                                 var m = await channel.GetMessageAsync((ulong)starboardmessageid);
@@ -219,7 +219,7 @@ namespace ModCore.Listeners
             }
         }
 
-        private static DiscordMessageBuilder buildMessage(DiscordMessage message, DiscordEmoji emoji, int count)
+        public static DiscordMessageBuilder buildMessage(DiscordMessage message, DiscordEmoji emoji, int count)
         {
             var embed = new DiscordEmbedBuilder()
                 .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}",
