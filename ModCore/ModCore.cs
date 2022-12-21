@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
+using ModCore.DataFixer;
 using ModCore.Entities;
 using Newtonsoft.Json;
 using ApiStartup = ModCore.Api.ApiStartup;
@@ -51,6 +52,15 @@ namespace ModCore
                 Console.WriteLine("Applying migrations...");
                 this.migrate();
                 Console.WriteLine("Done applying migrations.");
+                return;
+            }
+
+            if(args.Contains("--fixdata"))
+            {
+                var fixer = new Fixer(Settings);
+
+                await fixer.FixDataAsync();
+
                 return;
             }
 
