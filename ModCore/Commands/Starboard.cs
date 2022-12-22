@@ -119,10 +119,9 @@ namespace ModCore.Commands
                 (await ctx.Guild.GetEmojiAsync(settings.Starboard.Emoji.EmojiId)) 
                 : DiscordEmoji.FromUnicode(settings.Starboard.Emoji.EmojiName);
 
-            var channelIds = ctx.Guild.Channels.Select(x => x.Key).ToList();
-            var guildStars = db.StarDatas.Where(x => channelIds.Contains((ulong)x.ChannelId)).ToList();
+            var guildStars = db.StarDatas.Where(x => x.GuildId == (long)ctx.Guild.Id).ToList();
             var totalStars = guildStars.Count();
-            var randomizedStars = guildStars.OrderBy(x => Guid.NewGuid()).Take(5);
+            var randomizedStars = guildStars.OrderBy(x => new Random().Next()).ToList().Take(10);
 
             DatabaseStarData star = null;
             DiscordMessage msg = null;
@@ -137,9 +136,6 @@ namespace ModCore.Commands
                     star = guildStar;
                 }catch(Exception ex)
                 {
-                    var deletion = guildStars.Where(x => x.ChannelId == guildStar.ChannelId && x.MessageId == guildStar.MessageId);
-                    db.StarDatas.RemoveRange(deletion);
-                    await db.SaveChangesAsync();
                     continue;
                 }
                 break;

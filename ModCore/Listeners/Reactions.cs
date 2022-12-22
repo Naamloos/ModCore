@@ -66,7 +66,7 @@ namespace ModCore.Listeners
                         if (message.Author.Id == user.Id || user.IsBot)
                             return;
 
-                        if (db.StarDatas.Any(x => (ulong)x.MessageId == eventargs.Message.Id))
+                        if (db.StarDatas.Any(x => (ulong)x.MessageId == eventargs.Message.Id && (ulong)x.ChannelId == eventargs.Channel.Id))
                         {
                             var count = db.StarDatas.Count(x => x.ChannelId == (long)eventargs.Channel.Id && (ulong)x.MessageId == eventargs.Message.Id);
 
@@ -135,6 +135,7 @@ namespace ModCore.Listeners
 						await member.RevokeRoleAsync(reactionrole);
 				}
 
+                //SB
 				var emoji = config.Starboard.Emoji;
                 DiscordEmoji discordemoji = null;
                 if (emoji.EmojiId != 0)

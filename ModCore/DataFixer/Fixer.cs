@@ -89,7 +89,6 @@ namespace ModCore.DataFixer
 
                     long correctChannel = 0;
 
-                    bool saved = false;
                     try
                     {
                         await rest.GetMessageAsync((ulong)msg.ChannelId, (ulong)msg.MessageId);
@@ -100,7 +99,7 @@ namespace ModCore.DataFixer
                     catch (Exception) { }
 
                     // channel ID is not valid so we'll try iterating
-                    if (!saved)
+                    if (correctChannel == 0)
                     {
                         foreach (var channel in guild.Item2)
                         {
