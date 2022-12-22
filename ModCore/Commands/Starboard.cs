@@ -126,7 +126,7 @@ namespace ModCore.Commands
             DatabaseStarData star = null;
             DiscordMessage msg = null;
 
-            foreach(var guildStar in guildStars)
+            foreach(var guildStar in randomizedStars)
             {
                 var channel = ctx.Guild.GetChannel((ulong)guildStar.ChannelId);
                 try
