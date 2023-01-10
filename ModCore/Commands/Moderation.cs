@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using Microsoft.Extensions.Caching.Memory;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
@@ -21,6 +22,8 @@ namespace ModCore.Commands
     {
         public DatabaseContextBuilder Database { private get; set; }
         public SharedData Shared { private get; set; }
+
+        public IMemoryCache Cache { private get; set; }
 
         [SlashCommand("offtopic", "Moves off-topic chat to another channel.")]
         [SlashCommandPermissions(Permissions.ManageMessages)]
@@ -213,7 +216,7 @@ namespace ModCore.Commands
             users.Add(user5);
             users.RemoveAll(x => x == null);
 
-            foreach(var cuser in users)
+            foreach (var cuser in users)
             {
                 if (!(cuser as DiscordMember).PermissionsIn(ctx.Channel).HasPermission(Permissions.AccessChannels))
                 {
@@ -231,13 +234,26 @@ namespace ModCore.Commands
             await thread.SendMessageAsync($"⚠ {mentions}, a moderator has created an isolated chat with you" +
                 $"{(reason != null ? $" for the following reasoning:\n```\n{reason}\n```" : ".")}" +
                 $"_Said moderator can bring in more members through_ ***@pinging*** _when needed._");
-            
+
             // Add the responsible moderator through a ping
             await (await thread.SendMessageAsync(ctx.Member.Mention)).DeleteAsync();
-            
+
             await ctx.CreateResponseAsync(new DiscordInteractionResponseBuilder()
                 .WithContent($"✅ Created a new private thread: {thread.Mention}")
                 .AsEphemeral());
+        }
+
+        [SlashCommand("unsnipe", "Clears message deletion/update data for this channel.")]
+        [SlashCommandPermissions(Permissions.ManageMessages)]
+        public async Task UnsnipeAsync(InteractionContext ctx)
+        {
+            var snipeId = $"snipe_{ctx.Channel.Id}";
+            var eSnipeId = "e" + snipeId;
+
+            Cache.Remove(snipeId);
+            Cache.Remove(eSnipeId);
+
+            await ctx.CreateResponseAsync($"Deletion and Edit snipe data for this channel was deleted!");
         }
     }
 }
