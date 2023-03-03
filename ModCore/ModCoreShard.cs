@@ -100,11 +100,10 @@ namespace ModCore
             this.Commands = Client.UseCommandsNext(new CommandsNextConfiguration
             {
                 CaseSensitive = false,
-                EnableDefaultHelp = true,
+                EnableDefaultHelp = false,
                 EnableDms = false,
                 EnableMentionPrefix = true,
-                PrefixResolver = this.GetPrefixPositionAsync,
-                Services = deps,
+                Services = deps
             });
 
             // set the converters
