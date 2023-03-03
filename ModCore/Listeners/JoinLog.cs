@@ -44,8 +44,8 @@ namespace ModCore.Listeners
 						.WithDescription($"ID: ({m.Id})" + (newUser? "\n\n⚠️ This is a very new user!" : ""))
 						.WithAuthor($"{m.Username}#{m.Discriminator}",
 							iconUrl: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
-						.AddField("Join Date", $"{m.JoinedAt.DateTime}")
-						.AddField("Register Date", $"{m.CreationTimestamp.DateTime}")
+						.AddField("Join Date", m.JoinedAt == default? "Unknown" : m.JoinedAt.ToString())
+						.AddField("Register Date", m.CreationTimestamp == default? "Unknown" : m.CreationTimestamp.ToString())
 						.WithColor(newUser ? DiscordColor.Red : DiscordColor.Green)
                         .AddField("IDs", $"```ini\nUser = {eventargs.Member.Id}```"); ;
 					await channel.ElevatedMessageAsync(embed);
@@ -164,11 +164,11 @@ namespace ModCore.Listeners
                 .AddField("IDs", $"```ini\nUser = {eventargs.Member.Id}\n```"); ;
 
 			if (member.JoinedAt.DateTime == DateTime.MinValue)
-				embed.AddField("Join Date", $"{member.JoinedAt.DateTime}");
+				embed.AddField("Join Date", member.JoinedAt == default? "Unknown" : member.JoinedAt.ToString());
 
 			embed
 				.AddField("Leave Date", $"{DateTime.Now}")
-				.AddField("Register Date", $"{member.CreationTimestamp.DateTime}")
+				.AddField("Register Date", member.CreationTimestamp == default? "Unknown" : member.CreationTimestamp.ToString())
 				.WithColor(DiscordColor.LightGray);
 
 			await channel.ElevatedMessageAsync(embed);
