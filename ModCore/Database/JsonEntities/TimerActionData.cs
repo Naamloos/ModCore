@@ -30,6 +30,15 @@ namespace ModCore.Database.JsonEntities
         /// </summary>
         [JsonProperty("message")]
         public ulong? MessageId { get; set; } = null;
+
+        [JsonProperty("snoozed")]
+        public bool Snoozed { get; set; } = false;
+
+        [JsonProperty("originalUnix")]
+        public long OriginalUnix { get; set; } = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+        [JsonProperty("snoozecontext")]
+        public string SnoozedContext { get; set; } = "";
     }
 
     /// <summary>

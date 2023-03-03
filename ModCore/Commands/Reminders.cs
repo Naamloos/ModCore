@@ -37,7 +37,7 @@ namespace ModCore.Commands
         {
             var (duration, text) = Dates.ParseTime(timespan);
 
-            if (string.IsNullOrWhiteSpace(text) || text.Length > 128)
+            if (string.IsNullOrWhiteSpace(about) || about.Length > 128)
             {
                 await ctx.CreateResponseAsync(
                     "⚠️ Reminder text must to be no longer than 128 characters, not empty and not whitespace.", true);

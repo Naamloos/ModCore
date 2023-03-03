@@ -12,6 +12,7 @@ using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
 using ModCore.Entities;
+using ModCore.Extensions;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Enums;
 using ModCore.Utils;
@@ -145,17 +146,23 @@ namespace ModCore.Listeners
                 msg.AddEmbed(
                     new DiscordEmbedBuilder()
                     .WithTitle("⏰ Reminder")
-                    .WithDescription($"You wanted to be reminded <t:{unixTimestamp.ToUnixTimeSeconds()}:R>")
+                    .WithDescription(data.Snoozed? $"You snoozed a reminder to be re-reminded <t:{unixTimestamp.ToUnixTimeSeconds()}:R>" 
+                        : $"You wanted to be reminded <t:{unixTimestamp.ToUnixTimeSeconds()}:R>")
                     .AddField("✏️ Reminder Text", data.ReminderText)
                     );
 
                 msg.WithReply(data.MessageId, true, false);
 
-                if (original == null)
-                {
-                    msg.WithContent(message);
-                }
+                // generating a snowflake from original unix timestamp
+                ulong fakeContextId = ((ulong)data.OriginalUnix - 1420070400000ul) << 22;
 
+                var link = string.IsNullOrEmpty(data.SnoozedContext) ? $"https://discord.com/channels/{channel.GuildId}/{channel.Id}/{fakeContextId}" : data.SnoozedContext;
+
+                var snooze = new DiscordButtonComponent(ButtonStyle.Secondary, "snooze", "Snooze", emoji: new DiscordComponentEmoji(DiscordEmoji.FromUnicode("⏰")));
+                var contextLink = new DiscordLinkButtonComponent(link, "Jump to Context");
+
+                msg.AddComponents(snooze, contextLink);
+                msg.WithContent(message);
                 msg.WithAllowedMention(new UserMention(user));
 
                 await msg.SendAsync(channel);
