@@ -5,6 +5,7 @@ using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
 using ModCore.Modals;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ModCore.Components
@@ -14,10 +15,13 @@ namespace ModCore.Components
         [Component("snooze", ComponentType.Button)]
         public async Task SnoozeReminderAsync(ComponentInteractionCreateEventArgs e)
         {
-            await Client.GetInteractionExtension().RespondWithModalAsync<SnoozeModal>(e.Interaction, "Snooze reminder", new Dictionary<string, string>()
+            if (e.Message.MentionedUsers.Any(x => x.Id == e.User.Id))
             {
-                { "msg", e.Message.Id.ToString() }
-            });
+                await Client.GetInteractionExtension().RespondWithModalAsync<SnoozeModal>(e.Interaction, "Snooze reminder", new Dictionary<string, string>()
+                {
+                    { "msg", e.Message.Id.ToString() }
+                });
+            }
         }
     }
 }
