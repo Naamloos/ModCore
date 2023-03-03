@@ -56,7 +56,7 @@ namespace ModCore.Modals
             await feedbackChannel.SendMessageAsync(message);
 
             await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                .WithContent($"✅ Your feedback has been submitted to the ModCore team! ✨").AsEphemeral());
+                .WithContent($"✨ Your feedback has been submitted to the ModCore team! Thank you for your feedback! 💖").AsEphemeral());
         }
 
         private DiscordColor GetColor() => Type switch

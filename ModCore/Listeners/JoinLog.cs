@@ -165,9 +165,8 @@ namespace ModCore.Listeners
 
 			if (member.JoinedAt.DateTime == DateTime.MinValue)
 				embed.AddField("Join Date", member.JoinedAt == default? "Unknown" : member.JoinedAt.ToString());
-
-			embed
-				.AddField("Leave Date", $"{DateTime.Now}")
+            embed
+                .AddField("Leave Date", $"{DateTime.Now}")
 				.AddField("Register Date", member.CreationTimestamp == default? "Unknown" : member.CreationTimestamp.ToString())
 				.WithColor(DiscordColor.LightGray);
 

@@ -193,7 +193,7 @@ namespace ModCore.Commands
                 return;
             }
 
-            await ctx.EditFollowupAsync(response.FollowupMessage.Id, new DiscordWebhookBuilder().WithContent("Thank you for your feedback! 💖"));
+            await ctx.DeleteFollowupAsync(response.FollowupMessage.Id) ;
 
             var feedbackTypeString = Enum.GetName(response.Choice.GetType(), response.Choice);
             await ctx.Client.GetInteractionExtension().RespondWithModalAsync<FeedbackModal>(response.interaction,
