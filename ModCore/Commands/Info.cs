@@ -34,7 +34,7 @@ namespace ModCore.Commands
             var roles = new StringBuilder();
 
             foreach (var r in member.Roles)
-                roles.Append($"`{r.Name.Replace("`", "'")}`");
+                roles.Append($"`{r.Name.Replace("`", "'")}` ");
 
             if (roles.Length == 0)
                 roles.Append("*None*");
