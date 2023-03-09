@@ -71,7 +71,7 @@ namespace ModCore.Listeners
 
             using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
-            if(cfg.Logging.EditLog_Enable)
+            if(cfg != null && cfg.Logging.EditLog_Enable)
             {
                 var channel = eventargs.Guild.GetChannel(cfg.Logging.ChannelId);
                 if (channel == null)
