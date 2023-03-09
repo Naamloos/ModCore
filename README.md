@@ -3,7 +3,7 @@
   <p align="center">
     <a href="https://github.com/Naamloos/ModCore/stargazers" target="_blank"><img src="https://img.shields.io/github/stars/Naamloos/ModCore.svg" alt="Github Stars"></a>
     <a href="https://github.com/Naamloos/ModCore/issues" target="_blank"><img src="https://img.shields.io/github/issues/Naamloos/ModCore.svg" alt="Github Issues"></a>
-    <a href="https://ci.appveyor.com/project/Naamloos/modcore" target="_blank"><img src="https://ci.appveyor.com/api/projects/status/q1ac6j6qjxvpmm8s?svg=true" alt="Appveyor"></a>
+    <a href="https://github.com/Naamloos/ModCore/actions/workflows/dotnet.yml" target="_blank"><img src="https://github.com/Naamloos/ModCore/actions/workflows/dotnet.yml/badge.svg" alt=".NET Build"></a>
   </p>
   
 Support
