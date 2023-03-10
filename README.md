@@ -6,6 +6,10 @@
     <a href="https://github.com/Naamloos/ModCore/actions/workflows/dotnet.yml" target="_blank"><img src="https://github.com/Naamloos/ModCore/actions/workflows/dotnet.yml/badge.svg" alt=".NET Build"></a>
   </p>
   
+ModCore is A powerful moderating bot written on top of the DSharpPlus library. ModCore is your assistant for server moderation and management through a wide range of hand-crafted features to make your life as a moderator or administrator a breeze! 
+
+[Invite ModCore now!](https://discord.com/api/oauth2/authorize?client_id=359828546719449109&permissions=8&scope=bot%20applications.commands) 
+  
 Support
 ---------
 Need help with ModCore? Either use the `/contact` command or join the ModCore Discord!
