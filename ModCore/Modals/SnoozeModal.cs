@@ -55,7 +55,7 @@ namespace ModCore.Modals
                 {
                     await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                     {
-                        Content = "⚠️ Maximum allowed snooze time span is 24 hours.",
+                        Content = "⚠️ Maximum allowed snooze time span is 1 year.",
                         IsEphemeral = true
                     });
                     return;
