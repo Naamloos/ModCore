@@ -1,4 +1,5 @@
 ﻿using DSharpPlus;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using ModCore.Extensions;
 using ModCore.Extensions.Abstractions;
@@ -21,6 +22,11 @@ namespace ModCore.Components
                 {
                     { "msg", e.Message.Id.ToString() }
                 });
+            }
+            else
+            {
+                await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                    .WithContent("⛔ This is not your reminder! You can only snooze your own reminders!").AsEphemeral());
             }
         }
     }
