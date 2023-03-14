@@ -20,6 +20,7 @@ using Microsoft.Extensions.Logging;
 using DSharpPlus.SlashCommands;
 using ModCore.Extensions;
 using ModCore.Database.JsonEntities;
+using ModCore.Integrations;
 
 namespace ModCore
 {
@@ -93,6 +94,7 @@ namespace ModCore
                 .AddSingleton(this.Database)
                 .AddSingleton(this)
                 .AddSingleton(this.Client)
+                .AddSingleton<PronounDB>()
                 .AddMemoryCache()
                 .BuildServiceProvider();
 
