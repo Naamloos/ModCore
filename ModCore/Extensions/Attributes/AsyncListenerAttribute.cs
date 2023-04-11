@@ -1,5 +1,5 @@
 ﻿using DSharpPlus;
-using DSharpPlus.AsyncEvents;
+using Emzi0767.Utilities;
 using Microsoft.Extensions.Logging;
 using ModCore.Extensions.Enums;
 using System;
@@ -21,29 +21,32 @@ namespace ModCore.Extensions.Attributes
 
         public void Register(DiscordClient client, MethodInfo listener, IServiceProvider services)
         {
-            async Task onEvent(DiscordClient client, object e)
+            Task onEvent(DiscordClient client, object e)
             {
-
-                try
+                _ = Task.Run(async () =>
                 {
-                    List<object> parameters = new List<object>();
-                    foreach (var param in listener.GetParameters())
+                    try
                     {
-                        if (param.ParameterType == typeof(DiscordClient))
-                            parameters.Add(client);
-                        else if (param.ParameterType.IsAssignableTo(typeof(AsyncEventArgs)))
-                            parameters.Add(e);
-                        else
-                            parameters.Add(services.GetService(param.ParameterType));
-                    }
+                        List<object> parameters = new List<object>();
+                        foreach (var param in listener.GetParameters())
+                        {
+                            if (param.ParameterType == typeof(DiscordClient))
+                                parameters.Add(client);
+                            else if (param.ParameterType.IsAssignableTo(typeof(AsyncEventArgs)))
+                                parameters.Add(e);
+                            else
+                                parameters.Add(services.GetService(param.ParameterType));
+                        }
 
-                    await (Task)listener.Invoke(null, parameters.ToArray());
-                }
-                catch (Exception ex)
-                {
-                    client.Logger.LogError($"Uncaught error in event handler thread: {ex}");
-                    client.Logger.LogError(ex.StackTrace);
-                }
+                        await (Task)listener.Invoke(null, parameters.ToArray());
+                    }
+                    catch (Exception ex)
+                    {
+                        client.Logger.LogError($"Uncaught error in event handler thread: {ex}");
+                        client.Logger.LogError(ex.StackTrace);
+                    }
+                });
+                return Task.CompletedTask;
             };
 
             #region Registering correct events

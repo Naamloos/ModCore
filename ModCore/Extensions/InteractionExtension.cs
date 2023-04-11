@@ -77,7 +77,11 @@ namespace ModCore.Extensions
                 registerComponentHandler(handler);
             }
 
-            client.ComponentInteractionCreated += handleComponentAsync;
+            client.ComponentInteractionCreated += (sender, e) =>
+            {
+                _ = Task.Run(async () => await handleComponentAsync(sender, e));
+                return Task.CompletedTask;
+            };
         }
 
         private void registerComponentHandler(Type type)
@@ -112,7 +116,11 @@ namespace ModCore.Extensions
                 registerModalHandler(handler);
             }
 
-            client.ModalSubmitted += handleModalSubmission;
+            client.ModalSubmitted += (sender, e) =>
+            {
+                _ = Task.Run(async () => await handleModalSubmission(sender, e));
+                return Task.CompletedTask;
+            };
         }
 
         private ModalHandler registerModalHandler(Type type)

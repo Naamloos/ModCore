@@ -87,37 +87,42 @@ namespace ModCore.Modals
             var msg = await interaction.Channel.SendMessageAsync(message);
 
             // Temporary event handler for this specific poll.
-            async Task handlePoll(DiscordClient sender, ComponentInteractionCreateEventArgs e)
+            Task handlePoll(DiscordClient sender, ComponentInteractionCreateEventArgs e)
             {
-                // check message ID is correct
-                if (e.Message.Id == msg.Id)
+                _ = Task.Run(async () =>
                 {
-                    if (e.Interaction.Data.CustomId == "x")
+                    // check message ID is correct
+                    if (e.Message.Id == msg.Id)
                     {
-                        responses.Remove(e.User.Id);
-                        await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                            .WithContent("✅ Cleared your poll response (if any).").AsEphemeral());
-                        return;
-                    }
+                        if (e.Interaction.Data.CustomId == "x")
+                        {
+                            responses.Remove(e.User.Id);
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                                .WithContent("✅ Cleared your poll response (if any).").AsEphemeral());
+                            return;
+                        }
 
-                    if (!int.TryParse(e.Interaction.Data.CustomId, out var index))
-                    {
-                        return;
-                    }
+                        if (!int.TryParse(e.Interaction.Data.CustomId, out var index))
+                        {
+                            return;
+                        }
 
-                    if (responses.Any(x => x.Key == e.User.Id))
-                    {
-                        responses[e.User.Id] = index;
-                        await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                            .WithContent($"✅ Updated your poll vote to `{splitOptions[index]}`.").AsEphemeral());
+                        if (responses.Any(x => x.Key == e.User.Id))
+                        {
+                            responses[e.User.Id] = index;
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                                .WithContent($"✅ Updated your poll vote to `{splitOptions[index]}`.").AsEphemeral());
+                        }
+                        else
+                        {
+                            responses.Add(e.User.Id, index);
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                                .WithContent($"✅ Set your poll vote to `{splitOptions[index]}`.").AsEphemeral());
+                        }
                     }
-                    else
-                    {
-                        responses.Add(e.User.Id, index);
-                        await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                            .WithContent($"✅ Set your poll vote to `{splitOptions[index]}`.").AsEphemeral());
-                    }
-                }
+                });
+
+                return Task.CompletedTask;
             }
 
             client.ComponentInteractionCreated += handlePoll;

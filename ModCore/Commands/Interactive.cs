@@ -39,27 +39,32 @@ namespace ModCore.Commands
 
             List<DiscordUser> members = new List<DiscordUser>();
 
-            async Task collectorTask(DiscordClient sender, DSharpPlus.EventArgs.ComponentInteractionCreateEventArgs e)
+            Task collectorTask(DiscordClient sender, DSharpPlus.EventArgs.ComponentInteractionCreateEventArgs e)
             {
-                if(e.Message.Id == giveaway.Id && e.User.Id != ctx.User.Id)
+                _ = Task.Run(async () =>
                 {
-                    if(e.Interaction.Data.CustomId == "join" && !members.Any(x => x.Id == e.User.Id))
+                    if(e.Message.Id == giveaway.Id && e.User.Id != ctx.User.Id)
                     {
-                        members.Add(e.User);
-                        await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                            .WithContent("✅ You joined the raffle!").AsEphemeral());
+                        if(e.Interaction.Data.CustomId == "join" && !members.Any(x => x.Id == e.User.Id))
+                        {
+                            members.Add(e.User);
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                                .WithContent("✅ You joined the raffle!").AsEphemeral());
+                        }
+                        else if(e.Interaction.Data.CustomId == "leave")
+                        {
+                            members.RemoveAll(x => x.Id == e.User.Id);
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
+                                .WithContent("✅ You left the raffle.").AsEphemeral());
+                        }
+                        else
+                        {
+                            await e.Interaction.CreateResponseAsync(InteractionResponseType.Pong);
+                        }
                     }
-                    else if(e.Interaction.Data.CustomId == "leave")
-                    {
-                        members.RemoveAll(x => x.Id == e.User.Id);
-                        await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
-                            .WithContent("✅ You left the raffle.").AsEphemeral());
-                    }
-                    else
-                    {
-                        await e.Interaction.CreateResponseAsync(InteractionResponseType.Pong);
-                    }
-                }
+                });
+
+                return Task.CompletedTask;
             }
 
             ctx.Client.ComponentInteractionCreated += collectorTask;
