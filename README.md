@@ -5,6 +5,9 @@
     <a href="https://github.com/Naamloos/ModCore/issues" target="_blank"><img src="https://img.shields.io/github/issues/Naamloos/ModCore.svg" alt="Github Issues"></a>
     <a href="https://github.com/Naamloos/ModCore/actions/workflows/dotnet.yml" target="_blank"><img src="https://github.com/Naamloos/ModCore/actions/workflows/dotnet.yml/badge.svg" alt=".NET Build"></a>
   </p>
+
+# Rewrite
+This current branch tracks progress of the ModCore rewrite. For more information about this rewrite, read the following Notion article: [ModCore: Next](https://naamloos.notion.site/ModCore-Next-cbc2f6f3f9ad481880911bbd5c12c410)
   
 ModCore is A powerful moderating bot written on top of the DSharpPlus library. ModCore is your assistant for server moderation and management through a wide range of hand-crafted features to make your life as a moderator or administrator a breeze! 
 
