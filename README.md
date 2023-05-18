@@ -8,7 +8,9 @@
 
 # Rewrite
 This current branch tracks progress of the ModCore rewrite. For more information about this rewrite, read the following Notion article: [ModCore: Next](https://naamloos.notion.site/ModCore-Next-cbc2f6f3f9ad481880911bbd5c12c410)
-  
+
+---------------
+
 ModCore is A powerful moderating bot written on top of the DSharpPlus library. ModCore is your assistant for server moderation and management through a wide range of hand-crafted features to make your life as a moderator or administrator a breeze! 
 
 [Invite ModCore now!](https://discord.com/api/oauth2/authorize?client_id=359828546719449109&permissions=8&scope=bot%20applications.commands) 
