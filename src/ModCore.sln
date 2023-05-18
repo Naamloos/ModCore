@@ -3,21 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Common.Database", "ModCore.Common.Database\ModCore.Common.Database.csproj", "{9DCC5364-47BB-4335-8E77-559B0A959AE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Common.Database", "ModCore.Common.Database\ModCore.Common.Database.csproj", "{9DCC5364-47BB-4335-8E77-559B0A959AE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Services.MessageBroker", "ModCore.Services.MessageBroker\ModCore.Services.MessageBroker.csproj", "{E80FD689-2A76-42E4-94DA-86D7C652ECA6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Services.MessageBroker", "ModCore.Services.MessageBroker\ModCore.Services.MessageBroker.csproj", "{E80FD689-2A76-42E4-94DA-86D7C652ECA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Services.Shard", "ModCore.Services.Shard\ModCore.Services.Shard.csproj", "{E0534507-7162-416C-988C-BA47C194D560}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Services.Shard", "ModCore.Services.Shard\ModCore.Services.Shard.csproj", "{E0534507-7162-416C-988C-BA47C194D560}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Services.Api", "ModCore.Services.Api\ModCore.Services.Api.csproj", "{C544B59F-4BD0-42E1-8210-D125B03FE86A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Services.Api", "ModCore.Services.Api\ModCore.Services.Api.csproj", "{C544B59F-4BD0-42E1-8210-D125B03FE86A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Services.Timers", "ModCore.Services.Timers\ModCore.Services.Timers.csproj", "{A7BCB238-8C25-4815-9E6A-56B48589C5D4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Services.Timers", "ModCore.Services.Timers\ModCore.Services.Timers.csproj", "{A7BCB238-8C25-4815-9E6A-56B48589C5D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Common.Discord.Rest", "ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj", "{1CA317DE-9554-4966-839D-3B79DD4C9BE1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Common.Discord.Rest", "ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj", "{1CA317DE-9554-4966-839D-3B79DD4C9BE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Common.Discord.Entities", "ModCore.Common.Discord.Entities\ModCore.Common.Discord.Entities.csproj", "{D6148D1C-0F8D-4B9D-8C01-57F5CE4DBA53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Common.Discord.Entities", "ModCore.Common.Discord.Entities\ModCore.Common.Discord.Entities.csproj", "{D6148D1C-0F8D-4B9D-8C01-57F5CE4DBA53}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Common.Discord.Gateway", "ModCore.Common.Discord.Gateway\ModCore.Common.Discord.Gateway.csproj", "{15C4D42D-129F-4F3C-B711-C85D13F6D37D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Common.Discord.Gateway", "ModCore.Common.Discord.Gateway\ModCore.Common.Discord.Gateway.csproj", "{15C4D42D-129F-4F3C-B711-C85D13F6D37D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{13222A28-2536-425B-B054-0DB5CD45AE53}"
 EndProject
