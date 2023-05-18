@@ -1,0 +1,42 @@
+services:
+
+  messagebroker: # Message Broker, handles cross-service communication.
+    build: ./src/docker/broker.dockerfile
+    restart: unless-stopped
+
+  timers: # Timer service, handles long-running timers and triggers events when they hit.
+    build: ./src/timers.dockerfile
+    restart: unless-stopped
+    links:
+      - messagebroker
+
+  api:
+    build: ./src/docker/api.dockerfile
+    restart: unless-stopped
+    links:
+      - messagebroker
+
+  # Shards, these define websocket connections with Discord's gateway.
+  # This could be automated, but at this time we still manually handle this
+  shard-0:
+    build: ./src/docker/shard.dockerfile
+    restart: unless-stopped
+    links:
+      - messagebroker
+    environment:
+      - SHARD_ID=0
+      - SHARD_COUNT=2
+      - TOKEN=token
+    env_file:
+      - token.env
+
+  shard-1:
+    build: ./src/docker/shard.dockerfile
+    restart: unless-stopped
+    links:
+      - messagebroker
+    environment:
+      - SHARD_ID=1
+      - SHARD_COUNT=2
+    env_file:
+      - token.env
