@@ -117,6 +117,10 @@ namespace ModCore.Listeners
                 case TimerActionType.Reminder:
                     await DispatchReminderAsync(timer, timer.GetData<TimerReminderData>());
                     break;
+
+                case TimerActionType.Unban:
+                    await DispatchUnbanAsync(timer, timer.GetData<TimerUnbanData>());
+                    break;
             }
 
             using(var dbContext = databaseContextBuilder.CreateContext())
