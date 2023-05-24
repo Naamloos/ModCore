@@ -55,11 +55,11 @@ namespace ModCore.Listeners
 
         public static async Task UnscheduleTimersAsync(params DatabaseTimer[] timers)
         {
-            // lock the timers
-            await semaphore.WaitAsync();
-
             try
             {
+                // lock the timers
+                await semaphore.WaitAsync();
+
                 // remove the requested timers
                 using (var db = databaseContextBuilder.CreateContext())
                 {
@@ -82,6 +82,8 @@ namespace ModCore.Listeners
 
         public static async Task ScheduleNextAsync()
         {
+            try
+            {
             await semaphore.WaitAsync();
             await TriggerExpiredTimersAsync();
 
@@ -122,7 +124,11 @@ namespace ModCore.Listeners
                     }
                 }
             }
-            semaphore.Release();
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
 
         private static async Task TriggerExpiredTimersAsync()
