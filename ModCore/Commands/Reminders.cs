@@ -35,7 +35,17 @@ namespace ModCore.Commands
             [Option("in", "In how long the reminder should trigger.")]string timespan,
             [Option("about", "What to remind about.")]string about)
         {
-            var (duration, text) = Dates.ParseTime(timespan);
+            var (duration, text) = (TimeSpan.FromSeconds(0), "");
+
+            try
+            {
+                (duration, text) = Dates.ParseTime(timespan);
+            }catch(Exception)
+            {
+                await ctx.CreateResponseAsync(
+                    "⚠️ Unable to parse your reminder duration. Please try again.", true);
+                return;
+            }
 
             if (string.IsNullOrWhiteSpace(about) || about.Length > 128)
             {
