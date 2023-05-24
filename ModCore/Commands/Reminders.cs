@@ -60,6 +60,12 @@ namespace ModCore.Commands
                 return;
             }
 
+            if (duration < TimeSpan.FromSeconds(15)) // 1 year is the maximum
+            {
+                await ctx.CreateResponseAsync("⚠️ Minimum allowed time span to set a reminder is 15 seconds.", true);
+                return;
+            }
+
             var now = DateTimeOffset.UtcNow;
             var dispatchAt = now + duration;
 

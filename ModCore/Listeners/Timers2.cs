@@ -42,20 +42,24 @@ namespace ModCore.Listeners
         {
             using var dbContext = databaseContextBuilder.CreateContext();
 
-            var now = DateTime.UtcNow;
+            var now = DateTime.UtcNow.AddSeconds(2);
             var expiredTimers = dbContext.Timers.Where(x => x.DispatchAt < now).ToList();
 
             foreach (var timer in expiredTimers)
             {
                 // Dispatch all expired timers without rescheduling.
-                await Dispatch(timer, false);
+                try
+                {
+                    await Dispatch(timer, false);
+                }
+                catch (Exception) { }
             }
         }
 
         public static async Task ScheduleNext()
         {
-            await TriggerExpiredTimers();
             await semaphore.WaitAsync();
+            await TriggerExpiredTimers();
 
             using var dbContext = databaseContextBuilder.CreateContext();
             if (!dbContext.Timers.Any())
@@ -122,6 +126,8 @@ namespace ModCore.Listeners
 
             if (dispatchNext)
             {
+                current.timer = null;
+                current.cancellation = null;
                 await ScheduleNext();
             }
         }
