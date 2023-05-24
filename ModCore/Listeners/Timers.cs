@@ -84,46 +84,46 @@ namespace ModCore.Listeners
         {
             try
             {
-            await semaphore.WaitAsync();
-            await TriggerExpiredTimersAsync();
+                await semaphore.WaitAsync();
+                await TriggerExpiredTimersAsync();
 
-            using var dbContext = databaseContextBuilder.CreateContext();
-            if (!dbContext.Timers.Any())
-            {
-                return; // We'll reschedule once a new timer arrives through a command.
-            }
-
-            var newTimer = dbContext.Timers.OrderBy(x => x.DispatchAt).FirstOrDefault();
-            if (newTimer != null)
-            {
-                // Cancel previous if necessary
-                if (current.timer == null || current.timer.DispatchAt > newTimer.DispatchAt)
+                using var dbContext = databaseContextBuilder.CreateContext();
+                if (!dbContext.Timers.Any())
                 {
-                    if (current.cancellation != null)
-                    {
-                        // We cancel our previous dispatch / interim reschedule
-                        current.cancellation.Cancel();
-                    }
+                    return; // We'll reschedule once a new timer arrives through a command.
+                }
 
-                    // Schedule next
-                    current.cancellation = new CancellationTokenSource();
+                var newTimer = dbContext.Timers.OrderBy(x => x.DispatchAt).FirstOrDefault();
+                if (newTimer != null)
+                {
+                    // Cancel previous if necessary
+                    if (current.timer == null || current.timer.DispatchAt > newTimer.DispatchAt)
+                    {
+                        if (current.cancellation != null)
+                        {
+                            // We cancel our previous dispatch / interim reschedule
+                            current.cancellation.Cancel();
+                        }
 
-                    var delay = newTimer.DispatchAt.Subtract(DateTime.Now);
-                    // There's a max to a delay. If it's over the max, we reschedule on trigger. Else, just schedule dispatch.
-                    if (delay.TotalMilliseconds > Int32.MaxValue)
-                    {
-                        current.timer = null;
-                        _ = Task.Delay(TimeSpan.FromMilliseconds(Int32.MaxValue - 1000/* just to be safe */), current.cancellation.Token)
-                            .ContinueWith(InterimScheduleNextAsync, current.cancellation, TaskContinuationOptions.OnlyOnRanToCompletion);
-                    }
-                    else
-                    {
-                        current.timer = newTimer;
-                        _ = Task.Delay(delay, current.cancellation.Token)
-                            .ContinueWith(DispatchAsync, current.timer, TaskContinuationOptions.OnlyOnRanToCompletion);
+                        // Schedule next
+                        current.cancellation = new CancellationTokenSource();
+
+                        var delay = newTimer.DispatchAt.Subtract(DateTime.Now);
+                        // There's a max to a delay. If it's over the max, we reschedule on trigger. Else, just schedule dispatch.
+                        if (delay.TotalMilliseconds > Int32.MaxValue)
+                        {
+                            current.timer = null;
+                            _ = Task.Delay(TimeSpan.FromMilliseconds(Int32.MaxValue - 1000/* just to be safe */), current.cancellation.Token)
+                                .ContinueWith(InterimScheduleNextAsync, current.cancellation, TaskContinuationOptions.OnlyOnRanToCompletion);
+                        }
+                        else
+                        {
+                            current.timer = newTimer;
+                            _ = Task.Delay(delay, current.cancellation.Token)
+                                .ContinueWith(DispatchAsync, current.timer, TaskContinuationOptions.OnlyOnRanToCompletion);
+                        }
                     }
                 }
-            }
             }
             finally
             {
