@@ -86,7 +86,7 @@ namespace ModCore.Commands
             }
 
             // reschedule timers
-            await Timers2.ScheduleNextAsync();
+            await Timers.ScheduleNextAsync();
             await ctx.CreateResponseAsync(
                 $"⏰ Ok, <t:{DateTimeOffset.Now.Add(duration).ToUnixTimeSeconds()}:R> I will remind you about the following:\n\n{about}", true);
         }
@@ -166,7 +166,7 @@ namespace ModCore.Commands
             }
 
             // unschedule and reset timers
-            await Timers.UnscheduleTimerAsync(reminder, ctx.Client, this.Database, this.Shared);
+            await Timers.UnscheduleTimersAsync(reminder);
 
             var duration = reminder.DispatchAt - DateTimeOffset.Now;
             var data = reminder.GetData<TimerReminderData>();
@@ -192,10 +192,10 @@ namespace ModCore.Commands
             {
                 using (var db = this.Database.CreateContext())
                 {
-                    List<DatabaseTimer> timers = db.Timers.Where(xt => xt.ActionType == TimerActionType.Reminder && xt.UserId == (long)ctx.User.Id).ToList();
+                    DatabaseTimer[] timers = db.Timers.Where(xt => xt.ActionType == TimerActionType.Reminder && xt.UserId == (long)ctx.User.Id).ToArray();
 
-                    var count = timers.Count;
-                    await Timers.UnscheduleTimersAsync(timers, ctx.Client, this.Database, this.Shared);
+                    var count = timers.Length;
+                    await Timers.UnscheduleTimersAsync(timers);
 
                     await ctx.EditFollowupAsync(confirmed.FollowupMessage.Id, new DiscordWebhookBuilder()
                         .WithContent("✅ Alright, cleared " + count + $" timer{(count > 1? "s" : "")}."));
