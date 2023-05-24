@@ -99,7 +99,7 @@ namespace ModCore.Modals
                 }
 
                 // reschedule timers
-                await Timers.RescheduleTimers(client, this._db, this.shared);
+                await Timers.ScheduleNextAsync();
 
                 await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                 {

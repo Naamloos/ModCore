@@ -129,7 +129,7 @@ namespace ModCore.Commands
                 await db.SaveChangesAsync();
             }
 
-            await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+            await Timers.ScheduleNextAsync();
 
             var banEnd = DateTimeOffset.UtcNow.Add(timespan);
 
