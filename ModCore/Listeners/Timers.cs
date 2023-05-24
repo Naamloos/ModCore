@@ -22,7 +22,7 @@ namespace ModCore.Listeners
 {
     public static class Timers
     {
-        [AsyncListener(EventType.Ready)]
+        //[AsyncListener(EventType.Ready)]
         public static async Task OnReady(DatabaseContextBuilder database, DiscordClient client, SharedData sharedData)
         {
             using (var db = database.CreateContext())

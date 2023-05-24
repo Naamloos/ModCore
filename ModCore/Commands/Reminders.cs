@@ -80,7 +80,7 @@ namespace ModCore.Commands
             }
 
             // reschedule timers
-            await Timers.RescheduleTimers(ctx.Client, this.Database, this.Shared);
+            await Timers2.ScheduleNext();
             await ctx.CreateResponseAsync(
                 $"⏰ Ok, <t:{DateTimeOffset.Now.Add(duration).ToUnixTimeSeconds()}:R> I will remind you about the following:\n\n{about}", true);
         }
