@@ -75,7 +75,7 @@ namespace ModCore.Listeners
             var shared = timerdata.Shared;
 
             // lock the timers
-            shared.TimerSempahore.Wait();
+            await shared.TimerSempahore.WaitAsync();
 
             try
             {
