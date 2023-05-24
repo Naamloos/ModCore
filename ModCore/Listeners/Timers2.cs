@@ -8,6 +8,7 @@ using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Enums;
+using ModCore.Utils.Extensions;
 using Newtonsoft.Json;
 using System;
 using System.Linq;
@@ -35,10 +36,10 @@ namespace ModCore.Listeners
                 client = clientInject;
             }
 
-            await ScheduleNext();
+            await ScheduleNextAsync();
         }
 
-        private static async Task TriggerExpiredTimers()
+        private static async Task TriggerExpiredTimersAsync()
         {
             using var dbContext = databaseContextBuilder.CreateContext();
 
@@ -50,16 +51,16 @@ namespace ModCore.Listeners
                 // Dispatch all expired timers without rescheduling.
                 try
                 {
-                    await Dispatch(timer, false);
+                    await DispatchAsync(timer, false);
                 }
                 catch (Exception) { }
             }
         }
 
-        public static async Task ScheduleNext()
+        public static async Task ScheduleNextAsync()
         {
             await semaphore.WaitAsync();
-            await TriggerExpiredTimers();
+            await TriggerExpiredTimersAsync();
 
             using var dbContext = databaseContextBuilder.CreateContext();
             if (!dbContext.Timers.Any())
@@ -88,24 +89,24 @@ namespace ModCore.Listeners
                     {
                         current.timer = null;
                         _ = Task.Delay(TimeSpan.FromMilliseconds(Int32.MaxValue - 1000/* just to be safe */), current.cancellation.Token)
-                            .ContinueWith(InterimScheduleNext, current.cancellation, TaskContinuationOptions.OnlyOnRanToCompletion);
+                            .ContinueWith(InterimScheduleNextAsync, current.cancellation, TaskContinuationOptions.OnlyOnRanToCompletion);
                     }
                     else
                     {
                         current.timer = newTimer;
                         _ = Task.Delay(delay, current.cancellation.Token)
-                            .ContinueWith(Dispatch, current.timer, TaskContinuationOptions.OnlyOnRanToCompletion);
+                            .ContinueWith(DispatchAsync, current.timer, TaskContinuationOptions.OnlyOnRanToCompletion);
                     }
                 }
             }
             semaphore.Release();
         }
 
-        private static async Task InterimScheduleNext(Task task, object data) => await ScheduleNext();
+        private static async Task InterimScheduleNextAsync(Task task, object data) => await ScheduleNextAsync();
 
-        private static async Task Dispatch(Task task, object timer) => await Dispatch((DatabaseTimer)timer, true);
+        private static async Task DispatchAsync(Task task, object timer) => await DispatchAsync((DatabaseTimer)timer, true);
 
-        private static async Task Dispatch(DatabaseTimer timer, bool dispatchNext)
+        private static async Task DispatchAsync(DatabaseTimer timer, bool dispatchNext)
         {
             switch (timer.ActionType)
             {
@@ -114,7 +115,7 @@ namespace ModCore.Listeners
                     break;
 
                 case TimerActionType.Reminder:
-                    await DispatchReminder(timer, timer.GetData<TimerReminderData>());
+                    await DispatchReminderAsync(timer, timer.GetData<TimerReminderData>());
                     break;
             }
 
@@ -128,11 +129,11 @@ namespace ModCore.Listeners
             {
                 current.timer = null;
                 current.cancellation = null;
-                await ScheduleNext();
+                await ScheduleNextAsync();
             }
         }
 
-        private static async Task DispatchReminder(DatabaseTimer timer, TimerReminderData data)
+        private static async Task DispatchReminderAsync(DatabaseTimer timer, TimerReminderData data)
         {
             DiscordChannel channel;
             try
@@ -167,6 +168,37 @@ namespace ModCore.Listeners
             .WithAllowedMention(new UserMention((ulong)timer.UserId));
 
             await msg.SendAsync(channel);
+        }
+
+        private static async Task DispatchUnbanAsync(DatabaseTimer timer, TimerUnbanData data)
+        {
+            DiscordGuild guild;
+
+            try
+            {
+                guild = await client.GetGuildAsync((ulong)timer.GuildId);
+            }
+            catch(Exception)
+            {
+                return;
+            }
+
+            using (var db = databaseContextBuilder.CreateContext())
+            {
+                try
+                {
+                    await guild.UnbanMemberAsync((ulong)data.UserId);
+                }
+                catch
+                {
+                    // ignored
+                }
+                var embed = new DiscordEmbedBuilder()
+                    .WithTitle($"Tempban Expired")
+                    .WithDescription($"{data.DisplayName}#{data.Discriminator} has been unbanned. ({data.UserId})")
+                    .WithColor(DiscordColor.Green);
+                await guild.ModLogAsync(db, embed);
+            }
         }
     }
 }

@@ -86,7 +86,7 @@ namespace ModCore.Commands
             }
 
             // reschedule timers
-            await Timers2.ScheduleNext();
+            await Timers2.ScheduleNextAsync();
             await ctx.CreateResponseAsync(
                 $"⏰ Ok, <t:{DateTimeOffset.Now.Add(duration).ToUnixTimeSeconds()}:R> I will remind you about the following:\n\n{about}", true);
         }
