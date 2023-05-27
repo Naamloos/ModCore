@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ModCore.Extensions.Abstractions;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Modals
 {
@@ -36,7 +37,7 @@ namespace ModCore.Modals
             var feedbackChannel = await client.GetChannelAsync(settings.ContactChannelId);
 
             var embed = new DiscordEmbedBuilder()
-                .WithAuthor($"{interaction.User.Username}#{interaction.User.Discriminator} in {interaction.Guild.Name}", 
+                .WithAuthor($"{interaction.User.GetDisplayUsername()} in {interaction.Guild.Name}", 
                     iconUrl: interaction.User.GetAvatarUrl(ImageFormat.Png))
                 .WithTitle(Category)
                 .WithDescription(Feedback)

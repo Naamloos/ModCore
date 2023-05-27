@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
+using ModCore.Utils.Extensions;
 using System;
 using System.Globalization;
 using System.Text;
@@ -19,7 +20,7 @@ namespace ModCore.Commands
 
             var embed = new DiscordEmbedBuilder()
                 .WithColor(new DiscordColor("#089FDF"))
-                .WithTitle($"{member.Username}#{member.Discriminator} ({member.Id})");
+                .WithTitle($"{member.GetDisplayUsername()} ({member.Id})");
 
             if (member.IsBot)
                 embed.Title += " (BOT) ";
@@ -57,7 +58,7 @@ namespace ModCore.Commands
 
             var embed = new DiscordEmbedBuilder()
                 .WithColor(new DiscordColor("#089FDF"))
-                .WithTitle($"All permissions for {member.Username}#{member.Discriminator} ({member.Id})");
+                .WithTitle($"All permissions for {member.GetDisplayUsername()} ({member.Id})");
 
             embed.WithDescription(member.Permissions.ToPermissionString());
             embed.WithThumbnail(member.GetGuildAvatarUrl(ImageFormat.Auto));
@@ -72,7 +73,7 @@ namespace ModCore.Commands
 
             var embed = new DiscordEmbedBuilder()
                 .WithColor(new DiscordColor("#089FDF"))
-                .WithTitle($"Permissions in current channel for {member.Username}#{member.Discriminator} ({member.Id})");
+                .WithTitle($"Permissions in current channel for {member.GetDisplayUsername()} ({member.Id})");
 
             var permissionsEnum = member.PermissionsIn(ctx.Channel);
 
@@ -118,7 +119,7 @@ namespace ModCore.Commands
             if (!string.IsNullOrEmpty(guild.IconHash))
                 embed.WithThumbnail(guild.IconUrl);
 
-            embed.WithAuthor($"Owner: {guild.Owner.Username}#{guild.Owner.Discriminator}",
+            embed.WithAuthor($"Owner: {guild.Owner.GetDisplayUsername()}",
                 iconUrl: string.IsNullOrEmpty(guild.Owner.AvatarHash) ? null : guild.Owner.AvatarUrl);
             var channelstring = new StringBuilder();
             #region channel list string builder

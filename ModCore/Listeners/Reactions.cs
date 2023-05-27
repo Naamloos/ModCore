@@ -223,7 +223,7 @@ namespace ModCore.Listeners
         public static DiscordMessageBuilder buildMessage(DiscordMessage message, DiscordEmoji emoji, int count)
         {
             var embed = new DiscordEmbedBuilder()
-                .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}",
+                .WithAuthor($"{message.Author.GetDisplayUsername()}",
                 iconUrl: (string.IsNullOrEmpty(message.Author.AvatarHash) ? message.Author.DefaultAvatarUrl : message.Author.AvatarUrl))
                 .WithDescription(message.Content.Truncate(800, "..."))
                 .WithFooter($"ID: {message.Id}")

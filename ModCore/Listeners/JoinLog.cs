@@ -42,7 +42,7 @@ namespace ModCore.Listeners
 					var embed = new DiscordEmbedBuilder()
 						.WithTitle("New member joined")
 						.WithDescription($"ID: ({m.Id})" + (newUser? "\n\n⚠️ This is a very new user!" : ""))
-						.WithAuthor($"{m.Username}#{m.Discriminator}",
+						.WithAuthor($"{m.GetDisplayUsername()}",
 							iconUrl: string.IsNullOrEmpty(m.AvatarHash) ? m.DefaultAvatarUrl : m.AvatarUrl)
 						.AddField("Join Date", m.JoinedAt == default? "Unknown" : m.JoinedAt.ToString())
 						.AddField("Register Date", m.CreationTimestamp == default? "Unknown" : m.CreationTimestamp.ToString())
@@ -80,9 +80,6 @@ namespace ModCore.Listeners
 					case "username":
 						return eventargs.Member.Username;
 
-					case "discriminator":
-						return eventargs.Member.Discriminator;
-
 					case "mention":
 						return eventargs.Member.Mention;
 
@@ -100,9 +97,6 @@ namespace ModCore.Listeners
 
 					case "owner-username":
 						return eventargs.Guild.Owner.Username;
-
-					case "owner-discriminator":
-						return eventargs.Guild.Owner.Discriminator;
 
 					case "guild-icon-url":
 						return eventargs.Guild.IconUrl;
@@ -159,7 +153,7 @@ namespace ModCore.Listeners
 			var embed = new DiscordEmbedBuilder()
 				.WithTitle("Member left")
 				.WithDescription($"ID: ({member.Id})")
-				.WithAuthor($"{member.Username}#{member.Discriminator}",
+				.WithAuthor($"{member.GetDisplayUsername()}",
 					iconUrl: string.IsNullOrEmpty(member.AvatarHash) ? member.DefaultAvatarUrl : member.AvatarUrl)
                 .AddField("IDs", $"```ini\nUser = {eventargs.Member.Id}\n```"); ;
 

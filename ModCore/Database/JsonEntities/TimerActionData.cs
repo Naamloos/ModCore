@@ -54,9 +54,6 @@ namespace ModCore.Database.JsonEntities
 
         [JsonProperty("displayname")]
         public string DisplayName { get; set; }
-
-        [JsonProperty("discriminator")]
-        public string Discriminator { get; set; }
     }
 
     /// <summary>

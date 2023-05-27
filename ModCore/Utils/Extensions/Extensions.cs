@@ -422,6 +422,9 @@ namespace ModCore.Utils.Extensions
             return MakeChoiceAsync<DiscordChannel>(ctx, message, channels);
         }
 
+        public static string GetDisplayUsername(this DiscordUser user)
+            => user.Discriminator.Length != 4 ? user.Username : $"{user.Username}#{user.Discriminator}";
+
         public static string GetProfileUri(this DiscordUser user)
             => $"discord://-/users/{user.Id}/";
     }

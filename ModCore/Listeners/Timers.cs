@@ -246,7 +246,7 @@ namespace ModCore.Listeners
                 }
                 var embed = new DiscordEmbedBuilder()
                     .WithTitle($"Tempban Expired")
-                    .WithDescription($"{data.DisplayName}#{data.Discriminator} has been unbanned. ({data.UserId})")
+                    .WithDescription($"{data.DisplayName} has been unbanned. ({data.UserId})")
                     .WithColor(DiscordColor.Green);
                 await guild.ModLogAsync(db, embed);
             }

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Components
 {
@@ -28,11 +29,11 @@ namespace ModCore.Components
                 await targetMember.ModifyAsync(x => x.Nickname = nickname);
 
                 var embed = new DiscordEmbedBuilder()
-                    .WithAuthor(targetMember.Username + "#" + targetMember.Discriminator, iconUrl: targetMember.GetAvatarUrl(ImageFormat.Png))
+                    .WithAuthor(targetMember.GetDisplayUsername(), iconUrl: targetMember.GetAvatarUrl(ImageFormat.Png))
                     .WithDescription($"Nickname approved")
                     .AddField("New nickname", nickname)
                     .AddField("Old nickname", targetMember.DisplayName)
-                    .AddField("Responsible moderator", e.User.Username + "#" + e.User.Discriminator)
+                    .AddField("Responsible moderator", e.User.GetDisplayUsername())
                     .WithColor(DiscordColor.Green);
 
                 await e.Interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder().AddEmbed(embed));
@@ -56,11 +57,11 @@ namespace ModCore.Components
                 var targetMember = await guild.GetMemberAsync(user_id);
 
                 var embed = new DiscordEmbedBuilder()
-                    .WithAuthor(targetMember.Username + "#" + targetMember.Discriminator, iconUrl: targetMember.GetAvatarUrl(ImageFormat.Png))
+                    .WithAuthor(targetMember.GetDisplayUsername(), iconUrl: targetMember.GetAvatarUrl(ImageFormat.Png))
                     .WithDescription($"Nickname Denied")
                     .AddField("New nickname", nickname)
                     .AddField("Old nickname", targetMember.DisplayName)
-                    .AddField("Responsible moderator", e.User.Username + "#" + e.User.Discriminator)
+                    .AddField("Responsible moderator", e.User.GetDisplayUsername())
                     .WithColor(DiscordColor.Red);
 
                 var msg = new DiscordMessageBuilder()

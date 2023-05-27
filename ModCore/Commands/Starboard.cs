@@ -28,7 +28,7 @@ namespace ModCore.Commands
 
             var embed = new DiscordEmbedBuilder()
                 .WithColor(new DiscordColor("#089FDF"))
-                .WithAuthor($"{member.DisplayName} - {member.Username}#{member.Discriminator}", iconUrl: member.GetGuildAvatarUrl(ImageFormat.Png));
+                .WithAuthor($"{member.DisplayName} - {member.GetDisplayUsername()}", iconUrl: member.GetGuildAvatarUrl(ImageFormat.Png));
 
             using (var db = Database.CreateContext())
             {

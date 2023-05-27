@@ -10,6 +10,7 @@ using ModCore.Extensions;
 using ModCore.Listeners;
 using ModCore.Modals;
 using ModCore.Utils;
+using ModCore.Utils.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -90,7 +91,7 @@ namespace ModCore.Commands
 
             var unbanmoment = DateTimeOffset.UtcNow.Add(timespan);
 
-            var userstring = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
+            var userstring = $"{ctx.User.GetDisplayUsername()} ({ctx.User.Id})";
             var reasonstring = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             var sent_dm = false;
             try
@@ -118,8 +119,8 @@ namespace ModCore.Commands
 
             reminder.SetData(new TimerUnbanData
             {
-                Discriminator = member.Discriminator,
-                DisplayName = member.Username,
+                Discriminator = "",
+                DisplayName = member.GetDisplayUsername(),
                 UserId = (long)member.Id
             });
 
@@ -182,7 +183,7 @@ namespace ModCore.Commands
                 return;
             }
 
-            var userstring = $"{ctx.User.Username}#{ctx.User.Discriminator} ({ctx.User.Id})";
+            var userstring = $"{ctx.User.GetDisplayUsername()} ({ctx.User.Id})";
             var reasonstring = string.IsNullOrWhiteSpace(reason) ? "" : $": {reason}";
             var sent_dm = false;
             try

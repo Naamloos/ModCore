@@ -131,9 +131,9 @@ namespace ModCore.Commands
                     content = content.Substring(0, 500) + "...";
 
                 var embed = new DiscordEmbedBuilder()
-                    .WithAuthor($"{message.Author.Username}#{message.Author.Discriminator}" + (edit ? " (Edited)" : ""),
+                    .WithAuthor($"{message.Author.GetDisplayUsername()}" + (edit ? " (Edited)" : ""),
                         iconUrl: message.Author.GetAvatarUrl(ImageFormat.Png))
-                    .WithFooter($"{(edit? "Edit" : "Deletion")} sniped by {ctx.User.Username}#{ctx.User.Discriminator}", ctx.User.AvatarUrl);
+                    .WithFooter($"{(edit? "Edit" : "Deletion")} sniped by {ctx.User.GetDisplayUsername()}", ctx.User.AvatarUrl);
 
                 if (!string.IsNullOrEmpty(content))
                 {
@@ -230,7 +230,7 @@ namespace ModCore.Commands
                     {
                         member.Nickname = nickname;
                         member.AuditLogReason = "Nickname change requested by " +
-                                                "@{reaction.User.Username}#{reaction.User.Discriminator} auto approved " +
+                                                "@{reaction.User.GetDisplayUsername()} auto approved " +
                                                 "since they already have the Change Nickname permission";
                     });
                     await ctx.CreateResponseAsync("✅ Your nickname change was auto-approved since you have the right permissions!", true);
@@ -283,7 +283,7 @@ namespace ModCore.Commands
                 "✅ Your request to change your nickname was placed, and should be actioned shortly.", true);
 
             var embed = new DiscordEmbedBuilder()
-                .WithAuthor(member.Username + "#" + member.Discriminator, iconUrl: member.GetAvatarUrl(ImageFormat.Png))
+                .WithAuthor(member.GetDisplayUsername(), iconUrl: member.GetAvatarUrl(ImageFormat.Png))
                 .WithDescription($"Nickname request")
                 .AddField("New nickname", nickname)
                 .AddField("Old nickname", member.DisplayName)

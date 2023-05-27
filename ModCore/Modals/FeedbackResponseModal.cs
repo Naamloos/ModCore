@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using ModCore.Extensions.Abstractions;
+using ModCore.Utils.Extensions;
 
 namespace ModCore.Modals
 {
@@ -37,7 +38,7 @@ namespace ModCore.Modals
                     var guild = await client.GetGuildAsync(gid);
                     var member = await guild.GetMemberAsync(id);
                     await member.SendMessageAsync(new DiscordEmbedBuilder()
-                        .WithAuthor($"{interaction.User.Username}#{interaction.User.Discriminator}", iconUrl: interaction.User.GetAvatarUrl(ImageFormat.Png))
+                        .WithAuthor($"{interaction.User.GetDisplayUsername()}", iconUrl: interaction.User.GetAvatarUrl(ImageFormat.Png))
                         .WithTitle("Response to your feedback!")
                         .WithDescription(Response)
                         .WithFooter("Thank you for using ModCore!")
