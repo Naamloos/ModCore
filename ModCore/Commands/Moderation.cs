@@ -119,7 +119,6 @@ namespace ModCore.Commands
 
             reminder.SetData(new TimerUnbanData
             {
-                Discriminator = "",
                 DisplayName = member.GetDisplayUsername(),
                 UserId = (long)member.Id
             });
