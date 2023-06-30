@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using ModCore.Entities;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Enums;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 

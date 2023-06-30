@@ -7,7 +7,6 @@ using ModCore.Extensions;
 using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
 using ModCore.Utils.Extensions;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +32,7 @@ namespace ModCore.Components
 
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -54,7 +53,7 @@ namespace ModCore.Components
             var value = e.Interaction.Data.Resolved.Channels.First();
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -88,7 +87,7 @@ namespace ModCore.Components
 
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -131,8 +130,7 @@ namespace ModCore.Components
             }
 
             // Trying to parse emoji, simplified version from what cnext does
-            DiscordEmoji emoji = null;
-            if (!DiscordEmoji.TryFromUnicode(response.Result.Content, out emoji))
+            if (!DiscordEmoji.TryFromUnicode(response.Result.Content, out var emoji))
             {
                 var match = EmoteRegex.Match(response.Result.Content);
                 if (match.Success)
@@ -148,14 +146,14 @@ namespace ModCore.Components
                 return;
             }
 
-            if(emoji.Id > 1 && !e.Guild.Emojis.Any(x => x.Key == emoji.Id))
+            if(emoji.Id > 1 && e.Guild.Emojis.All(x => x.Key != emoji.Id))
             {
                 await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"⛔ This emoji is not from this Server!")
                     .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "sb", "Back to Starboard config", emoji: new DiscordComponentEmoji("🏃"))));
                 return;
             }
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -173,7 +171,7 @@ namespace ModCore.Components
 
         public static async Task PostMenuAsync(DiscordInteraction interaction, InteractionResponseType responseType, DatabaseContext db)
         {
-            using (db)
+            await using (db)
             {
                 var settings = interaction.Guild.GetGuildSettings(db).Starboard;
 

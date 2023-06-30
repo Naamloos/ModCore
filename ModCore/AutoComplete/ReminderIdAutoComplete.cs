@@ -1,11 +1,9 @@
-﻿using DSharpPlus;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
 using ModCore.Extensions;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,7 +21,7 @@ namespace ModCore.AutoComplete
 
             DatabaseTimer[] reminders;
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
                 reminders = db.Timers.Where(xt =>
                     xt.ActionType == TimerActionType.Reminder &&
                     xt.UserId == (long)ctx.User.Id).ToArray();

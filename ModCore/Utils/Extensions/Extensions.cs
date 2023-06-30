@@ -8,15 +8,12 @@ using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
-using ModCore.Entities;
-using ModCore.Utils;
 
 namespace ModCore.Utils.Extensions
 {
@@ -234,23 +231,21 @@ namespace ModCore.Utils.Extensions
         public static async Task SetGuildSettingsAsync(this CommandContext ctx, GuildSettings gcfg)
         {
             var dbb = ctx.Services.GetService<DatabaseContextBuilder>();
-            using (var db = dbb.CreateContext())
+            await using var db = dbb.CreateContext();
+            var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id);
+            if (cfg == null)
             {
-                var cfg = db.GuildConfig.SingleOrDefault(xc => (ulong) xc.GuildId == ctx.Guild.Id);
-                if (cfg == null)
-                {
-                    cfg = new DatabaseGuildConfig {GuildId = (long) ctx.Guild.Id};
-                    cfg.SetSettings(gcfg);
-                    await db.GuildConfig.AddAsync(cfg);
-                }
-                else
-                {
-                    cfg.SetSettings(gcfg);
-                    db.GuildConfig.Update(cfg);
-                }
-
-                await db.SaveChangesAsync();
+                cfg = new DatabaseGuildConfig {GuildId = (long) ctx.Guild.Id};
+                cfg.SetSettings(gcfg);
+                await db.GuildConfig.AddAsync(cfg);
             }
+            else
+            {
+                cfg.SetSettings(gcfg);
+                db.GuildConfig.Update(cfg);
+            }
+
+            await db.SaveChangesAsync();
         }
 
         public static async Task ModLogAsync(this DiscordGuild guild, DatabaseContext db, DiscordEmbedBuilder embed)

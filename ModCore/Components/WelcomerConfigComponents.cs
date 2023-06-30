@@ -30,7 +30,7 @@ namespace ModCore.Components
 
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -52,7 +52,7 @@ namespace ModCore.Components
 
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -73,7 +73,7 @@ namespace ModCore.Components
             var value = e.Interaction.Data.Resolved.Channels.First();
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -96,7 +96,7 @@ namespace ModCore.Components
 
         public static async Task PostMenuAsync(DiscordInteraction interaction, InteractionResponseType responseType, DatabaseContext db)
         {
-            using (db)
+            await using (db)
             {
                 var settings = interaction.Guild.GetGuildSettings(db).Welcome;
 

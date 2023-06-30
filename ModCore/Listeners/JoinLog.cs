@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Net;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using ModCore.Database;
 using ModCore.Database.JsonEntities;
-using ModCore.Entities;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Enums;
-using ModCore.Utils;
 using ModCore.Utils.Extensions;
 
 namespace ModCore.Listeners
@@ -23,7 +19,7 @@ namespace ModCore.Listeners
 		public static async Task LogNewMember(GuildMemberAddEventArgs eventargs, DatabaseContextBuilder database)
 		{
 			GuildSettings config;
-			using (var db = database.CreateContext())
+			await using (var db = database.CreateContext())
 				config = eventargs.Guild.GetGuildSettings(db);
 
             if(config == null)
@@ -138,7 +134,7 @@ namespace ModCore.Listeners
 		public static async Task LogLeaveMember(GuildMemberRemoveEventArgs eventargs, DatabaseContextBuilder database)
 		{
 			GuildSettings config;
-			using (var db = database.CreateContext())
+			await using (var db = database.CreateContext())
 				config = eventargs.Guild.GetGuildSettings(db);
 			
 			if (config == null || !config.Logging.JoinLog_Enable)

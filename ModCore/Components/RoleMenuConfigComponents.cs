@@ -7,10 +7,7 @@ using ModCore.Extensions;
 using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
 using ModCore.Modals;
-using ModCore.Utils.Extensions;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -30,34 +27,34 @@ namespace ModCore.Components
         {
             await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Loading Role Menu...").AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using var db = database.CreateContext();
+            var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
+            var settings = guild.GetSettings();
+            var menu = settings.RoleMenus.FirstOrDefault(x => x.Name == context["n"]);
+
+            if (menu != null)
             {
-                var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
-                var settings = guild.GetSettings();
-                var menu = settings.RoleMenus.FirstOrDefault(x => x.Name == context["n"]);
-
-                if (menu != null)
+                var roles = e.Guild.Roles.Values.Where(x => menu.RoleIds.Contains(x.Id));
+                var options = new List<DiscordSelectComponentOption>
                 {
-                    var roles = e.Guild.Roles.Values.Where(x => menu.RoleIds.Contains(x.Id));
-                    var options = new List<DiscordSelectComponentOption>();
-                    options.Add(new DiscordSelectComponentOption("Clear roles", "clear", "Clears your roles", emoji: new DiscordComponentEmoji("🗑")));
-                    foreach (var role in roles)
-                    {
-                        options.Add(new DiscordSelectComponentOption(role.Name, role.Id.ToString()));
-                    }
-
-                    var customId = ExtensionStatics.GenerateIdString("rm.use", new Dictionary<string, string>()
-                    {
-                        {"n", menu.Name }
-                    });
-
-
-                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"📖 Role Menu with name: `{context["n"]}`")
-                        .AddComponents(new DiscordSelectComponent(customId, "Select roles...", options, maxOptions: options.Count)));
-                    return;
+                    new("Clear roles", "clear", "Clears your roles", emoji: new DiscordComponentEmoji("🗑"))
+                };
+                foreach (var role in roles)
+                {
+                    options.Add(new DiscordSelectComponentOption(role.Name, role.Id.ToString()));
                 }
-                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"⛔ This Role menu does no longer exist! Notify a server admin that this does not work!"));
+
+                var customId = ExtensionStatics.GenerateIdString("rm.use", new Dictionary<string, string>()
+                {
+                    {"n", menu.Name }
+                });
+
+
+                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"📖 Role Menu with name: `{context["n"]}`")
+                    .AddComponents(new DiscordSelectComponent(customId, "Select roles...", options, maxOptions: options.Count)));
+                return;
             }
+            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"⛔ This Role menu does no longer exist! Notify a server admin that this does not work!"));
         }
 
         [Component("rm.use", ComponentType.StringSelect)]
@@ -69,39 +66,37 @@ namespace ModCore.Components
 
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using var db = database.CreateContext();
+            var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
+            var settings = guild.GetSettings();
+            var menu = settings.RoleMenus.FirstOrDefault(x => x.Name == context["n"]);
+
+            if (menu != null)
             {
-                var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
-                var settings = guild.GetSettings();
-                var menu = settings.RoleMenus.FirstOrDefault(x => x.Name == context["n"]);
+                var member = e.User as DiscordMember;
 
-                if (menu != null)
+                if (!clear)
                 {
-                    var member = e.User as DiscordMember;
-
-                    if (!clear)
+                    if (roles.Any(x => !menu.RoleIds.Contains(x.Id)))
                     {
-                        if (roles.Any(x => !menu.RoleIds.Contains(x.Id)))
-                        {
-                            // somehow user did an invalid selection
-                            return;
-                        }
-
-                        foreach (var role in roles)
-                        {
-                            await member.GrantRoleAsync(role);
-                        }
-
-                        await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Granted you the selected roles!"));
+                        // somehow user did an invalid selection
+                        return;
                     }
-                    else
+
+                    foreach (var role in roles)
                     {
-                        var removeRoles = e.Guild.Roles.Values.Where(x => menu.RoleIds.Contains(x.Id)).Where(x => member.Roles.Any(y => y.Id == x.Id));
-                        foreach (var role in removeRoles)
-                        {
-                            await member.RevokeRoleAsync(role, "ModCore rolemenu");
-                            await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Removed all roles you had from this menu!"));
-                        }
+                        await member.GrantRoleAsync(role);
+                    }
+
+                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Granted you the selected roles!"));
+                }
+                else
+                {
+                    var removeRoles = e.Guild.Roles.Values.Where(x => menu.RoleIds.Contains(x.Id)).Where(x => member.Roles.Any(y => y.Id == x.Id));
+                    foreach (var role in removeRoles)
+                    {
+                        await member.RevokeRoleAsync(role, "ModCore rolemenu");
+                        await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent("Removed all roles you had from this menu!"));
                     }
                 }
             }
@@ -114,7 +109,7 @@ namespace ModCore.Components
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
             var roles = e.Interaction.Data.Resolved.Roles.Values;
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -142,21 +137,19 @@ namespace ModCore.Components
             var value = e.Interaction.Data.Values.First();
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using var db = database.CreateContext();
+            var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
+            var settings = guild.GetSettings();
+            var menu = settings.RoleMenus.FirstOrDefault(x => x.Name == value);
+
+            if (menu != null)
             {
-                var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
-                var settings = guild.GetSettings();
-                var menu = settings.RoleMenus.FirstOrDefault(x => x.Name == value);
+                var embed = new DiscordEmbedBuilder()
+                    .WithTitle($"📖 Roles for menu {value}")
+                    .WithDescription(string.Join(", ", menu.RoleIds.Select(x => $"<@&{x}>")));
 
-                if (menu != null)
-                {
-                    var embed = new DiscordEmbedBuilder()
-                        .WithTitle($"📖 Roles for menu {value}")
-                        .WithDescription(string.Join(", ", menu.RoleIds.Select(x => $"<@&{x}>")));
-
-                    await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed)
-                        .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Back to Role Menu config", emoji: new DiscordComponentEmoji("🏃"))));
-                }
+                await e.Interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().AddEmbed(embed)
+                    .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Back to Role Menu config", emoji: new DiscordComponentEmoji("🏃"))));
             }
         }
 
@@ -167,7 +160,7 @@ namespace ModCore.Components
             var value = e.Interaction.Data.Values.First();
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -201,7 +194,7 @@ namespace ModCore.Components
 
         public static async Task PostMenuAsync(DiscordInteraction interaction, InteractionResponseType responseType, DatabaseContext db)
         {
-            using (db)
+            await using (db)
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)interaction.Guild.Id);
                 var settings = guild.GetSettings();

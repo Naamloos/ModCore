@@ -1,17 +1,14 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Microsoft.VisualBasic;
 using ModCore.Database;
 using ModCore.Database.JsonEntities;
 using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
-using ModCore.Utils.Extensions;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace ModCore.Components
@@ -64,10 +61,10 @@ namespace ModCore.Components
         [Component("cfg.dump", ComponentType.Button)]
         public async Task DumpConfigAsync(ComponentInteractionCreateEventArgs e)
         {
-            using var db = database.CreateContext();
+            await using var db = database.CreateContext();
             var settings = db.GuildConfig.FirstOrDefault(x => x.GuildId == (long)e.Guild.Id).GetSettings();
             using var ms = new MemoryStream();
-            using var sw = new StreamWriter(ms);
+            await using var sw = new StreamWriter(ms);
             sw.Write(JsonConvert.SerializeObject(settings, Formatting.Indented));
             sw.Flush();
             ms.Position = 0;
@@ -93,7 +90,7 @@ namespace ModCore.Components
         [Component("cfg.reset.confirm", ComponentType.Button)]
         public async Task ResetConfigConfirmAsync(ComponentInteractionCreateEventArgs e)
         {
-            using var db = database.CreateContext();
+            await using var db = database.CreateContext();
             var settings = db.GuildConfig.FirstOrDefault(x => x.GuildId == (long)e.Guild.Id);
             settings.SetSettings(new GuildSettings());
             db.GuildConfig.Update(settings);

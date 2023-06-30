@@ -1,6 +1,4 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,10 +7,8 @@ using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using ModCore.Database;
 using ModCore.Database.JsonEntities;
-using ModCore.Entities;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Enums;
-using ModCore.Utils;
 using ModCore.Utils.Extensions;
 
 namespace ModCore.Listeners
@@ -40,7 +36,7 @@ namespace ModCore.Listeners
                 return;
 
             GuildSettings config;
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
                 config = eventargs.Guild.GetGuildSettings(db);
             if (config == null)
                 return;

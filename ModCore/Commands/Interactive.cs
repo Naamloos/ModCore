@@ -1,6 +1,5 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using ModCore.Extensions;
 using ModCore.Modals;
@@ -45,7 +44,7 @@ namespace ModCore.Commands
                 {
                     if(e.Message.Id == giveaway.Id && e.User.Id != ctx.User.Id)
                     {
-                        if(e.Interaction.Data.CustomId == "join" && !members.Any(x => x.Id == e.User.Id))
+                        if(e.Interaction.Data.CustomId == "join" && members.All(x => x.Id != e.User.Id))
                         {
                             members.Add(e.User);
                             await e.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
@@ -77,7 +76,7 @@ namespace ModCore.Commands
                 return;
             }
 
-            var winnerindex = new Random().Next(0, members.Count() - 1);
+            var winnerindex = new Random().Next(0, members.Count - 1);
             var winner = members[winnerindex];
 
             var tada = DiscordEmoji.FromUnicode("🎉");

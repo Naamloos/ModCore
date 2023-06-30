@@ -1,18 +1,14 @@
-﻿using ConcurrentCollections;
-using DSharpPlus;
+﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
-using ModCore.Entities;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Enums;
 using ModCore.Utils.Extensions;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,14 +39,14 @@ namespace ModCore.Listeners
 
         public static DatabaseTimer FindNearestTimer(TimerActionType actionType, ulong userId, ulong channelId, ulong guildId, DatabaseContextBuilder database)
         {
-            using (var db = database.CreateContext())
-                return db.Timers.FirstOrDefault(xt => xt.ActionType == actionType && xt.UserId == (long)userId && xt.ChannelId == (long)channelId && xt.GuildId == (long)guildId);
+            using var db = database.CreateContext();
+            return db.Timers.FirstOrDefault(xt => xt.ActionType == actionType && xt.UserId == (long)userId && xt.ChannelId == (long)channelId && xt.GuildId == (long)guildId);
         }
 
         public static DatabaseTimer FindTimer(int id, TimerActionType actionType, ulong userId, DatabaseContextBuilder database)
         {
-            using (var db = database.CreateContext())
-                return db.Timers.FirstOrDefault(xt => xt.Id == id && xt.ActionType == actionType && xt.UserId == (long)userId);
+            using var db = database.CreateContext();
+            return db.Timers.FirstOrDefault(xt => xt.Id == id && xt.ActionType == actionType && xt.UserId == (long)userId);
         }
 
         public static async Task UnscheduleTimersAsync(params DatabaseTimer[] timers)
@@ -61,11 +57,9 @@ namespace ModCore.Listeners
                 await semaphore.WaitAsync();
 
                 // remove the requested timers
-                using (var db = databaseContextBuilder.CreateContext())
-                {
-                    db.Timers.RemoveRange(timers);
-                    await db.SaveChangesAsync();
-                }
+                await using var db = databaseContextBuilder.CreateContext();
+                db.Timers.RemoveRange(timers);
+                await db.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -87,7 +81,7 @@ namespace ModCore.Listeners
                 await semaphore.WaitAsync();
                 await TriggerExpiredTimersAsync();
 
-                using var dbContext = databaseContextBuilder.CreateContext();
+                await using var dbContext = databaseContextBuilder.CreateContext();
                 if (!dbContext.Timers.Any())
                 {
                     return; // We'll reschedule once a new timer arrives through a command.
@@ -110,10 +104,10 @@ namespace ModCore.Listeners
 
                         var delay = newTimer.DispatchAt.Subtract(DateTime.Now);
                         // There's a max to a delay. If it's over the max, we reschedule on trigger. Else, just schedule dispatch.
-                        if (delay.TotalMilliseconds > Int32.MaxValue)
+                        if (delay.TotalMilliseconds > int.MaxValue)
                         {
                             current.timer = null;
-                            _ = Task.Delay(TimeSpan.FromMilliseconds(Int32.MaxValue - 1000/* just to be safe */), current.cancellation.Token)
+                            _ = Task.Delay(TimeSpan.FromMilliseconds(int.MaxValue - 1000/* just to be safe */), current.cancellation.Token)
                                 .ContinueWith(InterimScheduleNextAsync, current.cancellation, TaskContinuationOptions.OnlyOnRanToCompletion);
                         }
                         else
@@ -133,7 +127,7 @@ namespace ModCore.Listeners
 
         private static async Task TriggerExpiredTimersAsync()
         {
-            using var dbContext = databaseContextBuilder.CreateContext();
+            await using var dbContext = databaseContextBuilder.CreateContext();
 
             var now = DateTime.UtcNow.AddSeconds(2);
             var expiredTimers = dbContext.Timers.Where(x => x.DispatchAt < now).ToList();
@@ -170,7 +164,7 @@ namespace ModCore.Listeners
                     break;
             }
 
-            using(var dbContext = databaseContextBuilder.CreateContext())
+            await using(var dbContext = databaseContextBuilder.CreateContext())
             {
                 dbContext.Timers.Remove(timer);
                 await dbContext.SaveChangesAsync();
@@ -234,22 +228,20 @@ namespace ModCore.Listeners
                 return;
             }
 
-            using (var db = databaseContextBuilder.CreateContext())
+            await using var db = databaseContextBuilder.CreateContext();
+            try
             {
-                try
-                {
-                    await guild.UnbanMemberAsync((ulong)data.UserId);
-                }
-                catch
-                {
-                    // ignored
-                }
-                var embed = new DiscordEmbedBuilder()
-                    .WithTitle($"Tempban Expired")
-                    .WithDescription($"{data.DisplayName} has been unbanned. ({data.UserId})")
-                    .WithColor(DiscordColor.Green);
-                await guild.ModLogAsync(db, embed);
+                await guild.UnbanMemberAsync((ulong)data.UserId);
             }
+            catch
+            {
+                // ignored
+            }
+            var embed = new DiscordEmbedBuilder()
+                .WithTitle($"Tempban Expired")
+                .WithDescription($"{data.DisplayName} has been unbanned. ({data.UserId})")
+                .WithColor(DiscordColor.Green);
+            await guild.ModLogAsync(db, embed);
         }
     }
 }

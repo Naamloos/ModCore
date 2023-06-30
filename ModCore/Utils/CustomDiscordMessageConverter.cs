@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Converters;
@@ -22,7 +21,7 @@ namespace ModCore.Utils
 					return default;
 
 				var msgs = await ctx.Channel.GetMessagesBeforeAsync(ctx.Message.Id, count);
-				return msgs.Last();
+				return msgs[^1];
 			}
 			else
 			{

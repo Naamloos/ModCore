@@ -22,7 +22,7 @@ namespace ModCore.Commands
             var experience = 0;
             var level = 0;
 
-            using (var db = Database.CreateContext())
+            await using (var db = Database.CreateContext())
             {
                 if(!ctx.Guild.GetGuildSettings(db).Levels.Enabled)
                 {
@@ -46,42 +46,40 @@ namespace ModCore.Commands
         [SlashCommand("leaderboard", "Shows this server's level leaderboard.")]
         public async Task LeaderboardAsync(InteractionContext ctx)
         {
-            using (var db = Database.CreateContext())
+            await using var db = Database.CreateContext();
+            if (!ctx.Guild.GetGuildSettings(db).Levels.Enabled)
             {
-                if (!ctx.Guild.GetGuildSettings(db).Levels.Enabled)
-                {
-                    await ctx.CreateResponseAsync("⛔ Levels are disabled in this server!");
-                    return;
-                }
-
-                var top10 = db.Levels.Where(x => x.GuildId == (long)ctx.Guild.Id)
-                    .OrderByDescending(x => x.Experience)
-                    .Take(10)
-                    .ToList();
-
-                if(top10.Count == 0)
-                {
-                    await ctx.CreateResponseAsync("⚠️ No level data was found for this server!", true);
-                    return;
-                }
-
-                var top10string = "";
-                int index = 1;
-                foreach (var leveldata in top10)
-                {
-                    top10string += $"{index}. <@{leveldata.UserId}>: Level " +
-                        $"{Listeners.LevelUp.CalculateLevel(leveldata.Experience)} ({leveldata.Experience} xp)\n";
-                    index++;
-                }
-
-                var embed = new DiscordEmbedBuilder()
-                    .WithTitle($"{ctx.Guild.Name} Level Leaderboard")
-                    .WithDescription($"These are the users with the most activity!")
-                    .WithColor(new DiscordColor())
-                    .AddField("Top 10", top10string);
-
-                await ctx.CreateResponseAsync(embed, true);
+                await ctx.CreateResponseAsync("⛔ Levels are disabled in this server!");
+                return;
             }
+
+            var top10 = db.Levels.Where(x => x.GuildId == (long)ctx.Guild.Id)
+                .OrderByDescending(x => x.Experience)
+                .Take(10)
+                .ToList();
+
+            if(top10.Count == 0)
+            {
+                await ctx.CreateResponseAsync("⚠️ No level data was found for this server!", true);
+                return;
+            }
+
+            var top10string = "";
+            int index = 1;
+            foreach (var leveldata in top10)
+            {
+                top10string += $"{index}. <@{leveldata.UserId}>: Level " +
+                               $"{Listeners.LevelUp.CalculateLevel(leveldata.Experience)} ({leveldata.Experience} xp)\n";
+                index++;
+            }
+
+            var embed = new DiscordEmbedBuilder()
+                .WithTitle($"{ctx.Guild.Name} Level Leaderboard")
+                .WithDescription($"These are the users with the most activity!")
+                .WithColor(new DiscordColor())
+                .AddField("Top 10", top10string);
+
+            await ctx.CreateResponseAsync(embed, true);
         }
     }
 }

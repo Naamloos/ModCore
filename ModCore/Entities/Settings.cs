@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using ModCore.Database;
 using Newtonsoft.Json;
 using Npgsql;
@@ -66,28 +65,22 @@ namespace ModCore.Entities
 
         public string BuildConnectionString()
         {
-            switch (this.Provider)
+            return this.Provider switch
             {
-                case DatabaseProvider.InMemory:
-                    return null;
-                case DatabaseProvider.Sqlite:
-                    return "Data Source=" + this.DataSource;
-                default:
-                    return new NpgsqlConnectionStringBuilder
-                    {
-                        Host = this.Hostname,
-                        Port = this.Port,
-                        Database = this.Database,
-                        Username = this.Username,
-                        Password = this.Password,
-
-                        SslMode = SslMode.Prefer,
-                        TrustServerCertificate = true,
-
-                        Pooling = true
-                    }.ConnectionString;
-            }
-
+                DatabaseProvider.InMemory => null,
+                DatabaseProvider.Sqlite => "Data Source=" + this.DataSource,
+                _ => new NpgsqlConnectionStringBuilder
+                {
+                    Host = this.Hostname,
+                    Port = this.Port,
+                    Database = this.Database,
+                    Username = this.Username,
+                    Password = this.Password,
+                    SslMode = SslMode.Prefer,
+                    TrustServerCertificate = true,
+                    Pooling = true
+                }.ConnectionString
+            };
         }
 
         public DatabaseContextBuilder CreateContextBuilder() =>
