@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.EventData.Outgoing;
+using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
 using System;
 using System.Buffers;
@@ -45,12 +46,33 @@ namespace ModCore.Common.Discord.Gateway
         private IServiceProvider services;
         private ILogger logger;
 
+        private List<ISubscriber> subscribers = new List<ISubscriber>();
+
         public Gateway(Action<GatewayConfiguration> configure, IServiceProvider services)
         {
             this.services = services;
             logger = services.GetRequiredService<ILogger<Gateway>>();
             this.configuration = new GatewayConfiguration();
             configure(this.configuration);
+
+            foreach(var subscriber in configuration.subscribers)
+            {
+                var constructors = subscriber.GetConstructors();
+                if(constructors.Count() != 1)
+                {
+                    throw new NotSupportedException($"Your subscriber of type {subscriber} needs exactly 1 constructor! It has {constructors.Count()}!");
+                }
+
+                var constructor = constructors[0];
+                var parameters = constructor.GetParameters().Select(x => x.ParameterType).ToArray();
+                var qualifiedParameters = new object[parameters.Length];
+                for(int i = 0; i < parameters.Length; i++)
+                {
+                    qualifiedParameters[i] = services.GetService(parameters[i]);
+                }
+
+                subscribers.Add(Activator.CreateInstance(subscriber, qualifiedParameters) as ISubscriber);
+            }
 
             var uribuilder = new UriBuilder(this.configuration.GatewayUrl);
             uribuilder.Scheme = "wss";
@@ -200,13 +222,13 @@ namespace ModCore.Common.Discord.Gateway
             {
                 await Task.Delay(hello.HeartbeatInterval + jitter.Next(0, 2));
                 logger.LogInformation("Sending new Heartbeat.");
-                await SendWebsocketPacketAsync(new Payload(OpCodes.Heartbeat).WithData(lastSequenceNumber));
+                await SendWebsocketPacketAsync(new Payload(OpCodes.Heartbeat).WithData(lastSequenceNumber, jsonSerializerOptions));
             }
         }
 
         private async Task HandleHelloAsync(Payload gatewayEvent)
         {
-            var hello = gatewayEvent.GetDataAs<Hello>();
+            var hello = gatewayEvent.GetDataAs<Hello>(jsonSerializerOptions);
             // start heartbeat task
             _ = Task.Run(async () =>
             {
@@ -222,7 +244,9 @@ namespace ModCore.Common.Discord.Gateway
             {
                 Token = configuration.Token,
                 Intents = configuration.Intents
-            }));
+            }, jsonSerializerOptions));
+
+            await DispatchEventToSubscribers(hello);
         }
 
         private async Task HandleDispatchAsync(Payload gatewayEvent)
@@ -236,8 +260,22 @@ namespace ModCore.Common.Discord.Gateway
                     break;
                 case "READY":
                     logger.LogInformation("Gateway is ready for operation.");
+                    await DispatchEventToSubscribers(gatewayEvent.GetDataAs<Ready>(jsonSerializerOptions));
                     break;
             }
+        }
+
+        private async Task DispatchEventToSubscribers<T>(T data) where T : IPublishable
+        {
+            _ = Task.Run(async () =>
+            {
+                // This is very much a temporary solution.
+                var qualifiedSubscribers = subscribers.Where(x => x.GetType().IsAssignableTo(typeof(ISubscriber<T>))).Cast<ISubscriber<T>>();
+                foreach (var subscriber in qualifiedSubscribers)
+                {
+                    _ = Task.Run(async () => await subscriber.HandleEvent(data));
+                }
+            });
         }
     }
 }

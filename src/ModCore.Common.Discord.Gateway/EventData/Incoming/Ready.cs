@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Discord.Rest.Entities;
+﻿using ModCore.Common.Discord.Gateway.Events;
+using ModCore.Common.Discord.Rest.Entities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,27 +11,27 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Gateway.EventData.Incoming
 {
-    public class Ready
+    public class Ready : IPublishable
     {
         [JsonPropertyName("v")]
-        public int ApiVersion { get; internal set; }
+        public int ApiVersion { get; set; }
 
         [JsonPropertyName("user")]
-        public User User { get; internal set; }
+        public User User { get; set; }
 
         [JsonPropertyName("guilds")]
-        public ReadOnlyCollection<JsonObject> Guilds { get; internal set; }
+        public List<JsonObject> Guilds { get; set; }
 
         [JsonPropertyName("session_id")]
-        public string SessionId { get; internal set; }
+        public string SessionId { get; set; }
 
         [JsonPropertyName("resume_gateway_url")]
-        public string ResumeGatewayUrl { get; internal set; }
+        public string ResumeGatewayUrl { get; set; }
         
         [JsonPropertyName("shard")]
-        public int[] Shard { get; internal set; }
+        public int[] Shard { get; set; }
 
         [JsonPropertyName("application")]
-        public JsonObject Application { get; internal set; }
+        public JsonObject Application { get; set; }
     }
 }

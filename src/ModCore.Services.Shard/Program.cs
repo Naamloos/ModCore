@@ -40,6 +40,7 @@ namespace ModCore.Services.Shard
                     {
                         config.Token = TEMP_TOKEN;
                         config.Intents = Intents.AllUnprivileged;
+                        config.SubscribeEvents<SomeEventHandler>();
                     });
                     services.AddDiscordRest(config =>
                     {

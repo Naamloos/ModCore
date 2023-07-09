@@ -23,19 +23,19 @@ namespace ModCore.Common.Discord.Gateway
         [JsonPropertyName("t")]
         public string? EventName { get; set; }
 
-        public T? GetDataAs<T>()
+        public T? GetDataAs<T>(JsonSerializerOptions options)
         {
-            return Data.Deserialize<T>();
+            return Data.Deserialize<T>(options);
         }
 
-        public void SetData<T>(T data)
+        public void SetData<T>(T data, JsonSerializerOptions options)
         {
-            Data = JsonSerializer.SerializeToElement(data);
+            Data = JsonSerializer.SerializeToElement(data, options);
         }
 
-        public Payload WithData<T>(T data)
+        public Payload WithData<T>(T data, JsonSerializerOptions options)
         {
-            this.SetData(data);
+            this.SetData(data, options);
             return this;
         }
 
