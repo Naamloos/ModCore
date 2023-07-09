@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Discord.Gateway.Events;
+﻿using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest.Entities;
 using System;
 using System.Collections.Generic;
@@ -32,6 +33,15 @@ namespace ModCore.Common.Discord.Gateway.EventData.Incoming
         public int[] Shard { get; set; }
 
         [JsonPropertyName("application")]
-        public JsonObject Application { get; set; }
+        public ReadyApplication Application { get; set; }
+    }
+
+    public class ReadyApplication
+    {
+        [JsonPropertyName("id")]
+        public Snowflake Id { get; set; }
+
+        [JsonPropertyName("flags")]
+        public int Flags { get; set; }
     }
 }

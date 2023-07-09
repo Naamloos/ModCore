@@ -45,6 +45,13 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<User>(HttpMethod.Get, url, route);
         }
 
+        public Task<RestResponse<Application>> GetApplicationAsync(Snowflake applicationId) 
+        {
+            string route = "applications/:application_id";
+            string url = $"applications/{applicationId}";
+            return makeRequestAsync<Application>(HttpMethod.Get, url, route);
+        }
+
         private async Task<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)
         {
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(HttpMethod.Get, route, url);
