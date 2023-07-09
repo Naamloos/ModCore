@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Rest
 {
-    public class RestResponse<T>
+    public struct RestResponse<T>
     {
         public T? Value { get; private set; }
         public HttpResponseMessage HttpResponse { get; private set; }
