@@ -56,10 +56,13 @@ namespace ModCore.Common.Discord.Rest
 
             var response = await httpClient.SendAsync(request);
 
-            var remaining = response.Headers.GetValues("X-RateLimit-Remaining");
-            var reset_after = response.Headers.GetValues("X-RateLimit-Reset-After");
+            if (response.Headers.Contains("X-Ratelimit-Remaining"))
+            {
+                var remaining = response.Headers.GetValues("X-RateLimit-Remaining");
+                var reset_after = response.Headers.GetValues("X-RateLimit-Reset-After");
 
-            await bucket.SignalDoneAsync(int.Parse(remaining.First()), float.Parse(reset_after.First()));
+                await bucket.SignalDoneAsync(int.Parse(remaining.First()), float.Parse(reset_after.First()));
+            }
 
             return response;
         }

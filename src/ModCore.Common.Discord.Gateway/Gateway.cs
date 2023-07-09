@@ -273,6 +273,12 @@ namespace ModCore.Common.Discord.Gateway
                     logger.LogInformation("Gateway is ready for operation.");
                     await DispatchEventToSubscribers(gatewayEvent.GetDataAs<Ready>(jsonSerializerOptions));
                     break;
+                case "GUILD_CREATE":
+                    await DispatchEventToSubscribers(gatewayEvent.GetDataAs<GuildCreate>(jsonSerializerOptions));
+                    break;
+                case "MESSAGE_CREATE":
+                    await DispatchEventToSubscribers(gatewayEvent.GetDataAs<MessageCreate>(jsonSerializerOptions));
+                    break;
             }
         }
 

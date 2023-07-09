@@ -64,8 +64,9 @@ namespace ModCore.Services.Shard
                     // the gateway will use it to decide what it's websocket url should be.
                     services.AddDiscordGateway(config =>
                     {
-                        config.Intents = Intents.AllUnprivileged;
+                        config.Intents = Intents.AllUnprivileged | Intents.MessageContents;
                         config.SubscribeEvents<StartupEvents>();
+                        config.SubscribeEvents<MessageEvents>();
                     });
                     // These are the REAL™️ PISSCATSHARP
                     services.AddDiscordRest(config => { });

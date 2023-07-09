@@ -52,9 +52,24 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<Application>(HttpMethod.Get, url, route);
         }
 
+        public class msg
+        {
+            [JsonPropertyName("content")]
+            public string content { get; set; }
+        }
+
+        // TODO this sucks, properly implement. this is jsut here for "ayo it work" atm.
+        public Task<RestResponse<Message>> CreateMessageAsync(Snowflake channelId, string content)
+        {
+            string route = "channels/:channel_id/messages";
+            string url = $"channels/{channelId}/messages";
+            var message = new msg() { content = content };
+            return makeRequestAsync<Message>(HttpMethod.Post, url, route, message);
+        }
+
         private async Task<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)
         {
-            HttpResponseMessage response = await RatelimitedRest.RequestAsync(HttpMethod.Get, route, url);
+            HttpResponseMessage response = await RatelimitedRest.RequestAsync(method, route, url, body);
             T? deserializedResponse = default(T);
             if (response.IsSuccessStatusCode)
             {
