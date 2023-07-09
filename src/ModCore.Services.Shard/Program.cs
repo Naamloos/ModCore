@@ -42,6 +42,7 @@ namespace ModCore.Services.Shard
                         config.Intents = Intents.AllUnprivileged;
                         config.SubscribeEvents<StartupEvents>();
                     });
+                    // These are the REAL™️ PISSCATSHARP
                     services.AddDiscordRest(config =>
                     {
                         config.Token = TEMP_TOKEN;

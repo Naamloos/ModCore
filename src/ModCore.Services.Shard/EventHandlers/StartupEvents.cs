@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace ModCore.Services.Shard.EventHandlers
 {
+    /// <summary>
+    /// This event handler handles anything that should be ran around startup.
+    /// </summary>
     public class StartupEvents : ISubscriber<Ready>, ISubscriber<Hello>
     {
         private readonly ILogger _logger;
