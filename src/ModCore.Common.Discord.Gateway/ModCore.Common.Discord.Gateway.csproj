@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj" />
     <ProjectReference Include="..\ModCore.Common.Utils\ModCore.Common.Utils.csproj" />
   </ItemGroup>
 

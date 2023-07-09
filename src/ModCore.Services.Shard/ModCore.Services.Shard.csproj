@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ModCore.Common.Discord.Gateway\ModCore.Common.Discord.Gateway.csproj" />
+    <ProjectReference Include="..\ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj" />
   </ItemGroup>
 
 </Project>

@@ -32,5 +32,10 @@ namespace ModCore.Common.Discord.Entities
         public static implicit operator Snowflake(ulong value) { return new Snowflake(value); }
         public static implicit operator Snowflake(DateTimeOffset timestamp) { return new Snowflake(timestamp); }
         public static implicit operator DateTimeOffset(Snowflake snowflake) { return snowflake.Timestamp; }
+
+        public override string ToString()
+        {
+            return snowflake.ToString();
+        }
     }
 }

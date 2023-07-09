@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.EventData.Outgoing;
+using ModCore.Common.Discord.Rest;
 using System;
 using System.Buffers;
 using System.Collections.Generic;

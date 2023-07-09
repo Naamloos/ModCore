@@ -40,6 +40,11 @@ namespace ModCore.Services.Shard
                         config.Token = TEMP_TOKEN;
                         config.Intents = Intents.AllUnprivileged;
                     });
+                    services.AddDiscordRest(config =>
+                    {
+                        config.Token = TEMP_TOKEN;
+                        config.TokenType = "Bot";
+                    });
                     services.AddLogging();
                 })
                 .Build();

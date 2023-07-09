@@ -12,12 +12,12 @@ namespace ModCore.Common.Discord.Entities.Serializer
     {
         public override Snowflake? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return reader.GetUInt64();
+            return ulong.Parse(reader.GetString());
         }
 
         public override void Write(Utf8JsonWriter writer, Snowflake value, JsonSerializerOptions options)
         {
-            writer.WriteNumberValue(value);
+            writer.WriteStringValue(value.ToString());
         }
     }
 }
