@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Rest
 {
-    public class RatelimitedRest
+    public class RateLimitedRest
     {
         const short API_VERSION = 10;
 
@@ -21,7 +21,7 @@ namespace ModCore.Common.Discord.Rest
 
         private ConcurrentDictionary<string, RateLimitBucket> buckets;
 
-        public RatelimitedRest(DiscordRestConfiguration config, JsonSerializerOptions jsonSerializerOptions)
+        public RateLimitedRest(DiscordRestConfiguration config, JsonSerializerOptions jsonSerializerOptions)
         {
             this.jsonSerializerOptions = jsonSerializerOptions;
             buckets = new ConcurrentDictionary<string, RateLimitBucket>();

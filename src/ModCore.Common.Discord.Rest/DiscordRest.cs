@@ -14,7 +14,7 @@ namespace ModCore.Common.Discord.Rest
     public class DiscordRest
     {
         private DiscordRestConfiguration Configuration;
-        private RatelimitedRest RatelimitedRest;
+        private RateLimitedRest RatelimitedRest;
         private JsonSerializerOptions JsonSerializerOptions;
 
         public DiscordRest(Action<DiscordRestConfiguration> configure, IServiceProvider services)
@@ -23,12 +23,12 @@ namespace ModCore.Common.Discord.Rest
             configure(Configuration);
             JsonSerializerOptions = new JsonSerializerOptions();
             JsonSerializerOptions.Converters.Add(new SnowflakeJsonSerializer());
-            RatelimitedRest = new RatelimitedRest(Configuration, JsonSerializerOptions);
+            RatelimitedRest = new RateLimitedRest(Configuration, JsonSerializerOptions);
         }
 
         public async Task<User> GetCurrentUserAsync()
         {
-            string route = "users/:user";
+            string route = "users/@me";
             string url = "users/@me";
             
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(HttpMethod.Get, route, url);
@@ -36,10 +36,10 @@ namespace ModCore.Common.Discord.Rest
             return await JsonSerializer.DeserializeAsync<User>(await response.Content.ReadAsStreamAsync(), JsonSerializerOptions);
         }
 
-        public async Task<User> GetUserAsync(Snowflake snowflake)
+        public async Task<User> GetUserAsync(Snowflake userId)
         {
-            string route = "users/:user";
-            string url = $"users/{snowflake}";
+            string route = "users/:user_id";
+            string url = $"users/{userId}";
 
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(HttpMethod.Get, route, url);
 

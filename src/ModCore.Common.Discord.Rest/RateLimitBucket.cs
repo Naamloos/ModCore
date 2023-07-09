@@ -8,7 +8,6 @@ namespace ModCore.Common.Discord.Rest
 {
     internal class RateLimitBucket
     {
-        private SemaphoreSlim semaphore;
         private ManualResetEventSlim manualResetEvent;
 
         public RateLimitBucket()
