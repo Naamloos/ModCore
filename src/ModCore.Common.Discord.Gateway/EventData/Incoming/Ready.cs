@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ModCore.Common.Discord.Rest.Entities;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace ModCore.Common.Discord.Gateway.EventData.Incoming
         public int ApiVersion { get; internal set; }
 
         [JsonPropertyName("user")]
-        public JsonObject User { get; internal set; }
+        public User User { get; internal set; }
 
         [JsonPropertyName("guilds")]
         public ReadOnlyCollection<JsonObject> Guilds { get; internal set; }

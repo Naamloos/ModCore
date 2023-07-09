@@ -26,24 +26,30 @@ namespace ModCore.Common.Discord.Rest
             RatelimitedRest = new RateLimitedRest(Configuration, JsonSerializerOptions);
         }
 
-        public async Task<User> GetCurrentUserAsync()
+        public Task<RestResponse<User>> GetCurrentUserAsync()
         {
             string route = "users/@me";
             string url = "users/@me";
-            
-            HttpResponseMessage response = await RatelimitedRest.RequestAsync(HttpMethod.Get, route, url);
-
-            return await JsonSerializer.DeserializeAsync<User>(await response.Content.ReadAsStreamAsync(), JsonSerializerOptions);
+            return makeRequestAsync<User>(HttpMethod.Get, url, route);
         }
 
-        public async Task<User> GetUserAsync(Snowflake userId)
+        public Task<RestResponse<User>> GetUserAsync(Snowflake userId)
         {
             string route = "users/:user_id";
             string url = $"users/{userId}";
+            return makeRequestAsync<User>(HttpMethod.Get, url, route);
+        }
 
+        private async Task<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)
+        {
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(HttpMethod.Get, route, url);
+            T? deserializedResponse = default(T);
+            if (response.IsSuccessStatusCode)
+            {
+                deserializedResponse = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), JsonSerializerOptions);
+            }
 
-            return await JsonSerializer.DeserializeAsync<User>(await response.Content.ReadAsStreamAsync(), JsonSerializerOptions);
+            return new RestResponse<T>(deserializedResponse, response);
         }
     }
 }
