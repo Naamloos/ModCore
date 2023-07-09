@@ -8,7 +8,5 @@ namespace ModCore.Common.Discord.Rest
 {
     public record DiscordRestConfiguration
     {
-        public string Token { get; set; }
-        public string TokenType { get; set; } // TODO enum
     }
 }

@@ -13,7 +13,6 @@ namespace ModCore.Common.Discord.Gateway
 {
     public record GatewayConfiguration
     {
-        public string Token { get; set; } = "";
         public Intents Intents { get; set; } = Intents.AllUnprivileged;
         public string GatewayUrl { get; set; } = "gateway.discord.gg";
         public IServiceProvider Services { get; set; } = new ServiceCollection().BuildServiceProvider(); // placeholder dummy

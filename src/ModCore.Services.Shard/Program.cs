@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Rest;
+using ModCore.Services.Shard.EventHandlers;
 using Serilog;
 using Serilog.Events;
 using Serilog.Extensions.Logging;
@@ -14,8 +16,6 @@ namespace ModCore.Services.Shard
 {
     internal class Program
     {
-        const string TEMP_TOKEN = "snip";
-
         static void Main(string[] args)
         {
             var logger = new LoggerConfiguration()
@@ -23,6 +23,26 @@ namespace ModCore.Services.Shard
                 .MinimumLevel.Debug()
                 .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
+
+            var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.General)
+            {
+                WriteIndented = true
+            };
+
+            if(!File.Exists("settings.json"))
+            {
+                File.Create("settings.json").Close();
+                File.WriteAllText("settings.json", JsonSerializer.Serialize(new Settings(), jsonOptions));
+                logger.Information("Settings file not found. Created one. Please fill with required values!");
+                return;
+            }
+            else
+            {
+                // ensure new config values are written
+                var contents = File.ReadAllText("settings.json");
+                var settings = JsonSerializer.Deserialize<Settings>(contents);
+                File.WriteAllText("settings.json", JsonSerializer.Serialize(settings, jsonOptions));
+            }
 
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(options =>
@@ -32,22 +52,23 @@ namespace ModCore.Services.Shard
                         .AddSerilog(logger)
                         .SetMinimumLevel(LogLevel.Debug);
                 })
+                .ConfigureAppConfiguration(config =>
+                {
+                    config.AddJsonFile("settings.json")
+                        .AddEnvironmentVariables()
+                        .Build();
+                })
                 .ConfigureServices(services =>
                 {
                     // TODO if the rest client is added as a service, 
                     // the gateway will use it to decide what it's websocket url should be.
                     services.AddDiscordGateway(config =>
                     {
-                        config.Token = TEMP_TOKEN;
                         config.Intents = Intents.AllUnprivileged;
                         config.SubscribeEvents<StartupEvents>();
                     });
                     // These are the REAL™️ PISSCATSHARP
-                    services.AddDiscordRest(config =>
-                    {
-                        config.Token = TEMP_TOKEN;
-                        config.TokenType = "Bot";
-                    });
+                    services.AddDiscordRest(config => { });
                     services.AddLogging();
                 })
                 .Build();

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.HighPerformance;
 using CommunityToolkit.HighPerformance.Buffers;
 using CommunityToolkit.HighPerformance.Helpers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -48,12 +49,21 @@ namespace ModCore.Common.Discord.Gateway
 
         private List<ISubscriber> subscribers = new List<ISubscriber>();
 
+        private string token;
+        private int shard_id;
+        private int shard_count;
+
         public Gateway(Action<GatewayConfiguration> configure, IServiceProvider services)
         {
             this.services = services;
             logger = services.GetRequiredService<ILogger<Gateway>>();
             this.configuration = new GatewayConfiguration();
             configure(this.configuration);
+
+            var hostConfig = services.GetRequiredService<IConfiguration>();
+            token = hostConfig.GetRequiredSection("discord_token").Value;
+            shard_id = int.Parse(hostConfig.GetRequiredSection("current_shard").Value);
+            shard_count = int.Parse(hostConfig.GetRequiredSection("shard_count").Value);
 
             foreach(var subscriber in configuration.subscribers)
             {
@@ -242,8 +252,9 @@ namespace ModCore.Common.Discord.Gateway
             // Send IDENTIFY
             await SendWebsocketPacketAsync(new Payload(OpCodes.Identify).WithData(new Identify()
             {
-                Token = configuration.Token,
-                Intents = configuration.Intents
+                Token = token,
+                Intents = configuration.Intents,
+                Shard = new int[] { shard_id, shard_count }
             }, jsonSerializerOptions));
 
             await DispatchEventToSubscribers(hello);

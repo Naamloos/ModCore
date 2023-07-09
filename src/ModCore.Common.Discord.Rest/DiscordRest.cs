@@ -1,4 +1,6 @@
-﻿using ModCore.Common.Discord.Entities;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Rest.Entities;
 using System;
@@ -23,7 +25,10 @@ namespace ModCore.Common.Discord.Rest
             configure(Configuration);
             JsonSerializerOptions = new JsonSerializerOptions();
             JsonSerializerOptions.Converters.Add(new SnowflakeJsonSerializer());
-            RatelimitedRest = new RateLimitedRest(Configuration, JsonSerializerOptions);
+
+            var hostConfig = services.GetRequiredService<IConfiguration>();
+
+            RatelimitedRest = new RateLimitedRest(Configuration, hostConfig.GetRequiredSection("discord_token").Value, JsonSerializerOptions);
         }
 
         public Task<RestResponse<User>> GetCurrentUserAsync()

@@ -21,7 +21,7 @@ namespace ModCore.Common.Discord.Rest
 
         private ConcurrentDictionary<string, RateLimitBucket> buckets;
 
-        public RateLimitedRest(DiscordRestConfiguration config, JsonSerializerOptions jsonSerializerOptions)
+        public RateLimitedRest(DiscordRestConfiguration config, string token, JsonSerializerOptions jsonSerializerOptions)
         {
             this.jsonSerializerOptions = jsonSerializerOptions;
             buckets = new ConcurrentDictionary<string, RateLimitBucket>();
@@ -32,7 +32,7 @@ namespace ModCore.Common.Discord.Rest
                 BaseAddress = new Uri($"https://discord.com/api/v{API_VERSION}")
             };
 
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"{configuration.TokenType} {configuration.Token}");
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bot {token}");
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("ModCore3 (https://github.com/Naamloos/ModCore)");
         }
 
