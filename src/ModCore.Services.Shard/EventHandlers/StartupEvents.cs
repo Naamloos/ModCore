@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
@@ -38,15 +39,21 @@ namespace ModCore.Services.Shard.EventHandlers
             if (application.Success)
             {
                 _logger.LogInformation("Application is registered under ID {0}. Owner username is {1}.", data.Application.Id, application.Value!.Owner!.Username);
-
-                _logger.LogDebug("Clearing AppCommands");
-                var succ = await _rest.BulkOverwriteGlobalApplicationCommandsAsync(data.Application.Id);
-                var bod = succ.HttpResponse.Content.ReadAsStringAsync();
             }
             else
             {
                 _logger.LogCritical("Failed to fetch application info!");
             }
+
+            var resp = await _rest.BulkOverwriteGlobalApplicationCommandsAsync(data.Application.Id, new ApplicationCommand()
+            {
+                Name = "about", 
+                Type = ApplicationCommandType.ChatInput,
+                Description = "Information about ModCore",
+                CanBeUsedInDM = false
+            });
+
+            var respc = await resp.HttpResponse.Content.ReadAsStringAsync();
         }
 
         public async Task HandleEvent(GuildCreate data)

@@ -68,11 +68,18 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<Message>(HttpMethod.Post, url, route, message);
         }
 
-        public Task<RestResponse<JsonArray>> BulkOverwriteGlobalApplicationCommandsAsync(Snowflake applicationId, params JsonObject[] commands)
+        public Task<RestResponse<ApplicationCommand[]>> BulkOverwriteGlobalApplicationCommandsAsync(Snowflake applicationId, params ApplicationCommand[] commands)
         {
             string route = "applications/:application_id/commands";
             string url = $"applications/{applicationId}/commands";
             return makeRequestAsync<JsonArray>(HttpMethod.Put, url, route, commands);
+        }
+
+        public Task<RestResponse<ApplicationCommand[]>> GetGlobalApplicationCommandsAsync(Snowflake applicationId, bool withLocalizations = true)
+        {
+            string route = "applications/:application_id/commands";
+            string url = $"applications/{applicationId}/commands?with_localizations=" + withLocalizations;
+            return makeRequestAsync<ApplicationCommand[]>(HttpMethod.Get, url, route);
         }
 
         private async Task<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)

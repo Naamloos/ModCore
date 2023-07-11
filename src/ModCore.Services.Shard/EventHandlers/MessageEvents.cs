@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Services.Shard.EventHandlers
 {
-    public class MessageEvents : ISubscriber<MessageCreate>
+    public class MessageEvents : ISubscriber<MessageCreate>, ISubscriber<InteractionCreate>
     {
         private readonly ILogger _logger;
         private readonly DiscordRest _rest;
@@ -33,6 +33,11 @@ namespace ModCore.Services.Shard.EventHandlers
             {
                 throw new InsufficientExecutionStackException("dick too small");
             }
+        }
+
+        public async Task HandleEvent(InteractionCreate data)
+        {
+            _logger.LogDebug("Incoming interaction");
         }
     }
 }

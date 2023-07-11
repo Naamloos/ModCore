@@ -318,6 +318,9 @@ namespace ModCore.Common.Discord.Gateway
                 case "MESSAGE_CREATE":
                     DispatchEventToSubscribers(gatewayEvent.GetDataAs<MessageCreate>(jsonSerializerOptions));
                     break;
+                case "INTERACTION_CREATE":
+                    DispatchEventToSubscribers(gatewayEvent.GetDataAs<InteractionCreate>(jsonSerializerOptions));
+                    break;
             }
         }
 
