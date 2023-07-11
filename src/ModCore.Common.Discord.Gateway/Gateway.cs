@@ -40,7 +40,9 @@ namespace ModCore.Common.Discord.Gateway
         private JsonSerializerOptions jsonSerializerOptions;
         private SemaphoreSlim sendingSemaphore;
         private Channel<Payload> gatewayEventChannel;
-        private CancellationToken cancellationToken;
+
+        private CancellationToken serviceCancellationToken;
+        private CancellationTokenSource gatewayCancellationTokenSource;
 
         private int? lastSequenceNumber = null;
 
@@ -53,12 +55,16 @@ namespace ModCore.Common.Discord.Gateway
         private int shard_id;
         private int shard_count;
 
+        private Ready lastReadyEvent;
+
         public Gateway(Action<GatewayConfiguration> configure, IServiceProvider services)
         {
             this.services = services;
             logger = services.GetRequiredService<ILogger<Gateway>>();
             this.configuration = new GatewayConfiguration();
             configure(this.configuration);
+
+            gatewayCancellationTokenSource = new CancellationTokenSource();
 
             var hostConfig = services.GetRequiredService<IConfiguration>();
             token = hostConfig.GetRequiredSection("discord_token").Value;
@@ -108,25 +114,55 @@ namespace ModCore.Common.Discord.Gateway
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            this.cancellationToken = cancellationToken;
+            this.serviceCancellationToken = cancellationToken;
             _ = Task.Run(GatewayMessageReceiverAsync);
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
+            if(websocket.State == WebSocketState.Open)
+            {
+                return websocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
+            }
             return Task.CompletedTask;
+        }
+
+        public async Task ResumeAsync()
+        {
+            // cancel running gateway loops
+            gatewayCancellationTokenSource.Cancel();
+            // and close websocket if still running
+            if(websocket.State == WebSocketState.Open)
+            {
+                await websocket.CloseAsync(WebSocketCloseStatus.Empty, null, serviceCancellationToken);
+            }
+
+            // reconstruct connection
+            this.gatewayCancellationTokenSource = new CancellationTokenSource();
+            this.websocket = new ClientWebSocket();
+            await websocket.ConnectAsync(new Uri(lastReadyEvent.ResumeGatewayUrl), serviceCancellationToken);
+
+            logger.LogInformation("Sending resume packet.");
+            // Send RESUME
+            await SendWebsocketPacketAsync(new Payload(OpCodes.Identify).WithData(new Resume()
+            {
+                LastSequenceNumber = lastSequenceNumber ?? 0,
+                SessionId = lastReadyEvent.SessionId,
+                Token = token
+            }, jsonSerializerOptions));
         }
 
         private async Task GatewayMessageReceiverAsync()
         {
-            await websocket.ConnectAsync(new Uri(gatewayUrl), cancellationToken);
+            await websocket.ConnectAsync(new Uri(gatewayUrl), serviceCancellationToken);
             logger.LogInformation("Successfully connected to Discord's Gateway.");
 
-            _ = Task.Run(GatewayMessageHandlerAsync, cancellationToken);
+            _ = Task.Run(GatewayMessageHandlerAsync, gatewayCancellationTokenSource.Token);
 
             logger.LogInformation("Started Gateway Receiver Logic");
-            while (!cancellationToken.IsCancellationRequested
+            while (!serviceCancellationToken.IsCancellationRequested
+                && !gatewayCancellationTokenSource.IsCancellationRequested
                 && websocket.State == WebSocketState.Open)
             {
                 try
@@ -147,9 +183,9 @@ namespace ModCore.Common.Discord.Gateway
         private async Task GatewayMessageHandlerAsync()
         {
             logger.LogInformation("Started Gateway Response Logic");
-            while (!cancellationToken.IsCancellationRequested)
+            while (!serviceCancellationToken.IsCancellationRequested && !gatewayCancellationTokenSource.IsCancellationRequested)
             {
-                var gatewayEvent = await gatewayEventChannel.Reader.ReadAsync(cancellationToken);
+                var gatewayEvent = await gatewayEventChannel.Reader.ReadAsync(serviceCancellationToken);
                 lastSequenceNumber = gatewayEvent.Sequence ?? lastSequenceNumber;
                 logger.LogDebug("Received websocket OpCode: {0}", gatewayEvent.OpCode);
 
@@ -184,7 +220,7 @@ namespace ModCore.Common.Discord.Gateway
 
         private async Task SendWebsocketPacketAsync(Payload gatewayEvent)
         {
-            await sendingSemaphore.WaitAsync(cancellationToken);
+            await sendingSemaphore.WaitAsync(serviceCancellationToken);
             var memoryStream = new MemoryStream();
 
             JsonSerializer.Serialize(memoryStream, gatewayEvent, jsonSerializerOptions);
@@ -205,7 +241,7 @@ namespace ModCore.Common.Discord.Gateway
                 throw new Exception($"Failed to fetch memory buffer!");
             }
 
-            await websocket.SendAsync(buffer, WebSocketMessageType.Text, true, cancellationToken);
+            await websocket.SendAsync(buffer, WebSocketMessageType.Text, true, serviceCancellationToken);
             sendingSemaphore.Release();
             logger.LogDebug("Sent websocket OpCode: {0}", gatewayEvent.OpCode);
         }
@@ -217,7 +253,7 @@ namespace ModCore.Common.Discord.Gateway
             do
             {
                 var buffer = arrayPoolBufferWriter.GetMemory(BUFFER_SIZE);
-                result = await websocket.ReceiveAsync(buffer, cancellationToken);
+                result = await websocket.ReceiveAsync(buffer, serviceCancellationToken);
                 arrayPoolBufferWriter.Advance(result.Count);
             } 
             while (!result.EndOfMessage);
@@ -228,7 +264,7 @@ namespace ModCore.Common.Discord.Gateway
         private async Task GatewayHeartbeatHandlerAsync(Hello hello)
         {
             var jitter = new Random();
-            while(!cancellationToken.IsCancellationRequested)
+            while(!serviceCancellationToken.IsCancellationRequested)
             {
                 await Task.Delay(hello.HeartbeatInterval + jitter.Next(0, 2));
                 logger.LogInformation("Sending new Heartbeat.");
@@ -257,7 +293,7 @@ namespace ModCore.Common.Discord.Gateway
                 Shard = new int[] { shard_id, shard_count }
             }, jsonSerializerOptions));
 
-            await DispatchEventToSubscribers(hello);
+            DispatchEventToSubscribers(hello);
         }
 
         private async Task HandleDispatchAsync(Payload gatewayEvent)
@@ -270,29 +306,50 @@ namespace ModCore.Common.Discord.Gateway
                     logger.LogWarning("Received yet unknown DISPATCH event: {0}", gatewayEvent.EventName);
                     break;
                 case "READY":
+                    lastReadyEvent = gatewayEvent.GetDataAs<Ready>(jsonSerializerOptions)!;
                     logger.LogInformation("Gateway is ready for operation.");
-                    await DispatchEventToSubscribers(gatewayEvent.GetDataAs<Ready>(jsonSerializerOptions));
+                    logger.LogInformation("Resume Gateway URL: {0}", lastReadyEvent.ResumeGatewayUrl);
+                    logger.LogInformation("Session ID: {0}", lastReadyEvent.SessionId);
+                    DispatchEventToSubscribers(lastReadyEvent);
                     break;
                 case "GUILD_CREATE":
-                    await DispatchEventToSubscribers(gatewayEvent.GetDataAs<GuildCreate>(jsonSerializerOptions));
+                    DispatchEventToSubscribers(gatewayEvent.GetDataAs<GuildCreate>(jsonSerializerOptions));
                     break;
                 case "MESSAGE_CREATE":
-                    await DispatchEventToSubscribers(gatewayEvent.GetDataAs<MessageCreate>(jsonSerializerOptions));
+                    DispatchEventToSubscribers(gatewayEvent.GetDataAs<MessageCreate>(jsonSerializerOptions));
                     break;
             }
         }
 
-        private async Task DispatchEventToSubscribers<T>(T data) where T : IPublishable
+        private void DispatchEventToSubscribers<T>(T? data) where T : IPublishable
         {
-            _ = Task.Run(async () =>
+            if(data is null)
             {
-                // This is very much a temporary solution.
-                var qualifiedSubscribers = subscribers.Where(x => x.GetType().IsAssignableTo(typeof(ISubscriber<T>))).Cast<ISubscriber<T>>();
-                foreach (var subscriber in qualifiedSubscribers)
+                logger.LogError("Null data passed to event with data type {0}! This should be considered an gateway error!", typeof(T));
+                return;
+            }
+
+            foreach (var subscriber in subscribers)
+            {
+                if (subscriber is ISubscriber<T> qualifiedSubscriber)
                 {
-                    _ = Task.Run(async () => await subscriber.HandleEvent(data));
+                    _ = Task.Run(async () => await runEventHandlerAsync<T>(qualifiedSubscriber, data));
                 }
-            });
+            }
+        }
+
+        private async Task runEventHandlerAsync<T>(ISubscriber<T> subscriber, T data)
+        {
+            try
+            {
+                await subscriber.HandleEvent(data);
+            }
+            catch(Exception ex)
+            {
+                logger.LogError("Caught exception of type {0}!", ex.GetType());
+                logger.LogError("Event Handler: {0} ({1})", subscriber.GetType(), typeof(T).Name);
+                logger.LogError("Message: {0}\n{1}", ex.Message ?? "None provided.", ex.StackTrace);
+            }
         }
     }
 }

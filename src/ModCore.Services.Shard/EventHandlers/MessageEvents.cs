@@ -29,6 +29,10 @@ namespace ModCore.Services.Shard.EventHandlers
             {
                 var resp = await _rest.CreateMessageAsync(data.ChannelId, $"Ayo ima be real <@{data.Author.Id}>, this text command is just a test man..");
             }
+            else if(data.Content == "$oops")
+            {
+                throw new InsufficientExecutionStackException("dick too small");
+            }
         }
     }
 }
