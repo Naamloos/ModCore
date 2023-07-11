@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
@@ -67,12 +68,20 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<Message>(HttpMethod.Post, url, route, message);
         }
 
+        public Task<RestResponse<JsonArray>> BulkOverwriteGlobalApplicationCommandsAsync(Snowflake applicationId, params JsonObject[] commands)
+        {
+            string route = "applications/:application_id/commands";
+            string url = $"applications/{applicationId}/commands";
+            return makeRequestAsync<JsonArray>(HttpMethod.Put, url, route, commands);
+        }
+
         private async Task<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)
         {
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(method, route, url, body);
             T? deserializedResponse = default(T);
             if (response.IsSuccessStatusCode)
             {
+                var resp = response.Content.ReadAsStringAsync();
                 deserializedResponse = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), JsonSerializerOptions);
             }
 

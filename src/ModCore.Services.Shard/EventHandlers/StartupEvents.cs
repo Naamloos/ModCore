@@ -38,6 +38,10 @@ namespace ModCore.Services.Shard.EventHandlers
             if (application.Success)
             {
                 _logger.LogInformation("Application is registered under ID {0}. Owner username is {1}.", data.Application.Id, application.Value!.Owner!.Username);
+
+                _logger.LogDebug("Clearing AppCommands");
+                var succ = await _rest.BulkOverwriteGlobalApplicationCommandsAsync(data.Application.Id);
+                var bod = succ.HttpResponse.Content.ReadAsStringAsync();
             }
             else
             {
