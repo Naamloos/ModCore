@@ -175,6 +175,9 @@ namespace ModCore.Extensions.Attributes
                 case EventType.MessageReactionRemoved:
                     client.MessageReactionRemoved += onEvent;
                     break;
+                case EventType.MessageReactionEmojiRemoved:
+                    client.MessageReactionRemovedEmoji += onEvent;
+                    break;
                 case EventType.MessageReactionsCleared:
                     client.MessageReactionsCleared += onEvent;
                     break;

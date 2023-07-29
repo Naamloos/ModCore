@@ -41,6 +41,8 @@ namespace ModCore.Listeners
 						await member.GrantRoleAsync(reactionrole);
 				}
 
+                return;
+
                 // Starboard
                 var emoji = config.Starboard.Emoji;
                 DiscordEmoji discordemoji = null;
@@ -135,6 +137,8 @@ namespace ModCore.Listeners
 						await member.RevokeRoleAsync(reactionrole);
 				}
 
+                return;
+
                 //SB
 				var emoji = config.Starboard.Emoji;
                 DiscordEmoji discordemoji = null;
@@ -190,7 +194,7 @@ namespace ModCore.Listeners
             }
         }
 
-        [AsyncListener(EventType.MessageReactionsCleared)]
+        //[AsyncListener(EventType.MessageReactionsCleared)]
         public static async Task ReactionClear(MessageReactionsClearEventArgs eventargs, DiscordClient client, DatabaseContextBuilder database)
         {
             GuildSettings config = null;
