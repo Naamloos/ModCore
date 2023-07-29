@@ -135,6 +135,7 @@ namespace ModCore.Listeners
             }
         }
 
+        [AsyncListener(EventType.MessageReactionRemoved)]
         public static async Task ReactionRemovedAsync(MessageReactionRemoveEventArgs eventargs, DatabaseContextBuilder database,
             DiscordClient client, IMemoryCache cache)
         {
@@ -285,7 +286,10 @@ namespace ModCore.Listeners
                 await semaphore.WaitAsync();
                 try
                 {
-                    var starDataWithMessage = ctx.StarDatas.FirstOrDefault(x => x.StarboardMessageId != 0);
+                    var starDataWithMessage = ctx.StarDatas.FirstOrDefault(x => x.MessageId == (long)eventargs.Message.Id &&
+                        x.ChannelId == (long)eventargs.Channel.Id &&
+                        x.StarboardMessageId != 0);
+
                     if (starDataWithMessage != default(DatabaseStarData))
                     {
                         try
@@ -300,8 +304,7 @@ namespace ModCore.Listeners
                     // delete all star datas for this message.
                     ctx.StarDatas.RemoveRange(ctx.StarDatas.Where(x =>
                         x.MessageId == (long)eventargs.Message.Id &&
-                        x.ChannelId == (long)eventargs.Channel.Id &&
-                        x.GuildId == (long)eventargs.Guild.Id));
+                        x.ChannelId == (long)eventargs.Channel.Id));
                 }
                 finally
                 {
@@ -312,6 +315,7 @@ namespace ModCore.Listeners
             }
         }
 
+        [AsyncListener(EventType.MessageReactionEmojiRemoved)]
         public static async Task ReactionsEmojiRemoveAsync(MessageReactionRemoveEmojiEventArgs eventargs, DatabaseContextBuilder database,
             DiscordClient client, IMemoryCache cache)
         {
@@ -379,7 +383,10 @@ namespace ModCore.Listeners
                 await semaphore.WaitAsync();
                 try
                 {
-                    var starDataWithMessage = ctx.StarDatas.FirstOrDefault(x => x.StarboardMessageId != 0);
+                    var starDataWithMessage = ctx.StarDatas.FirstOrDefault(x => x.MessageId == (long)eventargs.Message.Id &&
+                        x.ChannelId == (long)eventargs.Channel.Id &&
+                        x.StarboardMessageId != 0);
+
                     if (starDataWithMessage != default(DatabaseStarData))
                     {
                         try
@@ -394,8 +401,7 @@ namespace ModCore.Listeners
                     // delete all star datas for this message.
                     ctx.StarDatas.RemoveRange(ctx.StarDatas.Where(x =>
                         x.MessageId == (long)eventargs.Message.Id &&
-                        x.ChannelId == (long)eventargs.Channel.Id &&
-                        x.GuildId == (long)eventargs.Guild.Id));
+                        x.ChannelId == (long)eventargs.Channel.Id));
                 }
                 finally
                 {
@@ -481,7 +487,7 @@ namespace ModCore.Listeners
 
             // Update the starboard message ID for all existing stars
             starboardMessageId = (long)starboardMessage.Id;
-            await existingStars.ForEachAsync(x => x.StarboardMessageId = starboardMessageId);
+            await existingStars.ForEachAsync(x => x.StarboardMessageId = (long)starboardMessage.Id);
             database.UpdateRange(existingStars);
             await database.SaveChangesAsync();
             try
