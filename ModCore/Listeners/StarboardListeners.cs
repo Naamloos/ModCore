@@ -27,9 +27,12 @@ namespace ModCore.Listeners
         public static async Task ReactionAddedAsync(MessageReactionAddEventArgs eventargs, DatabaseContextBuilder database, 
             DiscordClient client, IMemoryCache cache)
         {
-            if (eventargs.User.Id == eventargs.Message.Author.Id)
+            DiscordMessage message = await eventargs.Channel.GetMessageAsync(eventargs.Message.Id, true);
+            DiscordUser user = await eventargs.Guild.GetMemberAsync(eventargs.User.Id);
+
+            if (user.Id == message.Author.Id)
                 return; // same author, return
-            if (eventargs.User.IsBot)
+            if (user.IsBot)
                 return; // no bots allowed pshhk pshhk
 
             using (DatabaseContext ctx = database.CreateContext())
@@ -49,7 +52,7 @@ namespace ModCore.Listeners
                 if (starEmoji is null)
                     return; // emoji is null so we're ignoring.
 
-                if (starEmoji.EmojiId == 0)
+                if (starEmoji.EmojiId != 0)
                 {
                     // emoji is a guildemote
                     if (!DiscordEmoji.TryFromGuildEmote(client, starEmoji.EmojiId, out resolvedStarEmoji))
@@ -85,11 +88,9 @@ namespace ModCore.Listeners
                     return; // disallow starring on starboard messages.
 
                 // fetch User and Message since we can't trust cache nowadays lolol
-                DiscordMessage message;
                 DiscordMember member;
                 try
                 {
-                    message = await eventargs.Channel.GetMessageAsync(eventargs.Message.Id, true);
                     member = await eventargs.Guild.GetMemberAsync(eventargs.User.Id, false);
                 }
                 catch(Exception)
@@ -121,6 +122,7 @@ namespace ModCore.Listeners
                             GuildId = (long)message.Channel.GuildId,
                             MessageId = (long)message.Id
                         });
+                        await ctx.SaveChangesAsync();
                     }
                     await updateStarboardMessage(ctx, message, resolvedStarEmoji, settings, client);
                 }
@@ -136,9 +138,12 @@ namespace ModCore.Listeners
         public static async Task ReactionRemovedAsync(MessageReactionRemoveEventArgs eventargs, DatabaseContextBuilder database,
             DiscordClient client, IMemoryCache cache)
         {
-            if (eventargs.User.Id == eventargs.Message.Author.Id)
+            DiscordMessage message = await eventargs.Channel.GetMessageAsync(eventargs.Message.Id, true);
+            DiscordUser user = await eventargs.Guild.GetMemberAsync(eventargs.User.Id);
+
+            if (user.Id == message.Author.Id)
                 return; // same author, return
-            if (eventargs.User.IsBot)
+            if (user.IsBot)
                 return; // no bots allowed pshhk pshhk
 
             using (DatabaseContext ctx = database.CreateContext())
@@ -158,7 +163,7 @@ namespace ModCore.Listeners
                 if (starEmoji is null)
                     return; // emoji is null so we're ignoring.
 
-                if (starEmoji.EmojiId == 0)
+                if (starEmoji.EmojiId != 0)
                 {
                     // emoji is a guildemote
                     if (!DiscordEmoji.TryFromGuildEmote(client, starEmoji.EmojiId, out resolvedStarEmoji))
@@ -194,11 +199,9 @@ namespace ModCore.Listeners
                     return; // disallow starring on starboard messages.
 
                 // fetch User and Message since we can't trust cache nowadays lolol
-                DiscordMessage message;
                 DiscordMember member;
                 try
                 {
-                    message = await eventargs.Channel.GetMessageAsync(eventargs.Message.Id, true);
                     member = await eventargs.Guild.GetMemberAsync(eventargs.User.Id, false);
                 }
                 catch (Exception)
@@ -222,9 +225,10 @@ namespace ModCore.Listeners
                     if(data != default(DatabaseStarData))
                     {
                         ctx.StarDatas.Remove(data);
+                        await ctx.SaveChangesAsync();
                     }
 
-                    await updateStarboardMessage(ctx, message, resolvedStarEmoji, settings, client);
+                    await updateStarboardMessage(ctx, message, resolvedStarEmoji, settings, client, data.StarboardMessageId);
                 }
                 finally
                 {
@@ -239,6 +243,8 @@ namespace ModCore.Listeners
         public static async Task ReactionsClearedAsync(MessageReactionsClearEventArgs eventargs, DatabaseContextBuilder database,
             DiscordClient client, IMemoryCache cache)
         {
+            DiscordMessage message = await eventargs.Channel.GetMessageAsync(eventargs.Message.Id, true);
+
             using (DatabaseContext ctx = database.CreateContext())
             {
                 GuildSettings settings;
@@ -268,17 +274,6 @@ namespace ModCore.Listeners
 
                 if (eventargs.Channel.Id == starboardChannel.Id)
                     return; // disallow starring on starboard messages.
-
-                // fetch User and Message since we can't trust cache nowadays lolol
-                DiscordMessage message;
-                try
-                {
-                    message = await eventargs.Channel.GetMessageAsync(eventargs.Message.Id, true);
-                }
-                catch (Exception)
-                {
-                    return;
-                }
 
                 SemaphoreSlim semaphore;
                 if (!cache.TryGetValue($"starboard_semaphore_{message.Id}", out semaphore))
@@ -320,6 +315,8 @@ namespace ModCore.Listeners
         public static async Task ReactionsEmojiRemoveAsync(MessageReactionRemoveEmojiEventArgs eventargs, DatabaseContextBuilder database,
             DiscordClient client, IMemoryCache cache)
         {
+            DiscordMessage message = await eventargs.Channel.GetMessageAsync(eventargs.Message.Id, true);
+
             using (DatabaseContext ctx = database.CreateContext())
             {
                 GuildSettings settings;
@@ -337,7 +334,7 @@ namespace ModCore.Listeners
                 if (starEmoji is null)
                     return; // emoji is null so we're ignoring.
 
-                if (starEmoji.EmojiId == 0)
+                if (starEmoji.EmojiId != 0)
                 {
                     // emoji is a guildemote
                     if (!DiscordEmoji.TryFromGuildEmote(client, starEmoji.EmojiId, out resolvedStarEmoji))
@@ -371,17 +368,6 @@ namespace ModCore.Listeners
 
                 if (eventargs.Channel.Id == starboardChannel.Id)
                     return; // disallow starring on starboard messages.
-
-                // fetch User and Message since we can't trust cache nowadays lolol
-                DiscordMessage message;
-                try
-                {
-                    message = await eventargs.Channel.GetMessageAsync(eventargs.Message.Id, true);
-                }
-                catch (Exception)
-                {
-                    return;
-                }
 
                 SemaphoreSlim semaphore;
                 if (!cache.TryGetValue($"starboard_semaphore_{message.Id}", out semaphore))
@@ -420,12 +406,12 @@ namespace ModCore.Listeners
             }
         }
 
-        private static async Task updateStarboardMessage(DatabaseContext database, DiscordMessage message, DiscordEmoji emoji, 
-            GuildSettings settings, DiscordClient client)
+        private static async Task updateStarboardMessage(DatabaseContext database, DiscordMessage message, DiscordEmoji emoji,
+            GuildSettings settings, DiscordClient client, long predefinedStarboardMessageId = 0l)
         {
             // first, we fetch the existing stars and try to find an existing starboard message ID
             var existingStars = database.StarDatas.Where(x => x.ChannelId == (long)message.Channel.Id && x.MessageId == (long)message.Id);
-            var starboardMessageId = 0l;
+            var starboardMessageId = predefinedStarboardMessageId;
             if(existingStars.Any(x => x.StarboardMessageId != 0))
             {
                 starboardMessageId = existingStars.First(x => x.StarboardMessageId != 0).StarboardMessageId;
@@ -496,6 +482,8 @@ namespace ModCore.Listeners
             // Update the starboard message ID for all existing stars
             starboardMessageId = (long)starboardMessage.Id;
             await existingStars.ForEachAsync(x => x.StarboardMessageId = starboardMessageId);
+            database.UpdateRange(existingStars);
+            await database.SaveChangesAsync();
             try
             {
                 // Post the updated starboard message.
@@ -538,7 +526,6 @@ namespace ModCore.Listeners
                 .WithContent($"{emoji} {count} {emotename} in {sourceMessage.Channel.Mention}");
 
             messageBuilder.AddComponents(new DiscordLinkButtonComponent(sourceMessage.JumpLink.ToString(), "Go to message"));
-            messageBuilder.WithContent("");
 
             return messageBuilder;
         }
