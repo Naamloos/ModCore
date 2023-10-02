@@ -72,7 +72,7 @@ namespace ModCore.Common.Discord.Rest
         {
             string route = "applications/:application_id/commands";
             string url = $"applications/{applicationId}/commands";
-            return makeRequestAsync<JsonArray>(HttpMethod.Put, url, route, commands);
+            return makeRequestAsync<ApplicationCommand[]>(HttpMethod.Put, url, route, commands);
         }
 
         public Task<RestResponse<ApplicationCommand[]>> GetGlobalApplicationCommandsAsync(Snowflake applicationId, bool withLocalizations = true)

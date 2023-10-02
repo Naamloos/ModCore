@@ -49,7 +49,7 @@ namespace ModCore.Common.Discord.Gateway
         private IServiceProvider services;
         private ILogger logger;
 
-        private List<ISubscriber> subscribers = new List<ISubscriber>();
+        private ISubscriber[] subscribers = new ISubscriber[0];
 
         private string token;
         private int shard_id;
@@ -71,6 +71,7 @@ namespace ModCore.Common.Discord.Gateway
             shard_id = int.Parse(hostConfig.GetRequiredSection("current_shard").Value);
             shard_count = int.Parse(hostConfig.GetRequiredSection("shard_count").Value);
 
+            List<ISubscriber> registeringSubscribers = new List<ISubscriber>();
             foreach(var subscriber in configuration.subscribers)
             {
                 var constructors = subscriber.GetConstructors();
@@ -87,8 +88,9 @@ namespace ModCore.Common.Discord.Gateway
                     qualifiedParameters[i] = services.GetService(parameters[i]);
                 }
 
-                subscribers.Add(Activator.CreateInstance(subscriber, qualifiedParameters) as ISubscriber);
+                registeringSubscribers.Add(Activator.CreateInstance(subscriber, qualifiedParameters) as ISubscriber);
             }
+            subscribers = registeringSubscribers.ToArray();
 
             var uribuilder = new UriBuilder(this.configuration.GatewayUrl);
             uribuilder.Scheme = "wss";
@@ -275,13 +277,15 @@ namespace ModCore.Common.Discord.Gateway
         private async Task HandleHelloAsync(Payload gatewayEvent)
         {
             var hello = gatewayEvent.GetDataAs<Hello>(jsonSerializerOptions);
+            if(hello == null)
+            {
+                return;
+            }
+
             // start heartbeat task
             _ = Task.Run(async () =>
             {
-                if (hello != null)
-                {
-                    await GatewayHeartbeatHandlerAsync(hello);
-                }
+                await GatewayHeartbeatHandlerAsync(hello);
             });
 
             logger.LogInformation("Sending client identity.");
@@ -332,16 +336,10 @@ namespace ModCore.Common.Discord.Gateway
                 return;
             }
 
-            foreach (var subscriber in subscribers)
-            {
-                if (subscriber is ISubscriber<T> qualifiedSubscriber)
-                {
-                    _ = Task.Run(async () => await runEventHandlerAsync<T>(qualifiedSubscriber, data));
-                }
-            }
+            ParallelHelper.ForEach<ISubscriber, ParallelEventRunner<T>>(subscribers, new ParallelEventRunner<T>(this, data));
         }
 
-        private async Task runEventHandlerAsync<T>(ISubscriber<T> subscriber, T data)
+        internal async Task runEventHandlerAsync<T>(ISubscriber<T> subscriber, T data) where T : IPublishable
         {
             try
             {
