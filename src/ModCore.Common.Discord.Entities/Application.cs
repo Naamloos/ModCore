@@ -13,37 +13,42 @@ namespace ModCore.Common.Discord.Entities
         public string Name { get; set; }
 
         [JsonPropertyName("icon")]
-        public string Icon { get; set; }
+        public string? IconHash { get; set; }
 
         [JsonPropertyName("description")]
         public string Description { get; set; }
-        //public string[] RpcOrigins { get; set; }
 
         [JsonPropertyName("bot_public")]
         public bool BotPublic { get; set; }
 
         [JsonPropertyName("bot_require_code_grant")]
-        public bool BotRequireCodeGrant { get; set; }
+        public bool BotRequiresCodeGrant { get; set; }
 
         [JsonPropertyName("terms_of_service_url")]
-        public string? TermsOfServiceUrl { get; set; }
+        public Optional<string> TermsOfServiceUrl { get; set; }
 
         [JsonPropertyName("privacy_policy_url")]
-        public string? PrivacyPolicyUrl { get; set; }
+        public Optional<string> PrivacyPolicyUrl { get; set; }
 
         [JsonPropertyName("owner")]
-        public User? Owner { get; set; }
+        public Optional<User> Owner { get; set; }
 
         [JsonPropertyName("team")]
-        public JsonObject Team { get; set; }
+        public Optional<Team?> Team { get; set; }
+
+        [JsonPropertyName("guild_id")]
+        public Optional<Snowflake> GuildId { get; set; }
+
+        [JsonPropertyName("guild")]
+        public Optional<Guild> Guild { get; set; }
 
         [JsonPropertyName("cover_image")]
-        public string CoverImage { get; set; }
+        public Optional<string> CoverImage { get; set; }
 
         [JsonPropertyName("flags")]
-        public int Flags { get; set; }
+        public Optional<int> Flags { get; set; }
 
         [JsonPropertyName("tags")]
-        public string[] Tags { get; set; }
+        public Optional<string[]> Tags { get; set; }
     }
 }

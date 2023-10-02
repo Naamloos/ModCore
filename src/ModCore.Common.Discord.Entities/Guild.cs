@@ -21,13 +21,16 @@ namespace ModCore.Common.Discord.Entities
         public string Name { get; set; }
 
         [JsonPropertyName("icon")]
-        public string Icon { get; set; }
+        public string? Icon { get; set; }
 
         [JsonPropertyName("icon_hash")]
-        public string IconHash { get; set; }
+        public Optional<string?> IconHash { get; set; }
 
         [JsonPropertyName("splash")]
-        public string Splash { get; set; }
+        public string? Splash { get; set; }
+
+        [JsonPropertyName("discovery_splash")]
+        public string? DiscoverySplash { get; set; }
 
         [JsonPropertyName("owner_id")]
         public Snowflake OwnerId { get; set; }
@@ -39,10 +42,10 @@ namespace ModCore.Common.Discord.Entities
         public int AfkTimeout { get; set; }
 
         [JsonPropertyName("widget_enabled")]
-        public bool WidgetEnabled { get; set; }
+        public Optional<bool> WidgetEnabled { get; set; }
 
         [JsonPropertyName("widget_channel_id")]
-        public Snowflake? WidgetChannelId { get; set; }
+        public Optional<Snowflake?> WidgetChannelId { get; set; }
 
         [JsonPropertyName("verification_level")]
         public int VerificationLevel { get; set; }
@@ -54,10 +57,10 @@ namespace ModCore.Common.Discord.Entities
         public int ExplicitContentFilter { get; set; }
 
         [JsonPropertyName("roles")]
-        public JsonObject[] Roles { get; set; }
+        public Role[] Roles { get; set; }
 
         [JsonPropertyName("emojis")]
-        public JsonObject[] Emojis { get; set; }
+        public Emoji[] Emojis { get; set; }
 
         [JsonPropertyName("features")]
         public string[] Features { get; set; }
@@ -77,6 +80,9 @@ namespace ModCore.Common.Discord.Entities
         [JsonPropertyName("rules_channel_id")]
         public Snowflake? RulesChannelId { get; set; }
 
+        [JsonPropertyName("max_members")]
+        public Optional<int> MaxMembers { get; set; }
+
         [JsonPropertyName("vanity_url_code")]
         public string? VanityUrlCode { get; set; }
 
@@ -86,19 +92,55 @@ namespace ModCore.Common.Discord.Entities
         [JsonPropertyName("banner")]
         public string? Banner { get; set; }
 
+        [JsonPropertyName("premium_tier")]
+        public BoostTier PremiumTier { get; set; }
+
+        [JsonPropertyName("premium_subscription_count")]
+        public Optional<int> PremiumSubscriptionCount { get; set; }
+
         [JsonPropertyName("preferred_locale")]
         public string PreferredLocale { get; set; }
 
         [JsonPropertyName("public_updates_channel_id")]
         public Snowflake? PublicUpdatesChannelId { get; set; }
 
+        [JsonPropertyName("max_video_channel_users")]
+        public Optional<int> MaxVideoChannelUsers { get; set; }
+
+        [JsonPropertyName("max_stage_video_channel_users")]
+        public Optional<int> MaxStageVideoChannelUsers { get; set; }
+
         [JsonPropertyName("approximate_member_count")]
-        public int? ApproximateMemberCount { get; set; }
+        public Optional<int> ApproximateMemberCount { get; set; }
+
+        [JsonPropertyName("approximate_presence_count")]
+        public Optional<int> ApproximatePresenceCount { get; set; }
+
+        [JsonPropertyName("welcome_screen")]
+        public Optional<WelcomeScreen> WelcomeScreen { get; set; }
 
         [JsonPropertyName("nsfw_level")]
         public int NSFWLevel { get; set; }
 
         [JsonPropertyName("stickers")]
-        public JsonObject[] Stickers { get; set; }
+        public Optional<Sticker[]> Stickers { get; set; }
+
+        [JsonPropertyName("premium_progress_bar_enabled")]
+        public bool PremiumProgressBarEnabled { get; set; }
+
+        [JsonPropertyName("safety_alerts_channel_id")]
+        public Snowflake? SafetyAlertsChannelId { get; set; }
+    }
+
+    public class WelcomeScreen
+    {
+    }
+
+    public enum BoostTier
+    {
+        None = 0,
+        Tier1 = 1,
+        Tier2 = 2,
+        Tier3 = 3
     }
 }

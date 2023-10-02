@@ -18,8 +18,11 @@ namespace ModCore.Common.Discord.Rest
         {
             Configuration = new DiscordRestConfiguration();
             configure(Configuration);
-            JsonSerializerOptions = new JsonSerializerOptions();
-            JsonSerializerOptions.Converters.Add(new SnowflakeJsonSerializer());
+            JsonSerializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+                Converters = { new OptionalJsonSerializerFactory() }
+            };
 
             var hostConfig = services.GetRequiredService<IConfiguration>();
 
@@ -47,19 +50,12 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<Application>(HttpMethod.Get, url, route);
         }
 
-        public class msg
-        {
-            [JsonPropertyName("content")]
-            public string content { get; set; }
-        }
-
         // TODO this sucks, properly implement. this is jsut here for "ayo it work" atm.
-        public Task<RestResponse<Message>> CreateMessageAsync(Snowflake channelId, string content)
+        public Task<RestResponse<Message>> CreateMessageAsync(Snowflake channelId, CreateMessage content)
         {
             string route = "channels/:channel_id/messages";
             string url = $"channels/{channelId}/messages";
-            var message = new msg() { content = content };
-            return makeRequestAsync<Message>(HttpMethod.Post, url, route, message);
+            return makeRequestAsync<Message>(HttpMethod.Post, url, route, content);
         }
 
         public Task<RestResponse<ApplicationCommand[]>> BulkOverwriteGlobalApplicationCommandsAsync(Snowflake applicationId, params ApplicationCommand[] commands)

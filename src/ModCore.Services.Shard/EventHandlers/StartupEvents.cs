@@ -32,7 +32,7 @@ namespace ModCore.Services.Shard.EventHandlers
             var application = await _rest.GetApplicationAsync(data.Application.Id);
             if (application.Success)
             {
-                _logger.LogInformation("Application is registered under ID {0}. Owner username is {1}.", data.Application.Id, application.Value!.Owner!.Username);
+                _logger.LogInformation("Application is registered under ID {0}. Owner username is {1}.", data.Application.Id, application.Value!.Owner!.Value.Username);
             }
             else
             {

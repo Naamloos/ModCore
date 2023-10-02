@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
@@ -19,10 +20,22 @@ namespace ModCore.Services.Shard.EventHandlers
         public async Task HandleEvent(MessageCreate data)
         {
             _logger.LogInformation("@{0}: {1}", data.Author.Username, data.Content);
+
+            if(data.GuildId != 438803108978753536)
+            {
+                return;
+            }
             
             if(data.Content == "$modcore")
             {
-                var resp = await _rest.CreateMessageAsync(data.ChannelId, $"Ayo ima be real <@{data.Author.Id}>, this text command is just a test man..");
+                var responseMessage = new CreateMessage()
+                {
+                    Content = $"Ayo ima be real <@{data.Author.Id}>, this text command is just a test man..",
+                    StickerIds = new Snowflake[] { 1158544938485698611 }
+                };
+
+                var resp = await _rest.CreateMessageAsync(data.ChannelId, responseMessage);
+                var content = await resp.HttpResponse.RequestMessage.Content.ReadAsStringAsync();
             }
             else if(data.Content == "$oops")
             {

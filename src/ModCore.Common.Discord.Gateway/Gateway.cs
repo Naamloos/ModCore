@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.EventData.Outgoing;
 using ModCore.Common.Discord.Gateway.Events;
@@ -58,32 +59,15 @@ namespace ModCore.Common.Discord.Gateway
 
             gatewayCancellationTokenSource = new CancellationTokenSource();
 
+            registerSubscribers();
+
+            // fetch configuration data from host services.
             var hostConfig = services.GetRequiredService<IConfiguration>();
             token = hostConfig.GetRequiredSection("discord_token").Value;
             shard_id = int.Parse(hostConfig.GetRequiredSection("current_shard").Value);
             shard_count = int.Parse(hostConfig.GetRequiredSection("shard_count").Value);
 
-            List<ISubscriber> registeringSubscribers = new List<ISubscriber>();
-            foreach(var subscriber in configuration.subscribers)
-            {
-                var constructors = subscriber.GetConstructors();
-                if(constructors.Count() != 1)
-                {
-                    throw new NotSupportedException($"Your subscriber of type {subscriber} needs exactly 1 constructor! It has {constructors.Count()}!");
-                }
-
-                var constructor = constructors[0];
-                var parameters = constructor.GetParameters().Select(x => x.ParameterType).ToArray();
-                var qualifiedParameters = new object[parameters.Length];
-                for(int i = 0; i < parameters.Length; i++)
-                {
-                    qualifiedParameters[i] = services.GetService(parameters[i]);
-                }
-
-                registeringSubscribers.Add(Activator.CreateInstance(subscriber, qualifiedParameters) as ISubscriber);
-            }
-            subscribers = registeringSubscribers.ToArray();
-
+            // Preparing base websocket uri
             var uribuilder = new UriBuilder(this.configuration.GatewayUrl);
             uribuilder.Scheme = "wss";
             uribuilder.Port = 443;
@@ -92,8 +76,11 @@ namespace ModCore.Common.Discord.Gateway
 
             this.jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
             {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault, 
+                Converters = { new OptionalJsonSerializerFactory() }
             };
+
+            // Semaphore for sending websocket data
             this.sendingSemaphore = new SemaphoreSlim(1);
 
             this.arrayPoolBufferWriter = new ArrayPoolBufferWriter<byte>();
@@ -104,6 +91,30 @@ namespace ModCore.Common.Discord.Gateway
             });
 
             this.websocket = new ClientWebSocket();
+        }
+
+        private void registerSubscribers()
+        {
+            List<ISubscriber> registeringSubscribers = new List<ISubscriber>();
+            foreach (var subscriber in configuration.subscribers)
+            {
+                var constructors = subscriber.GetConstructors();
+                if (constructors.Count() != 1)
+                {
+                    throw new NotSupportedException($"Your subscriber of type {subscriber} needs exactly 1 constructor! It has {constructors.Count()}!");
+                }
+
+                var constructor = constructors[0];
+                var parameters = constructor.GetParameters().Select(x => x.ParameterType).ToArray();
+                var qualifiedParameters = new object[parameters.Length];
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    qualifiedParameters[i] = services.GetService(parameters[i]);
+                }
+
+                registeringSubscribers.Add(Activator.CreateInstance(subscriber, qualifiedParameters) as ISubscriber);
+            }
+            subscribers = registeringSubscribers.ToArray();
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

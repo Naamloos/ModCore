@@ -9,37 +9,37 @@ namespace ModCore.Common.Discord.Entities
         public Snowflake Id { get; set; }
 
         [JsonPropertyName("type")]
-        public ApplicationCommandType? Type { get; set; }
+        public Optional<ApplicationCommandType> Type { get; set; }
 
         [JsonPropertyName("application_id")]
         public Snowflake ApplicationId { get; set; }
 
         [JsonPropertyName("guild_id")]
-        public Snowflake? GuildId { get; set; }
+        public Optional<Snowflake> GuildId { get; set; }
 
         [JsonPropertyName("name")]
         public string Name { get; set; }
 
         [JsonPropertyName("name_localizations")]
-        public Dictionary<string, string> NameLocalizations { get; set; }
+        public Optional<Dictionary<string, string>?> NameLocalizations { get; set; }
 
         [JsonPropertyName("description")]
         public string Description { get; set; }
 
         [JsonPropertyName("decription_localizations")]
-        public Dictionary<string, string> DescriptionLocalizations { get; set; }
+        public Optional<Dictionary<string, string>?> DescriptionLocalizations { get; set; }
 
         [JsonPropertyName("options")]
-        public JsonObject[] Options { get; set; }
+        public Optional<JsonObject[]> Options { get; set; }
 
         [JsonPropertyName("default_member_permissions")]
         public string? DefaultMemberPermissions { get; set; }
 
         [JsonPropertyName("dm_permission")]
-        public bool? CanBeUsedInDM { get; set; }
+        public Optional<bool> CanBeUsedInDM { get; set; }
 
         [JsonPropertyName("nsfw")]
-        public bool? NSFW { get; set; }
+        public Optional<bool> NSFW { get; set; }
 
         [JsonPropertyName("version")]
         public Snowflake Version { get; set; }
