@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Rest.Entities
 {
-    public class User
+    public record User
     {
         [JsonPropertyName("id")]
         public Snowflake Id { get; set; }

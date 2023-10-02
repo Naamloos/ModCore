@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Entities
 {
-    public class CurrentUserGuild : Guild
+    public record CurrentUserGuild : Guild
     {
         [JsonPropertyName("owner")]
         public bool IsOwner { get; set; }
@@ -12,7 +12,7 @@ namespace ModCore.Common.Discord.Entities
         public string? Permissions { get; set; }
     }
 
-    public class Guild
+    public record Guild
     {
         [JsonPropertyName("id")]
         public Snowflake Id { get; set; }
@@ -132,7 +132,7 @@ namespace ModCore.Common.Discord.Entities
         public Snowflake? SafetyAlertsChannelId { get; set; }
     }
 
-    public class WelcomeScreen
+    public record WelcomeScreen
     {
     }
 

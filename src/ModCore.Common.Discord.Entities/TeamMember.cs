@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Entities
 {
-    public class TeamMember
+    public record TeamMember
     {
         [JsonPropertyName("membership_state")]
         public TeamMembershipState MembershipState { get; set; }

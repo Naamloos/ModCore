@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Entities
 {
-    public class Application
+    public record Application
     {
         [JsonPropertyName("id")]
         public Snowflake Id { get; set; }

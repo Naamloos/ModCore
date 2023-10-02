@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Entities
 {
-    public class Team
+    public record Team
     {
         [JsonPropertyName("icon")]
         public string? Icon { get; set; }

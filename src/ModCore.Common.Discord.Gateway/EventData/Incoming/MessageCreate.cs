@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Gateway.EventData.Incoming
 {
-    public class MessageCreate : Message, IPublishable
+    public record MessageCreate : Message, IPublishable
     {
         [JsonPropertyName("guild_id")]
         public Snowflake? GuildId { get; set; }

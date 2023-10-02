@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Entities
 {
-    public class Message
+    public record Message
     {
         [JsonPropertyName("id")]
         public Snowflake Id { get; set; }
@@ -103,23 +103,23 @@ namespace ModCore.Common.Discord.Entities
         public Optional<Resolved> Resolved { get; set; }
     }
 
-    public class Resolved
+    public record Resolved
     {
     }
 
-    public class RoleSubscriptionData
+    public record RoleSubscriptionData
     {
     }
 
-    public class MessageStickerItem
+    public record MessageStickerItem
     {
     }
 
-    public class MessageComponent
+    public record MessageComponent
     {
     }
 
-    public class MessageInteraction
+    public record MessageInteraction
     {
     }
 
@@ -139,11 +139,11 @@ namespace ModCore.Common.Discord.Entities
         IsVoiceMessage = 1<<13
     }
 
-    public class MessageReference
+    public record MessageReference
     {
     }
 
-    public class MessageActivity
+    public record MessageActivity
     {
     }
 
@@ -182,19 +182,19 @@ namespace ModCore.Common.Discord.Entities
         GuildApplicationPremiumSubscription = 32
     }
 
-    public class Reaction
+    public record Reaction
     {
     }
 
-    public class Embed
+    public record Embed
     {
     }
 
-    public class Attachment
+    public record Attachment
     {
     }
 
-    public class ChannelMention
+    public record ChannelMention
     {
     }
 }

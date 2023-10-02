@@ -33,12 +33,6 @@ namespace ModCore.Common.Discord.Entities
         [JsonPropertyName("sticker_ids")]
         public Optional<Snowflake[]> StickerIds { get; set; }
 
-        [JsonPropertyName("files")]
-        public Optional<UploadFile[]> Files { get; set; }
-
-        [JsonPropertyName("payload_json")]
-        public Optional<string> PayloadJson { get; set; }
-
         [JsonPropertyName("attachments")]
         public Optional<Attachment> Attachments { get; set; }
 
@@ -46,11 +40,7 @@ namespace ModCore.Common.Discord.Entities
         public Optional<MessageFlags> Flags { get; set; }
     }
 
-    public class UploadFile
-    {
-    }
-
-    public class AllowedMention
+    public record AllowedMention
     {
     }
 }

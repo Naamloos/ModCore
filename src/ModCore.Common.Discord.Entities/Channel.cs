@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Entities
 {
-    public class Channel
+    public record Channel
     {
         [JsonPropertyName("id")]
         public Snowflake Id { get; set; }
@@ -85,23 +85,23 @@ namespace ModCore.Common.Discord.Entities
         public Optional<int> DefaultForumLayout { get; set; }
     }
 
-    public class DefaultReaction
+    public record DefaultReaction
     {
     }
 
-    public class Tag
+    public record Tag
     {
     }
 
-    public class ThreadMetadata
+    public record ThreadMetadata
     {
     }
 
-    public class ThreadMember
+    public record ThreadMember
     {
     }
 
-    public class VideoQualityMode
+    public record VideoQualityMode
     {
     }
 

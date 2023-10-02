@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Gateway.EventData.Incoming
 {
-    public class GuildCreate : Guild, IPublishable
+    public record GuildCreate : Guild, IPublishable
     {
         [JsonPropertyName("joined_at")]
         public DateTimeOffset JoinedAt { get; set; }

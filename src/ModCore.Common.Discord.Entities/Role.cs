@@ -1,6 +1,6 @@
 ﻿namespace ModCore.Common.Discord.Entities
 {
-    public class Role
+    public record Role
     {
     }
 }

@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Gateway.EventData.Incoming
 {
-    public class Ready : IPublishable
+    public record Ready : IPublishable
     {
         [JsonPropertyName("v")]
         public int ApiVersion { get; set; }
