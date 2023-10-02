@@ -2,13 +2,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Rest;
 using ModCore.Services.Shard.EventHandlers;
 using Serilog;
-using Serilog.Events;
-using Serilog.Extensions.Logging;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Text.Json;
 
