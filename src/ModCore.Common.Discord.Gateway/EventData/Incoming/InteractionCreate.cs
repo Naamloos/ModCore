@@ -10,5 +10,6 @@ namespace ModCore.Common.Discord.Gateway.EventData.Incoming
 {
     public class InteractionCreate : Interaction, IPublishable
     {
+
     }
 }

@@ -18,10 +18,10 @@ namespace ModCore.Common.Discord.Entities
         public Snowflake ApplicationId { get; set; }
 
         [JsonPropertyName("type")]
-        public int Type { get; set; }
+        public InteractionType Type { get; set; }
 
         [JsonPropertyName("data")]
-        public JsonObject Data { get; set; }
+        public JsonObject Data { get; set; } // TODO implement mechanic for parsing this
 
         [JsonPropertyName("guild_id")]
         public Snowflake GuildId { get; set; }
@@ -39,7 +39,7 @@ namespace ModCore.Common.Discord.Entities
         public User? User { get; set; }
 
         [JsonPropertyName("token")]
-        public string InteractionToken { get; set; }
+        public string Token { get; set; }
 
         [JsonPropertyName("version")]
         public int Version { get; set; } // Always 1, why does Discord even send this
@@ -55,5 +55,19 @@ namespace ModCore.Common.Discord.Entities
 
         [JsonPropertyName("guild_locale")]
         public string? GuildLocale { get; set; }
+    }
+
+    public class ApplicationCommandDataStructure
+    {
+
+    }
+
+    public enum InteractionType
+    {
+        Ping = 1,
+        ApplicationCommand = 2,
+        MessageComponent = 3,
+        ApplicationCommandAutocomplete = 4,
+        ModalSubmit = 5
     }
 }
