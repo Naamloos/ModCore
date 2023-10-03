@@ -29,21 +29,21 @@ namespace ModCore.Common.Discord.Rest
             RatelimitedRest = new RateLimitedRest(Configuration, hostConfig.GetRequiredSection("discord_token").Value, JsonSerializerOptions);
         }
 
-        public Task<RestResponse<User>> GetCurrentUserAsync()
+        public ValueTask<RestResponse<User>> GetCurrentUserAsync()
         {
             string route = "users/@me";
             string url = "users/@me";
             return makeRequestAsync<User>(HttpMethod.Get, url, route);
         }
 
-        public Task<RestResponse<User>> GetUserAsync(Snowflake userId)
+        public ValueTask<RestResponse<User>> GetUserAsync(Snowflake userId)
         {
             string route = "users/:user_id";
             string url = $"users/{userId}";
             return makeRequestAsync<User>(HttpMethod.Get, url, route);
         }
 
-        public Task<RestResponse<Application>> GetApplicationAsync(Snowflake applicationId) 
+        public ValueTask<RestResponse<Application>> GetApplicationAsync(Snowflake applicationId) 
         {
             string route = "applications/:application_id";
             string url = $"applications/{applicationId}";
@@ -51,34 +51,33 @@ namespace ModCore.Common.Discord.Rest
         }
 
         // TODO this sucks, properly implement. this is jsut here for "ayo it work" atm.
-        public Task<RestResponse<Message>> CreateMessageAsync(Snowflake channelId, CreateMessage content)
+        public ValueTask<RestResponse<Message>> CreateMessageAsync(Snowflake channelId, CreateMessage content)
         {
             string route = "channels/:channel_id/messages";
             string url = $"channels/{channelId}/messages";
             return makeRequestAsync<Message>(HttpMethod.Post, url, route, content);
         }
 
-        public Task<RestResponse<ApplicationCommand[]>> BulkOverwriteGlobalApplicationCommandsAsync(Snowflake applicationId, params ApplicationCommand[] commands)
+        public ValueTask<RestResponse<ApplicationCommand[]>> BulkOverwriteGlobalApplicationCommandsAsync(Snowflake applicationId, params ApplicationCommand[] commands)
         {
             string route = "applications/:application_id/commands";
             string url = $"applications/{applicationId}/commands";
             return makeRequestAsync<ApplicationCommand[]>(HttpMethod.Put, url, route, commands);
         }
 
-        public Task<RestResponse<ApplicationCommand[]>> GetGlobalApplicationCommandsAsync(Snowflake applicationId, bool withLocalizations = true)
+        public ValueTask<RestResponse<ApplicationCommand[]>> GetGlobalApplicationCommandsAsync(Snowflake applicationId, bool withLocalizations = true)
         {
             string route = "applications/:application_id/commands";
             string url = $"applications/{applicationId}/commands?with_localizations=" + withLocalizations;
             return makeRequestAsync<ApplicationCommand[]>(HttpMethod.Get, url, route);
         }
 
-        private async Task<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)
+        private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)
         {
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(method, route, url, body);
             T? deserializedResponse = default(T);
             if (response.IsSuccessStatusCode)
             {
-                var resp = response.Content.ReadAsStringAsync();
                 deserializedResponse = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), JsonSerializerOptions);
             }
 
