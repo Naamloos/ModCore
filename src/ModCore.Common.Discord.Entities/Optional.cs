@@ -26,5 +26,10 @@ namespace ModCore.Common.Discord.Entities
         public static Optional<T> None => new Optional<T>();
         public static implicit operator Optional<T>(T value) { return new Optional<T>(value); }
         public static implicit operator T(Optional<T> value) { return value.HasValue? value.Value : default(T); }
+
+        public override string ToString()
+        {
+            return Value.ToString();
+        }
     }
 }

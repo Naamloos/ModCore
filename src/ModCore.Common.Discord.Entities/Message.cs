@@ -102,5 +102,8 @@ namespace ModCore.Common.Discord.Entities
 
         [JsonPropertyName("resolved")]
         public Optional<MessageResolved> Resolved { get; set; }
+
+        private const string JUMP_LINK_FORMAT = "https://discord.com/channels/{0}/{1}/{2}";
+        public string GetJumpLink(Snowflake GuildId) => string.Format(JUMP_LINK_FORMAT, GuildId, ChannelId, Id);
     }
 }

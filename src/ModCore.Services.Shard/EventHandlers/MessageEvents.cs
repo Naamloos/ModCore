@@ -30,12 +30,16 @@ namespace ModCore.Services.Shard.EventHandlers
             {
                 var responseMessage = new CreateMessage()
                 {
-                    Content = $"Ayo ima be real <@{data.Author.Id}>, this text command is just a test man..",
+                    Content = $"{data.Author.Mention}",
                     StickerIds = new Snowflake[] { 1158544938485698611 }
                 };
 
                 var resp = await _rest.CreateMessageAsync(data.ChannelId, responseMessage);
-                var content = await resp.HttpResponse.RequestMessage.Content.ReadAsStringAsync();
+                if(resp.Success)
+                {
+                    var createdMessage = resp.Value;
+                    _logger.LogInformation("Created message with new ID: {0} {1}", createdMessage.Id, createdMessage.GetJumpLink(data.GuildId));
+                }
             }
             else if(data.Content == "$oops")
             {

@@ -56,5 +56,8 @@ namespace ModCore.Common.Discord.Rest.Entities
 
         [JsonPropertyName("avatar_decoration")]
         public Optional<string?> AvatarDecorationHash { get; set; }
+
+        private const string MENTION_FORMAT = "<@{0}>";
+        public string Mention => string.Format(MENTION_FORMAT, Id);
     }
 }

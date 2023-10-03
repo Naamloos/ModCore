@@ -84,5 +84,11 @@ namespace ModCore.Common.Discord.Entities
         public Optional<int?> DefaultSortOrder { get; set; }
 
         public Optional<int> DefaultForumLayout { get; set; }
+
+        private const string JUMP_LINK_FORMAT = "https://discord.com/channels/{0}/{1}";
+        public string JumpLink => string.Format(JUMP_LINK_FORMAT, GuildId, Id);
+
+        private const string MENTION_FORMAT = "<#{0}>";
+        public string Mention => string.Format(MENTION_FORMAT, Id);
     }
 }
