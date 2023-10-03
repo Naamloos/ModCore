@@ -2,7 +2,7 @@
 using ModCore.Common.Discord.Entities.Enums;
 using System.Text.Json.Serialization;
 
-namespace ModCore.Common.Discord.Rest.Entities
+namespace ModCore.Common.Discord.Entities
 {
     public record User
     {

@@ -88,8 +88,8 @@ namespace ModCore.Common.Discord.Entities
         [JsonPropertyName("components")]
         public Optional<MessageComponent[]> Components { get; set; }
 
-        //[JsonPropertyName("sticker_items")]
-        //public Optional<MessageStickerItem> StickerItems { get; set; }
+        [JsonPropertyName("sticker_items")]
+        public Optional<MessageStickerItem[]> StickerItems { get; set; }
 
         [JsonPropertyName("stickers")]
         public Optional<Sticker[]> Stickers { get; set; }
@@ -101,7 +101,7 @@ namespace ModCore.Common.Discord.Entities
         public Optional<RoleSubscriptionData> RoleSubscriptionData { get; set; }
 
         [JsonPropertyName("resolved")]
-        public Optional<MessageResolved> Resolved { get; set; }
+        public Optional<ResolvedDataStructure> Resolved { get; set; }
 
         private const string JUMP_LINK_FORMAT = "https://discord.com/channels/{0}/{1}/{2}";
         public string GetJumpLink(Snowflake GuildId) => string.Format(JUMP_LINK_FORMAT, GuildId, ChannelId, Id);

@@ -2,8 +2,14 @@
 
 namespace ModCore.Common.Discord.Entities
 {
-    public record DefaultReaction
+    public record WelcomeScreenChannel
     {
+        [JsonPropertyName("channel_id")]
+        public Snowflake ChannelId { get; set; }
+
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
         [JsonPropertyName("emoji_id")]
         public Snowflake? EmojiId { get; set; }
 
