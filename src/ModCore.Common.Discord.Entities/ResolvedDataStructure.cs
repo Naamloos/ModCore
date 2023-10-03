@@ -1,4 +1,7 @@
 ﻿using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Channels;
+using ModCore.Common.Discord.Entities.Guilds;
+using ModCore.Common.Discord.Entities.Messages;
 
 namespace ModCore.Common.Discord.Entities
 {

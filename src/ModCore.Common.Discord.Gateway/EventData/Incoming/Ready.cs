@@ -1,6 +1,6 @@
 ﻿using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Gateway.Events;
-using ModCore.Common.Discord.Rest.Entities;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 

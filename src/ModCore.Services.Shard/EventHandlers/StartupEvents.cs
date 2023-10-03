@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;

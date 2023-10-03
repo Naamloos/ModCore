@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Entities.Serializer;
-using ModCore.Common.Discord.Rest.Entities;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
