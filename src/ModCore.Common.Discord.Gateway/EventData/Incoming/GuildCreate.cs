@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Discord.Entities.Guilds;
+﻿using ModCore.Common.Discord.Entities.Channels;
+using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Gateway.Events;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -23,13 +24,13 @@ namespace ModCore.Common.Discord.Gateway.EventData.Incoming
         public JsonObject[] VoiceStates { get; set; }
 
         [JsonPropertyName("members")]
-        public JsonObject[] Members { get; set; }
+        public Member[] Members { get; set; }
 
         [JsonPropertyName("channels")]
-        public JsonObject[] Channels { get; set; }
+        public Channel[] Channels { get; set; }
 
         [JsonPropertyName("threads")]
-        public JsonObject[] Threads { get; set; }
+        public Channel[] Threads { get; set; }
 
         [JsonPropertyName("presences")]
         public JsonObject[] Presences { get; set; }
