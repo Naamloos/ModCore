@@ -13,8 +13,5 @@ namespace ModCore.Common.Discord.Gateway.EventData.Incoming
 
         [JsonPropertyName("member")]
         public Member Member { get; set; }
-
-        [JsonPropertyName("mentions")]
-        public User[] Mentions { get; set; }
     }
 }
