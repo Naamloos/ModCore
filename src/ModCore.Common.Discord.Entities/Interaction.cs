@@ -1,6 +1,7 @@
 ﻿using ModCore.Common.Discord.Rest.Entities;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities
 {
@@ -53,14 +54,5 @@ namespace ModCore.Common.Discord.Entities
 
         [JsonPropertyName("entitlements")]
         public Entitlement[] Entitlements { get; set; }
-    }
-
-    public enum InteractionType
-    {
-        Ping = 1,
-        ApplicationCommand = 2,
-        MessageComponent = 3,
-        ApplicationCommandAutocomplete = 4,
-        ModalSubmit = 5
     }
 }

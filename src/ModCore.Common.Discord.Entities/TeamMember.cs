@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Discord.Rest.Entities;
+﻿using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Rest.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,11 +22,5 @@ namespace ModCore.Common.Discord.Entities
 
         [JsonPropertyName("role")]
         public string Role { get; set; }
-    }
-
-    public enum TeamMembershipState
-    {
-        Invited = 1,
-        Accepted = 2
     }
 }

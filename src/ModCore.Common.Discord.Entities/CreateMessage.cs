@@ -39,8 +39,4 @@ namespace ModCore.Common.Discord.Entities
         [JsonPropertyName("flags")]
         public Optional<MessageFlags> Flags { get; set; }
     }
-
-    public record AllowedMention
-    {
-    }
 }

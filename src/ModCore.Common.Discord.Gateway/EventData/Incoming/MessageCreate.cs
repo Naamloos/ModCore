@@ -12,7 +12,7 @@ namespace ModCore.Common.Discord.Gateway.EventData.Incoming
         public Snowflake? GuildId { get; set; }
 
         [JsonPropertyName("member")]
-        public JsonObject? Member { get; set; }
+        public Member Member { get; set; }
 
         [JsonPropertyName("mentions")]
         public User[] Mentions { get; set; }

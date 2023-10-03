@@ -15,7 +15,7 @@ namespace ModCore.Common.Discord.Gateway.EventData.Incoming
         public User User { get; set; }
 
         [JsonPropertyName("guilds")]
-        public List<JsonObject> Guilds { get; set; }
+        public List<Guild> Guilds { get; set; }
 
         [JsonPropertyName("session_id")]
         public string SessionId { get; set; }

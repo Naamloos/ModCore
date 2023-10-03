@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Nodes;
+﻿using ModCore.Common.Discord.Entities.Enums;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Entities
@@ -43,12 +44,5 @@ namespace ModCore.Common.Discord.Entities
 
         [JsonPropertyName("version")]
         public Snowflake Version { get; set; }
-    }
-
-    public enum ApplicationCommandType : int
-    {
-        ChatInput = 1,
-        User = 2,
-        Message = 3
     }
 }

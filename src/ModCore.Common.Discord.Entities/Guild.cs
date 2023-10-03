@@ -1,5 +1,6 @@
 ﻿using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities
 {
@@ -48,13 +49,13 @@ namespace ModCore.Common.Discord.Entities
         public Optional<Snowflake?> WidgetChannelId { get; set; }
 
         [JsonPropertyName("verification_level")]
-        public int VerificationLevel { get; set; }
+        public VerificationLevel VerificationLevel { get; set; }
 
         [JsonPropertyName("default_message_notifications")]
-        public int DefaultMessageNotifications { get; set; }
+        public DefaultMessageNotificationsLevel DefaultMessageNotifications { get; set; }
 
         [JsonPropertyName("explicit_content_filter")]
-        public int ExplicitContentFilter { get; set; }
+        public ExplicitContentFilterLevel ExplicitContentFilter { get; set; }
 
         [JsonPropertyName("roles")]
         public Role[] Roles { get; set; }
@@ -66,7 +67,7 @@ namespace ModCore.Common.Discord.Entities
         public string[] Features { get; set; }
 
         [JsonPropertyName("mfa_level")]
-        public int MFALevel { get; set; }
+        public MfaLevel MFALevel { get; set; }
 
         [JsonPropertyName("application_id")]
         public Snowflake? ApplicationId { get; set; }
@@ -75,7 +76,7 @@ namespace ModCore.Common.Discord.Entities
         public Snowflake? SystemChannelId { get; set; }
 
         [JsonPropertyName("system_channel_flags")]
-        public int SystemChannelFlags { get; set; }
+        public SystemChannelFlags SystemChannelFlags { get; set; }
 
         [JsonPropertyName("rules_channel_id")]
         public Snowflake? RulesChannelId { get; set; }
@@ -120,7 +121,7 @@ namespace ModCore.Common.Discord.Entities
         public Optional<WelcomeScreen> WelcomeScreen { get; set; }
 
         [JsonPropertyName("nsfw_level")]
-        public int NSFWLevel { get; set; }
+        public NSFWLevel NSFWLevel { get; set; }
 
         [JsonPropertyName("stickers")]
         public Optional<Sticker[]> Stickers { get; set; }
@@ -130,17 +131,5 @@ namespace ModCore.Common.Discord.Entities
 
         [JsonPropertyName("safety_alerts_channel_id")]
         public Snowflake? SafetyAlertsChannelId { get; set; }
-    }
-
-    public record WelcomeScreen
-    {
-    }
-
-    public enum BoostTier
-    {
-        None = 0,
-        Tier1 = 1,
-        Tier2 = 2,
-        Tier3 = 3
     }
 }

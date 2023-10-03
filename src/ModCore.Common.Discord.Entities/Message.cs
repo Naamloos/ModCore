@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Discord.Rest.Entities;
+﻿using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Rest.Entities;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
@@ -100,101 +101,6 @@ namespace ModCore.Common.Discord.Entities
         public Optional<RoleSubscriptionData> RoleSubscriptionData { get; set; }
 
         [JsonPropertyName("resolved")]
-        public Optional<Resolved> Resolved { get; set; }
-    }
-
-    public record Resolved
-    {
-    }
-
-    public record RoleSubscriptionData
-    {
-    }
-
-    public record MessageStickerItem
-    {
-    }
-
-    public record MessageComponent
-    {
-    }
-
-    public record MessageInteraction
-    {
-    }
-
-    [Flags]
-    public enum MessageFlags
-    {
-        CrossPosted = 1<<0,
-        IsCrosspost = 1<<1,
-        SuppressEmbeds = 1<<2,
-        SourceMessageDeleted = 1<<3,
-        Urgent = 1<<4,
-        HasThread = 1<<5,
-        Ephemeral = 1<<6,
-        Loading = 1<<7,
-        FailedToMentionSomeRolesInThread = 1<<8,
-        SuppressNotifications = 1<<12,
-        IsVoiceMessage = 1<<13
-    }
-
-    public record MessageReference
-    {
-    }
-
-    public record MessageActivity
-    {
-    }
-
-    public enum MessageType
-    {
-        Default = 0,
-        RecipientAdded = 1,
-        RecipientRemoved = 2,
-        Call = 3,
-        ChannelNameChange = 4,
-        ChannelIconChange = 5,
-        ChannelPinnedMessage = 6,
-        UserJoin = 7,
-        GuildBoost = 8,
-        GuildBoostTier1 = 9,
-        GuildBoostTier2 = 10,
-        GuildBoostTier3 = 11,
-        ChannelFollowAdd = 12,
-        GuildDiscoveryDisqualified = 14,
-        GuildDiscoveryRequalified = 15,
-        GuildDiscoveryGracePeriodInitialWarning = 16,
-        GuildDiscoveryGracePeriodFinalWarning = 17,
-        ThreadCreated = 18,
-        Reply = 19,
-        ChatInputCommand = 20,
-        ThreadStarterMessage = 21,
-        GuildInviteReminder = 22,
-        ContextMenuCommand = 23,
-        AutoModerationAction = 24,
-        RoleSubscriptionPurchase = 25,
-        InteractionPremiumUpsell = 26,
-        StageStart = 27,
-        StageEnd = 28,
-        StageSpeaker = 29,
-        StageTopic = 31,
-        GuildApplicationPremiumSubscription = 32
-    }
-
-    public record Reaction
-    {
-    }
-
-    public record Embed
-    {
-    }
-
-    public record Attachment
-    {
-    }
-
-    public record ChannelMention
-    {
+        public Optional<MessageResolved> Resolved { get; set; }
     }
 }
