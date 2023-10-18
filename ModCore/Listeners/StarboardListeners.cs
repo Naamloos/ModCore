@@ -514,24 +514,6 @@ namespace ModCore.Listeners
                 .WithFooter($"ID: {sourceMessage.Id}")
                 .WithTimestamp(sourceMessage.Id);
 
-            var imageEmbeds = new List<DiscordEmbedBuilder>();
-
-            var imageFiles = sourceMessage.Attachments.Where(x =>
-            {
-                var uri = new Uri(x.Url);
-                return uri.IsFile && validFileExts.Contains(Path.GetExtension(uri.AbsolutePath));
-            });
-
-            if(imageFiles.Any())
-            {
-                embed = embed.WithUrl("https://github.com/Naamloos/ModCore").WithImageUrl(imageFiles.First().Url);
-
-                foreach (var img in imageFiles.Skip(1))
-                {
-                    imageEmbeds.Add(new DiscordEmbedBuilder(embed).WithUrl("https://github.com/Naamloos/ModCore").WithImageUrl(img.Url));
-                }
-            }
-
             var emotename = emoji.GetDiscordName().Replace(":", "");
             emotename = emotename.EndsWith('s') ? emotename : count > 1 ? emotename + "s" : emotename;
 
@@ -544,15 +526,30 @@ namespace ModCore.Listeners
             }
 
             var embeds = new List<DiscordEmbed>();
-            embeds.Add(embed.Build());
-            embeds.AddRange(imageEmbeds.Select(x => x.Build()));
+
+            var imageFiles = sourceMessage.Attachments.Where(x =>
+            {
+                var uri = new Uri(x.Url);
+                return uri.IsFile && validFileExts.Contains(Path.GetExtension(uri.AbsolutePath));
+            });
+
+            if (imageFiles.Any()) 
+            {
+                foreach (var img in imageFiles)
+                {
+                    embeds.Add(new DiscordEmbedBuilder(embed).WithUrl("https://github.com/Naamloos/ModCore").WithImageUrl(img.Url));
+                }
+            }
+            else
+            {
+                embeds.Add(embed);
+            }
 
             var messageBuilder = new DiscordMessageBuilder()
                 .AddEmbeds(embeds)
                 .WithContent($"{emoji} {count} {emotename} in {sourceMessage.Channel.Mention}");
 
             messageBuilder.AddComponents(new DiscordLinkButtonComponent(sourceMessage.JumpLink.ToString(), "Go to message"));
-
             return messageBuilder;
         }
     }
