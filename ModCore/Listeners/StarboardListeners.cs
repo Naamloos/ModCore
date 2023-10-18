@@ -526,11 +526,10 @@ namespace ModCore.Listeners
             }
 
             var embeds = new List<DiscordEmbed>();
-
             var imageFiles = sourceMessage.Attachments.Where(x =>
             {
                 var uri = new Uri(x.Url);
-                return uri.IsFile && validFileExts.Contains(Path.GetExtension(uri.AbsolutePath));
+                return validFileExts.Contains(Path.GetExtension(uri.AbsolutePath));
             });
 
             if (imageFiles.Any()) 
