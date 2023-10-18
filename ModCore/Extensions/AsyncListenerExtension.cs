@@ -33,6 +33,11 @@ namespace ModCore.Extensions
                 listener.Attribute.Register(this.client, listener.Method, this.services);
             }
         }
+
+        public override void Dispose()
+        {
+
+        }
     }
 
     class ListenerMethod

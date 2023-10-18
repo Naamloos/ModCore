@@ -16,6 +16,9 @@ using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Enums;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Entities;
+using System.IO;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
 
 namespace ModCore.Listeners
 {
@@ -500,6 +503,7 @@ namespace ModCore.Listeners
             }
         }
 
+        private static readonly string[] validFileExts = { ".jpg", ".gif", ".png", ".jpeg", ".webp" };
         private static DiscordMessageBuilder buildStarboardMessage(DiscordMessage sourceMessage, long count, DiscordEmoji emoji)
         {
             // TODO cleanup
@@ -510,11 +514,18 @@ namespace ModCore.Listeners
                 .WithFooter($"ID: {sourceMessage.Id}")
                 .WithTimestamp(sourceMessage.Id);
 
-            // This is shit code kek
-            if (sourceMessage.Attachments.Any(x => x.Url.ToLower().EndsWith(".jpg") || x.Url.ToLower().EndsWith(".png")
-             || x.Url.ToLower().EndsWith(".jpeg") || x.Url.ToLower().EndsWith(".gif")))
-                embed.WithImageUrl(sourceMessage.Attachments.First(x => x.Url.ToLower().EndsWith(".jpg") || x.Url.ToLower().EndsWith(".png")
-            || x.Url.ToLower().EndsWith(".jpeg") || x.Url.ToLower().EndsWith(".gif")).Url);
+            var imageEmbeds = new List<DiscordEmbedBuilder>();
+
+            var imageFiles = sourceMessage.Attachments.Where(x =>
+            {
+                var uri = new Uri(x.Url);
+                return uri.IsFile && validFileExts.Contains(Path.GetExtension(uri.AbsolutePath));
+            });
+
+            foreach(var img in imageFiles)
+            {
+                imageEmbeds.Add(new DiscordEmbedBuilder().WithUrl(img.Url).WithImageUrl(img.Url));
+            }
 
             var emotename = emoji.GetDiscordName().Replace(":", "");
             emotename = emotename.EndsWith('s') ? emotename : count > 1 ? emotename + "s" : emotename;
@@ -527,8 +538,9 @@ namespace ModCore.Listeners
                     $"{refContent} {(sourceMessage.ReferencedMessage.Attachments.Count() > 0 ? $"_<{sourceMessage.ReferencedMessage.Attachments.Count()} file(s)>_" : "")}";
             }
 
+            imageEmbeds.Add(embed);
             var messageBuilder = new DiscordMessageBuilder()
-                .AddEmbed(embed)
+                .AddEmbeds(imageEmbeds.Select(x => x.Build()))
                 .WithContent($"{emoji} {count} {emotename} in {sourceMessage.Channel.Mention}");
 
             messageBuilder.AddComponents(new DiscordLinkButtonComponent(sourceMessage.JumpLink.ToString(), "Go to message"));
