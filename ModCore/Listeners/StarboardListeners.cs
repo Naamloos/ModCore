@@ -524,7 +524,7 @@ namespace ModCore.Listeners
 
             foreach(var img in imageFiles)
             {
-                imageEmbeds.Add(new DiscordEmbedBuilder().WithUrl(img.Url).WithImageUrl(img.Url));
+                imageEmbeds.Add(new DiscordEmbedBuilder().WithUrl("https://github.com/Naamloos/ModCore").WithImageUrl(img.Url));
             }
 
             var emotename = emoji.GetDiscordName().Replace(":", "");
