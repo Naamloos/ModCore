@@ -153,5 +153,10 @@ namespace ModCore.Extensions
             if (handler != null)
                 await handler.ExecuteAsync(e, deciphered.Values, services);
         }
+
+        public override void Dispose()
+        {
+
+        }
     }
 }
