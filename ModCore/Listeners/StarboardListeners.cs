@@ -528,7 +528,7 @@ namespace ModCore.Listeners
 
                 foreach (var img in imageFiles.Skip(1))
                 {
-                    imageEmbeds.Add(new DiscordEmbedBuilder().WithUrl("https://github.com/Naamloos/ModCore").WithImageUrl(img.Url));
+                    imageEmbeds.Add(new DiscordEmbedBuilder(embed).WithUrl("https://github.com/Naamloos/ModCore").WithImageUrl(img.Url));
                 }
             }
 
@@ -543,9 +543,12 @@ namespace ModCore.Listeners
                     $"{refContent} {(sourceMessage.ReferencedMessage.Attachments.Count() > 0 ? $"_<{sourceMessage.ReferencedMessage.Attachments.Count()} file(s)>_" : "")}";
             }
 
-            imageEmbeds.Add(embed);
+            var embeds = new List<DiscordEmbed>();
+            embeds.Add(embed.Build());
+            embeds.AddRange(imageEmbeds.Select(x => x.Build()));
+
             var messageBuilder = new DiscordMessageBuilder()
-                .AddEmbeds(imageEmbeds.Select(x => x.Build()))
+                .AddEmbeds(embeds)
                 .WithContent($"{emoji} {count} {emotename} in {sourceMessage.Channel.Mention}");
 
             messageBuilder.AddComponents(new DiscordLinkButtonComponent(sourceMessage.JumpLink.ToString(), "Go to message"));
