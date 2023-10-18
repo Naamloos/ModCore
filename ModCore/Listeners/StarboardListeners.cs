@@ -522,9 +522,14 @@ namespace ModCore.Listeners
                 return uri.IsFile && validFileExts.Contains(Path.GetExtension(uri.AbsolutePath));
             });
 
-            foreach(var img in imageFiles)
+            if(imageFiles.Any())
             {
-                imageEmbeds.Add(new DiscordEmbedBuilder().WithUrl("https://github.com/Naamloos/ModCore").WithImageUrl(img.Url));
+                embed = embed.WithUrl("https://github.com/Naamloos/ModCore").WithImageUrl(imageFiles.First().Url);
+
+                foreach (var img in imageFiles.Skip(1))
+                {
+                    imageEmbeds.Add(new DiscordEmbedBuilder().WithUrl("https://github.com/Naamloos/ModCore").WithImageUrl(img.Url));
+                }
             }
 
             var emotename = emoji.GetDiscordName().Replace(":", "");
