@@ -31,12 +31,13 @@ namespace ModCore.Services.Shard.EventHandlers
                 
                 var responseMessage = new CreateMessage()
                 {
-                    Content = $"{data.Author.Mention} This is the very early Alpha version of ModCore v3! <3",
+                    Content = $"{data.Author.Mention}, Welcome to ModCore v3. " +
+                        $"This is an early ALPHA version of ModCore, not yet available to the general public.",
                     Embeds = new[]
                     {
                         new Embed()
                         {
-                            Description = $"ModCore is a powerful moderating bot written in C# using DSharpPlus.",
+                            Description = $"ModCore is a Discord bot focused on moderation and server management, written from scratch in C#.",
                             Color = ColorConverter.FromHex("#089FDF"),
                             Author = new EmbedAuthor()
                             {
@@ -79,6 +80,10 @@ namespace ModCore.Services.Shard.EventHandlers
                                     Name = "Donate?",
                                     Value = "Currently, ModCore is hosted off my (Naamloos's) own money. Donations are always welcome over at [Ko-Fi](https://ko-fi.com/Naamloos)!"
                                 }
+                            },
+                            Footer = new EmbedFooter()
+                            {
+                                Text = "v3.0.0-alpha (early access)"
                             }
                         }
                     }
