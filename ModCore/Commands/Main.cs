@@ -51,8 +51,9 @@ namespace ModCore.Commands
                     "[DrCreo](https://github.com/DrCreo), " +
                     "[aexolate](https://github.com/aexolate), " +
                     "[Drake103](https://github.com/Drake103), " +
-                    "[Izumemori](https://github.com/Izumemori) and " +
-                    "[OoLunar](https://github.com/OoLunar)")
+                    "[Izumemori](https://github.com/Izumemori), " +
+                    "[OoLunar](https://github.com/OoLunar) and " +
+                    "[InFTord](https://github.com/InFTord)")
                 .AddField("Want to contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
                 .AddField("Donate?", "Currently, ModCore is hosted off my (Naamloos's) own money. Donations are always welcome over at [Ko-Fi](https://ko-fi.com/Naamloos)!")
                 .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl)
