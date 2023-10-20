@@ -9,7 +9,6 @@ using ModCore.Utils.Extensions;
 using System.Collections.Generic;
 using DSharpPlus.Interactivity;
 using System.Linq;
-using System;
 
 namespace ModCore.ContextMenu
 {
@@ -34,7 +33,7 @@ namespace ModCore.ContextMenu
             {
                 var matches = Regex.Matches(msg.Content, EMOJI_REGEX).DistinctBy(x => x.Groups[1].Value);
 
-                if (matches.Count() < 1)
+                if (!matches.Any())
                 {
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("⚠️ Referenced emoji not found!"));
                     return;
@@ -115,7 +114,7 @@ namespace ModCore.ContextMenu
             {
                 var stickers = ctx.TargetMessage.Stickers.Where(x => x.FormatType != StickerFormat.LOTTIE);
 
-                if (stickers.Count() < 1)
+                if (!stickers.Any())
                 {
                     await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("⚠️ Referenced sticker not found! Do note that ModCore can not copy LOTTIE type stickers!"));
                     return;

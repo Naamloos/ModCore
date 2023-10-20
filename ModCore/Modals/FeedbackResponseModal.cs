@@ -45,7 +45,7 @@ namespace ModCore.Modals
                         .WithColor(new DiscordColor("#089FDF")));
                     resp.WithContent("✅ Successfully sent response to feedback!");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     resp.WithContent("⚠️ Failed to DM member. Do they use ModCore still? Are their DMs disabled? We may never know.");
                 }

@@ -42,7 +42,7 @@ namespace ModCore.Modals
             if (ulong.TryParse(MessageId, out var messageId))
             {
                 var message = await interaction.Channel.GetMessageAsync(messageId);
-                var text = message.Embeds.First().Fields.First().Value;
+                var text = message.Embeds[0].Fields[0].Value;
                 var duration = TimeSpan.FromMinutes(15);
 
                 if (!string.IsNullOrEmpty(Timespan))
@@ -92,7 +92,7 @@ namespace ModCore.Modals
                     SnoozedContext = snoozeContext
                 });
 
-                using (var db = this._db.CreateContext())
+                await using (var db = this._db.CreateContext())
                 {
                     db.Timers.Add(reminder);
                     await db.SaveChangesAsync();

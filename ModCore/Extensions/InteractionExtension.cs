@@ -6,11 +6,9 @@ using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Handlers;
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace ModCore.Extensions
@@ -35,12 +33,8 @@ namespace ModCore.Extensions
         public async Task RespondWithModalAsync<T>(DiscordInteraction interaction, string title,
             IDictionary<string, string> hiddenValues = null) where T : IModal
         {
-            var handler = modalHandlers.FirstOrDefault(x => x.Type == typeof(T));
-            if (handler == null)
-            {
-                // Cache for next call :^)
-                handler = registerModalHandler(typeof(T));
-            }
+            // Cache for next call :^)
+            var handler = modalHandlers.FirstOrDefault(x => x.Type == typeof(T)) ?? registerModalHandler(typeof(T));
 
             await handler.CreateAsync(interaction, title, hiddenValues);
         }

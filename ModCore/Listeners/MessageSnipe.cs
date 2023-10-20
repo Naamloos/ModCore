@@ -6,11 +6,8 @@ using ModCore.Database;
 using ModCore.Entities;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Enums;
-using ModCore.Utils;
 using ModCore.Utils.Extensions;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ModCore.Listeners
@@ -32,7 +29,7 @@ namespace ModCore.Listeners
                 cache.Set($"snipe_{eventargs.Channel.Id}", eventargs.Message, TimeSpan.FromHours(12));
             }
 
-            using var db = database.CreateContext();
+            await using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
             if (cfg.Logging.EditLog_Enable)
             {
@@ -69,7 +66,7 @@ namespace ModCore.Listeners
                 cache.Set($"esnipe_{eventargs.Channel.Id}", eventargs.MessageBefore, TimeSpan.FromHours(12));
             }
 
-            using var db = database.CreateContext();
+            await using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
             if(cfg != null && cfg.Logging.EditLog_Enable)
             {

@@ -12,8 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using ModCore.Database;
-using ModCore.Database.DatabaseEntities;
 using ModCore.DataFixer;
 using ModCore.Entities;
 using Newtonsoft.Json;
@@ -157,7 +155,7 @@ namespace ModCore
             var db = Settings.Database.CreateContextBuilder().CreateContext();
             var pending = db.Database.GetPendingMigrations();
 
-            if (pending.Count() < 1)
+            if (!pending.Any())
             {
                 Console.WriteLine("No migrations pending.");
                 return;

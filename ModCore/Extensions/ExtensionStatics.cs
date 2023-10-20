@@ -33,8 +33,7 @@ namespace ModCore.Extensions
             if (values == null)
                 return Id;
 
-            List<string> data = new List<string>();
-            data.Add(Id);
+            List<string> data = new List<string> { Id };
 
             foreach (var val in values)
             {

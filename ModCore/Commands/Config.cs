@@ -1,17 +1,10 @@
 ﻿using DSharpPlus;
-using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
-using Microsoft.VisualBasic;
 using ModCore.Components;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Database.JsonEntities;
-using ModCore.Extensions;
-using ModCore.Modals;
 using ModCore.Utils.Extensions;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ModCore.Commands

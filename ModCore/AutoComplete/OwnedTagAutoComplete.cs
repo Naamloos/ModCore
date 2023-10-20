@@ -18,7 +18,7 @@ namespace ModCore.AutoComplete
             var interactions = ctx.Client.GetInteractionExtension();
             var database = interactions.Services.GetService(typeof(DatabaseContextBuilder)) as DatabaseContextBuilder;
 
-            using var db = database.CreateContext();
+            await using var db = database.CreateContext();
             var tags = db.Tags.Where(x => x.GuildId == (long)ctx.Guild.Id && x.ChannelId < 1).ToList();
             var channelTags = db.Tags.Where(x => x.ChannelId == (long)ctx.Channel.Id).ToList();
 

@@ -39,9 +39,8 @@ namespace ModCore.Commands
             [Option("content", "New content for this tag.")]string content)
         {
             bool isNew = false;
-            DatabaseTag tag;
 
-            if (tryGetTag(name, ctx.Channel, out tag))
+            if (tryGetTag(name, ctx.Channel, out var tag))
             {
                 if (!canManageTag(tag, ctx.Channel, ctx.Member))
                 {
@@ -62,21 +61,19 @@ namespace ModCore.Commands
                 isNew = true;
             }
 
-            using (var db = this.Database.CreateContext())
+            await using var db = this.Database.CreateContext();
+            tag.Contents = content;
+            if (isNew)
             {
-                tag.Contents = content;
-                if (isNew)
-                {
-                    db.Tags.Add(tag);
-                    await ctx.CreateResponseAsync($"✅ Server-global tag `{name}` succesfully created!", true);
-                }
-                else
-                {
-                    db.Tags.Update(tag);
-                    await ctx.CreateResponseAsync($"✅ Server-global tag `{name}` succesfully modified!", true);
-                }
-                await db.SaveChangesAsync();
+                db.Tags.Add(tag);
+                await ctx.CreateResponseAsync($"✅ Server-global tag `{name}` succesfully created!", true);
             }
+            else
+            {
+                db.Tags.Update(tag);
+                await ctx.CreateResponseAsync($"✅ Server-global tag `{name}` succesfully modified!", true);
+            }
+            await db.SaveChangesAsync();
         }
 
         [SlashCommand("override", "Creates a channel-specific override for a tag.")]
@@ -84,9 +81,8 @@ namespace ModCore.Commands
             [Option("name", "Name of tag to override.")] string name,
             [Option("content", "New override content for this tag.")] string content)
         {
-            DatabaseTag tag;
             bool isNew = false;
-            if (!tryGetTag(name, ctx.Channel, out tag)
+            if (!tryGetTag(name, ctx.Channel, out var tag)
                 || tag.ChannelId < 1)
             {
                 tag = new DatabaseTag()
@@ -106,21 +102,19 @@ namespace ModCore.Commands
                 return;
             }
 
-            using (var db = this.Database.CreateContext())
+            await using var db = this.Database.CreateContext();
+            tag.Contents = content;
+            if (isNew)
             {
-                tag.Contents = content;
-                if (isNew)
-                {
-                    db.Tags.Add(tag);
-                    await ctx.CreateResponseAsync($"✅ Channel override tag `{name}` succesfully created!", true);
-                }
-                else
-                {
-                    db.Tags.Update(tag);
-                    await ctx.CreateResponseAsync($"✅ Channel override tag `{name}` succesfully modified!", true);
-                }
-                await db.SaveChangesAsync();
+                db.Tags.Add(tag);
+                await ctx.CreateResponseAsync($"✅ Channel override tag `{name}` succesfully created!", true);
             }
+            else
+            {
+                db.Tags.Update(tag);
+                await ctx.CreateResponseAsync($"✅ Channel override tag `{name}` succesfully modified!", true);
+            }
+            await db.SaveChangesAsync();
         }
 
         [SlashCommand("remove", "Removes a tag.")]
@@ -148,12 +142,10 @@ namespace ModCore.Commands
 
             if (!response.TimedOut && response.Accepted)
             {
-                using (var db = this.Database.CreateContext())
-                {
-                    db.Tags.Remove(tag);
-                    await db.SaveChangesAsync();
-                    await ctx.CreateResponseAsync($"✅ Tag `{name}` successfully removed!", true);
-                }
+                await using var db = this.Database.CreateContext();
+                db.Tags.Remove(tag);
+                await db.SaveChangesAsync();
+                await ctx.CreateResponseAsync($"✅ Tag `{name}` successfully removed!", true);
                 return;
             }
 
@@ -194,52 +186,46 @@ namespace ModCore.Commands
                 await ctx.CreateResponseAsync("⚠️ You don't own that tag, and you don't have `Manage Messages` permissions!", true);
             }
 
-            using (var db = this.Database.CreateContext())
-            {
-                tag.OwnerId = (long)newowner.Id;
-                db.Tags.Update(tag);
-                await db.SaveChangesAsync();
-                await ctx.CreateResponseAsync($"✅ {(tag.ChannelId == 0 ? "Server" : "Channel")} tag `{name}` successfully transferred to {newowner.Mention}!", false);
-            }
+            await using var db = this.Database.CreateContext();
+            tag.OwnerId = (long)newowner.Id;
+            db.Tags.Update(tag);
+            await db.SaveChangesAsync();
+            await ctx.CreateResponseAsync($"✅ {(tag.ChannelId == 0 ? "Server" : "Channel")} tag `{name}` successfully transferred to {newowner.Mention}!", false);
         }
 
         [SlashCommand("list", "Lists all tags available in this channel.")]
         public async Task ListAsync(InteractionContext ctx)
         {
-            using (var db = this.Database.CreateContext())
+            await using var db = this.Database.CreateContext();
+            var list = db.Tags.Where(x => (x.GuildId == (long)ctx.Guild.Id && x.ChannelId < 1)).ToList();
+            var channelist = db.Tags.Where(x => x.ChannelId == (long)ctx.Channel.Id).ToList();
+            list = list.Where(x => channelist.All(y => y.Name != x.Name)).ToList();
+            list.AddRange(channelist);
+            list.OrderByDescending(x => x.Name);
+
+            if (list.Count < 1)
             {
-                var list = db.Tags.Where(x => (x.GuildId == (long)ctx.Guild.Id && x.ChannelId < 1)).ToList();
-                var channelist = db.Tags.Where(x => x.ChannelId == (long)ctx.Channel.Id).ToList();
-                list = list.Where(x => !channelist.Any(y => y.Name == x.Name)).ToList();
-                list.AddRange(channelist);
-                list.OrderByDescending(x => x.Name);
+                await ctx.CreateResponseAsync("⚠️ There are no tags available in this channel!", true);
+            }
+            else
+            {
+                string tags = string.Join("\n", list.Select(x => x.ChannelId < 1 ? $"🌍 `{x.Name}`" : $"💬 `{x.Name}`"));
+                var embedBase = new DiscordEmbedBuilder()
+                    .WithTitle("🏷 Tags available in this channel");
 
-                if (list.Count() < 1)
-                {
-                    await ctx.CreateResponseAsync("⚠️ There are no tags available in this channel!", true);
-                }
-                else
-                {
-                    string tags = string.Join("\n", list.Select(x => x.ChannelId < 1 ? $"🌍 `{x.Name}`" : $"💬 `{x.Name}`"));
-                    var embedBase = new DiscordEmbedBuilder()
-                        .WithTitle("🏷 Tags available in this channel");
-
-                    var pages = this.Interactivity.GeneratePagesInEmbed(tags, SplitType.Line, embedBase);
-                    await this.Interactivity.SendPaginatedResponseAsync(ctx.Interaction, true, ctx.User, pages, deletion: ButtonPaginationBehavior.DeleteButtons);
-                }
+                var pages = this.Interactivity.GeneratePagesInEmbed(tags, SplitType.Line, embedBase);
+                await this.Interactivity.SendPaginatedResponseAsync(ctx.Interaction, true, ctx.User, pages, deletion: ButtonPaginationBehavior.DeleteButtons);
             }
         }
 
         private bool tryGetTag(string name, DiscordChannel channel, out DatabaseTag tag)
         {
-            using (var db = this.Database.CreateContext())
-            {
-                tag = db.Tags.FirstOrDefault(x => x.Name == name && x.ChannelId == (long)channel.Id);
-                if (tag == null)
-                    tag = db.Tags.FirstOrDefault(x => x.Name == name && x.GuildId == (long)channel.GuildId && x.ChannelId < 1);
+            using var db = this.Database.CreateContext();
+            tag = db.Tags.FirstOrDefault(x => x.Name == name && x.ChannelId == (long)channel.Id);
+            if (tag == null)
+                tag = db.Tags.FirstOrDefault(x => x.Name == name && x.GuildId == (long)channel.GuildId && x.ChannelId < 1);
 
-                return tag != null;
-            }
+            return tag != null;
         }
 
         public static bool canManageTag(DatabaseTag tag, DiscordChannel channel, DiscordMember member)

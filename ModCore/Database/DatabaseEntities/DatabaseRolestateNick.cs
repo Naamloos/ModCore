@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using ModCore.Entities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using ModCore.Utils.EntityFramework.AttributeImpl;
 
 namespace ModCore.Database.DatabaseEntities

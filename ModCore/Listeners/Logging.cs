@@ -3,9 +3,7 @@ using DSharpPlus.EventArgs;
 using ModCore.Database;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Enums;
-using ModCore.Utils;
 using ModCore.Utils.Extensions;
-using Newtonsoft.Json.Converters;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,7 +14,7 @@ namespace ModCore.Listeners
         [AsyncListener(EventType.GuildMemberUpdated)]
         public static async Task LogMemberAsync(GuildMemberUpdateEventArgs eventargs, DatabaseContextBuilder database)
         {
-            using var db = database.CreateContext();
+            await using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
             if (cfg == null)
                 return;
@@ -100,7 +98,7 @@ namespace ModCore.Listeners
         [AsyncListener(EventType.InviteCreate)]
         public static async Task LogInvitesAsync(InviteCreateEventArgs eventargs, DatabaseContextBuilder database)
         {
-            using var db = database.CreateContext();
+            await using var db = database.CreateContext();
             var cfg = eventargs.Guild.GetGuildSettings(db);
             DiscordChannel channel = eventargs.Guild.GetChannel(cfg.Logging.ChannelId);
             if (channel == null)

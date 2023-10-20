@@ -1,6 +1,4 @@
-﻿using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
+﻿using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Enums;
 using DSharpPlus.SlashCommands;
@@ -35,11 +33,11 @@ namespace ModCore.Commands
             [Option("in", "In how long the reminder should trigger.")]string timespan,
             [Option("about", "What to remind about.")]string about)
         {
-            var (duration, text) = (TimeSpan.FromSeconds(0), "");
+            var (duration, _) = (TimeSpan.FromSeconds(0), "");
 
             try
             {
-                (duration, text) = Dates.ParseTime(timespan);
+                (duration, _) = Dates.ParseTime(timespan);
             }catch(Exception)
             {
                 await ctx.CreateResponseAsync(
@@ -79,7 +77,7 @@ namespace ModCore.Commands
                 ActionType = TimerActionType.Reminder
             };
             reminder.SetData(new TimerReminderData { ReminderText = about});
-            using (var db = this.Database.CreateContext())
+            await using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
                 await db.SaveChangesAsync();
@@ -96,7 +94,7 @@ namespace ModCore.Commands
         {
             DatabaseTimer[] reminders;
 
-            using (var db = this.Database.CreateContext())
+            await using (var db = this.Database.CreateContext())
                 reminders = db.Timers.Where(xt =>
                     xt.ActionType == TimerActionType.Reminder &&
                     xt.UserId == (long)ctx.User.Id).ToArray();
@@ -190,16 +188,14 @@ namespace ModCore.Commands
             }
             else if(confirmed.Accepted)
             {
-                using (var db = this.Database.CreateContext())
-                {
-                    DatabaseTimer[] timers = db.Timers.Where(xt => xt.ActionType == TimerActionType.Reminder && xt.UserId == (long)ctx.User.Id).ToArray();
+                await using var db = this.Database.CreateContext();
+                DatabaseTimer[] timers = db.Timers.Where(xt => xt.ActionType == TimerActionType.Reminder && xt.UserId == (long)ctx.User.Id).ToArray();
 
-                    var count = timers.Length;
-                    await Timers.UnscheduleTimersAsync(timers);
+                var count = timers.Length;
+                await Timers.UnscheduleTimersAsync(timers);
 
-                    await ctx.EditFollowupAsync(confirmed.FollowupMessage.Id, new DiscordWebhookBuilder()
-                        .WithContent("✅ Alright, cleared " + count + $" timer{(count > 1? "s" : "")}."));
-                }
+                await ctx.EditFollowupAsync(confirmed.FollowupMessage.Id, new DiscordWebhookBuilder()
+                    .WithContent("✅ Alright, cleared " + count + $" timer{(count > 1? "s" : "")}."));
             }
             else
             {

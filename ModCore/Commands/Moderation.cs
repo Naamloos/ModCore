@@ -123,7 +123,7 @@ namespace ModCore.Commands
                 UserId = (long)member.Id
             });
 
-            using (var db = this.Database.CreateContext())
+            await using (var db = this.Database.CreateContext())
             {
                 db.Timers.Add(reminder);
                 await db.SaveChangesAsync();
@@ -208,12 +208,14 @@ namespace ModCore.Commands
             [Option("user_4", "Add another user to isolate")] DiscordUser user4 = null,
             [Option("user_5", "Add another user to isolate")] DiscordUser user5 = null)
         {
-            List<DiscordUser> users = new List<DiscordUser>();
-            users.Add(user);
-            users.Add(user2);
-            users.Add(user3);
-            users.Add(user4);
-            users.Add(user5);
+            List<DiscordUser> users = new List<DiscordUser>
+            {
+                user,
+                user2,
+                user3,
+                user4,
+                user5
+            };
             users.RemoveAll(x => x == null);
 
             foreach (var cuser in users)

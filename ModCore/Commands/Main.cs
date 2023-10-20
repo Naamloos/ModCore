@@ -1,7 +1,5 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
-using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.SlashCommands;
 using ModCore.Entities;
 using ModCore.Extensions;
@@ -10,14 +8,10 @@ using ModCore.Modals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using ModCore.Database;
 using ModCore.Database.JsonEntities;
 using System.Runtime.InteropServices;
-using Microsoft.Data.SqlClient;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.IO;
 using Microsoft.Extensions.Caching.Memory;
@@ -129,7 +123,7 @@ namespace ModCore.Commands
             {
                 var content = message.Content;
                 if (content.Length > 500)
-                    content = content.Substring(0, 500) + "...";
+                    content = content[..500] + "...";
 
                 var embed = new DiscordEmbedBuilder()
                     .WithAuthor($"{message.Author.GetDisplayUsername()}" + (edit ? " (Edited)" : ""),
@@ -165,7 +159,7 @@ namespace ModCore.Commands
 
                 var customId = ExtensionStatics.GenerateIdString("del", new Dictionary<string, string>()
                 {
-                    {"u", ctx.User.Id.ToString() + "|" + message.Author.Id.ToString() },
+                    {"u", ctx.User.Id + "|" + message.Author.Id },
                 });
 
                 response.AddComponents(new DiscordButtonComponent(ButtonStyle.Danger, customId, "", emoji: new DiscordComponentEmoji("🗑")));

@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using ModCore.Database.JsonEntities;
-using ModCore.Entities;
 using ModCore.Utils.EntityFramework.AttributeImpl;
 using Newtonsoft.Json;
 

@@ -1,5 +1,4 @@
 ﻿using ModCore.Database.JsonEntities;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;

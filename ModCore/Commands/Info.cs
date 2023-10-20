@@ -2,8 +2,6 @@
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using ModCore.Utils.Extensions;
-using System;
-using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 
