@@ -1,5 +1,5 @@
 ﻿using DSharpPlus;
-using Emzi0767.Utilities;
+using DSharpPlus.AsyncEvents;
 using Microsoft.Extensions.Logging;
 using ModCore.Extensions.Enums;
 using System;
@@ -174,6 +174,9 @@ namespace ModCore.Extensions.Attributes
                     break;
                 case EventType.MessageReactionRemoved:
                     client.MessageReactionRemoved += onEvent;
+                    break;
+                case EventType.MessageReactionEmojiRemoved:
+                    client.MessageReactionRemovedEmoji += onEvent;
                     break;
                 case EventType.MessageReactionsCleared:
                     client.MessageReactionsCleared += onEvent;

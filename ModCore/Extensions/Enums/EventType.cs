@@ -45,6 +45,7 @@
         MessageReactionAdded, // AsyncEventHandler<MessageReactionAddEventArgs>
         MessageReactionRemoved, // AsyncEventHandler<MessageReactionRemoveEventArgs>
         MessageReactionsCleared, // AsyncEventHandler<MessageReactionsClearEventArgs>
+        MessageReactionEmojiRemoved,
         WebhooksUpdated, // AsyncEventHandler<WebhooksUpdateEventArgs>
         Heartbeated, // AsyncEventHandler<HeartbeatEventArgs>
         CommandExecuted,

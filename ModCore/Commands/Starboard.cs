@@ -142,7 +142,7 @@ namespace ModCore.Commands
             }
 
             var starCount = guildStars.Count(x => x.ChannelId == star.ChannelId && x.MessageId == star.MessageId);
-            var response = Reactions.buildMessage(msg, emoji, starCount);
+            var response = StarboardListeners.buildStarboardMessage(msg, starCount, emoji);
             var converted = new DiscordInteractionResponseBuilder(response);
 
             await ctx.CreateResponseAsync(converted);
