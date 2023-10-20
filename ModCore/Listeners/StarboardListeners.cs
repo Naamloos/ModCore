@@ -504,7 +504,7 @@ namespace ModCore.Listeners
         }
 
         private static readonly string[] validFileExts = { ".jpg", ".gif", ".png", ".jpeg", ".webp" };
-        private static DiscordMessageBuilder buildStarboardMessage(DiscordMessage sourceMessage, long count, DiscordEmoji emoji)
+        public static DiscordMessageBuilder buildStarboardMessage(DiscordMessage sourceMessage, long count, DiscordEmoji emoji)
         {
             // TODO cleanup
             var embed = new DiscordEmbedBuilder()
