@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using ModCore.Utils.EntityFramework.AttributeImpl;
 
 namespace ModCore.Database.DatabaseEntities

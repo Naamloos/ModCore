@@ -9,7 +9,6 @@ using ModCore.Extensions.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace ModCore.Modals
 {
@@ -35,33 +34,31 @@ namespace ModCore.Modals
                 return;
             }
 
-            using (var db = ((DatabaseContextBuilder)client.GetCommandsNext().Services.GetService(typeof(DatabaseContextBuilder))).CreateContext())
+            await using var db = ((DatabaseContextBuilder)client.GetCommandsNext().Services.GetService(typeof(DatabaseContextBuilder))).CreateContext();
+            var guildConfig = db.GuildConfig.FirstOrDefault(x => x.GuildId == (long)interaction.GuildId);
+            var settings = guildConfig?.GetSettings();
+            if (settings == null)
             {
-                var guildConfig = db.GuildConfig.FirstOrDefault(x => x.GuildId == (long)interaction.GuildId);
-                var settings = guildConfig?.GetSettings();
-                if (settings == null)
-                {
-                    await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"⛔ No guild config??? contact devs!!1")
-                        .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Back to Role Menu config", emoji: new DiscordComponentEmoji("🏃"))));
-                    return;
-                }
-
-                if(settings.RoleMenus.Any(x => x.Name == name))
-                {
-                    await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"⛔ A role menu with that name already exists!")
-                        .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Back to Role Menu config", emoji: new DiscordComponentEmoji("🏃"))));
-                    return;
-                }
-
-                var customId = ExtensionStatics.GenerateIdString("rm.setroles", new Dictionary<string, string>()
-                {
-                    { "n", name }
-                });
-
-                await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
-                    .WithContent($"📝 Pick the roles for this new menu...")
-                    .AddComponents(new DiscordRoleSelectComponent(customId, "Select roles...", maxOptions: 25)));
+                await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"⛔ No guild config??? contact devs!!1")
+                    .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Back to Role Menu config", emoji: new DiscordComponentEmoji("🏃"))));
+                return;
             }
+
+            if(settings.RoleMenus.Any(x => x.Name == name))
+            {
+                await interaction.EditOriginalResponseAsync(new DiscordWebhookBuilder().WithContent($"⛔ A role menu with that name already exists!")
+                    .AddComponents(new DiscordButtonComponent(ButtonStyle.Secondary, "rm", "Back to Role Menu config", emoji: new DiscordComponentEmoji("🏃"))));
+                return;
+            }
+
+            var customId = ExtensionStatics.GenerateIdString("rm.setroles", new Dictionary<string, string>()
+            {
+                { "n", name }
+            });
+
+            await interaction.CreateResponseAsync(InteractionResponseType.UpdateMessage, new DiscordInteractionResponseBuilder()
+                .WithContent($"📝 Pick the roles for this new menu...")
+                .AddComponents(new DiscordRoleSelectComponent(customId, "Select roles...", maxOptions: 25)));
         }
     }
 }

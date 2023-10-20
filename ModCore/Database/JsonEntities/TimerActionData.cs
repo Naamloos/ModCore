@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using DSharpPlus;
-using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
 using ModCore.Entities;
 using Newtonsoft.Json;

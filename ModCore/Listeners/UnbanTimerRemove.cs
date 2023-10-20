@@ -6,7 +6,6 @@ using ModCore.Database.JsonEntities;
 using ModCore.Entities;
 using ModCore.Extensions.Attributes;
 using ModCore.Extensions.Enums;
-using ModCore.Utils;
 
 namespace ModCore.Listeners
 {

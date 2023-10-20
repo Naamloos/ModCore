@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
-using ModCore.Entities;
 
 namespace ModCore.Utils.EntityFramework.AttributeImpl
 {

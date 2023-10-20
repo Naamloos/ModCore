@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Design;
 using ModCore.Entities;
 using Newtonsoft.Json;
-using Npgsql;
 using System;
 using System.IO;
 using System.Text;

@@ -1,5 +1,4 @@
 ﻿using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
 using ModCore.Utils.Extensions;
 
 namespace ModCore.Utils

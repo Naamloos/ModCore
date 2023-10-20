@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DSharpPlus;
@@ -11,7 +8,6 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
 using DSharpPlus.Interactivity.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
@@ -60,7 +56,7 @@ namespace ModCore.LegacyCommands
 	    [Command("exit"), Aliases("e"), Hidden, RequireOwner]
         public async Task ExitAsync(CommandContext context)
         {
-            if (!context.Client.CurrentApplication.Owners.Any(x => x.Id == context.User.Id))
+            if (context.Client.CurrentApplication.Owners.All(x => x.Id != context.User.Id))
             {
                 await context.SafeRespondUnformattedAsync("⚠️ You do not have permission to use this command!");
                 return;
@@ -90,23 +86,21 @@ namespace ModCore.LegacyCommands
         [Command("grantxp"), Aliases("gxp"), Hidden, RequireOwner]
         public async Task GrantXpAsync(CommandContext context, DiscordMember member, int experience)
         {
-            using (var db = Database.CreateContext())
+            await using var db = Database.CreateContext();
+            var data = db.Levels.FirstOrDefault(x => x.UserId == (long)member.Id && x.GuildId == (long)context.Guild.Id);
+
+            if (data != null)
             {
-                var data = db.Levels.FirstOrDefault(x => x.UserId == (long)member.Id && x.GuildId == (long)context.Guild.Id);
+                data.Experience += experience;
+                await context.RespondAsync($"✅ Granted {experience} xp to {member.DisplayName}.");
+                db.Levels.Update(data);
 
-                if (data != null)
-                {
-                    data.Experience += experience;
-                    await context.RespondAsync($"✅ Granted {experience} xp to {member.DisplayName}.");
-                    db.Levels.Update(data);
-
-                    await db.SaveChangesAsync();
-                }
-                else
-                {
-                    await context.RespondAsync("⚠️ No xp data stored for this user/guild combo");
-                    return;
-                }
+                await db.SaveChangesAsync();
+            }
+            else
+            {
+                await context.RespondAsync("⚠️ No xp data stored for this user/guild combo");
+                return;
             }
         }
 

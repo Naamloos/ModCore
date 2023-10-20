@@ -58,7 +58,7 @@ namespace ModCore.Utils
         /// Action for an individual token in the reminder text.
         /// </summary>
         /// <param name="tokenizer">The tokenizer instance</param>
-        /// <param name="s">The token</param>
+        /// <param name="input">The token</param>
         /// <param name="time">The current time state</param>
         /// <returns>A <see cref="ValueTuple{T1}"/>&lt;<see cref="Boolean"/>, <see cref="UInt64"/>&gt; containing
         /// <c>true</c> to continue parsing execution or <c>false</c> to escape control flow. The returned value of

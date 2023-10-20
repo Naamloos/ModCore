@@ -30,9 +30,8 @@ namespace System.Collections.Generic
         {
             get
             {
-                IEnumerable<TValues> values;
-                if (TryGetValue(key, out values)) return values;
-                return new TValues[0];
+                if (TryGetValue(key, out var values)) return values;
+                return Array.Empty<TValues>();
             }
 
             set
@@ -63,8 +62,7 @@ namespace System.Collections.Generic
         /// null reference (<c>Nothing</c> in Visual Basic).</exception>
         public bool AddValue(TKey key, TValues value)
         {
-            IEnumerable<TValues> existingValues;
-            if (TryGetValue(key, out existingValues))
+            if (TryGetValue(key, out var existingValues))
             {
                 var valuesList = new List<TValues>(existingValues);
                 if (valuesList.Contains(value)) return false;
@@ -94,8 +92,7 @@ namespace System.Collections.Generic
         /// null reference (<c>Nothing</c> in Visual Basic).</exception>
         public void AddValues(TKey key, IEnumerable<TValues> values)
         {
-            IEnumerable<TValues> existingValues;
-            if (!TryGetValue(key, out existingValues))
+            if (!TryGetValue(key, out var existingValues))
             {
                 Add(key, new List<TValues>(values).ToArray());
                 return;
@@ -158,8 +155,7 @@ namespace System.Collections.Generic
         /// null reference (<c>Nothing</c> in Visual Basic).</exception>
         public bool RemoveValue(TKey key, TValues value)
         {
-            IEnumerable<TValues> existingValues;
-            if (!TryGetValue(key, out existingValues)) return false;
+            if (!TryGetValue(key, out var existingValues)) return false;
 
             var valuesList = new List<TValues>(existingValues);
             if (!valuesList.Remove(value)) return false;
@@ -181,8 +177,7 @@ namespace System.Collections.Generic
         /// null reference (<c>Nothing</c> in Visual Basic).</exception>
         public void RemoveValues(TKey key, IEnumerable<TValues> values)
         {
-            IEnumerable<TValues> existingValues;
-            if (!TryGetValue(key, out existingValues)) return;
+            if (!TryGetValue(key, out var existingValues)) return;
 
             var valuesList = new List<TValues>(existingValues);
             foreach (var v in values) valuesList.Remove(v);

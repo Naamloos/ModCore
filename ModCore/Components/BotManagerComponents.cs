@@ -1,6 +1,5 @@
 ﻿using DSharpPlus;
 using DSharpPlus.EventArgs;
-using Microsoft.VisualBasic;
 using ModCore.Extensions;
 using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
@@ -16,7 +15,7 @@ namespace ModCore.Components
         [Component("fb", ComponentType.Button)]
         public async Task RespondFeedbackAsync(ComponentInteractionCreateEventArgs e, IDictionary<string, string> context)
         {
-            if (!Client.CurrentApplication.Owners.Any(x => x.Id == e.User.Id))
+            if (Client.CurrentApplication.Owners.All(x => x.Id != e.User.Id))
                 return;
 
             if (ulong.TryParse(context["u"], out _) && ulong.TryParse(context["g"], out _))

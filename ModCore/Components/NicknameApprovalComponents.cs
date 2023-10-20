@@ -1,14 +1,11 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using Microsoft.VisualBasic;
 using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
-using ModCore.Commands;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using ModCore.Utils.Extensions;
 
 namespace ModCore.Components

@@ -2,14 +2,12 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using ModCore.Database;
-using ModCore.Entities;
 using ModCore.Extensions;
 using ModCore.Extensions.Abstractions;
 using ModCore.Extensions.Attributes;
 using ModCore.Utils.Extensions;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ModCore.Components
@@ -31,7 +29,7 @@ namespace ModCore.Components
 
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -53,7 +51,7 @@ namespace ModCore.Components
 
             await e.Interaction.CreateResponseAsync(InteractionResponseType.DeferredMessageUpdate, new DiscordInteractionResponseBuilder().AsEphemeral(true));
 
-            using (var db = database.CreateContext())
+            await using (var db = database.CreateContext())
             {
                 var guild = db.GuildConfig.First(x => x.GuildId == (long)e.Guild.Id);
                 var settings = guild.GetSettings();
@@ -71,7 +69,7 @@ namespace ModCore.Components
 
         public static async Task PostMenuAsync(DiscordInteraction interaction, InteractionResponseType responseType, DatabaseContext db)
         {
-            using (db)
+            await using (db)
             {
                 var settings = interaction.Guild.GetGuildSettings(db).AutoRole;
 

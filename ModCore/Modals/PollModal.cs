@@ -1,7 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using DSharpPlus.Interactivity;
 using ModCore.Extensions.Attributes;
 using ModCore.Utils;
 using System;
@@ -38,13 +37,13 @@ namespace ModCore.Modals
             var splitOptions = Options.Split('\n', StringSplitOptions.TrimEntries);
             Dictionary<ulong, int> responses = new Dictionary<ulong, int>();
 
-            if (splitOptions.Count() < 2)
+            if (splitOptions.Length < 2)
             {
                 await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                     .WithContent("⚠️ Polls need at least two options!").AsEphemeral());
             }
 
-            if (splitOptions.Count() > 4)
+            if (splitOptions.Length > 4)
             {
                 await interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder()
                     .WithContent("⚠️ Polls may only have up to four options!").AsEphemeral());
@@ -72,7 +71,6 @@ namespace ModCore.Modals
 
             for (int i = 0; i < splitOptions.Length; i++)
             {
-                var option = splitOptions[i];
                 buttons.Add(new DiscordButtonComponent(ButtonStyle.Primary, i.ToString(),
                     (i + 1).ToString(), emoji: new DiscordComponentEmoji(DiscordEmoji.FromUnicode("✏️"))));
                 disabledButtons.Add(new DiscordButtonComponent(ButtonStyle.Primary, i.ToString(),
@@ -149,7 +147,7 @@ namespace ModCore.Modals
                     _ => "❌"
                 };
 
-                results.AppendLine($"{medal} {splitOptions[i]} (**{responses.Where(x => x.Value == i).Count()} votes**)");
+                results.AppendLine($"{medal} {splitOptions[i]} (**{responses.Count(x => x.Value == i)} votes**)");
             }
 
             await msg.ModifyAsync(new DiscordMessageBuilder().WithContent(results.ToString()));
