@@ -44,7 +44,6 @@ namespace ModCore.Services.Shard.EventHandlers
                 _logger.LogCritical("Failed to fetch application info!");
             }
 
-            _interactions.LoadInteractions();
             await _interactions.RegisterInteractionsAsync(data.Application.Id);
         }
 

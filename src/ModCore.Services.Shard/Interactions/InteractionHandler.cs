@@ -7,12 +7,14 @@ using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
 using ModCore.Services.Shard.Interactions.Attributes;
+using ModCore.Services.Shard.Interactions.InteractionTypes;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -22,66 +24,16 @@ namespace ModCore.Services.Shard.Interactions
     {
         private readonly ILogger _logger;
         private readonly DiscordRest _rest;
-
-        private readonly ConcurrentDictionary<string, RegisteredCommandData> _commandBelongsToType;
-        private readonly ConcurrentDictionary<Type, BaseInteractionContainer> _registeredTypes;
         private readonly IServiceProvider _services;
 
-        private bool loaded = false;
+        private CommandMap _commandMap;
 
         public InteractionHandler(ILogger<InteractionHandler> logger, DiscordRest rest, IServiceProvider services)
         {
             _logger = logger;
             _rest = rest;
-            _commandBelongsToType = new ConcurrentDictionary<string, RegisteredCommandData>();
-            _registeredTypes = new ConcurrentDictionary<Type, BaseInteractionContainer>();
             _services = services;
-        }
-
-        /// <summary>
-        /// Preloads interactions from codebase
-        /// </summary>
-        public void LoadInteractions()
-        {
-            _logger.LogInformation("Loading interactions...");
-
-            var types = Assembly.GetExecutingAssembly().DefinedTypes.Where(x => x.IsAssignableTo(typeof(BaseInteractionContainer)) && x != typeof(BaseInteractionContainer));
-            foreach (var type in types)
-            {
-                // first we construct an instance of our type with dep. injection
-                var constructors = type.GetConstructors();
-                if (constructors.Count() != 1)
-                {
-                    throw new NotSupportedException($"Your InteractionContainer of type {type} needs exactly 1 constructor! It has {constructors.Count()}!");
-                }
-
-                var constructor = constructors[0];
-                var parameters = constructor.GetParameters().Select(x => x.ParameterType).ToArray();
-                var qualifiedParameters = new object[parameters.Length];
-                for (int i = 0; i < parameters.Length; i++)
-                {
-                    qualifiedParameters[i] = _services.GetService(parameters[i]);
-                }
-                _registeredTypes.TryAdd(type, Activator.CreateInstance(type, qualifiedParameters) as BaseInteractionContainer);
-                _logger.LogInformation("Registered Interaction Container type {0}", type.Name);
-
-                // Then, we try to register any commands we can find
-                var commands = type.GetMethods().Where(x => x.GetCustomAttribute<CommandAttribute>() != null);
-                foreach (var command in commands)
-                {
-                    var attr = command.GetCustomAttribute<CommandAttribute>();
-                    _commandBelongsToType.TryAdd(attr.Name, new RegisteredCommandData()
-                    {
-                        Command = attr,
-                        ContainerType = type,
-                        MethodInfo = command
-                    });
-                    _logger.LogInformation(" └ Registered Command for type {0} with name {1}", type.Name, attr.Name);
-                }
-            }
-
-            loaded = true;
-            _logger.LogInformation("Loading interactions done!");
+            _commandMap = new CommandMap();
         }
 
         /// <summary>
@@ -90,26 +42,84 @@ namespace ModCore.Services.Shard.Interactions
         /// <returns></returns>
         public async ValueTask RegisterInteractionsAsync(Snowflake appId)
         {
-            if (!loaded)
-            {
-                _logger.LogError("Interactions were not loaded, thus registering failed!");
-                return;
-            }
-
-            _logger.LogInformation("Registering interactions...");
+            _logger.LogInformation("Loading and Registering interactions...");
 
             // Gather all app commands into a list of entities to register with Discord.
             List<ApplicationCommand> commands = new List<ApplicationCommand>();
-            foreach (var command in _commandBelongsToType)
+
+            var commandTypes = Assembly.GetExecutingAssembly().GetTypes().Where(x => x.GetCustomAttribute<CommandAttribute>() != null && x.IsAssignableTo(typeof(BaseCommand)));
+            foreach (var commandType in commandTypes)
             {
-                commands.Add(new ApplicationCommand()
+                var commandInfo = commandType.GetCustomAttribute<CommandAttribute>();
+                var topLevel = Activator.CreateInstance(commandType, resolveDependenciesForType(commandType, _services));
+                var invoke = commandType.GetMethods().FirstOrDefault(x => x.GetCustomAttribute<InvokeInteractionAttribute>() != null);
+
+                var discordCommand = new ApplicationCommand()
                 {
-                    Name = command.Key,
-                    Description = command.Value.Command.Description,
-                    CanBeUsedInDM = command.Value.Command.AllowDM,
-                    NSFW = command.Value.Command.NSFW,
-                    Type = ApplicationCommandType.ChatInput
-                });
+                    Name = commandInfo.Name,
+                    Description = commandInfo.Description,
+                    NSFW = commandInfo.NSFW,
+                    CanBeUsedInDM = commandInfo.AllowDM,
+                    Options = new List<ApplicationCommandOption>()
+                };
+
+                _logger.LogInformation("Registering command: {0}", commandInfo.Name);
+                _commandMap.Register(commandInfo.Name, topLevel, invoke);
+
+                var subcommandTypes = commandType.GetNestedTypes().Where(x => x.GetCustomAttribute<SubcommandGroupAttribute>() != null);
+                // Subcommand Groups
+                foreach (var subclass in subcommandTypes)
+                {
+                    if (subclass.BaseType.GenericTypeArguments.Contains(commandType))
+                    {
+                        var subgroupInfo = subclass.GetCustomAttribute<SubcommandGroupAttribute>();
+                        _logger.LogInformation("Registering command: {0}", $"{commandInfo.Name} {subgroupInfo.Name}");
+                        var discordsubgroup = new ApplicationCommandOption()
+                        {
+                            Name = subgroupInfo.Name,
+                            Description = subgroupInfo.Description,
+                            Options = new List<ApplicationCommandOption>(),
+                            Type = ApplicationCommandOptionType.SubcommandGroup
+                        };
+                        // seems valid
+                        var subcommandClass = Activator.CreateInstance(subclass, resolveDependenciesForType(subclass, _services));
+                        var fields = subclass.BaseType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
+                        fields.First(x=>x.FieldType == commandType).SetValue(subcommandClass, topLevel);
+
+                        foreach (var subsubcommand in subclass.GetMethods().Where(x => x.GetCustomAttribute<SubcommandAttribute>() != null))
+                        {
+                            var subcommandInfo = subsubcommand.GetCustomAttribute<SubcommandAttribute>();
+                            _logger.LogInformation("Registering command: {0}", $"{commandInfo.Name} {subgroupInfo.Name} {subcommandInfo.Name}");
+                            _commandMap.Register($"{commandInfo.Name} {subgroupInfo.Name} {subcommandInfo.Name}", subcommandClass, subsubcommand);
+                            var discordsubsubcommand = new ApplicationCommandOption()
+                            {
+                                Name = subcommandInfo.Name,
+                                Description = subcommandInfo.Description,
+                                Type = ApplicationCommandOptionType.Subcommand
+                            };
+                            discordsubgroup.Options.Value.Add(discordsubsubcommand);
+                        }
+                        discordCommand.Options.Value.Add(discordsubgroup);
+                    }
+                }
+
+                var subcommandMethods = commandType.GetMethods().Where(x => x.GetCustomAttribute<SubcommandAttribute>() != null);
+                // Subcommands
+                foreach (var subcommand in subcommandMethods)
+                {
+                    var subcommandInfo = subcommand.GetCustomAttribute<SubcommandAttribute>();
+                    _logger.LogInformation("Registering command: {0}", $"{commandInfo.Name} {subcommandInfo.Name}");
+                    _commandMap.Register($"{commandInfo.Name} {subcommandInfo.Name}", topLevel, subcommand);
+                    var discordsubsubcommand = new ApplicationCommandOption()
+                    {
+                        Name = subcommandInfo.Name,
+                        Description = subcommandInfo.Description,
+                        Type = ApplicationCommandOptionType.Subcommand
+                    };
+                    discordCommand.Options.Value.Add(discordsubsubcommand);
+                }
+
+                commands.Add(discordCommand);
             }
 
             // register them
@@ -121,8 +131,27 @@ namespace ModCore.Services.Shard.Interactions
             }
             else
             {
-                _logger.LogError("Registering interactions failed... Some interactions may not work.");
+                _logger.LogError("Registering interactions failed... Some interactions may not work because of this.");
             }
+        }
+
+        private object[] resolveDependenciesForType(Type type, IServiceProvider services)
+        {
+            var constructors = type.GetConstructors();
+            if (constructors.Count() != 1)
+            {
+                throw new NotSupportedException($"Your type {type} needs exactly 1 constructor! It has {constructors.Count()}!");
+            }
+
+            var constructor = constructors[0];
+            var parameters = constructor.GetParameters().Select(x => x.ParameterType).ToArray();
+            var qualifiedParameters = new object[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                qualifiedParameters[i] = services.GetService(parameters[i]);
+            }
+
+            return qualifiedParameters;
         }
 
         /// <summary>
@@ -136,17 +165,18 @@ namespace ModCore.Services.Shard.Interactions
 
             if (eventdata.Type == InteractionType.ApplicationCommand)
             {
-                _logger.LogDebug("Requested command name: {0}", eventdata.Data.Value.Name);
-                if (_commandBelongsToType.TryGetValue(eventdata.Data.Value.Name, out var commandData))
+                var command = eventdata.Data.Value.Name;
+                if(eventdata.Data.Value.options.Value?.FirstOrDefault(x => x.Type == ApplicationCommandOptionType.Subcommand) != default)
                 {
-                    if (_registeredTypes.TryGetValue(commandData.ContainerType, out var container))
-                    {
-                        var commandTask = (Task)commandData.MethodInfo.Invoke(container, new object[] { eventdata });
-                        _logger.LogDebug("Succesfully resolved slash command {0} for user {1}, executing...",
-                            commandData.Command.Name, eventdata.Member.Value.User.Value.Username);
-                        await commandTask;
-                    }
+                    command = command + " " + eventdata.Data.Value.options.Value.First().Name;
                 }
+                else if(eventdata.Data.Value?.options.Value?.FirstOrDefault(x => x.Type == ApplicationCommandOptionType.SubcommandGroup) != default)
+                {
+                    var group = eventdata.Data.Value.options.Value.First();
+                    command = command + " " + group.Name + " " + group.Options.Value.First().Name;
+                }
+                _logger.LogDebug("Requested command name: {0}", command);
+                await _commandMap.InvokeAsync(command, eventdata);
             }
         }
     }

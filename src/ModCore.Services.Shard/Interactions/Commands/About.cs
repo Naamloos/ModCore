@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
-using ModCore.Common.Discord.Entities.Enums;
+﻿using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.Utils;
 using ModCore.Services.Shard.Interactions.Attributes;
+using ModCore.Services.Shard.Interactions.InteractionTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,19 +14,17 @@ using System.Threading.Tasks;
 
 namespace ModCore.Services.Shard.Interactions.Commands
 {
-    public class GeneralCommands : BaseInteractionContainer
+    [Command("about", "Information about ModCore")]
+    public class About : BaseCommand
     {
         private readonly DiscordRest _rest;
-        private readonly ILogger _logger;
-
-        public GeneralCommands(DiscordRest rest, ILogger<GeneralCommands> logger)
+        public About(DiscordRest rest)
         {
             _rest = rest;
-            _logger = logger;
         }
 
-        [Command("about", "General information about ModCore", true, false)]
-        public async Task AboutAsync(InteractionCreate data)
+        [InvokeInteraction]
+        public async Task InvokeAsync(InteractionCreate data)
         {
             var modcoreSelf = await _rest.GetCurrentUserAsync();
             if (!modcoreSelf.Success)

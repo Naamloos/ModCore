@@ -31,7 +31,7 @@ namespace ModCore.Common.Discord.Entities.Interactions
         public Optional<Dictionary<string, string>?> DescriptionLocalizations { get; set; }
 
         [JsonPropertyName("options")]
-        public Optional<JsonObject[]> Options { get; set; }
+        public Optional<List<ApplicationCommandOption>> Options { get; set; }
 
         [JsonPropertyName("default_member_permissions")]
         public string? DefaultMemberPermissions { get; set; }

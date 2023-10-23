@@ -9,13 +9,13 @@ namespace ModCore.Common.Discord.Entities.Interactions
         public string Name { get; set; }
 
         [JsonPropertyName("type")]
-        public ApplicationCommandType Type { get; set; }
+        public ApplicationCommandOptionType Type { get; set; }
 
         [JsonPropertyName("value")]
-        public string Value { get; set; }
+        public Optional<string> Value { get; set; }
 
         [JsonPropertyName("options")]
-        public Optional<ApplicationCommandInteractionDataOption> Options { get; set; }
+        public Optional<List<ApplicationCommandInteractionDataOption>> Options { get; set; }
 
         [JsonPropertyName("focused")]
         public Optional<bool> Focused { get; set; }
