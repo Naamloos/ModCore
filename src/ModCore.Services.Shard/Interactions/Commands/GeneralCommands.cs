@@ -33,6 +33,8 @@ namespace ModCore.Services.Shard.Interactions.Commands
             if (!modcoreSelf.Success)
                 return;
 
+            var avatar = $"https://cdn.discordapp.com/avatars/{modcoreSelf.Value.Id}/{modcoreSelf.Value.AvatarHash}.png";
+
             var resp = await _rest.CreateInteractionResponseAsync(data.Id, data.Token, InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
             {
                 Content = $"{data.Member.Value.User.Value.Mention}, Welcome to ModCore v3. " +
@@ -41,56 +43,26 @@ namespace ModCore.Services.Shard.Interactions.Commands
                 Embeds = new[]
                     {
                         new Embed()
-                        {
-                            Description = $"ModCore is a Discord bot focused on moderation and server management, written from scratch in C#.",
-                            Color = ColorConverter.FromHex("#089FDF"),
-                            Author = new EmbedAuthor()
-                            {
-                                Name = "ModCore",
-                                IconUrl = $"https://cdn.discordapp.com/avatars/{modcoreSelf.Value.Id}/{modcoreSelf.Value.AvatarHash}.png",
-                                Url = "https://github.com/Naamloos/ModCore"
-                            },
-                            Thumbnail = new EmbedThumbnail()
-                            {
-                                Url = $"https://cdn.discordapp.com/avatars/{modcoreSelf.Value.Id}/{modcoreSelf.Value.AvatarHash}.png"
-                            },
-                            Fields = new List<EmbedField>()
-                            {
-                                new()
-                                {
-                                    Name = "Main Developer",
-                                    Value = "[Naamloos](https://github.com/Naamloos)"
-                                },
-                                new()
-                                {
-                                    Name = "Special thanks to all of these wonderful contributors:",
-                                    Value = "[uwx](https://github.com/uwx), " +
-                                        "[jcryer](https://github.com/jcryer), " +
-                                        "[Emzi0767](https://github.com/Emzi0767), " +
-                                        "[YourAverageBlackGuy](https://github.com/YourAverageBlackGuy), " +
-                                        "[DrCreo](https://github.com/DrCreo), " +
-                                        "[aexolate](https://github.com/aexolate), " +
-                                        "[Drake103](https://github.com/Drake103), " +
-                                        "[Izumemori](https://github.com/Izumemori), " +
-                                        "[OoLunar](https://github.com/OoLunar) and " +
-                                        "[InFTord](https://github.com/InFTord)"
-                                },
-                                new()
-                                {
-                                    Name = "Want to contribute?",
-                                    Value = "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)"
-                                },
-                                new()
-                                {
-                                    Name = "Donate?",
-                                    Value = "Currently, ModCore is hosted off my (Naamloos's) own money. Donations are always welcome over at [Ko-Fi](https://ko-fi.com/Naamloos)!"
-                                }
-                            },
-                            Footer = new EmbedFooter()
-                            {
-                                Text = "v3.0.0-alpha (early access)"
-                            }
-                        }
+                            .WithDescription($"ModCore is a Discord bot focused on moderation and server management, written from scratch in C#.")
+                            .WithColor(ColorConverter.FromHex("#089FDF"))
+                            .WithAuthor("ModCore", "https://github.com/Naamloos/ModCore", avatar)
+                            .WithThumbnail(avatar)
+                            .WithField("Main Developer", "[Naamloos](https://github.com/Naamloos)")
+                            .WithField("Special thanks to all of these wonderful contributors:",
+                                "[uwx](https://github.com/uwx), " +
+                                "[jcryer](https://github.com/jcryer), " +
+                                "[Emzi0767](https://github.com/Emzi0767), " +
+                                "[YourAverageBlackGuy](https://github.com/YourAverageBlackGuy), " +
+                                "[DrCreo](https://github.com/DrCreo), " +
+                                "[aexolate](https://github.com/aexolate), " +
+                                "[Drake103](https://github.com/Drake103), " +
+                                "[Izumemori](https://github.com/Izumemori), " +
+                                "[OoLunar](https://github.com/OoLunar) and " +
+                                "[InFTord](https://github.com/InFTord)"
+                            )
+                            .WithField("Want to contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
+                            .WithField("Donate?", "Currently, ModCore is hosted off my (Naamloos's) own money. Donations are always welcome over at [Ko-Fi](https://ko-fi.com/Naamloos)!")
+                            .WithFooter("v3.0.0-alpha (early access)")
                     }
             });
         }
