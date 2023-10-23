@@ -1,4 +1,5 @@
 ﻿using ModCore.Common.Discord.Entities.Enums;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Entities.Interactions
@@ -12,7 +13,7 @@ namespace ModCore.Common.Discord.Entities.Interactions
         public ApplicationCommandOptionType Type { get; set; }
 
         [JsonPropertyName("value")]
-        public Optional<string> Value { get; set; }
+        public Optional<JsonValue> Value { get; set; }
 
         [JsonPropertyName("options")]
         public Optional<List<ApplicationCommandInteractionDataOption>> Options { get; set; }

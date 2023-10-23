@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
+﻿using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Rest;
@@ -18,7 +19,9 @@ namespace ModCore.Services.Shard.Interactions.Commands
         }
 
         [Subcommand("subcommand", "subcommand on test")]
-        public async Task SubCommandAsync(InteractionCreate data)
+        public async Task SubCommandAsync(InteractionCreate data, 
+            [Parameter("Some test param")] string param_value,
+            [Parameter("Goof")] Optional<double> some_other_param)
         {
             await _rest.CreateInteractionResponseAsync(data.Id, data.Token, InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
             {

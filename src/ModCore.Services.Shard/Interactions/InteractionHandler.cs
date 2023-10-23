@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Channels;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
@@ -60,7 +62,7 @@ namespace ModCore.Services.Shard.Interactions
                     Description = commandInfo.Description,
                     NSFW = commandInfo.NSFW,
                     CanBeUsedInDM = commandInfo.AllowDM,
-                    Options = new List<ApplicationCommandOption>()
+                    Options = invoke != default? parseOptions(invoke) : new List<ApplicationCommandOption>()
                 };
 
                 _logger.LogInformation("Registering command: {0}", commandInfo.Name);
@@ -95,7 +97,8 @@ namespace ModCore.Services.Shard.Interactions
                             {
                                 Name = subcommandInfo.Name,
                                 Description = subcommandInfo.Description,
-                                Type = ApplicationCommandOptionType.Subcommand
+                                Type = ApplicationCommandOptionType.Subcommand,
+                                Options = parseOptions(subsubcommand)
                             };
                             discordsubgroup.Options.Value.Add(discordsubsubcommand);
                         }
@@ -114,7 +117,8 @@ namespace ModCore.Services.Shard.Interactions
                     {
                         Name = subcommandInfo.Name,
                         Description = subcommandInfo.Description,
-                        Type = ApplicationCommandOptionType.Subcommand
+                        Type = ApplicationCommandOptionType.Subcommand,
+                        Options = parseOptions(subcommand)
                     };
                     discordCommand.Options.Value.Add(discordsubsubcommand);
                 }
@@ -152,6 +156,50 @@ namespace ModCore.Services.Shard.Interactions
             }
 
             return qualifiedParameters;
+        }
+
+        private Optional<List<ApplicationCommandOption>> parseOptions(MethodInfo method)
+        {
+            var parsedOptions = new List<ApplicationCommandOption>();
+
+            var allParameters = method.GetParameters();
+            if (allParameters.Length < 1)
+                throw new NotSupportedException($"Invalid parameter structure on {method}");
+            if(allParameters.First().ParameterType != typeof(InteractionCreate))
+                throw new NotSupportedException($"Invalid parameter structure on {method}");
+
+            foreach(var parameter in allParameters.Skip(1))
+            {
+                var paramInfo = parameter.GetCustomAttribute<ParameterAttribute>();
+                var required = !parameter.ParameterType.IsAssignableTo(typeof(Optional));
+                var type = required ? parameter.ParameterType : parameter.ParameterType.GetGenericArguments()[0];
+                parsedOptions.Add(new ApplicationCommandOption()
+                {
+                    Name = parameter.Name,
+                    Description = paramInfo.Description,
+                    Type = getResolvedType(type, method),
+                    Required = required
+                });
+            }
+
+            return parsedOptions.Count < 1? Optional<List<ApplicationCommandOption>>.None : parsedOptions;
+        }
+
+        private ApplicationCommandOptionType getResolvedType(Type paramType, MethodInfo method)
+        {
+            // TODO type resolvers
+            if (paramType == typeof(string))
+                return ApplicationCommandOptionType.String;
+            else if (paramType == typeof(int))
+                return ApplicationCommandOptionType.Integer;
+            else if (paramType == typeof(double))
+                return ApplicationCommandOptionType.Number;
+            else if (paramType == typeof(User))
+                return ApplicationCommandOptionType.User;
+            else if (paramType == typeof(Channel))
+                return ApplicationCommandOptionType.Channel;
+
+            throw new NotSupportedException($"Invalid parameter structure on {method}");
         }
 
         /// <summary>
