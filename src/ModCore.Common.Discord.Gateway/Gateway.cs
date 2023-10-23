@@ -76,7 +76,7 @@ namespace ModCore.Common.Discord.Gateway
 
             this.jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
             {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault, 
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
                 Converters = { new OptionalJsonSerializerFactory() }
             };
 
@@ -126,7 +126,7 @@ namespace ModCore.Common.Discord.Gateway
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            if(websocket.State == WebSocketState.Open)
+            if (websocket.State == WebSocketState.Open)
             {
                 return websocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
             }
@@ -138,7 +138,7 @@ namespace ModCore.Common.Discord.Gateway
             // cancel running gateway loops
             gatewayCancellationTokenSource.Cancel();
             // and close websocket if still running
-            if(websocket.State == WebSocketState.Open)
+            if (websocket.State == WebSocketState.Open)
             {
                 await websocket.CloseAsync(WebSocketCloseStatus.Empty, null, serviceCancellationToken);
             }
@@ -230,7 +230,7 @@ namespace ModCore.Common.Discord.Gateway
 
             JsonSerializer.Serialize(memoryStream, gatewayEvent, jsonSerializerOptions);
 
-            if(memoryStream.Length > 4096)
+            if (memoryStream.Length > 4096)
             {
                 sendingSemaphore.Release();
                 logger.LogError("Gateway event being sent to Discord is too big! {0} Maximum size is {1}", gatewayEvent.EventName, 4096);
@@ -239,7 +239,7 @@ namespace ModCore.Common.Discord.Gateway
             }
 
             memoryStream.Seek(0, SeekOrigin.Begin);
-            if(!memoryStream.TryGetBuffer(out var buffer))
+            if (!memoryStream.TryGetBuffer(out var buffer))
             {
                 sendingSemaphore.Release();
                 logger.LogError($"Failed to fetch memory buffer!");
@@ -260,7 +260,7 @@ namespace ModCore.Common.Discord.Gateway
                 var buffer = arrayPoolBufferWriter.GetMemory(BUFFER_SIZE);
                 result = await websocket.ReceiveAsync(buffer, serviceCancellationToken);
                 arrayPoolBufferWriter.Advance(result.Count);
-            } 
+            }
             while (!result.EndOfMessage);
 
             return JsonSerializer.Deserialize<Payload>(arrayPoolBufferWriter.WrittenSpan, jsonSerializerOptions);
@@ -269,7 +269,7 @@ namespace ModCore.Common.Discord.Gateway
         private async Task GatewayHeartbeatHandlerAsync(Hello hello)
         {
             var jitter = new Random();
-            while(!serviceCancellationToken.IsCancellationRequested)
+            while (!serviceCancellationToken.IsCancellationRequested)
             {
                 await Task.Delay(hello.HeartbeatInterval + jitter.Next(0, 2));
                 logger.LogInformation("Sending new Heartbeat.");
@@ -280,7 +280,7 @@ namespace ModCore.Common.Discord.Gateway
         private async Task HandleHelloAsync(Payload gatewayEvent)
         {
             var hello = gatewayEvent.GetDataAs<Hello>(jsonSerializerOptions);
-            if(hello == null)
+            if (hello == null)
             {
                 return;
             }
@@ -307,7 +307,7 @@ namespace ModCore.Common.Discord.Gateway
         {
             await Task.Yield();
 
-            switch(gatewayEvent.EventName)
+            switch (gatewayEvent.EventName)
             {
                 default:
                     logger.LogWarning("Received yet unknown DISPATCH event: {0}", gatewayEvent.EventName);
@@ -333,7 +333,7 @@ namespace ModCore.Common.Discord.Gateway
 
         private void DispatchEventToSubscribers<T>(T? data) where T : IPublishable
         {
-            if(data is null)
+            if (data is null)
             {
                 logger.LogError("Null data passed to event with data type {0}! This should be considered an gateway error!", typeof(T));
                 return;
@@ -348,7 +348,7 @@ namespace ModCore.Common.Discord.Gateway
             {
                 await subscriber.HandleEvent(data);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.LogError("Caught exception of type {0}!", ex.GetType());
                 logger.LogError("Event Handler: {0} ({1})", subscriber.GetType(), typeof(T).Name);

@@ -19,7 +19,7 @@ namespace ModCore.Services.Shard.Interactions.Commands
         private readonly DiscordRest _rest;
         private readonly ILogger _logger;
 
-        public GeneralCommands(DiscordRest rest, ILogger<GeneralCommands> logger) 
+        public GeneralCommands(DiscordRest rest, ILogger<GeneralCommands> logger)
         {
             _rest = rest;
             _logger = logger;
@@ -28,7 +28,6 @@ namespace ModCore.Services.Shard.Interactions.Commands
         [Command("about", "General information about ModCore", true, false)]
         public async Task AboutAsync(InteractionCreate data)
         {
-            _logger.LogInformation($"Succesfully interpreted command interaction- 'about' as a command, and reached command handler method.");
             var modcoreSelf = await _rest.GetCurrentUserAsync();
             if (!modcoreSelf.Success)
                 return;

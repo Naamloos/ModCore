@@ -112,9 +112,9 @@ namespace ModCore.Common.Discord.Entities.Messages
             return this;
         }
 
-        public Embed WithField(string title, string content, bool inline =  false)
+        public Embed WithField(string title, string content, bool inline = false)
         {
-            if(!this.Fields.HasValue)
+            if (!this.Fields.HasValue)
             {
                 this.Fields = new List<EmbedField>();
             }

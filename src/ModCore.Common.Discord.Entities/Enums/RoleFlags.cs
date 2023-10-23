@@ -9,6 +9,6 @@ namespace ModCore.Common.Discord.Entities.Enums
     [Flags]
     public enum RoleFlags
     {
-        InPrompt = 1<<0
+        InPrompt = 1 << 0
     }
 }

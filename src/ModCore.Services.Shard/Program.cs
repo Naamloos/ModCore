@@ -27,7 +27,7 @@ namespace ModCore.Services.Shard
                 WriteIndented = true
             };
 
-            if(!File.Exists("settings.json"))
+            if (!File.Exists("settings.json"))
             {
                 File.Create("settings.json").Close();
                 File.WriteAllText("settings.json", JsonSerializer.Serialize(new Settings(), jsonOptions));

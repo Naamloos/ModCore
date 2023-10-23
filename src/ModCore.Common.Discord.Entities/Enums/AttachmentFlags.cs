@@ -9,6 +9,6 @@ namespace ModCore.Common.Discord.Entities.Enums
     [Flags]
     public enum AttachmentFlags
     {
-        IsRemix = 1<<2
+        IsRemix = 1 << 2
     }
 }

@@ -49,7 +49,7 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<User>(HttpMethod.Get, url, route);
         }
 
-        public ValueTask<RestResponse<Application>> GetApplicationAsync(Snowflake applicationId) 
+        public ValueTask<RestResponse<Application>> GetApplicationAsync(Snowflake applicationId)
         {
             string route = "applications/:application_id";
             string url = $"applications/{applicationId}";
@@ -78,14 +78,15 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<ApplicationCommand[]>(HttpMethod.Get, url, route);
         }
 
-        public ValueTask<RestResponse<object>> CreateInteractionResponseAsync(Snowflake interactionId, string interationToken, 
+        public ValueTask<RestResponse<object>> CreateInteractionResponseAsync(Snowflake interactionId, string interationToken,
             InteractionResponseType type, InteractionResponseData data)
         {
             string route = "interactions/:interaction_id/:interaction_token/callback";
             string url = $"interactions/{interactionId}/{interationToken}/callback";
             return makeRequestAsync<object>(HttpMethod.Post, url, route, new InteractionResponse()
             {
-                Type = type, Data = data
+                Type = type,
+                Data = data
             });
         }
 

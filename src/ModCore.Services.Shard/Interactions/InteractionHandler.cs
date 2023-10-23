@@ -29,7 +29,7 @@ namespace ModCore.Services.Shard.Interactions
 
         private bool loaded = false;
 
-        public InteractionHandler(ILogger<InteractionHandler> logger, DiscordRest rest, IServiceProvider services) 
+        public InteractionHandler(ILogger<InteractionHandler> logger, DiscordRest rest, IServiceProvider services)
         {
             _logger = logger;
             _rest = rest;
@@ -46,7 +46,7 @@ namespace ModCore.Services.Shard.Interactions
             _logger.LogInformation("Loading interactions...");
 
             var types = Assembly.GetExecutingAssembly().DefinedTypes.Where(x => x.IsAssignableTo(typeof(BaseInteractionContainer)) && x != typeof(BaseInteractionContainer));
-            foreach(var type in types)
+            foreach (var type in types)
             {
                 // first we construct an instance of our type with dep. injection
                 var constructors = type.GetConstructors();
@@ -67,7 +67,7 @@ namespace ModCore.Services.Shard.Interactions
 
                 // Then, we try to register any commands we can find
                 var commands = type.GetMethods().Where(x => x.GetCustomAttribute<CommandAttribute>() != null);
-                foreach(var command in commands)
+                foreach (var command in commands)
                 {
                     var attr = command.GetCustomAttribute<CommandAttribute>();
                     _commandBelongsToType.TryAdd(attr.Name, new RegisteredCommandData()
@@ -90,7 +90,7 @@ namespace ModCore.Services.Shard.Interactions
         /// <returns></returns>
         public async ValueTask RegisterInteractionsAsync(Snowflake appId)
         {
-            if(!loaded)
+            if (!loaded)
             {
                 _logger.LogError("Interactions were not loaded, thus registering failed!");
                 return;
@@ -100,7 +100,7 @@ namespace ModCore.Services.Shard.Interactions
 
             // Gather all app commands into a list of entities to register with Discord.
             List<ApplicationCommand> commands = new List<ApplicationCommand>();
-            foreach(var command in _commandBelongsToType)
+            foreach (var command in _commandBelongsToType)
             {
                 commands.Add(new ApplicationCommand()
                 {
@@ -115,7 +115,7 @@ namespace ModCore.Services.Shard.Interactions
             // register them
             var resp = await _rest.BulkOverwriteGlobalApplicationCommandsAsync(appId, commands.ToArray());
 
-            if(resp.Success)
+            if (resp.Success)
             {
                 _logger.LogInformation("Successfully registered interactions with Discord!");
             }
@@ -131,17 +131,19 @@ namespace ModCore.Services.Shard.Interactions
         /// <returns></returns>
         public async ValueTask HandleInteractionAsync(InteractionCreate eventdata)
         {
-            string username = eventdata.User.HasValue ? eventdata.User.Value.Username : (eventdata.Member.HasValue? eventdata.Member.Value.User.Value.Username : "UNKNOWN");
+            string username = eventdata.User.HasValue ? eventdata.User.Value.Username : (eventdata.Member.HasValue ? eventdata.Member.Value.User.Value.Username : "UNKNOWN");
             _logger.LogDebug("Interaction received from user {1} with type: {0}", username, Enum.GetName(eventdata.Type));
 
-            if(eventdata.Type == InteractionType.ApplicationCommand)
+            if (eventdata.Type == InteractionType.ApplicationCommand)
             {
-                _logger.LogDebug("command name: {0}", eventdata.Data.Value.Name);
-                if(_commandBelongsToType.TryGetValue(eventdata.Data.Value.Name, out var commandData))
+                _logger.LogDebug("Requested command name: {0}", eventdata.Data.Value.Name);
+                if (_commandBelongsToType.TryGetValue(eventdata.Data.Value.Name, out var commandData))
                 {
-                    if(_registeredTypes.TryGetValue(commandData.ContainerType, out var container))
+                    if (_registeredTypes.TryGetValue(commandData.ContainerType, out var container))
                     {
                         var commandTask = (Task)commandData.MethodInfo.Invoke(container, new object[] { eventdata });
+                        _logger.LogDebug("Succesfully resolved slash command {0} for user {1}, executing...",
+                            commandData.Command.Name, eventdata.Member.Value.User.Value.Username);
                         await commandTask;
                     }
                 }

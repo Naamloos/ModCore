@@ -33,7 +33,7 @@ namespace ModCore.Common.Discord.Rest
         {
             RateLimitBucket bucket;
 
-            if(!buckets.TryGetValue(route, out bucket))
+            if (!buckets.TryGetValue(route, out bucket))
             {
                 bucket = new RateLimitBucket();
                 buckets.TryAdd(route, bucket);
@@ -42,7 +42,7 @@ namespace ModCore.Common.Discord.Rest
             await bucket.WaitAsync();
 
             var request = new HttpRequestMessage(method, url);
-            if(body != null)
+            if (body != null)
             {
                 request.Content = JsonContent.Create(body, options: jsonSerializerOptions);
             }

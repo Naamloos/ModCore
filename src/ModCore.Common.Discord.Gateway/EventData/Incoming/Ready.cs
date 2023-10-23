@@ -22,7 +22,7 @@ namespace ModCore.Common.Discord.Gateway.EventData.Incoming
 
         [JsonPropertyName("resume_gateway_url")]
         public string ResumeGatewayUrl { get; set; }
-        
+
         [JsonPropertyName("shard")]
         public int[] Shard { get; set; }
 

@@ -19,7 +19,7 @@
 
         public async Task SignalDoneAsync(int remaining, float reset_after)
         {
-            if(remaining < 1)
+            if (remaining < 1)
             {
                 manualResetEvent.Reset();
 

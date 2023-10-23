@@ -7,7 +7,7 @@ namespace ModCore.Common.Discord.Entities.Serializer
     {
         public override Optional<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            if(reader.TokenType == JsonTokenType.None)
+            if (reader.TokenType == JsonTokenType.None)
             {
                 return Optional<T>.None;
             }
