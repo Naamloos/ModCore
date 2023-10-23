@@ -5,6 +5,7 @@ using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
+using ModCore.Services.Shard.Interactions;
 
 namespace ModCore.Services.Shard.EventHandlers
 {
@@ -15,11 +16,13 @@ namespace ModCore.Services.Shard.EventHandlers
     {
         private readonly ILogger _logger;
         private readonly DiscordRest _rest;
+        private readonly InteractionHandler _interactions;
 
-        public StartupEvents(ILogger<StartupEvents> logger, DiscordRest rest)
+        public StartupEvents(ILogger<StartupEvents> logger, DiscordRest rest, InteractionHandler interactions)
         {
             _logger = logger;
             _rest = rest;
+            _interactions = interactions;
         }
 
         public async Task HandleEvent(Hello data)
@@ -41,15 +44,8 @@ namespace ModCore.Services.Shard.EventHandlers
                 _logger.LogCritical("Failed to fetch application info!");
             }
 
-            var resp = await _rest.BulkOverwriteGlobalApplicationCommandsAsync(data.Application.Id, new ApplicationCommand()
-            {
-                Name = "about", 
-                Type = ApplicationCommandType.ChatInput,
-                Description = "Information about ModCore",
-                CanBeUsedInDM = false
-            });
-
-            var respc = await resp.HttpResponse.Content.ReadAsStringAsync();
+            _interactions.LoadInteractions();
+            await _interactions.RegisterInteractionsAsync(data.Application.Id);
         }
 
         public async Task HandleEvent(GuildCreate data)

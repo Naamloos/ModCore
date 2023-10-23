@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Rest;
 using ModCore.Services.Shard.EventHandlers;
+using ModCore.Services.Shard.Interactions;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Text.Json;
@@ -68,6 +69,8 @@ namespace ModCore.Services.Shard
                     // These are the REAL™️ PISSCATSHARP
                     services.AddDiscordRest(config => { });
                     services.AddLogging();
+
+                    services.AddInteractions();
                 })
                 .Build();
 

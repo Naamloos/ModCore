@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Entities.Serializer;
@@ -14,6 +16,7 @@ namespace ModCore.Common.Discord.Rest
         private DiscordRestConfiguration Configuration;
         private RateLimitedRest RatelimitedRest;
         private JsonSerializerOptions JsonSerializerOptions;
+        private ILogger _logger;
 
         public DiscordRest(Action<DiscordRestConfiguration> configure, IServiceProvider services)
         {
@@ -28,6 +31,8 @@ namespace ModCore.Common.Discord.Rest
             var hostConfig = services.GetRequiredService<IConfiguration>();
 
             RatelimitedRest = new RateLimitedRest(Configuration, hostConfig.GetRequiredSection("discord_token").Value, JsonSerializerOptions);
+
+            _logger = services.GetService<ILogger<DiscordRest>>();
         }
 
         public ValueTask<RestResponse<User>> GetCurrentUserAsync()
@@ -73,6 +78,17 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<ApplicationCommand[]>(HttpMethod.Get, url, route);
         }
 
+        public ValueTask<RestResponse<object>> CreateInteractionResponseAsync(Snowflake interactionId, string interationToken, 
+            InteractionResponseType type, InteractionResponseData data)
+        {
+            string route = "interactions/:interaction_id/:interaction_token/callback";
+            string url = $"interactions/{interactionId}/{interationToken}/callback";
+            return makeRequestAsync<object>(HttpMethod.Post, url, route, new InteractionResponse()
+            {
+                Type = type, Data = data
+            });
+        }
+
         private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)
         {
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(method, route, url, body);
@@ -80,6 +96,11 @@ namespace ModCore.Common.Discord.Rest
             if (response.IsSuccessStatusCode)
             {
                 deserializedResponse = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), JsonSerializerOptions);
+            }
+            else
+            {
+                _logger.LogError(await response.Content.ReadAsStringAsync());
+                _logger.LogError(await response.RequestMessage.Content.ReadAsStringAsync());
             }
 
             return new RestResponse<T>(deserializedResponse, response);
