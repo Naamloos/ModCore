@@ -65,6 +65,7 @@ namespace ModCore.Services.Shard
                         config.Intents = Intents.AllUnprivileged | Intents.MessageContents;
                         config.SubscribeEvents<StartupEvents>();
                         config.SubscribeEvents<MessageEvents>();
+                        config.SubscribeEvents<SimpleEvalEvent>();
                     });
                     // These are the REAL™️ PISSCATSHARP
                     services.AddDiscordRest(config => { });

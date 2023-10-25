@@ -64,6 +64,13 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<Message>(HttpMethod.Post, url, route, content);
         }
 
+        public ValueTask<RestResponse<Message>> ModifyMessageAsync(Snowflake channelId, Snowflake messageId, CreateMessage content)
+        {
+            string route = "channels/:channel_id/messages/:message_id";
+            string url = $"channels/{channelId}/messages/{messageId}";
+            return makeRequestAsync<Message>(HttpMethod.Patch, url, route, content);
+        }
+
         public ValueTask<RestResponse<ApplicationCommand[]>> BulkOverwriteGlobalApplicationCommandsAsync(Snowflake applicationId, params ApplicationCommand[] commands)
         {
             string route = "applications/:application_id/commands";

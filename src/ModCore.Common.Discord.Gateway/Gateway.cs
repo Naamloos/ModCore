@@ -24,6 +24,8 @@ namespace ModCore.Common.Discord.Gateway
         const string ENCODING = "json";
         const int BUFFER_SIZE = 4096;
 
+        public ReadyApplication? Application { get; private set; }
+
         private GatewayConfiguration configuration;
 
         private string gatewayUrl = "";
@@ -109,6 +111,11 @@ namespace ModCore.Common.Discord.Gateway
                 var qualifiedParameters = new object[parameters.Length];
                 for (int i = 0; i < parameters.Length; i++)
                 {
+                    if (parameters[i] == typeof(Gateway))
+                    {
+                        qualifiedParameters[i] = this;
+                        continue;
+                    }
                     qualifiedParameters[i] = services.GetService(parameters[i]);
                 }
 
@@ -314,6 +321,9 @@ namespace ModCore.Common.Discord.Gateway
                     break;
                 case "READY":
                     lastReadyEvent = gatewayEvent.GetDataAs<Ready>(jsonSerializerOptions)!;
+
+                    Application = lastReadyEvent.Application;
+
                     logger.LogInformation("Gateway is ready for operation.");
                     logger.LogInformation("Resume Gateway URL: {0}", lastReadyEvent.ResumeGatewayUrl);
                     logger.LogInformation("Session ID: {0}", lastReadyEvent.SessionId);
