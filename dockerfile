@@ -1,9 +1,10 @@
 # BUILD
 FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build
+ARG BUILD_VER
 WORKDIR /src
 COPY ./ModCore ./
 RUN dotnet restore
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -c Release -o out /p:VersionPrefix=${BUILD_VER}
 
 # RUNNER IMAGE
 FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine

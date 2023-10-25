@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using Microsoft.Extensions.Caching.Memory;
 using ModCore.AutoComplete;
+using System.Reflection;
 
 namespace ModCore.Commands
 {
@@ -51,6 +52,7 @@ namespace ModCore.Commands
                 .AddField("Want to contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
                 .AddField("Donate?", "Currently, ModCore is hosted off my (Naamloos's) own money. Donations are always welcome over at [Ko-Fi](https://ko-fi.com/Naamloos)!")
                 .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl)
+                .WithFooter($"ModCore version {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyVersionAttribute>().Version}")
                 .Build();
 
             await ctx.CreateResponseAsync(eb, true);
@@ -86,7 +88,8 @@ namespace ModCore.Commands
                 .AddField("⏱️ Socket Uptime", string.Format("<t:{0}:R>", StartTimes.SocketStartTime.ToUnixTimeSeconds()), true)
                 .AddField("💻 Operating System", osVersion.StartsWith("Unix")? fetchLinuxName() : Environment.OSVersion.VersionString, true)
                 .AddField("🪟 Framework", RuntimeInformation.FrameworkDescription, true)
-                .AddField("📖 DSharpPlus", ctx.Client.VersionString, true);
+                .AddField("📖 DSharpPlus", ctx.Client.VersionString, true)
+                .WithFooter($"ModCore version {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyVersionAttribute>().Version}");
 
             await ctx.CreateResponseAsync(embed, true);
         }

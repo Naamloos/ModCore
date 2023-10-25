@@ -39,3 +39,5 @@ jobs:
           tags: |
             ghcr.io/naamloos/modcore:latest
             ghcr.io/naamloos/modcore:${{ steps.previoustag.outputs.tag }}
+          build-args: |
+            "BUILD_VER=${{ steps.previoustag.outputs.tag }}"
