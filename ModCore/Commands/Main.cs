@@ -52,7 +52,7 @@ namespace ModCore.Commands
                 .AddField("Want to contribute?", "Contributions are always welcome at our [GitHub repo.](https://github.com/Naamloos/ModCore)")
                 .AddField("Donate?", "Currently, ModCore is hosted off my (Naamloos's) own money. Donations are always welcome over at [Ko-Fi](https://ko-fi.com/Naamloos)!")
                 .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl)
-                .WithFooter($"ModCore version {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyVersionAttribute>().Version}")
+                .WithFooter($"ModCore v{Assembly.GetEntryAssembly().GetName().Version}")
                 .Build();
 
             await ctx.CreateResponseAsync(eb, true);
@@ -89,7 +89,7 @@ namespace ModCore.Commands
                 .AddField("💻 Operating System", osVersion.StartsWith("Unix")? fetchLinuxName() : Environment.OSVersion.VersionString, true)
                 .AddField("🪟 Framework", RuntimeInformation.FrameworkDescription, true)
                 .AddField("📖 DSharpPlus", ctx.Client.VersionString, true)
-                .WithFooter($"ModCore version {Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyVersionAttribute>().Version}");
+                .WithFooter($"ModCore v{Assembly.GetEntryAssembly().GetName().Version}");
 
             await ctx.CreateResponseAsync(embed, true);
         }
