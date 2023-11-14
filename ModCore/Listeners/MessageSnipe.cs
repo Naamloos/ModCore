@@ -19,7 +19,7 @@ namespace ModCore.Listeners
         {
             await Task.Yield();
 
-            if (eventargs.Message == null)
+            if (eventargs.Message is null)
                 return;
             if (eventargs.Message.WebhookMessage)
                 return;
@@ -54,9 +54,11 @@ namespace ModCore.Listeners
         [AsyncListener(EventType.MessageUpdated)]
         public static async Task MessageEdited(MessageUpdateEventArgs eventargs, SharedData sharedData, DatabaseContextBuilder database, IMemoryCache cache)
         {
-            if (eventargs.Message == null)
+            if (eventargs.Message is null)
                 return;
             if (eventargs.Message.WebhookMessage)
+                return;
+            if (eventargs.MessageBefore is null)
                 return;
 
             await Task.Yield();
@@ -71,7 +73,7 @@ namespace ModCore.Listeners
             if(cfg != null && cfg.Logging.EditLog_Enable)
             {
                 var channel = eventargs.Guild.GetChannel(cfg.Logging.ChannelId);
-                if (channel == null)
+                if (channel is null)
                     return;
 
                 if (eventargs.Message.Content != eventargs.MessageBefore.Content)

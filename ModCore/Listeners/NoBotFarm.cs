@@ -31,7 +31,7 @@ namespace ModCore.Listeners
 
             var embed = new DiscordEmbedBuilder()
                 .WithTitle("Joined new guild!")
-                .WithDescription($"Guild Name: {e.Guild.Name}")
+                .WithDescription($"Guild Name: {e.Guild.Name}\nID: {e.Guild.Id}")
                 .AddField("Members", e.Guild.MemberCount.ToString(), true)
                 .AddField("Bots", botCount >= 0 ? botCount.ToString() : "LargeGuild", true)
                 .AddField("Bot Ratio", botCount >= 0 ? $"{botRatio}%" : "LargeGuild", true);
@@ -53,6 +53,11 @@ namespace ModCore.Listeners
             }
 
             messageBuilder.AddEmbed(embed);
+
+            messageBuilder.AddComponents(new DiscordComponent[]
+            {
+                new DiscordButtonComponent(ButtonStyle.Danger, "lguild", "Leave Guild", emoji: new DiscordComponentEmoji("❌"))
+            });
 
             await channel.SendMessageAsync(messageBuilder);
         }
