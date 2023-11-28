@@ -213,7 +213,7 @@ namespace ModCore.ContextMenu
                 var translation = await translator.TranslateTextAsync(translate, null, LanguageCode.EnglishAmerican);
                 await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
                     .AddEmbed(new DiscordEmbedBuilder()
-                        .WithDescription($"Translated from language: {translation.DetectedSourceLanguageCode} to {LanguageCode.EnglishAmerican}.")
+                        .WithDescription($"Translated using DeepL from language: {translation.DetectedSourceLanguageCode} to {LanguageCode.EnglishAmerican}.")
                         .AddField("Original Text", translate)
                         .AddField("Translated Text", translation.Text)
                         .WithColor(new DiscordColor("09a0e2"))

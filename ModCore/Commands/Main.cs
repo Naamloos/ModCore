@@ -17,6 +17,7 @@ using System.IO;
 using Microsoft.Extensions.Caching.Memory;
 using ModCore.AutoComplete;
 using System.Reflection;
+using DeepL;
 
 namespace ModCore.Commands
 {
@@ -337,6 +338,54 @@ namespace ModCore.Commands
                 await ctx.CreateResponseAsync(command, false);
             else
                 await ctx.CreateResponseAsync($"⚠️ {command} is not a valid command!", true);
+        }
+
+        [SlashCommand("translate", "Translates text using DeepL.")]
+        public async Task TranslateAsync(InteractionContext ctx,
+            [Option("input", "Input text to be translated. Source language will be auto-detected.")]
+            string input,
+            [Option("destination_language", "Destination Language. Leave empty for en-US", true)]
+            [Autocomplete(typeof(DeepLLanguageAutoComplete))]
+            string destinationLanguage = "en-US",
+            [Option("origin_language", "Origin Language. Leave empty for auto-detect.", true)]
+            [Autocomplete(typeof(DeepLLanguageAutoComplete))]
+            string? originLanguage = null)
+        {
+            if (string.IsNullOrEmpty(Settings.DeepLToken))
+            {
+                await ctx.CreateResponseAsync("No DeepL token configured! Notify the bot developers via /contact!", true);
+                return;
+            }
+
+            var translator = new Translator(Settings.DeepLToken);
+
+            if (string.IsNullOrEmpty(input))
+            {
+                await ctx.CreateResponseAsync("That message has no content!", true);
+                return;
+            }
+
+            await ctx.DeferAsync(false);
+
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                var resource = "ModCore.Assets.globe-showing-europe.gif";
+                var iconAsset = assembly.GetManifestResourceStream(resource);
+
+                var translation = await translator.TranslateTextAsync(input, originLanguage, destinationLanguage);
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(new DiscordEmbedBuilder()
+                        .WithDescription($"Translated using DeepL from language: {translation.DetectedSourceLanguageCode} to {destinationLanguage}.")
+                        .AddField("Original Text", input)
+                        .AddField("Translated Text", translation.Text)
+                        .WithColor(new DiscordColor("09a0e2"))
+                        .WithThumbnail("attachment://globe-showing-europe.gif"))
+                    .AddFile("globe-showing-europe.gif", iconAsset));
+            }
+            catch (Exception ex)
+            {
+            }
         }
     }
 }
