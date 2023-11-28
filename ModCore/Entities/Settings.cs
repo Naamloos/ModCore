@@ -27,6 +27,9 @@ namespace ModCore.Entities
 
         [JsonProperty("sus_guild_channel_id")]
         public ulong SusGuildChannelId { get; private set; } = 1040374549293838376;
+
+        [JsonProperty("deepl-token")]
+        public string DeepLToken { get; private set; } = "";
     }
 
     public struct DatabaseSettings

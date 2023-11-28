@@ -9,6 +9,10 @@ using ModCore.Utils.Extensions;
 using System.Collections.Generic;
 using DSharpPlus.Interactivity;
 using System.Linq;
+using DeepL;
+using System;
+using System.Reflection;
+using ModCore.Entities;
 
 namespace ModCore.ContextMenu
 {
@@ -18,6 +22,8 @@ namespace ModCore.ContextMenu
         // Message Context Menu commands here. Max 5.
 
         public InteractivityExtension interactivity { private get; set; }
+
+        public Settings settings { private get; set; }
 
         const string EMOJI_REGEX = @"<a?:(.+?):(\d+)>";
 
@@ -174,6 +180,51 @@ namespace ModCore.ContextMenu
             downloadedEmoji.Dispose();
             memory.Position = 0;
             return await guild.CreateStickerAsync(sticker.Name ?? "Sticker", sticker.Description ?? "", "🤡", memory, sticker.FormatType);
+        }
+
+        [ContextMenu(ApplicationCommandType.MessageContextMenu, "Translate (DeepL)")]
+        [SlashCommandPermissions(Permissions.ReadMessageHistory)]
+        [GuildOnly]
+        public async Task TranslateAsync(ContextMenuContext ctx)
+        {
+            if(string.IsNullOrEmpty(settings.DeepLToken))
+            {
+                await ctx.CreateResponseAsync("No DeepL token configured! Notify the bot developers via /contact!", true);
+                return;
+            }
+
+            var translate = ctx.TargetMessage.Content;
+            var translator = new Translator(settings.DeepLToken);
+
+            if(string.IsNullOrEmpty(translate))
+            {
+                await ctx.CreateResponseAsync("That message has no content!", true);
+                return;
+            }
+
+            await ctx.DeferAsync(false);
+
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                var resource = "ModCore.Assets.globe-showing-europe.gif";
+                var iconAsset = assembly.GetManifestResourceStream(resource);
+
+                var translation = await translator.TranslateTextAsync(translate, null, LanguageCode.EnglishAmerican);
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(new DiscordEmbedBuilder()
+                        .WithDescription($"Translated from language: {translation.DetectedSourceLanguageCode} to {LanguageCode.EnglishAmerican}.")
+                        .AddField("Original Text", translate)
+                        .AddField("Translated Text", translation.Text)
+                        .WithColor(new DiscordColor("09a0e2"))
+                        .WithThumbnail("attachment://globe-showing-europe.gif"))
+                    .AddComponents(new DiscordLinkButtonComponent(ctx.TargetMessage.JumpLink.ToString(), "Jump to Original", emoji: new DiscordComponentEmoji("💭")))
+                    .AddFile("globe-showing-europe.gif", iconAsset));
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }
