@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModCore.Common.Discord.Gateway;
+using ModCore.Common.Discord.Gateway.EventData.Outgoing;
 using ModCore.Common.Discord.Rest;
 using ModCore.Services.Shard.EventHandlers;
 using ModCore.Services.Shard.Interactions;
@@ -66,12 +67,16 @@ namespace ModCore.Services.Shard
                         config.SubscribeEvents<StartupEvents>();
                         config.SubscribeEvents<MessageEvents>();
                         config.SubscribeEvents<SimpleEvalEvent>();
+
+                        config.Activity = new Activity()
+                        {
+                            State = "Destroying 69 servers!",
+                            Type = 4
+                        };
                     });
                     // These are the REAL™️ PISSCATSHARP
                     services.AddDiscordRest(config => { });
                     services.AddLogging();
-
-                    services.AddInteractions();
                 })
                 .Build();
 

@@ -61,7 +61,7 @@ namespace ModCore.Services.Shard.EventHandlers
             {
                 var initialMessage = await _api.CreateMessageAsync(data.ChannelId, new CreateMessage()
                 {
-                    Content = $"Evaluation code block... <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}:R>",
+                    Content = $"Evaluating code block... <t:{DateTimeOffset.Now.ToUnixTimeSeconds()}:R>",
                     MessageReference = new MessageReference()
                     {
                         ChannelId = data.ChannelId,

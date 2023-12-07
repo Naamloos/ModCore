@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Guilds;
+using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Gateway.EventData.Outgoing
 {
@@ -41,7 +43,7 @@ namespace ModCore.Common.Discord.Gateway.EventData.Outgoing
         public bool Afk { get; set; } = false;
     }
 
-    internal record Activity
+    public record Activity
     {
         [JsonPropertyName("name")]
         public string Name { get; set; } = "ModCore.Common.Discord";
@@ -49,6 +51,24 @@ namespace ModCore.Common.Discord.Gateway.EventData.Outgoing
         [JsonPropertyName("type")]
         public int Type { get; set; } = 0;
         // TODO implement the rest https://discord.com/developers/docs/topics/gateway-events#activity-object
+
+        [JsonPropertyName("state")]
+        public Optional<string?> State { get; set; }
+
+
+        [JsonPropertyName("emoji")]
+        public Optional<ActivityEmoji?> Emoji { get; set; }
+    }
+
+    public record ActivityEmoji
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("id")]
+        public Optional<Snowflake> Id { get; set; }
+
+        public Optional<bool> Animated { get; set; } = Optional<bool>.None;
     }
 
     internal record ConnectionProperties

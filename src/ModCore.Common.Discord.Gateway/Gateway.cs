@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.EventData.Outgoing;
@@ -304,7 +306,15 @@ namespace ModCore.Common.Discord.Gateway
             {
                 Token = token,
                 Intents = configuration.Intents,
-                Shard = new int[] { shard_id, shard_count }
+                Shard = new int[] { shard_id, shard_count },
+                Presence = new PresenceUpdate()
+                {
+                    Status = "dnd",
+                    activities = configuration.Activity.HasValue? new()
+                    {
+                        configuration.Activity.Value
+                    } : new()
+                }
             }, jsonSerializerOptions));
 
             DispatchEventToSubscribers(hello);

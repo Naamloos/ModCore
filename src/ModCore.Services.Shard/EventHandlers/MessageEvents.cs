@@ -13,13 +13,11 @@ namespace ModCore.Services.Shard.EventHandlers
     {
         private readonly ILogger _logger;
         private readonly DiscordRest _rest;
-        private readonly InteractionHandler _interactions;
 
-        public MessageEvents(ILogger<StartupEvents> logger, DiscordRest rest, InteractionHandler interactions)
+        public MessageEvents(ILogger<StartupEvents> logger, DiscordRest rest)
         {
             _logger = logger;
             _rest = rest;
-            _interactions = interactions;
         }
 
         public async Task HandleEvent(MessageCreate data)
@@ -29,8 +27,6 @@ namespace ModCore.Services.Shard.EventHandlers
 
         public async Task HandleEvent(InteractionCreate data)
         {
-            // Offloads InteractionCreate to the InteractionHandler.
-            _ = Task.Run(async () => await _interactions.HandleInteractionAsync(data));
         }
     }
 }
