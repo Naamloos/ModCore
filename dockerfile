@@ -18,5 +18,6 @@ RUN apk add ffmpeg
 
 # ADD TESSERACT FOR OCR
 RUN apk add tesseract-ocr
+RUN apk add leptonica-dev
 
 ENTRYPOINT ["dotnet", "/app/ModCore.dll"]
