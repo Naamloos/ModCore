@@ -11,7 +11,12 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
 WORKDIR /app
 COPY --from=build /src/out .
 WORKDIR /config
+
 # ADD FFMPEG FOR VOICE SUPPORT
 RUN apk add ffmpeg
 # FFMPEG is not actually used but fukit
+
+# ADD TESSERACT FOR OCR
+RUN apk add tesseract-ocr
+
 ENTRYPOINT ["dotnet", "/app/ModCore.dll"]
