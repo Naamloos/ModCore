@@ -21,6 +21,6 @@ RUN apk add tesseract-ocr
 RUN apk add leptonica-dev
 
 RUN ln -s /usr/lib/x86_64-linux-gnu/liblept.so.5 liblept.so.5
-RUN ln -s /usr/lib/x86_64-linux-gnu/liblept.so.5 libleptonica-1.78.0.so
+RUN ln -s /usr/lib/x86_64-linux-gnu/liblept.so.5 libleptonica-1.82.0.so
 
 ENTRYPOINT ["dotnet", "/app/ModCore.dll"]
