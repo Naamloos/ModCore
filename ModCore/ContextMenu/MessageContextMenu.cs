@@ -184,6 +184,8 @@ namespace ModCore.ContextMenu
             return await guild.CreateStickerAsync(sticker.Name ?? "Sticker", sticker.Description ?? "", "🤡", memory, sticker.FormatType);
         }
 
+        private static readonly string[] validFileExts = { ".jpg", ".gif", ".png", ".jpeg", ".webp" };
+
         [ContextMenu(ApplicationCommandType.MessageContextMenu, "Translate (DeepL)")]
         [SlashCommandPermissions(Permissions.ReadMessageHistory)]
         [GuildOnly]
@@ -201,7 +203,11 @@ namespace ModCore.ContextMenu
 
             var translateImage = "";
 
-            if (ctx.TargetMessage.Attachments.Count() > 0)
+            if (ctx.TargetMessage.Attachments.Where(x =>
+                {
+                    var uri = new Uri(x.Url);
+                    return validFileExts.Contains(Path.GetExtension(uri.AbsolutePath));
+                }).Count() > 0)
             {
                 try
                 {
@@ -234,14 +240,14 @@ namespace ModCore.ContextMenu
                 var iconAsset = assembly.GetManifestResourceStream(resource);
 
                 TextResult translation = string.IsNullOrEmpty(translate) ? null : await translator.TranslateTextAsync(translate, null, LanguageCode.EnglishAmerican);
-                TextResult imageTranslation = string.IsNullOrEmpty(translateImage)? null : await translator.TranslateTextAsync(translateImage, null, LanguageCode.EnglishAmerican);
+                TextResult imageTranslation = string.IsNullOrEmpty(translateImage) ? null : await translator.TranslateTextAsync(translateImage, null, LanguageCode.EnglishAmerican);
 
                 var embed = new DiscordEmbedBuilder()
                         .WithDescription($"Translated using [DeepL](https://www.deepl.com/translator).")
                         .WithColor(new DiscordColor("09a0e2"))
                         .WithAuthor(name: "Translation", iconUrl: "attachment://globe-showing-europe.gif");
 
-                if(translation is not null)
+                if (translation is not null)
                 {
                     embed.AddField($"Original Message Text ({translation.DetectedSourceLanguageCode})", translate);
                     embed.AddField($"Translated Message Text ({LanguageCode.EnglishAmerican})", translation.Text);
