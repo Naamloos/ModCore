@@ -20,7 +20,7 @@ RUN apk add ffmpeg
 RUN apk add tesseract-ocr
 RUN apk add leptonica-dev
 
-RUN ln -s /usr/lib/libleptonica.so libleptonica-1.82.0.so
+RUN ln -s /usr/lib/libleptonica.so /app/x64/libleptonica-1.82.0.so
 RUN ln -s /usr/lib/libtesseract.so.5 /app/x64/libtesseract50.so
 
 ENTRYPOINT ["dotnet", "/app/ModCore.dll"]

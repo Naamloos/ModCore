@@ -211,8 +211,8 @@ namespace ModCore.ContextMenu
             {
                 try
                 {
-                    string pth = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                    pth = Path.Combine(pth, "/tessdata_fast");
+                    string pth = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+                    pth = Path.Combine(pth, "tessdata_fast");
 
                     using var engine = new TesseractEngine(pth, "eng+jpn+rus+jpn_vert", EngineMode.Default);
                     using var http = new HttpClient();
