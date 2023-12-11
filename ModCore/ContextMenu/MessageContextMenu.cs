@@ -13,6 +13,8 @@ using DeepL;
 using System;
 using System.Reflection;
 using ModCore.Entities;
+using Tesseract;
+using DeepL.Model;
 
 namespace ModCore.ContextMenu
 {
@@ -48,7 +50,7 @@ namespace ModCore.ContextMenu
                 var match = matches.First();
                 DiscordMessage followup = null;
 
-                if(matches.Count() > 1)
+                if (matches.Count() > 1)
                 {
                     var message = new DiscordFollowupMessageBuilder()
                         .WithContent("Which emoji do you want to copy?")
@@ -61,7 +63,7 @@ namespace ModCore.ContextMenu
                     }
 
                     var selection = await ctx.MakeChoiceAsync<Match>(message, choices);
-                    if(selection.TimedOut)
+                    if (selection.TimedOut)
                     {
                         await ctx.EditFollowupAsync(selection.FollowupMessage.Id, new DiscordWebhookBuilder().WithContent("⚠️ Timed out selection."));
                         return;
@@ -86,7 +88,7 @@ namespace ModCore.ContextMenu
                     {
                         await ctx.Interaction.DeleteOriginalResponseAsync();
                         await ctx.Channel.SendMessageAsync(new DiscordMessageBuilder().WithContent(response).WithReply(ctx.TargetMessage.Id, false, false));
-                        
+
                         return;
                     }
                 }
@@ -187,41 +189,77 @@ namespace ModCore.ContextMenu
         [GuildOnly]
         public async Task TranslateAsync(ContextMenuContext ctx)
         {
-            if(string.IsNullOrEmpty(settings.DeepLToken))
+            if (string.IsNullOrEmpty(settings.DeepLToken))
             {
                 await ctx.CreateResponseAsync("No DeepL token configured! Notify the bot developers via /contact!", true);
                 return;
             }
 
-            var translate = ctx.TargetMessage.Content;
-            var translator = new Translator(settings.DeepLToken);
+            await ctx.DeferAsync(false);
 
-            if(string.IsNullOrEmpty(translate))
+            var translate = ctx.TargetMessage.Content;
+
+            var translateImage = "";
+
+            if (ctx.TargetMessage.Attachments.Count() > 0)
             {
-                await ctx.CreateResponseAsync("That message has no content!", true);
+                try
+                {
+                    using var engine = new TesseractEngine(@"./tessdata_fast", "eng+jpn+rus+jpn_vert", EngineMode.Default);
+                    using var http = new HttpClient();
+
+                    var img = await http.GetAsync(ctx.TargetMessage.Attachments[0].Url);
+                    using var pix = Pix.LoadFromMemory(await img.Content.ReadAsByteArrayAsync());
+                    using var page = engine.Process(pix);
+
+                    translateImage = page.GetText();
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+
+            if (string.IsNullOrEmpty(translate) && string.IsNullOrEmpty(translateImage))
+            {
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder().WithContent("Neither text or images with text were found on this message!"));
                 return;
             }
 
-            await ctx.DeferAsync(false);
-
+            using var translator = new Translator(settings.DeepLToken);
             try
             {
                 var assembly = Assembly.GetExecutingAssembly();
                 var resource = "ModCore.Assets.globe-showing-europe.gif";
                 var iconAsset = assembly.GetManifestResourceStream(resource);
 
-                var translation = await translator.TranslateTextAsync(translate, null, LanguageCode.EnglishAmerican);
-                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
-                    .AddEmbed(new DiscordEmbedBuilder()
-                        .WithDescription($"Translated using DeepL from language: {translation.DetectedSourceLanguageCode} to {LanguageCode.EnglishAmerican}.")
-                        .AddField("Original Text", translate)
-                        .AddField("Translated Text", translation.Text)
+                TextResult translation = string.IsNullOrEmpty(translate) ? null : await translator.TranslateTextAsync(translate, null, LanguageCode.EnglishAmerican);
+                TextResult imageTranslation = string.IsNullOrEmpty(translateImage)? null : await translator.TranslateTextAsync(translateImage, null, LanguageCode.EnglishAmerican);
+
+                var embed = new DiscordEmbedBuilder()
+                        .WithDescription($"Translated using [DeepL](https://www.deepl.com/translator).")
                         .WithColor(new DiscordColor("09a0e2"))
-                        .WithThumbnail("attachment://globe-showing-europe.gif"))
+                        .WithAuthor(name: "Translation", iconUrl: "attachment://globe-showing-europe.gif");
+
+                if(translation is not null)
+                {
+                    embed.AddField($"Original Message Text ({translation.DetectedSourceLanguageCode})", translate);
+                    embed.AddField($"Translated Message Text ({LanguageCode.EnglishAmerican})", translation.Text);
+                }
+
+                if (imageTranslation is not null)
+                {
+                    embed.AddField($"Original Image Text ({imageTranslation.DetectedSourceLanguageCode})", translateImage);
+                    embed.AddField($"Translated Image Text ({LanguageCode.EnglishAmerican})", imageTranslation.Text);
+                    embed.WithFooter("Please note that translations from images may not be super accurate due to the fact that text recognition is prone to mistakes.");
+                }
+
+                await ctx.FollowUpAsync(new DiscordFollowupMessageBuilder()
+                    .AddEmbed(embed)
                     .AddComponents(new DiscordLinkButtonComponent(ctx.TargetMessage.JumpLink.ToString(), "Jump to Original", emoji: new DiscordComponentEmoji("💭")))
                     .AddFile("globe-showing-europe.gif", iconAsset));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }

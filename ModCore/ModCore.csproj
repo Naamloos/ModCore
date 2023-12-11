@@ -19,6 +19,11 @@
     <EmbeddedResource Include="Assets\globe-showing-europe.gif" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="tessdata_fast\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Chronic-netstandard" Version="0.3.2.4" />
     <PackageReference Include="DeepL.net" Version="1.8.0" />
     <PackageReference Include="DSharpPlus" Version="4.4.3" />
@@ -41,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+    <PackageReference Include="Tesseract" Version="5.2.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Migrations\" />

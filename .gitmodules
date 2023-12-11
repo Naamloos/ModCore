@@ -1,0 +1,3 @@
+[submodule "ModCore/tessdata_fast"]
+	path = ModCore/tessdata_fast
+	url = https://github.com/tesseract-ocr/tessdata_fast
