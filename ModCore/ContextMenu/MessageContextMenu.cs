@@ -222,7 +222,7 @@ namespace ModCore.ContextMenu
                 }
                 catch (Exception ex)
                 {
-
+                    Console.WriteLine($"d'oh!\n{ex}");
                 }
             }
 
