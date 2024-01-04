@@ -24,7 +24,7 @@ namespace ModCore.Common.Discord.Gateway.EventData.Incoming
         public string ResumeGatewayUrl { get; set; }
 
         [JsonPropertyName("shard")]
-        public int[] Shard { get; set; }
+        public Optional<int[]> Shard { get; set; }
 
         [JsonPropertyName("application")]
         public ReadyApplication Application { get; set; }

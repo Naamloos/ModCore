@@ -45,7 +45,11 @@ namespace ModCore.Services.Shard.EventHandlers
             if (application.Success)
             {
                 _logger.LogInformation("Application is registered under ID {0}. Owner username is {1}.", data.Application.Id, application.Value!.Owner!.Value.Username);
-                await _interactions.PublishCommands(application.Value.Id);
+                if (data.Shard.HasValue && data.Shard.Value[0] == 0)
+                {
+                    // Only send commands if we know we're definitely on shard 0!!
+                    await _interactions.PublishCommands(application.Value.Id);
+                }
             }
             else
             {
