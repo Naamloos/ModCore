@@ -147,6 +147,13 @@ namespace ModCore.Common.Discord.Gateway
             return Task.CompletedTask;
         }
 
+        public async Task ReconnectAsync()
+        {
+            await StopAsync(serviceCancellationToken);
+            this.websocket = new ClientWebSocket();
+            await StartAsync(serviceCancellationToken);
+        }
+
         public async Task ResumeAsync()
         {
             // cancel running gateway loops
@@ -164,7 +171,7 @@ namespace ModCore.Common.Discord.Gateway
 
             logger.LogInformation("Sending resume packet.");
             // Send RESUME
-            await SendWebsocketPacketAsync(new Payload(OpCodes.Identify).WithData(new Resume()
+            await SendWebsocketPacketAsync(new Payload(OpCodes.Resume).WithData(new Resume()
             {
                 LastSequenceNumber = lastSequenceNumber ?? 0,
                 SessionId = lastReadyEvent.SessionId,
@@ -227,6 +234,16 @@ namespace ModCore.Common.Discord.Gateway
 
                         case OpCodes.HeartbeatAck:
                             logger.LogInformation("Received a heartbeat acknowledgement.");
+                            break;
+
+                        case OpCodes.Reconnect:
+                            logger.LogInformation("Server indicated a reconnect is required.");
+                            await ResumeAsync();
+                            break;
+
+                        case OpCodes.InvalidSession:
+                            logger.LogInformation("Invalid session response by server, reconnect required.");
+                            await ReconnectAsync();
                             break;
                     }
                 }
