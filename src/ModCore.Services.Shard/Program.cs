@@ -6,10 +6,12 @@ using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Gateway.EventData.Outgoing;
 using ModCore.Common.Discord.Rest;
 using ModCore.Services.Shard.EventHandlers;
-using ModCore.Services.Shard.Interactions;
+using ModCore.Common.InteractionFramework;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Text.Json;
+using ModCore.Common.Discord.Entities.Serializer;
+using System.Text.Json.Serialization;
 
 namespace ModCore.Services.Shard
 {
@@ -23,7 +25,7 @@ namespace ModCore.Services.Shard
                 .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
 
-            var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.General)
+            var jsonOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
             {
                 WriteIndented = true
             };
@@ -42,6 +44,13 @@ namespace ModCore.Services.Shard
                 var settings = JsonSerializer.Deserialize<Settings>(contents);
                 File.WriteAllText("settings.json", JsonSerializer.Serialize(settings, jsonOptions));
             }
+
+            jsonOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+                Converters = { new OptionalJsonSerializerFactory() },
+                WriteIndented = true
+            };
 
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(options =>
@@ -76,7 +85,9 @@ namespace ModCore.Services.Shard
                     });
                     // These are the REAL™️ PISSCATSHARP
                     services.AddDiscordRest(config => { });
+                    services.AddInteractionService();
                     services.AddLogging();
+                    services.AddSingleton(jsonOptions);
                 })
                 .Build();
 

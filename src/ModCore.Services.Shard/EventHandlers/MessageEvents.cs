@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Messages;
+using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
@@ -19,6 +20,8 @@ namespace ModCore.Services.Shard.EventHandlers
             _logger = logger;
             _rest = rest;
         }
+
+        public Gateway Gateway { get; set; }
 
         public async Task HandleEvent(MessageCreate data)
         {

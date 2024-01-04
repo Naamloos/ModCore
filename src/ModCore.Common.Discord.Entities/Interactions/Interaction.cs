@@ -18,7 +18,7 @@ namespace ModCore.Common.Discord.Entities.Interactions
         public InteractionType Type { get; set; }
 
         [JsonPropertyName("data")]
-        public Optional<InteractionData> Data { get; set; } // TODO implement mechanic for parsing this
+        public Optional<InteractionData> Data { get; set; }
 
         [JsonPropertyName("guild_id")]
         public Optional<Snowflake> GuildId { get; set; }

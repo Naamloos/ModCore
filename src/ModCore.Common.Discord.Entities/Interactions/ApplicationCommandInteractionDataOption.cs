@@ -13,7 +13,7 @@ namespace ModCore.Common.Discord.Entities.Interactions
         public ApplicationCommandOptionType Type { get; set; }
 
         [JsonPropertyName("value")]
-        public Optional<JsonValue> Value { get; set; }
+        public Optional<JsonNode> Value { get; set; }
 
         [JsonPropertyName("options")]
         public Optional<List<ApplicationCommandInteractionDataOption>> Options { get; set; }

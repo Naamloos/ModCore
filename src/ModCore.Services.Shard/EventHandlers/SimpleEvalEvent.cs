@@ -21,6 +21,8 @@ namespace ModCore.Services.Shard.EventHandlers
 {
     public class SimpleEvalEvent : ISubscriber<MessageCreate>
     {
+        public Gateway Gateway { get; set; }
+
         private readonly ILogger _logger;
         private readonly DiscordRest _api;
         private readonly Gateway _gateway;

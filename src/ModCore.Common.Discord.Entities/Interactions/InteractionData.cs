@@ -18,7 +18,7 @@ namespace ModCore.Common.Discord.Entities.Interactions
         public Optional<ResolvedDataStructure> Resolved { get; set; }
 
         [JsonPropertyName("options")]
-        public Optional<List<ApplicationCommandInteractionDataOption>> options { get; set; }
+        public Optional<List<ApplicationCommandInteractionDataOption>> Options { get; set; }
 
         [JsonPropertyName("guild_id")]
         public Optional<Snowflake> GuildId { get; set; }

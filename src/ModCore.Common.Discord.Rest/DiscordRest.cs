@@ -103,7 +103,11 @@ namespace ModCore.Common.Discord.Rest
             T? deserializedResponse = default(T);
             if (response.IsSuccessStatusCode)
             {
-                deserializedResponse = await JsonSerializer.DeserializeAsync<T>(await response.Content.ReadAsStreamAsync(), JsonSerializerOptions);
+                var stream = await response.Content.ReadAsStreamAsync();
+                if (stream.Length > 0)
+                {
+                    deserializedResponse = await JsonSerializer.DeserializeAsync<T>(stream, JsonSerializerOptions);
+                }
             }
             else
             {

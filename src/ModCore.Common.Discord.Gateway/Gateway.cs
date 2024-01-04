@@ -46,7 +46,7 @@ namespace ModCore.Common.Discord.Gateway
         private IServiceProvider services;
         private ILogger logger;
 
-        private ISubscriber[] subscribers = new ISubscriber[0];
+        private List<ISubscriber> subscribers = new();
 
         private string token;
         private int shard_id;
@@ -63,7 +63,7 @@ namespace ModCore.Common.Discord.Gateway
 
             gatewayCancellationTokenSource = new CancellationTokenSource();
 
-            registerSubscribers();
+            registerSubscribersInternal();
 
             // fetch configuration data from host services.
             var hostConfig = services.GetRequiredService<IConfiguration>();
@@ -97,33 +97,38 @@ namespace ModCore.Common.Discord.Gateway
             this.websocket = new ClientWebSocket();
         }
 
-        private void registerSubscribers()
+        private void registerSubscribersInternal()
         {
-            List<ISubscriber> registeringSubscribers = new List<ISubscriber>();
             foreach (var subscriber in configuration.subscribers)
             {
-                var constructors = subscriber.GetConstructors();
-                if (constructors.Count() != 1)
-                {
-                    throw new NotSupportedException($"Your subscriber of type {subscriber} needs exactly 1 constructor! It has {constructors.Count()}!");
-                }
-
-                var constructor = constructors[0];
-                var parameters = constructor.GetParameters().Select(x => x.ParameterType).ToArray();
-                var qualifiedParameters = new object[parameters.Length];
-                for (int i = 0; i < parameters.Length; i++)
-                {
-                    if (parameters[i] == typeof(Gateway))
-                    {
-                        qualifiedParameters[i] = this;
-                        continue;
-                    }
-                    qualifiedParameters[i] = services.GetService(parameters[i]);
-                }
-
-                registeringSubscribers.Add(Activator.CreateInstance(subscriber, qualifiedParameters) as ISubscriber);
+                RegisterSubscriber(subscriber);
             }
-            subscribers = registeringSubscribers.ToArray();
+        }
+
+        public void RegisterSubscriber(Type subscriberType)
+        {
+            var constructors = subscriberType.GetConstructors();
+            if (constructors.Count() != 1)
+            {
+                throw new NotSupportedException($"Your subscriber of type {subscriberType} needs exactly 1 constructor! It has {constructors.Count()}!");
+            }
+
+            var constructor = constructors[0];
+            var parameters = constructor.GetParameters().Select(x => x.ParameterType).ToArray();
+            var qualifiedParameters = new object[parameters.Length];
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (parameters[i] == typeof(Gateway))
+                {
+                    qualifiedParameters[i] = this;
+                    continue;
+                }
+                qualifiedParameters[i] = services.GetService(parameters[i]);
+            }
+
+            var activatedSubscriber = Activator.CreateInstance(subscriberType, qualifiedParameters) as ISubscriber;
+            activatedSubscriber!.Gateway = this;
+            subscribers.Add(activatedSubscriber);
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -359,7 +364,7 @@ namespace ModCore.Common.Discord.Gateway
                 return;
             }
 
-            ParallelHelper.ForEach<ISubscriber, ParallelEventRunner<T>>(subscribers, new ParallelEventRunner<T>(this, data));
+            ParallelHelper.ForEach<ISubscriber, ParallelEventRunner<T>>(subscribers.ToArray(), new ParallelEventRunner<T>(this, data));
         }
 
         internal async Task runEventHandlerAsync<T>(ISubscriber<T> subscriber, T data) where T : IPublishable
