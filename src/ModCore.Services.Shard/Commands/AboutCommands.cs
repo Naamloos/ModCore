@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Discord.Entities;
+﻿using Microsoft.Extensions.Logging;
+using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.InteractionFramework;
@@ -13,9 +14,18 @@ namespace ModCore.Services.Shard.Commands
 {
     public class AboutCommands : BaseCommandHandler
     {
+        private readonly ILogger _logger;
+
+        public AboutCommands(ILogger<AboutCommands> logger) 
+        {
+            _logger = logger;
+        }
+
         [SlashCommand("Shows information about this bot.", dm_permission: true)]
         public async Task About(SlashCommandContext context)
         {
+            _logger.LogInformation(context.EventData.Member.Value.User.Value.Username + " ran about!");
+
             await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, 
                 InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
                 {

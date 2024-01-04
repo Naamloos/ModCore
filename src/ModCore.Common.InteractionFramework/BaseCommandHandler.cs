@@ -29,15 +29,15 @@ namespace ModCore.Common.InteractionFramework
 
             if (this.GetType().GetCustomAttribute<SlashCommandAttribute>() is not null)
             {
-                return loadAsTopLevel();
+                return loadAsTopLevel(services);
             }
             else
             {
-                return loadAsContainer();
+                return loadAsContainer(services);
             }
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommand>) loadAsTopLevel()
+        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommand>) loadAsTopLevel(IServiceProvider services)
         {
             var executables = new Dictionary<string, Func<SlashCommandContext, Task>>();
 
@@ -50,8 +50,8 @@ namespace ModCore.Common.InteractionFramework
 
             var type = this.GetType();
 
-            var subCommands = loadSubCommands(type, type.Name);
-            var subGroups = loadSubGroups(type, type.Name);
+            var subCommands = loadSubCommands(type, type.Name, services);
+            var subGroups = loadSubGroups(type, type.Name, services);
 
             var options = new List<ApplicationCommandOption>();
             options.AddRange(subCommands.Item2);
@@ -80,13 +80,13 @@ namespace ModCore.Common.InteractionFramework
             return (executables, new List<ApplicationCommand>() { command });
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommand>) loadAsContainer()
+        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommand>) loadAsContainer(IServiceProvider services)
         {
             var executables = new Dictionary<string, Func<SlashCommandContext, Task>>();
             var appCommands = new List<ApplicationCommand>();
 
-            var groups = loadGroups(this.GetType());
-            var commands = loadCommands(this.GetType());
+            var groups = loadGroups(this.GetType(), services);
+            var commands = loadCommands(this.GetType(), services);
 
             appCommands.AddRange(groups.Item2);
             appCommands.AddRange(commands.Item2);
@@ -103,7 +103,7 @@ namespace ModCore.Common.InteractionFramework
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommand>) loadCommands(Type parent)
+        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommand>) loadCommands(Type parent, IServiceProvider services)
         {
             var executables = new Dictionary<string, Func<SlashCommandContext, Task>>();
             var appCommands = new List<ApplicationCommand>();
@@ -125,13 +125,13 @@ namespace ModCore.Common.InteractionFramework
                     Options = loadOptions(method)
                 });
 
-                executables.Add(method.Name.ToLowerInvariant(), async context => await ExecuteCommand(context, method, getTypeInstance(this.GetType())));
+                executables.Add(method.Name.ToLowerInvariant(), async context => await ExecuteCommand(context, method, getTypeInstance(this.GetType(), services)));
             }
 
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommand>) loadGroups(Type parent)
+        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommand>) loadGroups(Type parent, IServiceProvider services)
         {
             var executables = new Dictionary<string, Func<SlashCommandContext, Task>>();
             var appCommands = new List<ApplicationCommand>();
@@ -143,8 +143,8 @@ namespace ModCore.Common.InteractionFramework
             {
                 var attr = group.GetCustomAttribute<SlashCommandAttribute>()!;
 
-                var subGroups = loadSubGroups(group, group.Name.ToLowerInvariant());
-                var subCommands = loadSubCommands(group, group.Name.ToLowerInvariant());
+                var subGroups = loadSubGroups(group, group.Name.ToLowerInvariant(), services);
+                var subCommands = loadSubCommands(group, group.Name.ToLowerInvariant(), services);
                 var options = new List<ApplicationCommandOption>();
 
                 options.AddRange(subGroups.Item2);
@@ -168,7 +168,7 @@ namespace ModCore.Common.InteractionFramework
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommandOption>) loadSubCommands(Type parent, string parentName)
+        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommandOption>) loadSubCommands(Type parent, string parentName, IServiceProvider services)
         {
             var executables = new Dictionary<string, Func<SlashCommandContext, Task>>();
             var appCommands = new List<ApplicationCommandOption>();
@@ -189,13 +189,14 @@ namespace ModCore.Common.InteractionFramework
                     Type = ApplicationCommandOptionType.Subcommand
                 });
 
-                executables.Add(parentName.ToLowerInvariant() + " " + method.Name.ToLowerInvariant(), context => ExecuteCommand(context, method, getTypeInstance(parent)));
+                executables.Add(parentName.ToLowerInvariant() + " " + method.Name.ToLowerInvariant(), 
+                    context => ExecuteCommand(context, method, getTypeInstance(parent, services)));
             }
 
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommandOption>) loadSubGroups(Type parent, string parentName)
+        private (Dictionary<string, Func<SlashCommandContext, Task>>, List<ApplicationCommandOption>) loadSubGroups(Type parent, string parentName, IServiceProvider services)
         {
             var executables = new Dictionary<string, Func<SlashCommandContext, Task>>();
             var appCommands = new List<ApplicationCommandOption>();
@@ -207,7 +208,7 @@ namespace ModCore.Common.InteractionFramework
             {
                 var attr = group.GetCustomAttribute<SlashCommandAttribute>()!;
 
-                var subCommands = loadSubCommands(group, group.Name.ToLowerInvariant());
+                var subCommands = loadSubCommands(group, group.Name.ToLowerInvariant(), services);
 
                 appCommands.Add(new ApplicationCommandOption()
                 {
@@ -224,7 +225,7 @@ namespace ModCore.Common.InteractionFramework
             return (executables, appCommands);
         }
 
-        private object getTypeInstance(Type type)
+        private object getTypeInstance(Type type, IServiceProvider services)
         {
             if (classInstances.ContainsKey(type))
             {
@@ -232,9 +233,20 @@ namespace ModCore.Common.InteractionFramework
             }
 
             // TODO dependency injection
-            var newObject = Activator.CreateInstance(type)!;
+            var newObject = createInstanceWithDependencies(type, services);
             classInstances.Add(type, newObject);
             return newObject;
+        }
+
+        private object createInstanceWithDependencies(Type type, IServiceProvider services)
+        {
+            var constructor = type.GetConstructors()[0];
+            List<object> injectedServices = new();
+            foreach(var parameter in constructor.GetParameters())
+            {
+                injectedServices.Add(services.GetService(parameter.ParameterType)!);
+            }
+            return Activator.CreateInstance(type, injectedServices.ToArray())!;
         }
 
         private List<ApplicationCommandOption> loadOptions(MethodInfo method)

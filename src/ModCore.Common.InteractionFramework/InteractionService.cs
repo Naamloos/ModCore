@@ -34,8 +34,14 @@ namespace ModCore.Common.InteractionFramework
             var handlers = assembly.GetTypes().Where(x => x.IsAssignableTo(typeof(BaseCommandHandler)));
             foreach(var handler in handlers) 
             {
-                // TODO dependency injection
-                var enabledHandler = Activator.CreateInstance(handler) as BaseCommandHandler;
+                List<object> activatedServices = new();
+                var constructorParams = handler.GetConstructors()[0].GetParameters();
+                foreach(var parameter in constructorParams)
+                {
+                    activatedServices.Add(Services.GetService(parameter.ParameterType)!);
+                }
+
+                var enabledHandler = Activator.CreateInstance(handler, activatedServices.ToArray()) as BaseCommandHandler;
                 if(enabledHandler is null)
                 {
                     continue;
@@ -71,18 +77,21 @@ namespace ModCore.Common.InteractionFramework
                     List<ApplicationCommandInteractionDataOption> options = interactionCreate.Data.Value.Options;
 
                     var qualifiedName = interactionCreate.Data.Value.Name;
-                    if (interactionCreate.Data.Value.Options.Value.Any(x => x.Type == ApplicationCommandOptionType.Subcommand))
+                    if (interactionCreate.Data.Value.Options.HasValue)
                     {
-                        var subCommand = interactionCreate.Data.Value.Options.Value.First();
-                        qualifiedName += $" {subCommand.Name}";
-                        options = subCommand.Options;
-                    }
-                    else if (interactionCreate.Data.Value.Options.Value.Any(x => x.Type == ApplicationCommandOptionType.SubcommandGroup))
-                    {
-                        var subCommandGroup = interactionCreate.Data.Value.Options.Value.First();
-                        var subCommand = subCommandGroup.Options.Value.First();
-                        qualifiedName += $" {subCommandGroup.Name} {subCommand}";
-                        options = subCommand.Options;
+                        if (interactionCreate.Data.Value.Options.Value.Any(x => x.Type == ApplicationCommandOptionType.Subcommand))
+                        {
+                            var subCommand = interactionCreate.Data.Value.Options.Value.First();
+                            qualifiedName += $" {subCommand.Name}";
+                            options = subCommand.Options;
+                        }
+                        else if (interactionCreate.Data.Value.Options.Value.Any(x => x.Type == ApplicationCommandOptionType.SubcommandGroup))
+                        {
+                            var subCommandGroup = interactionCreate.Data.Value.Options.Value.First();
+                            var subCommand = subCommandGroup.Options.Value.First();
+                            qualifiedName += $" {subCommandGroup.Name} {subCommand}";
+                            options = subCommand.Options;
+                        }
                     }
 
                     await CommandHandlers[qualifiedName].Invoke(new SlashCommandContext(interactionCreate, Rest, gateway, options, Services));
