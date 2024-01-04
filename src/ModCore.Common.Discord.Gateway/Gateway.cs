@@ -204,6 +204,13 @@ namespace ModCore.Common.Discord.Gateway
                     continue;
                 }
             }
+
+            if(!serviceCancellationToken.IsCancellationRequested)
+            {
+                // Wait a little but just in case the connection loss is caused by some network wackiness
+                await Task.Delay(2000);
+                await ReconnectAsync();
+            }
         }
 
         private async Task GatewayMessageHandlerAsync()
