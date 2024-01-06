@@ -84,7 +84,7 @@ namespace ModCore.Services.Shard
 
                         config.Activity = new Activity()
                         {
-                            State = $"Protecting your server from evil.", // TODO move this out 
+                            State = $"BETA. Not ready for general use.", // TODO move this out 
                             Type = 4
                         };
                     });

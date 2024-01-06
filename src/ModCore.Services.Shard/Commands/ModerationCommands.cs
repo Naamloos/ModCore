@@ -60,13 +60,28 @@ namespace ModCore.Services.Shard.Commands
                 sentDM = dm.Success;
             }
 
-            await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, InteractionResponseType.ChannelMessageWithSource,
-                new InteractionMessageResponse()
-                {
-                    Content = $"Succesfully banned member <@{userToBan}>. Sent DM: {(sentDM ? "Yes" : "No")}.\n" +
-                    $"Reason:\n```\n{givenReason}\n```",
-                    Flags = MessageFlags.Ephemeral
-                });
+            var ban = await context.RestClient.CreateGuildBanAsync(context.EventData.GuildId, userToBan);
+
+            if (ban.Success)
+            {
+                await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, InteractionResponseType.ChannelMessageWithSource,
+                    new InteractionMessageResponse()
+                    {
+                        Content = $"Succesfully banned member <@{userToBan}>. Sent DM: {(sentDM ? "Yes" : "No")}.\n" +
+                        $"Reason:\n```\n{givenReason}\n```",
+                        Flags = MessageFlags.Ephemeral
+                    });
+            }
+            else
+            {
+                await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, InteractionResponseType.ChannelMessageWithSource,
+                    new InteractionMessageResponse()
+                    {
+                        Content = $"Failed banning <@{userToBan}>. " +
+                        $"{(sentDM ? "Already sent a DM?" : "")}.\n",
+                        Flags = MessageFlags.Ephemeral
+                    });
+            }
         }
     }
 }

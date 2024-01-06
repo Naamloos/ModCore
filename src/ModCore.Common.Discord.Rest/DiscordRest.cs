@@ -118,6 +118,19 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<Guild>(HttpMethod.Get, url, route);
         }
 
+        public ValueTask<RestResponse<object>> CreateGuildBanAsync(Snowflake guildId, Snowflake userId, 
+            int? delete_message_days = null, int? delete_message_seconds = null)
+        {
+            string route = "guilds/:guild_id/bans/:user_id";
+            string url = $"guilds/{guildId}/bans/{userId}";
+
+            return makeRequestAsync<object>(HttpMethod.Put, url, route, new CreateGuildBan()
+            {
+                DeleteMessageDays = delete_message_days == null? Optional<int>.None : delete_message_days.Value,
+                DeleteMessageSeconds = delete_message_seconds == null? Optional<int>.None : delete_message_seconds.Value
+            });
+        }
+
         private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)
         {
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(method, route, url, body);
