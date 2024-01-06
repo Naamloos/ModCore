@@ -1,4 +1,4 @@
-﻿namespace ModCore.Services.MessageBroker
+﻿namespace ModCore.Common.MessageBroker
 {
     internal class Program
     {

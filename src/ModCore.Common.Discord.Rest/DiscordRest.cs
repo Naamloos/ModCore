@@ -2,7 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Channels;
 using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Entities.Serializer;
@@ -95,6 +97,25 @@ namespace ModCore.Common.Discord.Rest
                 Type = type,
                 Data = data
             });
+        }
+
+        public ValueTask<RestResponse<Channel>> CreateDMChannelAsync(Snowflake recipientId)
+        {
+            string route = "users/@me/channels";
+            string url = "users/@me/channels";
+
+            return makeRequestAsync<Channel>(HttpMethod.Post, url, route, new CreateDMChannel()
+            {
+                RecipientId = recipientId
+            });
+        }
+
+        public ValueTask<RestResponse<Guild>> GetGuildAsync(Snowflake guildId, bool withCounts = false)
+        {
+            string route = "guilds/:guild_id";
+            string url = $"guilds/{guildId}?with_counts={withCounts}";
+
+            return makeRequestAsync<Guild>(HttpMethod.Get, url, route);
         }
 
         private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)

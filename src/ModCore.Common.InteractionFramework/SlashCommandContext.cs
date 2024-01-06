@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.InteractionFramework
 {
-    public class SlashCommandContext
+    public class SlashCommandContext : IDisposable
     {
         public InteractionCreate EventData { get; private set; }
         public DiscordRest RestClient { get; private set; }
@@ -26,6 +26,19 @@ namespace ModCore.Common.InteractionFramework
             this.Gateway = gatewayClient;
             this.OptionValues = optionValues;
             this.ServiceProvider = serviceProvider;
+        }
+
+        public void Dispose()
+        {
+            if (OptionValues != null)
+            {
+                OptionValues.Clear();
+            }
+            EventData = null;
+            RestClient = null;
+            Gateway = null;
+            OptionValues = null;
+            ServiceProvider = null;
         }
     }
 }

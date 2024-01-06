@@ -2,16 +2,18 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Caching.Distributed;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Gateway.EventData.Outgoing;
 using ModCore.Common.Discord.Rest;
-using ModCore.Services.Shard.EventHandlers;
 using ModCore.Common.InteractionFramework;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Text.Json;
 using ModCore.Common.Discord.Entities.Serializer;
 using System.Text.Json.Serialization;
+using ModCore.Common.Cache;
+using ModCore.Services.Shard.EventHandlers;
 
 namespace ModCore.Services.Shard
 {
@@ -69,7 +71,7 @@ namespace ModCore.Services.Shard
                 .ConfigureServices(services =>
                 {
                     // TODO if the rest client is added as a service, 
-                    // the gateway will use it to decide what it's websocket url should be.
+                    // the gateway should use it to decide what it's websocket url should be.
                     services.AddDiscordGateway(config =>
                     {
                         config.Intents = Intents.AllUnprivileged | Intents.MessageContents;
@@ -77,9 +79,12 @@ namespace ModCore.Services.Shard
                         config.SubscribeEvents<MessageEvents>();
                         config.SubscribeEvents<SimpleEvalEvent>();
 
+                        // These events live in the cache service.
+                        config.SubscribeEvents<CacheEvents>();
+
                         config.Activity = new Activity()
                         {
-                            State = "Destroying 69 servers!",
+                            State = $"Protecting your server from evil.", // TODO move this out 
                             Type = 4
                         };
                     });
@@ -88,6 +93,8 @@ namespace ModCore.Services.Shard
                     services.AddInteractionService();
                     services.AddLogging();
                     services.AddSingleton(jsonOptions);
+                    services.AddDistributedMemoryCache();
+                    services.AddModcoreCacheService();
                 })
                 .Build();
 

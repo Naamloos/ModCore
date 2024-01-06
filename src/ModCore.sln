@@ -23,9 +23,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{41BA15
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Common.Utils", "ModCore.Common.Utils\ModCore.Common.Utils.csproj", "{4B7155CD-BC61-43ED-8CB3-D0B8BB5B3B5D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Services.Cache", "ModCore.Services.Cache\ModCore.Services.Cache.csproj", "{8079434B-0AEA-4599-845A-3EE043C2CA14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Common.Cache", "ModCore.Common.Cache\ModCore.Common.Cache.csproj", "{8079434B-0AEA-4599-845A-3EE043C2CA14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Common.InteractionFramework", "ModCore.Common.InteractionFramework\ModCore.Common.InteractionFramework.csproj", "{3DEB52A2-299D-4F89-96D0-C7A87295E92A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModCore.Common.InteractionFramework", "ModCore.Common.InteractionFramework\ModCore.Common.InteractionFramework.csproj", "{3DEB52A2-299D-4F89-96D0-C7A87295E92A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,7 +86,7 @@ Global
 		{D6148D1C-0F8D-4B9D-8C01-57F5CE4DBA53} = {41BA1590-3611-42E3-AA71-53260FD0CBC5}
 		{15C4D42D-129F-4F3C-B711-C85D13F6D37D} = {41BA1590-3611-42E3-AA71-53260FD0CBC5}
 		{4B7155CD-BC61-43ED-8CB3-D0B8BB5B3B5D} = {41BA1590-3611-42E3-AA71-53260FD0CBC5}
-		{8079434B-0AEA-4599-845A-3EE043C2CA14} = {13222A28-2536-425B-B054-0DB5CD45AE53}
+		{8079434B-0AEA-4599-845A-3EE043C2CA14} = {41BA1590-3611-42E3-AA71-53260FD0CBC5}
 		{3DEB52A2-299D-4F89-96D0-C7A87295E92A} = {41BA1590-3611-42E3-AA71-53260FD0CBC5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

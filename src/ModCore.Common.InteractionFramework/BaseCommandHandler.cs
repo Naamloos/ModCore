@@ -64,7 +64,8 @@ namespace ModCore.Common.InteractionFramework
                 NSFW = attr.Nsfw,
                 CanBeUsedInDM = attr.DmPermission,
                 Type = ApplicationCommandType.ChatInput,
-                Options = options
+                Options = options,
+                DefaultMemberPermissions = attr.Permissions
             };
 
             foreach (var subCommand in subCommands.Item1)
@@ -122,7 +123,8 @@ namespace ModCore.Common.InteractionFramework
                     Description = attr.Description,
                     NSFW = attr.Nsfw,
                     CanBeUsedInDM = attr.DmPermission,
-                    Options = loadOptions(method)
+                    Options = loadOptions(method),
+                    DefaultMemberPermissions = attr.Permissions
                 });
 
                 executables.Add(method.Name.ToLowerInvariant(), async context => await ExecuteCommand(context, method, getTypeInstance(this.GetType(), services)));
@@ -156,7 +158,8 @@ namespace ModCore.Common.InteractionFramework
                     Description = attr.Description,
                     NSFW = attr.Nsfw,
                     CanBeUsedInDM = attr.DmPermission,
-                    Options = options
+                    Options = options,
+                    DefaultMemberPermissions = attr.Permissions
                 });
 
                 foreach (var executable in subGroups.Item1)
@@ -279,7 +282,7 @@ namespace ModCore.Common.InteractionFramework
 
             foreach (var param in method.GetParameters().Skip(1))
             {
-                var option = context.OptionValues.FirstOrDefault(x => x.Name == param.Name);
+                var option = context.OptionValues.FirstOrDefault(x => x.Name.ToLowerInvariant() == param.Name.ToLowerInvariant());
                 if(option is null || !option.Value.HasValue)
                 {
                     parameters.Add(null);

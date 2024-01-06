@@ -11,8 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static ModCore.Services.Shard.Commands.AboutCommands;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ModCore.Services.Shard.Commands
 {

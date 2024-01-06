@@ -1,4 +1,4 @@
-namespace ModCore.Services.Api
+namespace ModCore.Common.Api
 {
     public class Program
     {

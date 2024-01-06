@@ -86,7 +86,7 @@ namespace ModCore.Services.Shard.EventHandlers
                 }
 
                 _logger.LogDebug(match.Groups[1].Value);
-                var resultEmbed = await executeAsync(match.Groups[1].Value);
+                var resultEmbed = await executeAsync(match.Groups[1].Value, data);
 
                 await _api.ModifyMessageAsync(data.ChannelId, initialMessage.Value.Id, new CreateMessage()
                 {
@@ -96,7 +96,7 @@ namespace ModCore.Services.Shard.EventHandlers
             }
         }
 
-        private async Task<Embed> executeAsync(string inputCode)
+        private async Task<Embed> executeAsync(string inputCode, MessageCreate context)
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -104,7 +104,7 @@ namespace ModCore.Services.Shard.EventHandlers
             var resultEmbed = new Embed()
                 .WithTitle("Evaluation Results");
 
-            var variables = new EvalVariables(_gateway, _api);
+            var variables = new EvalVariables(_gateway, _api, context);
             var options = ScriptOptions.Default
                 .WithImports("System", 
                     "System.Collections.Generic", 
@@ -131,7 +131,7 @@ namespace ModCore.Services.Shard.EventHandlers
                 }
                 else
                 {
-                    resultEmbed.WithField("Return Type", $"`{results.ReturnValue.GetType().ToString()}`");
+                    resultEmbed.WithField("Return Type", $"`{results.ReturnValue.GetType().ToString().Replace("`", "'")}`");
                     resultEmbed.WithField("Return Value", results.ReturnValue.ToString());
                 }
             }
@@ -154,11 +154,13 @@ namespace ModCore.Services.Shard.EventHandlers
         {
             public Gateway Gateway { get; set; }
             public DiscordRest Rest { get; set; }
+            public MessageCreate Context { get; set; }
 
-            public EvalVariables(Gateway gateway, DiscordRest rest)
+            public EvalVariables(Gateway gateway, DiscordRest rest, MessageCreate context)
             {
                 this.Gateway = gateway;
                 this.Rest = rest;
+                this.Context = context;
             }
         }
     }

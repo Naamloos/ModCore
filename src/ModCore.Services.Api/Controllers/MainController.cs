@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace ModCore.Services.Api.Controllers
+namespace ModCore.Common.Api.Controllers
 {
     [ApiController]
     [Route("/")] // "[Controller]"

@@ -77,6 +77,7 @@ namespace ModCore.Common.Discord.Gateway
             uribuilder.Port = 443;
             uribuilder.Query = $"v={API_VERSION}&encoding={ENCODING}";
             gatewayUrl = uribuilder.ToString();
+            // TODO gateway url should not be hard-coded, we should ask the API what to connect to..
 
             this.jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
             {
@@ -353,6 +354,7 @@ namespace ModCore.Common.Discord.Gateway
         {
             await Task.Yield();
 
+            // TODO source gen?? 
             switch (gatewayEvent.EventName)
             {
                 default:
@@ -370,6 +372,12 @@ namespace ModCore.Common.Discord.Gateway
                     break;
                 case "GUILD_CREATE":
                     DispatchEventToSubscribers(gatewayEvent.GetDataAs<GuildCreate>(jsonSerializerOptions));
+                    break;
+                case "GUILD_UPDATE":
+                    DispatchEventToSubscribers(gatewayEvent.GetDataAs<GuildUpdate>(jsonSerializerOptions));
+                    break;
+                case "CHANNEL_CREATE":
+                    DispatchEventToSubscribers(gatewayEvent.GetDataAs<ChannelCreate>(jsonSerializerOptions));
                     break;
                 case "MESSAGE_CREATE":
                     DispatchEventToSubscribers(gatewayEvent.GetDataAs<MessageCreate>(jsonSerializerOptions));

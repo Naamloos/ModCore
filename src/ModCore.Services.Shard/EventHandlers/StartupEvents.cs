@@ -7,7 +7,7 @@ using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.InteractionFramework;
-using ModCore.Services.Shard.Interactions;
+using ModCore.Common.Shard.Interactions;
 using System.Reflection;
 
 namespace ModCore.Services.Shard.EventHandlers

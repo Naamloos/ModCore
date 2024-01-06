@@ -2,21 +2,42 @@
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Messages;
+using ModCore.Common.Discord.Gateway;
+using ModCore.Common.Discord.Rest;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace ModCore.Services.Cache
+namespace ModCore.Common.Cache
 {
     public class CacheService
     {
         private IDistributedCache _cache;
         private JsonSerializerOptions _serializerOptions;
+        private DiscordRest DiscordRest { get; set; }
 
-        public CacheService(IDistributedCache cache) 
+        public CacheService(IDistributedCache cache, DiscordRest restClient) 
         {
             this._cache = cache;
             this._serializerOptions = new JsonSerializerOptions();
+        }
+
+        public async ValueTask<(bool Success, T Value)> GetFromCacheOrRest<T>(Snowflake Id, Func<DiscordRest, Snowflake, ValueTask<RestResponse<T>>> fallback)
+        {
+            T returnValue = default(T);
+            bool success = TryGet<T>(Id, out returnValue);
+            if (!success)
+            {
+                var fallbackResponse = await fallback(DiscordRest, Id);
+                if(fallbackResponse.Success)
+                {
+                    returnValue = fallbackResponse.Value!;
+                    Update<T>(Id, returnValue);
+                    success = true;
+                }
+            }
+
+            return (success, returnValue);
         }
 
         public bool TryGet<T>(Snowflake Id, out T? item)

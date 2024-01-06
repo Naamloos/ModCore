@@ -34,7 +34,7 @@ namespace ModCore.Common.Discord.Entities.Interactions
         public Optional<List<ApplicationCommandOption>> Options { get; set; }
 
         [JsonPropertyName("default_member_permissions")]
-        public string? DefaultMemberPermissions { get; set; }
+        public Optional<Permissions> DefaultMemberPermissions { get; set; }
 
         [JsonPropertyName("dm_permission")]
         public Optional<bool> CanBeUsedInDM { get; set; }

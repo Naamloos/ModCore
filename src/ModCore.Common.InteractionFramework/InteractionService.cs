@@ -5,6 +5,7 @@ using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Rest;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace ModCore.Common.InteractionFramework
@@ -51,7 +52,8 @@ namespace ModCore.Common.InteractionFramework
                 Commands.AddRange(loaded.Item2);
                 foreach(var command in loaded.Item1)
                 {
-                    CommandHandlers.Add(command.Key, command.Value);
+                    Expression<Func<SlashCommandContext, Task>> expression = x => command.Value(x);
+                    CommandHandlers.Add(command.Key, expression.Compile());
                 }
             }
         }
@@ -94,7 +96,10 @@ namespace ModCore.Common.InteractionFramework
                         }
                     }
 
-                    await CommandHandlers[qualifiedName].Invoke(new SlashCommandContext(interactionCreate, Rest, gateway, options, Services));
+                    using (var context = new SlashCommandContext(interactionCreate, Rest, gateway, options, Services))
+                    {
+                        await CommandHandlers[qualifiedName](context);
+                    }
                 }
             }
         }
