@@ -6,7 +6,6 @@ using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.Utils;
-using ModCore.Common.Shard.Interactions;
 
 namespace ModCore.Services.Shard.EventHandlers
 {
@@ -23,7 +22,7 @@ namespace ModCore.Services.Shard.EventHandlers
 
         public Gateway Gateway { get; set; }
 
-        public async Task HandleEvent(MessageCreate data)
+        public async ValueTask HandleEvent(MessageCreate data)
         {
             _logger.LogInformation("@{0}: {1}", data.Author.Username, data.Content);
         }

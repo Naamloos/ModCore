@@ -21,6 +21,6 @@ namespace ModCore.Common.InteractionFramework
             _interactions = interactions;
         }
 
-        public Task HandleEvent(InteractionCreate data) => _interactions.HandleInteractionAsync(Gateway, data);
+        public ValueTask HandleEvent(InteractionCreate data) => _interactions.HandleInteractionAsync(Gateway, data);
     }
 }

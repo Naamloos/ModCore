@@ -29,7 +29,7 @@ namespace ModCore.Common.Discord.Rest
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("ModCore3 (https://github.com/Naamloos/ModCore)");
         }
 
-        public async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string route, string url, object? body = null)
+        public async ValueTask<HttpResponseMessage> RequestAsync(HttpMethod method, string route, string url, object? body = null)
         {
             RateLimitBucket bucket;
 

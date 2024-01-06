@@ -7,7 +7,6 @@ using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.InteractionFramework;
-using ModCore.Common.Shard.Interactions;
 using System.Reflection;
 
 namespace ModCore.Services.Shard.EventHandlers
@@ -30,12 +29,12 @@ namespace ModCore.Services.Shard.EventHandlers
             _interactions = interactions;
         }
 
-        public async Task HandleEvent(Hello data)
+        public async ValueTask HandleEvent(Hello data)
         {
             _logger.LogInformation("Hello from event handler!");
         }
 
-        public async Task HandleEvent(Ready data)
+        public async ValueTask HandleEvent(Ready data)
         {
             _logger.LogInformation("Ready from event handler! User is {0} with ID {1}.",
                 data.User.Username, data.User.Id);
@@ -59,7 +58,7 @@ namespace ModCore.Services.Shard.EventHandlers
             _interactions.Start(Gateway);
         }
 
-        public async Task HandleEvent(GuildCreate data)
+        public async ValueTask HandleEvent(GuildCreate data)
         {
             _logger.LogInformation("Guild {0} has {1} members! Sent from event handler.", data.Name, data.MemberCount);
         }

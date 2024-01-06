@@ -2,7 +2,7 @@
 {
     public interface ISubscriber<T> : ISubscriber where T : IPublishable
     {
-        public Task HandleEvent(T data);
+        public ValueTask HandleEvent(T data);
     }
 
     public interface ISubscriber 

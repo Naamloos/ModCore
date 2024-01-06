@@ -11,13 +11,13 @@
             manualResetEvent.Set();
         }
 
-        public async Task WaitAsync()
+        public async ValueTask WaitAsync()
         {
             // If rate limit hits 0, we wait for it to unblock.
             manualResetEvent.Wait();
         }
 
-        public async Task SignalDoneAsync(int remaining, float reset_after)
+        public async ValueTask SignalDoneAsync(int remaining, float reset_after)
         {
             if (remaining < 1)
             {

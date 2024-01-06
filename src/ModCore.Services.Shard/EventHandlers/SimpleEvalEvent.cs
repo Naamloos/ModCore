@@ -37,7 +37,7 @@ namespace ModCore.Services.Shard.EventHandlers
         }
 
         private Regex codeRegex = new Regex(@"```c?s?((.|\n)*?)```", RegexOptions.Compiled);
-        public async Task HandleEvent(MessageCreate data)
+        public async ValueTask HandleEvent(MessageCreate data)
         {
             if(_modCore == default)
             {
@@ -96,7 +96,7 @@ namespace ModCore.Services.Shard.EventHandlers
             }
         }
 
-        private async Task<Embed> executeAsync(string inputCode, MessageCreate context)
+        private async ValueTask<Embed> executeAsync(string inputCode, MessageCreate context)
         {
             var stopwatch = new Stopwatch();
             stopwatch.Start();

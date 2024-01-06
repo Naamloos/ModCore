@@ -27,7 +27,7 @@ namespace ModCore.Services.Shard.Commands
         }
 
         [SlashCommand("Bans a user", permissions: Permissions.BanMembers)]
-        public async Task Ban(
+        public async ValueTask Ban(
             SlashCommandContext context,
             [Option("User to ban", ApplicationCommandOptionType.User)] Snowflake userToBan, 
             [Option("Reason to ban user", ApplicationCommandOptionType.String)] Optional<string> reason, 

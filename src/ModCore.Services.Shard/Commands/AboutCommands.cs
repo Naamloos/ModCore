@@ -24,7 +24,7 @@ namespace ModCore.Services.Shard.Commands
         }
 
         [SlashCommand("Shows information about this bot.", dm_permission: true)]
-        public async Task About(SlashCommandContext context)
+        public async ValueTask About(SlashCommandContext context)
         {
             _logger.LogInformation(context.EventData.Member.Value.User.Value.Username + " ran about!");
 

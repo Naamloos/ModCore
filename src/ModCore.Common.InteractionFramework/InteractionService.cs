@@ -15,7 +15,7 @@ namespace ModCore.Common.InteractionFramework
         private DiscordRest Rest { get; set; }
 
         private List<ApplicationCommand> Commands { get; set; }
-        private Dictionary<string, Func<SlashCommandContext, Task>> CommandHandlers { get; set; }
+        private Dictionary<string, Func<SlashCommandContext, ValueTask>> CommandHandlers { get; set; }
         private IServiceProvider Services { get; set; }
 
         public InteractionService(DiscordRest rest, IServiceProvider services)
@@ -52,13 +52,13 @@ namespace ModCore.Common.InteractionFramework
                 Commands.AddRange(loaded.Item2);
                 foreach(var command in loaded.Item1)
                 {
-                    Expression<Func<SlashCommandContext, Task>> expression = x => command.Value(x);
+                    Expression<Func<SlashCommandContext, ValueTask>> expression = x => command.Value(x);
                     CommandHandlers.Add(command.Key, expression.Compile());
                 }
             }
         }
 
-        public async Task PublishCommands(Snowflake appId)
+        public async ValueTask PublishCommands(Snowflake appId)
         {
             await Rest.BulkOverwriteGlobalApplicationCommandsAsync(appId, [.. Commands]);
         }
@@ -68,7 +68,7 @@ namespace ModCore.Common.InteractionFramework
             gateway.RegisterSubscriber(typeof(InteractionEventHandler));
         }
 
-        internal async Task HandleInteractionAsync(Gateway gateway, InteractionCreate interactionCreate)
+        internal async ValueTask HandleInteractionAsync(Gateway gateway, InteractionCreate interactionCreate)
         {
             if(interactionCreate.Type == InteractionType.ApplicationCommand)
             {
