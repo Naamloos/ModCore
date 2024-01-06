@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace ModCore.Common.Cache
@@ -42,24 +43,25 @@ namespace ModCore.Common.Cache
 
         public async ValueTask HandleEvent(MessageCreate data)
         {
-            _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data);
+            _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data, MessageChangeType.Initial, out _);
         }
 
         public async ValueTask HandleEvent(MessageUpdate data)
         {
-            _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data);
+            _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data, MessageChangeType.Update, out _);
         }
 
         public async ValueTask HandleEvent(MessageDelete data)
         {
-            _cache.DeleteCachedMessage(data.GuildId, data.ChannelId, data.Id);
+            _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, null, MessageChangeType.Delete, out _); 
+            // Why do I even have an out variable here
         }
 
         public async ValueTask HandleEvent(MessageBulkDelete data)
         {
             foreach(var id in data.Ids)
             {
-                _cache.DeleteCachedMessage(data.GuildId, data.ChannelId, id);
+                _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, id, null, MessageChangeType.BulkDelete, out _);
             }
         }
     }

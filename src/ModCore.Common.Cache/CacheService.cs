@@ -73,9 +73,9 @@ namespace ModCore.Common.Cache
             _cache.SetString(cacheKey, JsonSerializer.Serialize<T>(newCacheItem, _serializerOptions));
         }
 
-        public bool GetMessageFromCache(Snowflake guildId, Snowflake channelId, Snowflake messageId, out Message? message)
+        public bool GetMessageFromCache(Snowflake guildId, Snowflake channelId, Snowflake messageId, out MessageHistory? history)
         {
-            message = default;
+            history = default;
 
             var cacheKey = $"message_cache :: {guildId} :: {channelId} :: {messageId}";
             var cachedJson = _cache.GetString(cacheKey);
@@ -84,60 +84,66 @@ namespace ModCore.Common.Cache
                 return false;
             }
 
-            message = JsonSerializer.Deserialize<Message>(cachedJson);
+            history = JsonSerializer.Deserialize<MessageHistory>(cachedJson);
             return true;
         }
 
-        public void UpdateCachedMessage(Snowflake guildId, Snowflake channelId, Snowflake messageId, Message message)
+        public void UpdateCachedMessage(Snowflake guildId, Snowflake channelId, Snowflake messageId, Message? message, 
+            MessageChangeType changeType, out MessageHistory? history)
         {
             var cacheKey = $"message_cache :: {guildId} :: {channelId} :: {messageId}";
             var cachedJson = _cache.GetString(cacheKey);
+
+            var newChange = new MessageState()
+            {
+                ChangeTimestamp = DateTime.UtcNow,
+                ChangeType = changeType,
+                State = message != default ? message : Optional<Message>.None,
+            };
+
             if (string.IsNullOrEmpty(cachedJson))
             {
-                _cache.SetString(cacheKey, JsonSerializer.Serialize<Message>(message, _serializerOptions), new DistributedCacheEntryOptions()
+                history = new MessageHistory()
+                {
+                    Id = messageId,
+                    History = new() { newChange }
+                };
+
+                _cache.SetString(cacheKey, JsonSerializer.Serialize(history, _serializerOptions), new DistributedCacheEntryOptions()
                 {
                     SlidingExpiration = TimeSpan.FromHours(24) // TODO decide whether there's a more sensible value
                 });
+
+                history = history;
                 return;
             }
 
-            var oldMessage = JsonSerializer.Deserialize<Message>(cachedJson);
-            var newMessage = mergeObjects(oldMessage, message);
-            _cache.SetString(cacheKey, JsonSerializer.Serialize<Message>(newMessage, _serializerOptions));
+            history = JsonSerializer.Deserialize<MessageHistory>(cachedJson);
+            history.History.Add(newChange);
+
+            _cache.SetString(cacheKey, JsonSerializer.Serialize(history, _serializerOptions));
             _cache.Refresh(cacheKey);
-        }
-
-        public void DeleteCachedMessage(Snowflake guildId, Snowflake channelId, Snowflake messageId)
-        {
-            var cacheKey = $"message_cache :: {guildId} :: {channelId} :: {messageId}";
-            var cachedJson = _cache.GetString(cacheKey);
-            if (string.IsNullOrEmpty(cachedJson))
-            {
-                return;
-            }
-
-            _cache.Remove(cacheKey);
         }
 
         private T mergeObjects<T>(T oldValue, T newValue)
         {
-            // TODO this updates the old value, want to keep access to the old message.
-            var newCacheItem = oldValue;
-
             var type = typeof(T);
+            var newCacheItem = (T)Activator.CreateInstance(type)!;
 
             foreach (var property in type.GetProperties())
             {
+                object oldPropertyValue = property.GetValue(oldValue);
                 object newPropertyValue = property.GetValue(newValue);
 
                 if(property.PropertyType.IsInstanceOfType(typeof(Optional<>)))
                 {
-                    // if no value is present in new, we don't merge.
+                    // if no value is present in new, we keep old.
                     var prop = property.GetValue(newValue);
                     var hasValue = (bool)prop!.GetType().GetMethod("HasValue")!.Invoke(prop, null)!;
                     if (!hasValue)
                     {
-                        continue; // Optional has no value meaning we can ignore this property. Keep the old value.
+                        property.SetValue(oldPropertyValue, null);
+                        continue; // Keep the old value.
                     }
                 }
 
