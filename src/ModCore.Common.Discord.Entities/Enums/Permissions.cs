@@ -13,7 +13,6 @@ namespace ModCore.Common.Discord.Entities.Enums
     public enum Permissions : long
     {
         None = 0,
-        All = 2199023255551,
 
         CreateInstantInvite = 0x0000000000000001,
         KickMembers = 0x0000000000000002,
@@ -61,6 +60,7 @@ namespace ModCore.Common.Discord.Entities.Enums
         CreateEmojisStickersSoundsNShit = 0x0000080000000000,
         CreateEvents = 0x0000100000000000,
         UseExternalSounds = 0x0000200000000000,
-        SendVoiceMessages = 0x0000400000000000
+        SendVoiceMessages = 0x0000400000000000,
+        All = 2199023255551,
     }
 }

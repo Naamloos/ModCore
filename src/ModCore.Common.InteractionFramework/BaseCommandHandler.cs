@@ -65,7 +65,7 @@ namespace ModCore.Common.InteractionFramework
                 CanBeUsedInDM = attr.DmPermission,
                 Type = ApplicationCommandType.ChatInput,
                 Options = options,
-                DefaultMemberPermissions = attr.Permissions
+                DefaultMemberPermissions = attr.Permissions == Permissions.None? Optional<Permissions>.None : attr.Permissions,
             };
 
             foreach (var subCommand in subCommands.Item1)
@@ -125,7 +125,7 @@ namespace ModCore.Common.InteractionFramework
                     NSFW = attr.Nsfw,
                     CanBeUsedInDM = attr.DmPermission,
                     Options = loadOptions(method),
-                    DefaultMemberPermissions = attr.Permissions
+                    DefaultMemberPermissions = attr.Permissions == Permissions.None ? Optional<Permissions>.None : attr.Permissions,
                 });
 
                 executables.Add(method.Name.ToLowerInvariant(), async context => await ExecuteCommand(context, method, getTypeInstance(this.GetType(), services)));
@@ -160,7 +160,7 @@ namespace ModCore.Common.InteractionFramework
                     NSFW = attr.Nsfw,
                     CanBeUsedInDM = attr.DmPermission,
                     Options = options,
-                    DefaultMemberPermissions = attr.Permissions
+                    DefaultMemberPermissions = attr.Permissions == Permissions.None ? Optional<Permissions>.None : attr.Permissions,
                 });
 
                 foreach (var executable in subGroups.Item1)
