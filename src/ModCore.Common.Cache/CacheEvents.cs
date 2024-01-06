@@ -29,6 +29,8 @@ namespace ModCore.Common.Cache
             _cache = cache;
         }
 
+        // TODO: member+user+channel+role cache,
+
         public async ValueTask HandleEvent(GuildCreate data)
         {
             _logger.LogInformation("Updated guild cache for {guildname} via GUILD_CREATE", data.Name);
@@ -41,6 +43,8 @@ namespace ModCore.Common.Cache
             _cache.Update<Guild>(data.Id, data);
         }
 
+        // The following 4 methods keep a local message history cache, which is essentially very useful for moderators trying to snipe multiple edits.
+        // This cache expires after 24 hours, but I might lower that amount if cache fills up too quick.
         public async ValueTask HandleEvent(MessageCreate data)
         {
             _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data, MessageChangeType.Initial, out _);
