@@ -94,17 +94,34 @@ namespace ModCore.Common.Cache
             var cachedJson = _cache.GetString(cacheKey);
             if (string.IsNullOrEmpty(cachedJson))
             {
-                _cache.SetString(cacheKey, JsonSerializer.Serialize<Message>(message, _serializerOptions));
+                _cache.SetString(cacheKey, JsonSerializer.Serialize<Message>(message, _serializerOptions), new DistributedCacheEntryOptions()
+                {
+                    SlidingExpiration = TimeSpan.FromHours(24) // TODO decide whether there's a more sensible value
+                });
                 return;
             }
 
             var oldMessage = JsonSerializer.Deserialize<Message>(cachedJson);
             var newMessage = mergeObjects(oldMessage, message);
             _cache.SetString(cacheKey, JsonSerializer.Serialize<Message>(newMessage, _serializerOptions));
+            _cache.Refresh(cacheKey);
+        }
+
+        public void DeleteCachedMessage(Snowflake guildId, Snowflake channelId, Snowflake messageId)
+        {
+            var cacheKey = $"message_cache :: {guildId} :: {channelId} :: {messageId}";
+            var cachedJson = _cache.GetString(cacheKey);
+            if (string.IsNullOrEmpty(cachedJson))
+            {
+                return;
+            }
+
+            _cache.Remove(cacheKey);
         }
 
         private T mergeObjects<T>(T oldValue, T newValue)
         {
+            // TODO this updates the old value, want to keep access to the old message.
             var newCacheItem = oldValue;
 
             var type = typeof(T);

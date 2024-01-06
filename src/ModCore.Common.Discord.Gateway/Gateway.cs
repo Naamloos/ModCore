@@ -382,6 +382,15 @@ namespace ModCore.Common.Discord.Gateway
                 case "MESSAGE_CREATE":
                     DispatchEventToSubscribers(gatewayEvent.GetDataAs<MessageCreate>(jsonSerializerOptions));
                     break;
+                case "MESSAGE_UPDATE":
+                    DispatchEventToSubscribers(gatewayEvent.GetDataAs<MessageUpdate>(jsonSerializerOptions));
+                    break;
+                case "MESSAGE_DELETE":
+                    DispatchEventToSubscribers(gatewayEvent.GetDataAs<MessageDelete>(jsonSerializerOptions));
+                    break;
+                case "MESSAGE_DELETE_BULK":
+                    DispatchEventToSubscribers(gatewayEvent.GetDataAs<MessageBulkDelete>(jsonSerializerOptions));
+                    break;
                 case "INTERACTION_CREATE":
                     DispatchEventToSubscribers(gatewayEvent.GetDataAs<InteractionCreate>(jsonSerializerOptions));
                     break;

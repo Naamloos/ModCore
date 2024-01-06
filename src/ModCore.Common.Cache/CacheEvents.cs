@@ -14,7 +14,8 @@ namespace ModCore.Common.Cache
     /// <summary>
     /// This event handler exists solely to update memory cache entries when receiving gateway events.
     /// </summary>
-    public class CacheEvents : ISubscriber<GuildCreate>, ISubscriber<GuildUpdate>
+    public class CacheEvents : ISubscriber<GuildCreate>, ISubscriber<GuildUpdate>, 
+        ISubscriber<MessageCreate>, ISubscriber<MessageUpdate>, ISubscriber<MessageDelete>, ISubscriber<MessageBulkDelete>
     {
         public Gateway Gateway { get; set; }
 
@@ -37,6 +38,29 @@ namespace ModCore.Common.Cache
         {
             _logger.LogInformation("Updated guild cache for {guildname} via GUILD_UPDATE", data.Name);
             _cache.Update<Guild>(data.Id, data);
+        }
+
+        public async ValueTask HandleEvent(MessageCreate data)
+        {
+            _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data);
+        }
+
+        public async ValueTask HandleEvent(MessageUpdate data)
+        {
+            _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data);
+        }
+
+        public async ValueTask HandleEvent(MessageDelete data)
+        {
+            _cache.DeleteCachedMessage(data.GuildId, data.ChannelId, data.Id);
+        }
+
+        public async ValueTask HandleEvent(MessageBulkDelete data)
+        {
+            foreach(var id in data.Ids)
+            {
+                _cache.DeleteCachedMessage(data.GuildId, data.ChannelId, id);
+            }
         }
     }
 }
