@@ -26,7 +26,14 @@ namespace ModCore.Services.Shard.Commands
         [SlashCommand("Shows information about this bot.", dm_permission: true)]
         public async ValueTask About(SlashCommandContext context)
         {
-            _logger.LogInformation(context.EventData.Member.Value.User.Value.Username + " ran about!");
+            if (context.EventData.Member.HasValue)
+            {
+                _logger.LogInformation(context.EventData.Member.Value.User.Value.Username + " ran about!");
+            }
+            else if(context.EventData.User.HasValue)
+            {
+                _logger.LogInformation(context.EventData.User.Value.Username + " ran about!");
+            }
 
             var data = context.EventData;
             var modcoreSelf = await context.RestClient.GetCurrentUserAsync();
@@ -35,7 +42,7 @@ namespace ModCore.Services.Shard.Commands
             var avatar = $"https://cdn.discordapp.com/avatars/{modcoreSelf.Value.Id}/{modcoreSelf.Value.AvatarHash}.png";
             var resp = await context.RestClient.CreateInteractionResponseAsync(data.Id, data.Token, InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
             {
-                Content = $"{data.Member.Value.User.Value.Mention}, Welcome to ModCore v3. " +
+                Content = $"Welcome to ModCore v3. " +
                         $"This is an early ALPHA version of ModCore, not yet available to the general public.",
                 Flags = MessageFlags.Ephemeral,
                 Embeds = new[]
