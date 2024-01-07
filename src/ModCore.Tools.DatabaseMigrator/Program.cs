@@ -6,7 +6,7 @@
         {
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("Welcome, to the ModCore database migrator tool!" +
-                "\nThis tool will assist you in migrating data from a v2 ModCore database to a ModCore v3 database." +
+                "\nThis tool will assist you in migrating data from a v2 ModCore database to a v3 ModCore database." +
                 "\nWhy write all this text when I'm the only user?" +
                 "\nL Bozo Cope\n");
             Console.ResetColor();
