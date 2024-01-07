@@ -16,5 +16,20 @@ namespace ModCore.Services.Shard
 
         [JsonPropertyName("current_shard")]
         public int CurrentShard { get; set; } = 0;
+
+        [JsonPropertyName("postgres_username")]
+        public string PostgresUsername { get; set; } = "postgres";
+
+        [JsonPropertyName("postgres_password")]
+        public string PostgresPassword { get; set; } = "";
+
+        [JsonPropertyName("postgres_database")]
+        public string PostgresDatabase { get; set; } = "modcore_next";
+
+        [JsonPropertyName("postgres_host")]
+        public string PostgresHost { get; set; } = "127.0.0.1";
+
+        [JsonPropertyName("postgres_port")]
+        public int PostgresPort { get; set; } = 5432;
     }
 }

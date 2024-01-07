@@ -14,6 +14,8 @@ using ModCore.Common.Discord.Entities.Serializer;
 using System.Text.Json.Serialization;
 using ModCore.Common.Cache;
 using ModCore.Services.Shard.EventHandlers;
+using ModCore.Common.Database;
+using ModCore.Common.Utils;
 
 namespace ModCore.Services.Shard
 {
@@ -95,6 +97,10 @@ namespace ModCore.Services.Shard
                     services.AddSingleton(jsonOptions);
                     services.AddDistributedMemoryCache();
                     services.AddModcoreCacheService();
+                    services.AddDbContext<DatabaseConnection>();
+
+                    // Helper for scoped and transient services
+                    services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));
                 })
                 .Build();
 

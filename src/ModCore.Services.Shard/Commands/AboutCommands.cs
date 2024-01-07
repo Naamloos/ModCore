@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using ModCore.Common.Database;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;

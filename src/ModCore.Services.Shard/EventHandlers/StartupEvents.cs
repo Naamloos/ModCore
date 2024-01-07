@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using ModCore.Common.Database;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;
@@ -21,19 +23,26 @@ namespace ModCore.Services.Shard.EventHandlers
         private readonly ILogger _logger;
         private readonly DiscordRest _rest;
         private readonly InteractionService _interactions;
+        private readonly DatabaseConnection _database;
 
         private bool commandsRegistered = false;
 
-        public StartupEvents(ILogger<StartupEvents> logger, DiscordRest rest, InteractionService interactions)
+        public StartupEvents(ILogger<StartupEvents> logger, DiscordRest rest, InteractionService interactions, DatabaseConnection database)
         {
             _logger = logger;
             _rest = rest;
             _interactions = interactions;
+            _database = database;
         }
 
         public async ValueTask HandleEvent(Hello data)
         {
             _logger.LogInformation("Hello from event handler!");
+            var pendingMigrations = await _database.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
+            {
+                await _database.Database.MigrateAsync();
+            }
         }
 
         public async ValueTask HandleEvent(Ready data)
