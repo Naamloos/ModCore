@@ -41,7 +41,12 @@ namespace ModCore.Services.Shard.EventHandlers
             var pendingMigrations = await _database.Database.GetPendingMigrationsAsync();
             if (pendingMigrations.Any())
             {
+                _logger.LogInformation("Applied pending database migrations: {0}", string.Join(", ", pendingMigrations));
                 await _database.Database.MigrateAsync();
+            }
+            else
+            {
+                _logger.LogInformation("No pending database migrations.");
             }
         }
 
