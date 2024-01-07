@@ -32,8 +32,6 @@ namespace ModCore.Common.Database
                 Host = obj["postgres_host"]!.GetValue<string>()
             };
 
-            Console.WriteLine(cStringBuilder);
-
             var options = new DbContextOptionsBuilder<DatabaseConnection>()
                 .UseNpgsql(cStringBuilder.ToString());
 

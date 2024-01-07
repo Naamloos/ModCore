@@ -16,7 +16,7 @@ namespace ModCore.Common.Database.Entities
         public ulong Id { get; set; }
 
         [Column("logging_channel_id")]
-        public ulong LoggingChannel {  get; set; }
+        public ulong? LoggingChannel {  get; set; }
 
         public virtual ICollection<DatabaseLevelData> LevelData { get; set; }
     }
