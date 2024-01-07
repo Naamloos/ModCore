@@ -53,6 +53,8 @@ namespace ModCore.Common.Discord.Gateway
         private int shard_count;
 
         private Ready lastReadyEvent;
+        private int retries = 0;
+        private const int MAX_RETRIES = 5;
 
         public Gateway(Action<GatewayConfiguration> configure, IServiceProvider services)
         {
@@ -210,7 +212,15 @@ namespace ModCore.Common.Discord.Gateway
             {
                 // Wait a little but just in case the connection loss is caused by some network wackiness
                 await Task.Delay(2000);
-                await ReconnectAsync();
+                retries++;
+                if (retries < MAX_RETRIES)
+                {
+                    await ReconnectAsync();
+                }
+                else
+                {
+                    logger.LogError($"MAX_RETRIES ({MAX_RETRIES}) passed, giving up and waiting for manual reset.");
+                }
             }
         }
 
@@ -361,6 +371,7 @@ namespace ModCore.Common.Discord.Gateway
                     logger.LogWarning("Received yet unknown DISPATCH event: {0}", gatewayEvent.EventName);
                     break;
                 case "READY":
+                    retries = 0;
                     lastReadyEvent = gatewayEvent.GetDataAs<Ready>(jsonSerializerOptions)!;
 
                     Application = lastReadyEvent.Application;
