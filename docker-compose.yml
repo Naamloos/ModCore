@@ -1,42 +1,42 @@
 services:
-
-  messagebroker: # Message Broker, handles cross-service communication.
-    build: ./src/docker/broker.dockerfile
+  postgres:
     restart: unless-stopped
-
-  timers: # Timer service, handles long-running timers and triggers events when they hit.
-    build: ./src/timers.dockerfile
-    restart: unless-stopped
-    links:
-      - messagebroker
-
+    image: postgres:14-alpine
+    shm_size: 256mb
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+    volumes:
+      - modcore_postgres:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_HOST_AUTH_METHOD=trust'
+  
   api:
-    build: ./src/docker/api.dockerfile
+    build: ./api.dockerfile
     restart: unless-stopped
     links:
-      - messagebroker
+      - postgres
 
   # Shards, these define websocket connections with Discord's gateway.
-  # This could be automated, but at this time we still manually handle this
-  shard-0:
-    build: ./src/docker/shard.dockerfile
+  # Ensure shard_count is correct in .env!!!
+  shard_0:
+    build: ./shard.dockerfile
     restart: unless-stopped
     links:
-      - messagebroker
+      - postgres
     environment:
       - SHARD_ID=0
-      - SHARD_COUNT=2
-      - TOKEN=token
     env_file:
-      - token.env
-
-  shard-1:
-    build: ./src/docker/shard.dockerfile
+      - .env
+      
+  shard_1:
+    build: ./shard.dockerfile
     restart: unless-stopped
     links:
-      - messagebroker
+      - postgres
     environment:
       - SHARD_ID=1
-      - SHARD_COUNT=2
     env_file:
-      - token.env
+      - .env
+      
+volumes:
+  modcore_postgres:

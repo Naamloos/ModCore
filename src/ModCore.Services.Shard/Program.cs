@@ -66,7 +66,10 @@ namespace ModCore.Services.Shard
                 })
                 .ConfigureAppConfiguration(config =>
                 {
-                    config.AddJsonFile("settings.json")
+                    config
+                        #if DEBUG
+                        .AddJsonFile("settings.json") // Only add json config when debugging
+                        #endif
                         .AddEnvironmentVariables()
                         .Build();
                 })
