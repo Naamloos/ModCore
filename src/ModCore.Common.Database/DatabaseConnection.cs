@@ -3,6 +3,14 @@ using Microsoft.Extensions.Configuration;
 using ModCore.Common.Database.Entities;
 using Npgsql;
 
+// dotnet-ef database update (or run ModCore once to auto-apply)
+// dotnet-ef migrations add MigrationName
+// dotnet-ef database update (or run ModCore once to auto-apply)
+
+// to revert, dotnet-ef database update MigrationToRollbackToName
+
+// make sure to copy your debug settings.json to the build dir of the ModCore.Common.Database project!
+
 namespace ModCore.Common.Database
 {
     public class DatabaseConnection : DbContext
