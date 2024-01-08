@@ -39,7 +39,7 @@ namespace ModCore.Services.Shard
             ScheduleNext();
         }
 
-        private void ScheduleNext()
+        public void ScheduleNext()
         {
             try
             {
