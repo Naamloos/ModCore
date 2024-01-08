@@ -80,7 +80,7 @@ namespace ModCore.Services.Shard.EventHandlers
             if (!initialized)
             {
                 _interactions.Start(Gateway);
-                await _timerService.StartAsync();
+                await _timerService.StartAsync(data.Shard.HasValue? data.Shard.Value[0] : 0);
                 initialized = true;
             }
         }
