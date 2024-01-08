@@ -272,7 +272,7 @@ namespace ModCore.Common.InteractionFramework
                     Name = param.Name.ToLowerInvariant(),
                     Description = attr.Description,
                     Type = attr.Type,
-                    Required = param.ParameterType.IsAssignableFrom(typeof(Optional))
+                    Required = param.ParameterType.IsAssignableTo(typeof(Optional<>)) ? Optional<bool>.None : true
                 });
             }
             return options;
