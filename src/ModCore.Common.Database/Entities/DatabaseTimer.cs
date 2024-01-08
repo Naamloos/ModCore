@@ -18,6 +18,9 @@ namespace ModCore.Common.Database.Entities
 
         [Column("guild_id")]
         public ulong GuildId { get; set; }
+
+        [Column("shard_id")]
+        public int ShardId { get; set; } = 0;
         
         [Column("trigger_at")]
         public DateTimeOffset TriggersAt { get; set; }

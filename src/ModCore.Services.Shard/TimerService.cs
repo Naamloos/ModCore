@@ -22,6 +22,8 @@ namespace ModCore.Services.Shard
         private DatabaseTimer _timer;
         private CancellationTokenSource _cancellation;
 
+        private int shardId;
+
         public TimerService(ILogger<TimerService> logger, DatabaseContext dbContext, DiscordRest rest, CacheService cache)
         {
             _databaseContext = dbContext;
@@ -33,10 +35,13 @@ namespace ModCore.Services.Shard
             _cancellation = new CancellationTokenSource();
         }
 
-        public async ValueTask StartAsync()
+        public async ValueTask StartAsync(int shardId)
         {
+            this.shardId = shardId;
+            _logger.LogInformation("Initializing timer service...");
             await DispatchExpiredTimersAsync();
             ScheduleNext();
+            _logger.LogInformation("Timer service initialized.");
         }
 
         public void ScheduleNext()
@@ -44,13 +49,13 @@ namespace ModCore.Services.Shard
             try
             {
                 _semaphore?.Wait();
-                if (!_databaseContext.Timers.Any())
+                if (!_databaseContext.Timers.Any(x => x.ShardId == shardId))
                 {
                     return;
                 }
 
                 // Fetch upcoming timer
-                var nextTimer = _databaseContext.Timers.OrderBy(x => x.TriggersAt).FirstOrDefault();
+                var nextTimer = _databaseContext.Timers.Where(x => x.ShardId == shardId).OrderBy(x => x.TriggersAt).FirstOrDefault();
 
                 if (nextTimer != default)
                 {
@@ -87,7 +92,7 @@ namespace ModCore.Services.Shard
         private async ValueTask DispatchExpiredTimersAsync()
         {
             var now = DateTimeOffset.Now;
-            var expiredTimers = _databaseContext.Timers.Where(x => x.TriggersAt < now).ToList();
+            var expiredTimers = _databaseContext.Timers.Where(x => x.TriggersAt < now && x.ShardId == shardId).ToList();
 
             foreach (var timer in expiredTimers)
             {
