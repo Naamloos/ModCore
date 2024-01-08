@@ -16,6 +16,6 @@ namespace ModCore.Common.Database.Timers
         public bool Snoozed { get; set; } = false;
 
         [JsonPropertyName("created_at")]
-        public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     }
 }

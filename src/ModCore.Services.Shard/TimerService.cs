@@ -66,7 +66,7 @@ namespace ModCore.Services.Shard
                     }
                     _cancellation = new CancellationTokenSource();
 
-                    var delay = _timer.TriggersAt.Subtract(DateTimeOffset.Now);
+                    var delay = _timer.TriggersAt.Subtract(DateTimeOffset.UtcNow);
                     if (delay.TotalMilliseconds > int.MaxValue)
                     {
                         // Time until this timer hits exceeds the total milliseconds max.
@@ -91,7 +91,7 @@ namespace ModCore.Services.Shard
 
         private async ValueTask DispatchExpiredTimersAsync()
         {
-            var now = DateTimeOffset.Now;
+            var now = DateTimeOffset.UtcNow;
             var expiredTimers = _databaseContext.Timers.Where(x => x.TriggersAt < now && x.ShardId == shardId).ToList();
 
             foreach (var timer in expiredTimers)

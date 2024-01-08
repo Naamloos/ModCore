@@ -30,10 +30,10 @@ namespace ModCore.Common.Database.Entities
         public string Content { get; set; }
 
         [Column("modifed_at")]
-        public DateTimeOffset ModifiedAt { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset ModifiedAt { get; set; } = DateTimeOffset.UtcNow;
 
         [Column("created_at")]
-        public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
+        public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
         [Column("guild_id")]
         public ulong GuildId { get; set; }
