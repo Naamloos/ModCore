@@ -33,9 +33,9 @@ namespace ModCore.Common.Database
         public virtual DbSet<DatabaseLoggerSettings> LoggerSettings { get; set; }
         public virtual DbSet<DatabaseWelcomeSettings> WelcomeSettings { get; set; }
         public virtual DbSet<DatabaseTicket> Tickets { get; set; }
+        public virtual DbSet<DatabaseTimer> Timers { get; set; }
 
         private string _connectionString;
-        private bool inMemory = false;
 
         public DatabaseConnection(IConfiguration config)
         {
@@ -236,6 +236,9 @@ namespace ModCore.Common.Database
                 .HasOne(x => x.Guild)
                 .WithOne(x => x.WelcomeSettings)
                 .HasForeignKey<DatabaseWelcomeSettings>(x => x.GuildId);
+
+            modelBuilder.Entity<DatabaseTimer>()
+                .HasKey(x => x.TimerId);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -12,6 +12,7 @@ namespace ModCore.Common.Database.Entities
     public class DatabaseTagHistory
     {
         [Column("id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public ulong Id { get; set; }
 
         [Column("tag_id")]

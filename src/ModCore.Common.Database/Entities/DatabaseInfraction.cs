@@ -11,6 +11,7 @@ namespace ModCore.Common.Database.Entities
     public class DatabaseInfraction
     {
         [Column("id")]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public ulong Id { get; set; }
 
         [Column("guild_id")]
