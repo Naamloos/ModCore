@@ -28,6 +28,9 @@ namespace ModCore.Common.Discord.Gateway
 
         public ReadyApplication? Application { get; private set; }
 
+        public int ShardId => shard_id;
+        public int ShardCount => shard_count;
+
         private GatewayConfiguration configuration;
 
         private string gatewayUrl = "";

@@ -8,10 +8,10 @@ namespace ModCore.Common.Discord.Entities.Messages
         public string[] Parse { get; set; }
 
         [JsonPropertyName("roles")]
-        public Optional<Snowflake> Roles { get; set; }
+        public Optional<List<Snowflake>> Roles { get; set; }
 
         [JsonPropertyName("users")]
-        public Optional<Snowflake> Users { get; set; }
+        public Optional<List<Snowflake>> Users { get; set; }
 
         [JsonPropertyName("replied_user")]
         public Optional<bool> RepliedUser { get; set; }

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using ModCore.Common.Database.Entities;
 using Npgsql;
+using static Microsoft.EntityFrameworkCore.NpgsqlModelBuilderExtensions;
 
 // dotnet-ef database update (or run ModCore once to auto-apply)
 // dotnet-ef migrations add MigrationName
@@ -45,7 +46,8 @@ namespace ModCore.Common.Database
                 Username = config.GetRequiredSection("postgres_username").Value!,
                 Password = config.GetRequiredSection("postgres_password").Value!,
                 Port = int.Parse(config.GetRequiredSection("postgres_port").Value!),
-                Host = config.GetRequiredSection("postgres_host").Value!
+                Host = config.GetRequiredSection("postgres_host").Value!,
+                IncludeErrorDetail = true
             };
 
             this._connectionString = cStringBuilder.ToString();
@@ -86,6 +88,9 @@ namespace ModCore.Common.Database
             modelBuilder.Entity<DatabaseStarboard>()
                 .HasKey(x => new { x.Id });
             modelBuilder.Entity<DatabaseStarboard>()
+                .Property(x => x.Id)
+                .ValueGeneratedOnAdd();
+            modelBuilder.Entity<DatabaseStarboard>()
                 .HasOne(x => x.Guild)
                 .WithMany(x => x.Starboards)
                 .HasForeignKey(x => x.GuildId)
@@ -106,6 +111,9 @@ namespace ModCore.Common.Database
 
             modelBuilder.Entity<DatabaseTag>()
                 .HasKey(x => new {x.Id});
+            modelBuilder.Entity<DatabaseTag>()
+                .Property(x => x.Id)
+                .ValueGeneratedOnAdd();
             modelBuilder.Entity<DatabaseTag>()
                 .HasOne(x => x.Guild)
                 .WithMany(x => x.Tags)
@@ -175,6 +183,9 @@ namespace ModCore.Common.Database
             modelBuilder.Entity<DatabaseInfraction>()
                 .HasKey(x => x.Id);
             modelBuilder.Entity<DatabaseInfraction>()
+                .Property(x => x.Id)
+                .ValueGeneratedOnAdd();
+            modelBuilder.Entity<DatabaseInfraction>()
                 .HasOne(x =>x.Guild)
                 .WithMany(x => x.Infractions)
                 .HasForeignKey(x => x.GuildId)
@@ -196,6 +207,9 @@ namespace ModCore.Common.Database
             modelBuilder.Entity<DatabaseTicket>()
                 .HasKey(x => x.Id);
             modelBuilder.Entity<DatabaseTicket>()
+                .Property(x => x.Id)
+                .ValueGeneratedOnAdd();
+            modelBuilder.Entity<DatabaseTicket>()
                 .HasOne(x => x.Author)
                 .WithMany(x => x.Tickets)
                 .HasForeignKey(x => x.AuthorId)
@@ -208,6 +222,9 @@ namespace ModCore.Common.Database
 
             modelBuilder.Entity<DatabaseRoleMenu>()
                 .HasKey(x => x.Id);
+            modelBuilder.Entity<DatabaseRoleMenu>()
+                .Property(x => x.Id)
+                .ValueGeneratedOnAdd();
             modelBuilder.Entity<DatabaseRoleMenu>()
                 .HasOne(x => x.Guild)
                 .WithMany(x => x.RoleMenus)
@@ -239,8 +256,11 @@ namespace ModCore.Common.Database
 
             modelBuilder.Entity<DatabaseTimer>()
                 .HasKey(x => x.TimerId);
+            modelBuilder.Entity<DatabaseTimer>()
+                .Property(x => x.TimerId)
+                .ValueGeneratedOnAdd();
 
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.UseIdentityAlwaysColumns();
         }
     }
 }

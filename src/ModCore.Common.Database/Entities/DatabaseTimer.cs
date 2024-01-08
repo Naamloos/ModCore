@@ -14,7 +14,7 @@ namespace ModCore.Common.Database.Entities
     {
         [Column("timer_id")]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public ulong TimerId { get; set; }
+        public ulong TimerId { get; set; } = 1;
 
         [Column("guild_id")]
         public ulong GuildId { get; set; }

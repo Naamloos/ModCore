@@ -2,6 +2,9 @@
 using ModCore.Common.Cache;
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
+using ModCore.Common.Database.Timers;
+using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Rest;
 using System;
 using System.Collections.Generic;
@@ -66,7 +69,7 @@ namespace ModCore.Services.Shard
                     }
                     _cancellation = new CancellationTokenSource();
 
-                    var delay = _timer.TriggersAt.Subtract(DateTimeOffset.UtcNow);
+                    var delay = nextTimer.TriggersAt.Subtract(DateTimeOffset.UtcNow);
                     if (delay.TotalMilliseconds > int.MaxValue)
                     {
                         // Time until this timer hits exceeds the total milliseconds max.
@@ -107,22 +110,61 @@ namespace ModCore.Services.Shard
         private async ValueTask DispatchAsync(DatabaseTimer timer, bool scheduleNext)
         {
             _semaphore.Wait();
-            switch(_timer.Type)
+
+            if (timer is not null)
             {
-                default:
-                    _logger.LogWarning("Unknown timer type triggered! type: {0}", _timer.Type); 
-                    break;
+                switch (timer.Type)
+                {
+                    default:
+                        _logger.LogWarning("Unknown timer type triggered! type: {0}", timer.Type);
+                        break;
 
-                // TODO implement other timers
+                    case TimerTypes.Reminder:
+                        await DispatchReminderAsync(timer);
+                        break;
+                        // TODO implement other timers
+                }
+
+                _databaseContext.Timers.Remove(timer);
+                await _databaseContext.SaveChangesAsync();
             }
-
-            _databaseContext.Timers.Remove(timer);
-            await _databaseContext.SaveChangesAsync();
 
             _semaphore.Release();
             if (scheduleNext)
             {
                 ScheduleNext();
+            }
+        }
+
+        private async ValueTask DispatchReminderAsync(DatabaseTimer timer)
+        {
+            var reminderData = timer.GetData<ReminderTimerData>();
+
+            if (reminderData != null)
+            {
+                // TODO add snooze button
+                var now = DateTimeOffset.UtcNow;
+                var msg = await _rest.CreateMessageAsync(reminderData.ChannelId, new CreateMessage()
+                {
+                    Content = $"<@{reminderData.UserId}>",
+                    Embeds = new Embed[1]
+                    {
+                        new Embed()
+                        {
+                            Title = "⏰ Reminder",
+                            Description = $"You set a reminder <t:{reminderData.CreatedAt.ToUnixTimeSeconds()}:R> to be reminded <t:{now.ToUnixTimeSeconds()}:R>",
+                            Fields = new List<EmbedField>
+                            {
+                                new()
+                                {
+                                    Name = "✏️ Reminder Text",
+                                    Value = reminderData.Text
+                                }
+                            }
+                        }
+                    },
+                    AllowedMentions = new AllowedMention() { Parse = new[] { "users" } },
+                });
             }
         }
     }

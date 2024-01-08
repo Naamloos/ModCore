@@ -6,34 +6,53 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ModCore.Common.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class FurtherDatabaseImpl : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<decimal>(
-                name: "appeal_channel_id",
-                table: "mcore_guild",
-                type: "numeric(20,0)",
-                nullable: true);
+            migrationBuilder.CreateTable(
+                name: "mcore_guild",
+                columns: table => new
+                {
+                    guild_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    logging_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
+                    modlog_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
+                    ticket_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
+                    appeal_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
+                    nick_confirm_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mcore_guild", x => x.guild_id);
+                });
 
-            migrationBuilder.AddColumn<decimal>(
-                name: "modlog_channel_id",
-                table: "mcore_guild",
-                type: "numeric(20,0)",
-                nullable: true);
+            migrationBuilder.CreateTable(
+                name: "mcore_timers",
+                columns: table => new
+                {
+                    timer_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    guild_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    shard_id = table.Column<int>(type: "integer", nullable: false),
+                    trigger_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    type = table.Column<int>(type: "integer", nullable: false),
+                    data = table.Column<string>(type: "jsonb", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mcore_timers", x => x.timer_id);
+                });
 
-            migrationBuilder.AddColumn<decimal>(
-                name: "nick_confirm_channel_id",
-                table: "mcore_guild",
-                type: "numeric(20,0)",
-                nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "ticket_channel_id",
-                table: "mcore_guild",
-                type: "numeric(20,0)",
-                nullable: true);
+            migrationBuilder.CreateTable(
+                name: "mcore_user",
+                columns: table => new
+                {
+                    user_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mcore_user", x => x.user_id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "mcore_autorole",
@@ -145,17 +164,6 @@ namespace ModCore.Common.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "mcore_user",
-                columns: table => new
-                {
-                    user_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_mcore_user", x => x.user_id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "mcore_welcomer",
                 columns: table => new
                 {
@@ -181,24 +189,6 @@ namespace ModCore.Common.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "mcore_rolemenu_role",
-                columns: table => new
-                {
-                    menu_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    role_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_mcore_rolemenu_role", x => new { x.role_id, x.menu_id });
-                    table.ForeignKey(
-                        name: "FK_mcore_rolemenu_role_mcore_rolemenu_menu_id",
-                        column: x => x.menu_id,
-                        principalTable: "mcore_rolemenu",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "mcore_appeal",
                 columns: table => new
                 {
@@ -217,6 +207,32 @@ namespace ModCore.Common.Database.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_mcore_appeal_mcore_user_user_id",
+                        column: x => x.user_id,
+                        principalTable: "mcore_user",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "mcore_leveldata",
+                columns: table => new
+                {
+                    guild_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    user_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    experience = table.Column<long>(type: "bigint", nullable: false),
+                    last_xp_grant = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mcore_leveldata", x => new { x.guild_id, x.user_id });
+                    table.ForeignKey(
+                        name: "FK_mcore_leveldata_mcore_guild_guild_id",
+                        column: x => x.guild_id,
+                        principalTable: "mcore_guild",
+                        principalColumn: "guild_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_mcore_leveldata_mcore_user_user_id",
                         column: x => x.user_id,
                         principalTable: "mcore_user",
                         principalColumn: "user_id",
@@ -301,34 +317,6 @@ namespace ModCore.Common.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "mcore_starboard_item",
-                columns: table => new
-                {
-                    starboard_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    message_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    board_message_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    author_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    star_amount = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_mcore_starboard_item", x => new { x.starboard_id, x.message_id, x.channel_id });
-                    table.ForeignKey(
-                        name: "FK_mcore_starboard_item_mcore_starboard_starboard_id",
-                        column: x => x.starboard_id,
-                        principalTable: "mcore_starboard",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_mcore_starboard_item_mcore_user_author_id",
-                        column: x => x.author_id,
-                        principalTable: "mcore_user",
-                        principalColumn: "user_id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "mcore_tag",
                 columns: table => new
                 {
@@ -387,6 +375,52 @@ namespace ModCore.Common.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "mcore_rolemenu_role",
+                columns: table => new
+                {
+                    menu_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    role_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mcore_rolemenu_role", x => new { x.role_id, x.menu_id });
+                    table.ForeignKey(
+                        name: "FK_mcore_rolemenu_role_mcore_rolemenu_menu_id",
+                        column: x => x.menu_id,
+                        principalTable: "mcore_rolemenu",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "mcore_starboard_item",
+                columns: table => new
+                {
+                    starboard_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    message_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    board_message_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    author_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    star_amount = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_mcore_starboard_item", x => new { x.starboard_id, x.message_id, x.channel_id });
+                    table.ForeignKey(
+                        name: "FK_mcore_starboard_item_mcore_starboard_starboard_id",
+                        column: x => x.starboard_id,
+                        principalTable: "mcore_starboard",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_mcore_starboard_item_mcore_user_author_id",
+                        column: x => x.author_id,
+                        principalTable: "mcore_user",
+                        principalColumn: "user_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "mcore_tag_history",
                 columns: table => new
                 {
@@ -407,11 +441,6 @@ namespace ModCore.Common.Database.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_mcore_leveldata_user_id",
-                table: "mcore_leveldata",
-                column: "user_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_mcore_appeal_guild_id",
                 table: "mcore_appeal",
                 column: "guild_id");
@@ -420,6 +449,11 @@ namespace ModCore.Common.Database.Migrations
                 name: "IX_mcore_infraction_guild_id",
                 table: "mcore_infraction",
                 column: "guild_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_mcore_leveldata_user_id",
+                table: "mcore_leveldata",
+                column: "user_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_mcore_nickname_state_user_id",
@@ -485,23 +519,11 @@ namespace ModCore.Common.Database.Migrations
                 name: "IX_mcore_ticket_guild_id",
                 table: "mcore_ticket",
                 column: "guild_id");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_mcore_leveldata_mcore_user_user_id",
-                table: "mcore_leveldata",
-                column: "user_id",
-                principalTable: "mcore_user",
-                principalColumn: "user_id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_mcore_leveldata_mcore_user_user_id",
-                table: "mcore_leveldata");
-
             migrationBuilder.DropTable(
                 name: "mcore_appeal");
 
@@ -510,6 +532,9 @@ namespace ModCore.Common.Database.Migrations
 
             migrationBuilder.DropTable(
                 name: "mcore_infraction");
+
+            migrationBuilder.DropTable(
+                name: "mcore_leveldata");
 
             migrationBuilder.DropTable(
                 name: "mcore_logger_settings");
@@ -536,6 +561,9 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_ticket");
 
             migrationBuilder.DropTable(
+                name: "mcore_timers");
+
+            migrationBuilder.DropTable(
                 name: "mcore_welcomer");
 
             migrationBuilder.DropTable(
@@ -548,27 +576,10 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_tag");
 
             migrationBuilder.DropTable(
+                name: "mcore_guild");
+
+            migrationBuilder.DropTable(
                 name: "mcore_user");
-
-            migrationBuilder.DropIndex(
-                name: "IX_mcore_leveldata_user_id",
-                table: "mcore_leveldata");
-
-            migrationBuilder.DropColumn(
-                name: "appeal_channel_id",
-                table: "mcore_guild");
-
-            migrationBuilder.DropColumn(
-                name: "modlog_channel_id",
-                table: "mcore_guild");
-
-            migrationBuilder.DropColumn(
-                name: "nick_confirm_channel_id",
-                table: "mcore_guild");
-
-            migrationBuilder.DropColumn(
-                name: "ticket_channel_id",
-                table: "mcore_guild");
         }
     }
 }
