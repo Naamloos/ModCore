@@ -23,16 +23,19 @@ namespace ModCore.Services.Shard.EventHandlers
         private readonly ILogger _logger;
         private readonly DiscordRest _rest;
         private readonly InteractionService _interactions;
-        private readonly DatabaseConnection _database;
+        private readonly DatabaseContext _database;
+        private readonly TimerService _timerService;
 
         private bool commandsRegistered = false;
+        private bool initialized = false;
 
-        public StartupEvents(ILogger<StartupEvents> logger, DiscordRest rest, InteractionService interactions, DatabaseConnection database)
+        public StartupEvents(ILogger<StartupEvents> logger, DiscordRest rest, InteractionService interactions, DatabaseContext database, TimerService timerService)
         {
             _logger = logger;
             _rest = rest;
             _interactions = interactions;
             _database = database;
+            _timerService = timerService;
         }
 
         public async ValueTask HandleEvent(Hello data)
@@ -59,7 +62,7 @@ namespace ModCore.Services.Shard.EventHandlers
             if (application.Success)
             {
                 _logger.LogInformation("Application is registered under ID {0}. Owner username is {1}.", data.Application.Id, application.Value!.Owner!.Value.Username);
-                if (!commandsRegistered)
+                if (!initialized)
                 {
                     _interactions.RegisterCommands(Assembly.GetExecutingAssembly());
                     if (data.Shard.HasValue && data.Shard.Value[0] == 0)
@@ -67,7 +70,6 @@ namespace ModCore.Services.Shard.EventHandlers
                         // Only send commands if we know we're definitely on shard 0!!
                         await _interactions.PublishCommands(application.Value.Id);
                     }
-                    commandsRegistered = true;
                 }
             }
             else
@@ -75,7 +77,12 @@ namespace ModCore.Services.Shard.EventHandlers
                 _logger.LogCritical("Failed to fetch application info!");
             }
 
-            _interactions.Start(Gateway);
+            if (!initialized)
+            {
+                _interactions.Start(Gateway);
+                await _timerService.StartAsync();
+                initialized = true;
+            }
         }
 
         public async ValueTask HandleEvent(GuildCreate data)

@@ -100,10 +100,13 @@ namespace ModCore.Services.Shard
                     services.AddSingleton(jsonOptions);
                     services.AddDistributedMemoryCache();
                     services.AddModcoreCacheService();
-                    services.AddDbContext<DatabaseConnection>();
+                    services.AddDbContext<DatabaseContext>();
 
                     // Helper for scoped and transient services
                     services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));
+
+                    // Shard-specific services
+                    services.AddSingleton<TimerService>();
                 })
                 .Build();
 

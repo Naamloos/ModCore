@@ -131,7 +131,7 @@ namespace ModCore.Common.Discord.Rest
             });
         }
 
-        private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null)
+        private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null, bool retry = false)
         {
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(method, route, url, body);
             T? deserializedResponse = default(T);
@@ -145,6 +145,12 @@ namespace ModCore.Common.Discord.Rest
             }
             else
             {
+                if(response.StatusCode == System.Net.HttpStatusCode.TooManyRequests && !retry)
+                {
+                    // rate limited so....
+                    _logger.LogWarning("Rate limit hit! Retrying request.");
+                    return await makeRequestAsync<T>(method, url, route, body, true);
+                }
                 _logger.LogError(await response.Content.ReadAsStringAsync());
                 _logger.LogError(await response.RequestMessage.Content.ReadAsStringAsync());
             }

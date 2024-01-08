@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ModCore.Common.Database.Migrations
 {
-    [DbContext(typeof(DatabaseConnection))]
+    [DbContext(typeof(DatabaseContext))]
     [Migration("20240107203257_NullableLoggingChannel")]
     partial class NullableLoggingChannel
     {

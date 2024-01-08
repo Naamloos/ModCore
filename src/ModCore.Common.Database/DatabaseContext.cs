@@ -13,7 +13,7 @@ using Npgsql;
 
 namespace ModCore.Common.Database
 {
-    public class DatabaseConnection : DbContext
+    public class DatabaseContext : DbContext
     {
         public virtual DbSet<DatabaseGuild> Guilds { get; set; }
         public virtual DbSet<DatabaseLevelData> LevelData { get; set; }
@@ -37,7 +37,7 @@ namespace ModCore.Common.Database
 
         private string _connectionString;
 
-        public DatabaseConnection(IConfiguration config)
+        public DatabaseContext(IConfiguration config)
         {
             var cStringBuilder = new NpgsqlConnectionStringBuilder()
             {
@@ -51,7 +51,7 @@ namespace ModCore.Common.Database
             this._connectionString = cStringBuilder.ToString();
         }
 
-        internal DatabaseConnection(DbContextOptions<DatabaseConnection> options) : base(options)
+        internal DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
         }
 

@@ -14,9 +14,9 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Database
 {
-    public class DesignTimeDatabase : IDesignTimeDbContextFactory<DatabaseConnection>
+    public class DesignTimeDatabase : IDesignTimeDbContextFactory<DatabaseContext>
     {
-        public DatabaseConnection CreateDbContext(string[] args)
+        public DatabaseContext CreateDbContext(string[] args)
         {
             var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var settingsPath = Path.Combine(directory!, "settings.json"); // This is your ModCore debug's settings.json, throw it in build dir!
@@ -32,10 +32,10 @@ namespace ModCore.Common.Database
                 Host = obj["postgres_host"]!.GetValue<string>()
             };
 
-            var options = new DbContextOptionsBuilder<DatabaseConnection>()
+            var options = new DbContextOptionsBuilder<DatabaseContext>()
                 .UseNpgsql(cStringBuilder.ToString());
 
-            return new DatabaseConnection(options.Options);
+            return new DatabaseContext(options.Options);
         }
     }
 }

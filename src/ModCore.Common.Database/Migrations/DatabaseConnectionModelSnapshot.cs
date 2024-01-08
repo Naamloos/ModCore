@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace ModCore.Common.Database.Migrations
 {
-    [DbContext(typeof(DatabaseConnection))]
+    [DbContext(typeof(DatabaseContext))]
     partial class DatabaseConnectionModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
