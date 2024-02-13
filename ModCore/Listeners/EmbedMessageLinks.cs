@@ -12,6 +12,8 @@ using System.Collections.Generic;
 using System;
 using DSharpPlus.Entities;
 using Humanizer;
+using System.Linq;
+using System.IO;
 
 namespace ModCore.Listeners
 {
@@ -54,11 +56,30 @@ namespace ModCore.Listeners
                     {
                         var message = await channel.GetMessageAsync(messageId);
                         // no exception = exists
-                        var truncatedText = message.Content.Length > 250? message.Content.Truncate(250) + "..." : message.Content;
-                        embeds.Add(new DiscordEmbedBuilder()
-                            .WithDescription($"{truncatedText}\n\n[Jump to message]({match.Value.Replace("!", "")})")
-                            .WithAuthor(message.Author.GetDisplayUsername(), iconUrl: message.Author.GetAvatarUrl(ImageFormat.Png))
-                            .Build());
+
+                        var truncatedText = message.Content.Length > 250 ? message.Content.Truncate(250) + "..." : message.Content;
+                        var embed = new DiscordEmbedBuilder()
+                            .WithDescription($"{truncatedText}\n")
+                            .WithAuthor(message.Author.GetDisplayUsername(), iconUrl: message.Author.GetAvatarUrl(ImageFormat.Png));
+
+                        var imageFiles = message.Attachments.Where(x =>
+                        {
+                            var uri = new Uri(x.Url);
+                            return StarboardListeners.validFileExts.Contains(Path.GetExtension(uri.AbsolutePath));
+                        });
+
+                        if (imageFiles.Any())
+                        {
+                            embed.WithThumbnail(imageFiles.First().Url);
+                            var count = imageFiles.Count();
+                            if (count > 1)
+                            {
+                                embed.WithDescription(embed.Description + $"\n_Contains ({count - 1}) more attachments._");
+                            }
+                        }
+                        embed.WithDescription(embed.Description + $"\n[Jump to message]({match.Value.Replace("!", "")})");
+
+                        embeds.Add(embed.Build());
                     }
                     catch (Exception) { }
                 }

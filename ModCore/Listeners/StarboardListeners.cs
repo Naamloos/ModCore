@@ -503,7 +503,7 @@ namespace ModCore.Listeners
             }
         }
 
-        private static readonly string[] validFileExts = { ".jpg", ".gif", ".png", ".jpeg", ".webp" };
+        public static readonly string[] validFileExts = { ".jpg", ".gif", ".png", ".jpeg", ".webp" };
         public static DiscordMessageBuilder buildStarboardMessage(DiscordMessage sourceMessage, long count, DiscordEmoji emoji)
         {
             // TODO cleanup
