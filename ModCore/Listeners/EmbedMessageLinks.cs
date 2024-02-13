@@ -42,7 +42,7 @@ namespace ModCore.Listeners
 
                 var embeds = new List<DiscordEmbed>();
 
-                foreach(Match match in matches)
+                foreach(Match match in matches.Take(10))
                 {
                     var guildId = ulong.Parse(match.Groups[1].Value);
                     var channelId = ulong.Parse(match.Groups[2].Value);
@@ -60,7 +60,9 @@ namespace ModCore.Listeners
                         var truncatedText = message.Content.Length > 250 ? message.Content.Truncate(250) + "..." : message.Content;
                         var embed = new DiscordEmbedBuilder()
                             .WithDescription($"{truncatedText}\n")
-                            .WithAuthor(message.Author.GetDisplayUsername(), iconUrl: message.Author.GetAvatarUrl(ImageFormat.Png));
+                            .WithAuthor(message.Author.GetDisplayUsername(), iconUrl: message.Author.GetAvatarUrl(ImageFormat.Gif));
+
+                        var count = message.Attachments.Count();
 
                         var imageFiles = message.Attachments.Where(x =>
                         {
@@ -68,15 +70,20 @@ namespace ModCore.Listeners
                             return StarboardListeners.validFileExts.Contains(Path.GetExtension(uri.AbsolutePath));
                         });
 
+                        var more = "";
+
                         if (imageFiles.Any())
                         {
                             embed.WithThumbnail(imageFiles.First().Url);
-                            var count = imageFiles.Count();
-                            if (count > 1)
-                            {
-                                embed.WithDescription(embed.Description + $"\n_Contains ({count - 1}) more attachments._");
-                            }
+                            count--;
+                            more = " more";
                         }
+
+                        if (count > 0)
+                        {
+                            embed.WithDescription(embed.Description + $"\n_Contains ({count}){more} attachments._");
+                        }
+
                         embed.WithDescription(embed.Description + $"\n[Jump to message]({match.Value.Replace("!", "")})");
 
                         embeds.Add(embed.Build());
