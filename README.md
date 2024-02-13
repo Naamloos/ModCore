@@ -20,3 +20,5 @@ Support
 Need help with ModCore? Either use the `/contact` command or join the ModCore Discord!
 
 [![ModCore Chat](https://discord.com/api/guilds/709152601978961990/embed.png?style=banner2)](https://discord.gg/MRUP5dd)
+
+## Database Migration for development

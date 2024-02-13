@@ -149,6 +149,7 @@ namespace ModCore.Common.Discord.Rest
                 {
                     // rate limited so....
                     _logger.LogWarning("Rate limit hit! Retrying request.");
+                    // TODO parse retry_after from body
                     return await makeRequestAsync<T>(method, url, route, body, true);
                 }
                 _logger.LogError(await response.Content.ReadAsStringAsync());
