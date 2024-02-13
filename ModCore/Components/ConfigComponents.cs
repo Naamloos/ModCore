@@ -58,6 +58,10 @@ namespace ModCore.Components
         public async Task RoleMenuAsync(ComponentInteractionCreateEventArgs e)
             => await RoleMenuConfigComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
 
+        [Component("ae", ComponentType.Button)]
+        public async Task AutoEmbedAsync(ComponentInteractionCreateEventArgs e)
+            => await AutoEmbedComponents.PostMenuAsync(e.Interaction, InteractionResponseType.UpdateMessage, database.CreateContext());
+
         [Component("cfg.dump", ComponentType.Button)]
         public async Task DumpConfigAsync(ComponentInteractionCreateEventArgs e)
         {
@@ -130,6 +134,7 @@ namespace ModCore.Components
                 })
                 .AddComponents(new DiscordComponent[]
                 {
+                    new DiscordButtonComponent(ButtonStyle.Primary, "ae", "Jump Link Embed", emoji: new DiscordComponentEmoji("🖇️")),
                     new DiscordButtonComponent(ButtonStyle.Secondary, "cfg.reset", "Reset Server Configuration", emoji: new DiscordComponentEmoji("🗑")),
                     new DiscordButtonComponent(ButtonStyle.Secondary, "cfg.dump", "Dump JSON (Advanced)", emoji: new DiscordComponentEmoji("📩"))
                 })

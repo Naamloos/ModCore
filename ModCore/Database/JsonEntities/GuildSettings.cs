@@ -73,6 +73,15 @@ namespace ModCore.Database.JsonEntities
 
         [JsonProperty("role_menus")]
         public List<GuildRoleMenu> RoleMenus = new List<GuildRoleMenu>();
+
+        public EmbedMessageLinksMode EmbedMessageLinks = EmbedMessageLinksMode.Disabled;
+    }
+
+    public enum EmbedMessageLinksMode
+    {
+        Disabled = 0,
+        Prefixed = 1,
+        Always = 2
     }
 
     public class GuildRoleMenu
