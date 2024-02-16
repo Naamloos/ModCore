@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
@@ -11,6 +12,7 @@ using DSharpPlus.Interactivity.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Database;
 using ModCore.Entities;
+using ModCore.HansTagImport;
 using ModCore.Utils;
 using ModCore.Utils.Extensions;
 
@@ -26,6 +28,26 @@ namespace ModCore.LegacyCommands
         {
             this.Shared = shared;
             this.Database = db;
+        }
+
+        [Command("import"), Hidden, RequireOwner]
+        public async Task ImportTagsAsync(CommandContext context)
+        {
+            if(!context.Message.Attachments.Any() || !context.Message.Attachments[0].FileName.EndsWith(".json"))
+            {
+                await context.RespondAsync("u dum lmao big L cope");
+                return;
+            }
+
+            await context.RespondAsync("Importing tags...");
+
+            var importer = new Importer();
+            using HttpClient http = new HttpClient();
+            var downloadStream = await http.GetStreamAsync(context.Message.Attachments[0].Url);
+            importer.LoadTags(downloadStream);
+            await importer.DumpToDatabase(Database.CreateContext());
+
+            await context.RespondAsync("Done importing tags!");
         }
 
         [Command("clear"), Hidden, RequireOwner]
