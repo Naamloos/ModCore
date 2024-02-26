@@ -6,8 +6,11 @@ using DSharpPlus.SlashCommands;
 using ModCore.AutoComplete;
 using ModCore.Database;
 using ModCore.Database.DatabaseEntities;
+using ModCore.Extensions;
+using ModCore.Modals;
 using ModCore.Utils.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,7 +27,7 @@ namespace ModCore.Commands
         public async Task GetAsync(InteractionContext ctx,
             [Option("name", "Tag name.", true)][Autocomplete(typeof(TagAutoComplete))]string name)
         {
-            if (tryGetTag(name, ctx.Channel, out DatabaseTag tag))
+            if (tryGetTag(name, ctx.Channel, this.Database, out DatabaseTag tag))
             {
                 await ctx.CreateResponseAsync($"🏷 `{name}`:\n\n{tag.Contents}");
                 return;
@@ -35,93 +38,51 @@ namespace ModCore.Commands
 
         [SlashCommand("set", "Sets a tag's content.")]
         public async Task SetAsync(InteractionContext ctx, 
-            [Option("name", "Name of tag to set.")]string name, 
-            [Option("content", "New content for this tag.")]string content)
+            [Option("name", "Name of tag to set.")][MaximumLength(100)]string name)
         {
-            bool isNew = false;
-
-            if (tryGetTag(name, ctx.Channel, out var tag))
+            var exists = tryGetTag(name, ctx.Channel, this.Database, out var tag);
+            if (exists)
             {
                 if (!canManageTag(tag, ctx.Channel, ctx.Member))
                 {
-                    await ctx.CreateResponseAsync("⚠️ That tag already exists and you don't own it!", true);
+                    await ctx.CreateResponseAsync("⚠️ That tag already exists and you can not manage it!", true);
                     return;
                 }
             }
-            else
-            {
-                tag = new DatabaseTag
-                {
-                    ChannelId = -1, // guild tag
-                    Name = name,
-                    GuildId = (long)ctx.Guild.Id,
-                    OwnerId = (long)ctx.User.Id,
-                    CreatedAt = DateTime.Now
-                };
-                isNew = true;
-            }
 
-            await using var db = this.Database.CreateContext();
-            tag.Contents = content;
-            if (isNew)
-            {
-                db.Tags.Add(tag);
-                await ctx.CreateResponseAsync($"✅ Server-global tag `{name}` succesfully created!", true);
-            }
-            else
-            {
-                db.Tags.Update(tag);
-                await ctx.CreateResponseAsync($"✅ Server-global tag `{name}` succesfully modified!", true);
-            }
-            await db.SaveChangesAsync();
+            await ctx.Client.GetInteractionExtension().RespondWithModalAsync<SetTagModal>(ctx.Interaction,
+                exists? "Update global tag contents" : "Create new global tag", new Dictionary<string, string>()
+                {
+                    { "n", name }
+                });
         }
 
         [SlashCommand("override", "Creates a channel-specific override for a tag.")]
         public async Task OverrideAsync(InteractionContext ctx,
-            [Option("name", "Name of tag to override.")] string name,
-            [Option("content", "New override content for this tag.")] string content)
+            [Option("name", "Name of tag to override.")][MaximumLength(100)]string name)
         {
-            bool isNew = false;
-            if (!tryGetTag(name, ctx.Channel, out var tag)
-                || tag.ChannelId < 1)
+            var exists = tryGetTag(name, ctx.Channel, this.Database, out var tag);
+            if (exists)
             {
-                tag = new DatabaseTag()
+                if (!canManageTag(tag, ctx.Channel, ctx.Member))
                 {
-                    ChannelId = (long)ctx.Channel.Id,
-                    GuildId = (long)ctx.Guild.Id,
-                    Contents = content,
-                    CreatedAt = DateTime.Now,
-                    Name = name,
-                    OwnerId = (long)ctx.User.Id
-                };
-                isNew = true;
-            }
-            else if (!canManageTag(tag, ctx.Channel, ctx.Member))
-            {
-                await ctx.CreateResponseAsync("⚠️ That tag already exists and you don't own it!", true);
-                return;
+                    await ctx.CreateResponseAsync("⚠️ That tag already exists and you can not manage it!", true);
+                    return;
+                }
             }
 
-            await using var db = this.Database.CreateContext();
-            tag.Contents = content;
-            if (isNew)
-            {
-                db.Tags.Add(tag);
-                await ctx.CreateResponseAsync($"✅ Channel override tag `{name}` succesfully created!", true);
-            }
-            else
-            {
-                db.Tags.Update(tag);
-                await ctx.CreateResponseAsync($"✅ Channel override tag `{name}` succesfully modified!", true);
-            }
-            await db.SaveChangesAsync();
+            await ctx.Client.GetInteractionExtension().RespondWithModalAsync<OverrideTagModal>(ctx.Interaction,
+                exists ? "Update channel tag contents" : "Create new channel tag", new Dictionary<string, string>()
+                {
+                    { "n", name }
+                });
         }
 
         [SlashCommand("remove", "Removes a tag.")]
         public async Task RemoveAsync(InteractionContext ctx, 
             [Option("name", "Name of the tag to remove.", true)][Autocomplete(typeof(TagAutoComplete))] string name)
         {
-            if (!tryGetTag(name, ctx.Channel, out DatabaseTag tag))
+            if (!tryGetTag(name, ctx.Channel, this.Database, out DatabaseTag tag))
             {
                 await ctx.CreateResponseAsync($"⚠️ No such tag exists!", true);
                 return;
@@ -156,7 +117,7 @@ namespace ModCore.Commands
         public async Task InfoAsync(InteractionContext ctx, 
             [Option("name", "Name of tag to show information about.", true)][Autocomplete(typeof(TagAutoComplete))] string name)
         {
-            if (!tryGetTag(name, ctx.Channel, out DatabaseTag tag))
+            if (!tryGetTag(name, ctx.Channel, this.Database, out DatabaseTag tag))
             {
                 await ctx.CreateResponseAsync($"⚠️ No such tag exists!", true);
                 return;
@@ -176,7 +137,7 @@ namespace ModCore.Commands
             [Option("name", "Name of tag you want to transfer.", true)][Autocomplete(typeof(TagAutoComplete))] string name, 
             [Option("user", "User to transfer this tag to.")]DiscordUser newowner)
         {
-            if (!tryGetTag(name, ctx.Channel, out DatabaseTag tag))
+            if (!tryGetTag(name, ctx.Channel, this.Database, out DatabaseTag tag))
             {
                 await ctx.CreateResponseAsync($"⚠️ No such tag exists!", true);
             }
@@ -218,9 +179,9 @@ namespace ModCore.Commands
             }
         }
 
-        private bool tryGetTag(string name, DiscordChannel channel, out DatabaseTag tag)
+        public static bool tryGetTag(string name, DiscordChannel channel, DatabaseContextBuilder database, out DatabaseTag tag)
         {
-            using var db = this.Database.CreateContext();
+            using var db = database.CreateContext();
             tag = db.Tags.FirstOrDefault(x => x.Name == name && x.ChannelId == (long)channel.Id);
             if (tag == null)
                 tag = db.Tags.FirstOrDefault(x => x.Name == name && x.GuildId == (long)channel.GuildId && x.ChannelId < 1);
