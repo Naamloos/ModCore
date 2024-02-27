@@ -54,7 +54,10 @@ namespace ModCore.Commands
                 exists? "Update global tag contents" : "Create new global tag", new Dictionary<string, string>()
                 {
                     { "n", name }
-                });
+                }, exists ? new Dictionary<string, string>()
+                {
+                    { nameof(SetTagModal.Content), tag.Contents }
+                } : null);
         }
 
         [SlashCommand("override", "Creates a channel-specific override for a tag.")]
@@ -75,7 +78,10 @@ namespace ModCore.Commands
                 exists ? "Update channel tag contents" : "Create new channel tag", new Dictionary<string, string>()
                 {
                     { "n", name }
-                });
+                }, exists? new Dictionary<string, string>()
+                {
+                    { nameof(OverrideTagModal.Content), tag.Contents } 
+                } : null);
         }
 
         [SlashCommand("remove", "Removes a tag.")]

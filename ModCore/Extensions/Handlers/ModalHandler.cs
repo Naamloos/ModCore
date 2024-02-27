@@ -40,7 +40,7 @@ namespace ModCore.Extensions.Handlers
                 fields.TryAdd(property.GetCustomAttribute<ModalFieldAttribute>(), property);
         }
 
-        public async Task CreateAsync(DiscordInteraction interaction, string title, IDictionary<string, string> hiddenValues)
+        public async Task CreateAsync(DiscordInteraction interaction, string title, IDictionary<string, string> hiddenValues, IDictionary<string, string> prefill = null)
         {
             var modalString = ExtensionStatics.GenerateIdString(Info.ModalId, hiddenValues);
 
@@ -51,9 +51,14 @@ namespace ModCore.Extensions.Handlers
             foreach (var field in fields)
             {
                 var attr = field.Key;
+                string prefillValue = null;
+                if(prefill != null && prefill.Keys.Contains(field.Value.Name))
+                {
+                    prefillValue = prefill[field.Value.Name];
+                }
                 interactionResp.AddComponents(
                     new TextInputComponent(attr.DisplayText, attr.FieldName,
-                    attr.Placeholder, attr.Prefill, attr.Required, attr.InputStyle, attr.MinLength, attr.MaxLength));
+                    attr.Placeholder, attr.Prefill ?? prefillValue ?? null, attr.Required, attr.InputStyle, attr.MinLength, attr.MaxLength));
             }
 
             await interaction.CreateResponseAsync(InteractionResponseType.Modal, interactionResp);

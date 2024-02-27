@@ -31,12 +31,12 @@ namespace ModCore.Extensions
         }
 
         public async Task RespondWithModalAsync<T>(DiscordInteraction interaction, string title,
-            IDictionary<string, string> hiddenValues = null) where T : IModal
+            IDictionary<string, string> hiddenValues = null, IDictionary<string, string> prefill = null) where T : IModal
         {
             // Cache for next call :^)
             var handler = modalHandlers.FirstOrDefault(x => x.Type == typeof(T)) ?? registerModalHandler(typeof(T));
 
-            await handler.CreateAsync(interaction, title, hiddenValues);
+            await handler.CreateAsync(interaction, title, hiddenValues, prefill);
         }
 
         public string GenerateId(string id, params (string Key, string Value)[] values)
