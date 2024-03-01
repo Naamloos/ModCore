@@ -13,7 +13,7 @@ namespace ModCore.Modals
     [Modal("set_tag")]
     public class SetTagModal : IModal
     {
-        [ModalField("Tag Content (Markdown Permitted)", "content", "https://www.youtube.com/watch?v=dQw4w9WgXcQ", null, true, TextInputStyle.Paragraph, 1, 255)]
+        [ModalField("Tag Content (Markdown Permitted)", "content", "https://www.youtube.com/watch?v=dQw4w9WgXcQ", null, true, TextInputStyle.Paragraph, 1, 4000)]
         public string Content { get; set; }
 
         [ModalHiddenField("n")]
