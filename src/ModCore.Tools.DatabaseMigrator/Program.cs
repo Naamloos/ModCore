@@ -4,36 +4,40 @@
     {
         static void Main(string[] args)
         {
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("Welcome, to the ModCore database migrator tool!" +
+            Cons.WriteLine("Welcome, to the ModCore database migrator tool!" +
                 "\nThis tool will assist you in migrating data from a v2 ModCore database to a v3 ModCore database." +
                 "\nWhy write all this text when I'm the only user?" +
-                "\nL Bozo Cope\n");
-            Console.ResetColor();
+                "\nL Bozo Cope\n", ConsoleColor.Magenta);
 
-            Console.Write("DB Host: ");
+            Cons.Write("DB Host: ");
             var host = Console.ReadLine();
-            Console.Write("DB Username: ");
+            Cons.Write("DB Port: ");
+            var port = int.Parse(Cons.ReadLine() ?? "5432");
+            Cons.Write("DB Username: ");
             var username = Console.ReadLine();
-            Console.Write("DB Password: ");
+            Cons.Write("DB Password: ");
             var password = Console.ReadLine();
-            Console.Write("Old DB name: ");
+            Cons.Write("Old DB name: ");
             var oldDB = Console.ReadLine();
-            Console.Write("New DB name: ");
+            Cons.Write("New DB name: ");
             var newDB = Console.ReadLine();
-            Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("Getting ready to migrate from v2 DB ");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"{oldDB}");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write(" to v3 DB ");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"{newDB}");
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write(". Are you sure you want to proceed? (Y/n): ");
-            Console.ResetColor();
-            var agree = Console.ReadLine();
+            Cons.Write("Getting ready to migrate from v2 DB ", ConsoleColor.Red);
+            Cons.Write($"{oldDB}", ConsoleColor.Green);
+            Cons.Write(" to v3 DB ", ConsoleColor.Red);
+            Cons.Write($"{newDB}", ConsoleColor.Green);
+            Cons.Write(". Are you sure you want to proceed? (y/N): ", ConsoleColor.Red);
+            var agree = (Cons.ReadLine() ?? "n").Trim().ToLower() == "y";
+            if(agree)
+            {
+                var migrator = new Migrator(oldDB, newDB, username, password, host, port);
+                migrator.StartMigration();
+            }
+            else
+            {
+                Cons.WriteLine("Operation canceled by user.");
+            }
+
+            Console.ReadKey();
         }
     }
 }

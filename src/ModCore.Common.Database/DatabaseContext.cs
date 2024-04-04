@@ -53,6 +53,11 @@ namespace ModCore.Common.Database
             this._connectionString = cStringBuilder.ToString();
         }
 
+        public DatabaseContext(string cstring)
+        {
+            this._connectionString = cstring;
+        }
+
         internal DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
         }
