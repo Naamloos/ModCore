@@ -53,6 +53,10 @@ namespace ModCore.Tools.DatabaseMigrator
                     return;
                 }
                 Cons.WriteLine("Applying latest migrations to new Database:");
+                foreach(var migration in migrations)
+                {
+                    Cons.WriteLine(migration, ConsoleColor.Magenta);
+                }
                 _newDatabase.Database.Migrate();
                 Cons.WriteLine("Applied migrations!", ConsoleColor.Green);
             }
