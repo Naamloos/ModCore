@@ -20,9 +20,12 @@ namespace ModCore.Common.Database.Entities
 
         [Column("name")]
         [MaxLength(30)]
-        public ulong Name { get; set; }
+        public string Name { get; set; }
+
+        [Column("creator_id")]
+        public ulong CreatorId { get; set; }
 
         public virtual DatabaseGuild Guild { get; set; }
-        public virtual ICollection<DatabaseRoleMenuRole> Roles { get; set; }
+        public virtual ICollection<DatabaseRoleMenuRole> Roles { get; set; } = new HashSet<DatabaseRoleMenuRole>();
     }
 }

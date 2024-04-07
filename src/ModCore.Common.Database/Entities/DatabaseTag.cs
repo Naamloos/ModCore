@@ -39,7 +39,7 @@ namespace ModCore.Common.Database.Entities
         public ulong GuildId { get; set; }
 
         public virtual DatabaseGuild Guild { get; set; }
-        public virtual ICollection<DatabaseTagHistory> History { get; set; }
+        public virtual ICollection<DatabaseTagHistory> History { get; set; } = new HashSet<DatabaseTagHistory>();
         public virtual DatabaseUser Author { get; set; }
     }
 }

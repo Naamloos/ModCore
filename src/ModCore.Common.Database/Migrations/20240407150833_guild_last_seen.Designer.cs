@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ModCore.Common.Database;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ModCore.Common.Database.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240407150833_guild_last_seen")]
+    partial class guild_last_seen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,14 +73,6 @@ namespace ModCore.Common.Database.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("appeal_channel_id");
 
-                    b.Property<bool>("AutoRoleEnabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("auto_role_enabled");
-
-                    b.Property<int>("EmbedMessageLinks")
-                        .HasColumnType("integer")
-                        .HasColumnName("embed_message_links_state");
-
                     b.Property<DateTimeOffset?>("LastSeenAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_seen_at");
@@ -93,18 +88,6 @@ namespace ModCore.Common.Database.Migrations
                     b.Property<decimal?>("NicknameConfirmationChannelId")
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("nick_confirm_channel_id");
-
-                    b.Property<bool>("PersistUserNicknames")
-                        .HasColumnType("boolean")
-                        .HasColumnName("persist_user_nicknames");
-
-                    b.Property<bool>("PersistUserOverrides")
-                        .HasColumnType("boolean")
-                        .HasColumnName("persist_user_overrides");
-
-                    b.Property<bool>("PersistUserRoles")
-                        .HasColumnType("boolean")
-                        .HasColumnName("persist_user_roles");
 
                     b.Property<decimal?>("TicketChannelId")
                         .HasColumnType("numeric(20,0)")
@@ -179,33 +162,6 @@ namespace ModCore.Common.Database.Migrations
                     b.ToTable("mcore_leveldata");
                 });
 
-            modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseLevelSettings", b =>
-                {
-                    b.Property<decimal>("GuildId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("guild_id");
-
-                    b.Property<decimal>("ChannelId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("message_channel_id");
-
-                    b.Property<bool>("Enabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("levels_enabled");
-
-                    b.Property<bool>("MessagesEnabled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("messages_enabled");
-
-                    b.Property<bool>("RedirectMessages")
-                        .HasColumnType("boolean")
-                        .HasColumnName("redirect_messages");
-
-                    b.HasKey("GuildId");
-
-                    b.ToTable("LevelSettings");
-                });
-
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseLoggerSettings", b =>
                 {
                     b.Property<decimal>("GuildId")
@@ -248,7 +204,7 @@ namespace ModCore.Common.Database.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("log_role_edit");
 
-                    b.Property<decimal?>("LoggerChannelId")
+                    b.Property<decimal>("LoggerChannelId")
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("logger_channel_id");
 
@@ -315,18 +271,13 @@ namespace ModCore.Common.Database.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("id");
 
-                    b.Property<decimal>("CreatorId")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("creator_id");
-
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("guild_id");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
+                    b.Property<decimal>("Name")
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)")
+                        .HasColumnType("numeric(20,0)")
                         .HasColumnName("name");
 
                     b.HasKey("Id");
@@ -706,17 +657,6 @@ namespace ModCore.Common.Database.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseLevelSettings", b =>
-                {
-                    b.HasOne("ModCore.Common.Database.Entities.DatabaseGuild", "Guild")
-                        .WithOne("LevelSettings")
-                        .HasForeignKey("ModCore.Common.Database.Entities.DatabaseLevelSettings", "GuildId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Guild");
-                });
-
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseLoggerSettings", b =>
                 {
                     b.HasOne("ModCore.Common.Database.Entities.DatabaseGuild", "Guild")
@@ -906,9 +846,6 @@ namespace ModCore.Common.Database.Migrations
                     b.Navigation("Infractions");
 
                     b.Navigation("LevelData");
-
-                    b.Navigation("LevelSettings")
-                        .IsRequired();
 
                     b.Navigation("LoggerSettings")
                         .IsRequired();

@@ -30,6 +30,6 @@ namespace ModCore.Common.Database.Entities
         public ulong ChannelId { get; set; }
 
         public virtual DatabaseGuild Guild { get; set; }
-        public virtual ICollection<DatabaseStarboardItem> Items { get; set; }
+        public virtual ICollection<DatabaseStarboardItem> Items { get; set; } = new HashSet<DatabaseStarboardItem>();
     }
 }

@@ -37,6 +37,9 @@ namespace ModCore.Common.Database.Entities
         [Column("shape")]
         public WelcomeImageShape Shape { get; set; }
 
+        [Column("enabled")]
+        public bool Enabled = false;
+
         public DatabaseGuild Guild { get; set; }
     }
 

@@ -14,7 +14,7 @@ namespace ModCore.Common.Database.Entities
         public ulong GuildId { get; set; }
 
         [Column("logger_channel_id")]
-        public ulong LoggerChannelId { get; set; }
+        public ulong? LoggerChannelId { get; set; } = null;
 
         [Column("log_joins")]
         public bool LogJoins { get; set; }

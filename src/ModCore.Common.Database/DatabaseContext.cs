@@ -35,6 +35,7 @@ namespace ModCore.Common.Database
         public virtual DbSet<DatabaseWelcomeSettings> WelcomeSettings { get; set; }
         public virtual DbSet<DatabaseTicket> Tickets { get; set; }
         public virtual DbSet<DatabaseTimer> Timers { get; set; }
+        public virtual DbSet<DatabaseLevelSettings> LevelSettings { get; set; }
 
         private string _connectionString;
 
@@ -264,6 +265,14 @@ namespace ModCore.Common.Database
             modelBuilder.Entity<DatabaseTimer>()
                 .Property(x => x.TimerId)
                 .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<DatabaseLevelSettings>()
+                .HasKey(x => x.GuildId);
+            modelBuilder.Entity<DatabaseLevelSettings>()
+                .HasOne(x => x.Guild)
+                .WithOne(x => x.LevelSettings)
+                .HasForeignKey<DatabaseLevelSettings>(x => x.GuildId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.UseIdentityAlwaysColumns();
         }
