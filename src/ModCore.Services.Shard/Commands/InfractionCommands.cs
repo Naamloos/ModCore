@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using ModCore.Common.Cache;
 using ModCore.Common.Database;
+using ModCore.Common.Database.Helpers;
+using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.InteractionFramework;
 using ModCore.Common.InteractionFramework.Attributes;
 using System;
@@ -25,10 +28,48 @@ namespace ModCore.Services.Shard.Commands
             _database = database;
         }
 
+        [SlashCommand("infractions", "Lists user infractions", permissions: Permissions.BanMembers)]
         public async ValueTask ListInfractionsAsync(SlashCommandContext context,
-            [Option("user", "ID of the user to list infractions for", ApplicationCommandOptionType.User)]ulong user_id)
+            [Option("user", "ID of the user to list infractions for", ApplicationCommandOptionType.User)]Snowflake user_id)
         {
+            var fetchedUser = await _cache.GetFromCacheOrRest<User>(user_id, (rest, id) => rest.GetUserAsync(id));
+            if(!fetchedUser.Success)
+            {
+                await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, 
+                    InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
+                {
+                        Flags = MessageFlags.Ephemeral,
+                        Content = "🚫 Failed to fetch user data."
+                });
+                return;
+            }
 
+            var infractionHelper = new InfractionHelper(_database, user_id, context.EventData.GuildId.Value);
+            var infractions = await infractionHelper.GetInfractionsAsync();
+            if (!infractions.Any())
+            {
+                await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token,
+                    InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
+                    {
+                        Flags = MessageFlags.Ephemeral,
+                        Content = "🚫 User has no infractions!"
+                    });
+                return;
+            }
+
+            // infractions exist, let's list them
+            var sb = new StringBuilder();
+            sb.AppendLine($"🚫 Infractions for {fetchedUser.Value.Username}#{fetchedUser.Value.Discriminator}:");
+            foreach (var infraction in infractions)
+            {
+                sb.AppendLine($"`{infraction.Id}`: {infraction.Type} - {infraction.Reason}");
+            }
+            await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token,
+                InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
+                {
+                    Flags = MessageFlags.Ephemeral,
+                    Content = sb.ToString()
+                });
         }
 
         public async ValueTask AddNoteAsync(SlashCommandContext context)

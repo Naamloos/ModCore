@@ -20,6 +20,7 @@ namespace ModCore.Common.Cache
         {
             this._cache = cache;
             this._serializerOptions = new JsonSerializerOptions();
+            this.DiscordRest = restClient;
         }
 
         public async ValueTask<CacheResponse<T>> GetFromCacheOrRest<T>(Snowflake Id, Func<DiscordRest, Snowflake, ValueTask<RestResponse<T>>> fallback)
@@ -56,7 +57,7 @@ namespace ModCore.Common.Cache
             var cacheKey = getCacheKey<T>(Id);
 
             var item = default(T);
-            var success = true;
+            var success = false;
 
             var cachedJson = _cache.GetString(cacheKey);
             if (!string.IsNullOrEmpty(cachedJson))
