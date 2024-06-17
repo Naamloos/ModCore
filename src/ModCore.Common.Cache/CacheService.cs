@@ -53,8 +53,7 @@ namespace ModCore.Common.Cache
 
         public CacheResponse<T> TryGet<T>(Snowflake Id)
         {
-            var typeName = typeof(T).Name;
-            var cacheKey = $"{typeName} :: {Id}";
+            var cacheKey = getCacheKey<T>(Id);
 
             var item = default(T);
             var success = true;
@@ -78,12 +77,12 @@ namespace ModCore.Common.Cache
 
         public void Update<T>(Snowflake Id, T newItem)
         {
-            var typeName = typeof(T).Name;
-            var cacheKey = $"{typeName} :: {Id}";
+            var cacheKey = getCacheKey<T>(Id);
 
             var cachedJson = _cache.GetString(cacheKey);
             if (string.IsNullOrEmpty(cachedJson))
             {
+                // regular objects should just linger in cache I think. Might be sensible to have a sliding expiration at some point.
                 _cache.SetString(cacheKey, JsonSerializer.Serialize<T>(newItem, _serializerOptions));
                 return;
             }
@@ -99,7 +98,7 @@ namespace ModCore.Common.Cache
             var history = default(MessageHistory);
             var success = false;
 
-            var cacheKey = $"message_cache :: {guildId} :: {channelId} :: {messageId}";
+            var cacheKey = getMessageCacheKey(guildId, channelId, messageId);
             var cachedJson = _cache.GetString(cacheKey);
             if (!string.IsNullOrEmpty(cachedJson))
             {
@@ -120,7 +119,7 @@ namespace ModCore.Common.Cache
         public void UpdateCachedMessage(Snowflake guildId, Snowflake channelId, Snowflake messageId, Message? message,
             MessageChangeType changeType, out MessageHistory? history)
         {
-            var cacheKey = $"message_cache :: {guildId} :: {channelId} :: {messageId}";
+            var cacheKey = getMessageCacheKey(guildId, channelId, messageId);
             var cachedJson = _cache.GetString(cacheKey);
 
             var newChange = new MessageState()
@@ -152,6 +151,17 @@ namespace ModCore.Common.Cache
 
             _cache.SetString(cacheKey, JsonSerializer.Serialize(history, _serializerOptions));
             _cache.Refresh(cacheKey);
+        }
+
+        private string getCacheKey<T>(Snowflake Id)
+        {
+            var typeName = typeof(T).Name;
+            return $"{typeName} :: {Id}";
+        }
+
+        private string getMessageCacheKey(Snowflake guildId, Snowflake channelId, Snowflake messageId)
+        {
+            return $"message_cache :: {guildId} :: {channelId} :: {messageId}";
         }
 
         private T mergeObjects<T>(T oldValue, T newValue)
