@@ -12,6 +12,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Common.Database.Helpers;
+using ModCore.Common.Database;
+using ModCore.Common.Database.Entities;
 
 namespace ModCore.Services.Shard.Commands
 {
@@ -19,19 +22,21 @@ namespace ModCore.Services.Shard.Commands
     {
         private readonly ILogger _logger;
         private readonly CacheService _cache;
+        private readonly DatabaseContext _database;
 
-        public ModerationCommands(ILogger<ModerationCommands> logger, CacheService cache)
+        public ModerationCommands(ILogger<ModerationCommands> logger, CacheService cache, DatabaseContext database)
         {
             _logger = logger;
             _cache = cache;
+            _database = database;
         }
 
-        [SlashCommand("Bans a user", permissions: Permissions.BanMembers)]
-        public async ValueTask Ban(
+        [SlashCommand("ban", "Bans a user", permissions: Permissions.BanMembers)]
+        public async ValueTask BanAsync(
             SlashCommandContext context,
-            [Option("User to ban", ApplicationCommandOptionType.User)] Snowflake userToBan, 
-            [Option("Reason to ban user", ApplicationCommandOptionType.String)] Optional<string> reason, 
-            [Option("Whether to notify said user", ApplicationCommandOptionType.Boolean)] Optional<bool> notify)
+            [Option("user", "User to ban", ApplicationCommandOptionType.User)] Snowflake userToBan, 
+            [Option("reason", "Reason to ban user", ApplicationCommandOptionType.String)] Optional<string> reason, 
+            [Option("notify", "Whether to notify said user", ApplicationCommandOptionType.Boolean)] Optional<bool> notify)
         {
             var fetchGuild = await _cache.GetFromCacheOrRest<Guild>(context.EventData.GuildId, (rest, id) => rest.GetGuildAsync(id));
             if(!fetchGuild.Success)
@@ -71,6 +76,9 @@ namespace ModCore.Services.Shard.Commands
                         $"Reason:\n```\n{givenReason}\n```",
                         Flags = MessageFlags.Ephemeral
                     });
+
+                var infractionHelper = new InfractionHelper(_database, userToBan, context.EventData.GuildId.Value);
+                await infractionHelper.CreateInfractionAsync(InfractionType.Ban, context.EventData.User.Value.Id, givenReason, sentDM);
             }
             else
             {
@@ -82,6 +90,17 @@ namespace ModCore.Services.Shard.Commands
                         Flags = MessageFlags.Ephemeral
                     });
             }
+        }
+
+        [SlashCommand("hackban", "HackBans a user, by their ID.", permissions: Permissions.BanMembers)]
+        public async ValueTask HackBanAsync(SlashCommandContext context)
+        {
+            await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, InteractionResponseType.ChannelMessageWithSource,
+                new InteractionMessageResponse()
+                {
+                    Content = "⚠️ Not implemented yet!",
+                    Flags = MessageFlags.Ephemeral
+                });
         }
     }
 }

@@ -15,22 +15,23 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ModCore.Services.Shard.Commands
 {
-    [SlashCommand("Reminder commands")]
-    public class Remind : BaseCommandHandler
+    [SlashCommand("remind", "Reminder commands")]
+    public class ReminderCommands : BaseCommandHandler
     {
         private readonly TimerService _timers;
         private readonly DatabaseContext _databaseContext;
 
-        public Remind(TimerService timers, DatabaseContext databaseContext)
+        public ReminderCommands(TimerService timers, DatabaseContext databaseContext)
         {
             _timers = timers;
             _databaseContext = databaseContext;
         }
 
-        [SlashCommand("Reminds you at a given time.")]
+        // TODO use the new jobs system for this? should be more reliable
+        [SlashCommand("me", "Reminds you at a given time.")]
         public async ValueTask Me(SlashCommandContext ctx, 
-            [Option("Time to trigger at", ApplicationCommandOptionType.String)]string time,
-            [Option("What to remind you about", ApplicationCommandOptionType.String)]string about)
+            [Option("in", "Time to trigger at", ApplicationCommandOptionType.String)]string time,
+            [Option("about", "What to remind you about", ApplicationCommandOptionType.String)]string about)
         {
             var trigger = DateTimeOffset.UtcNow.AddSeconds(5);
 

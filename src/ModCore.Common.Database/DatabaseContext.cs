@@ -63,6 +63,18 @@ namespace ModCore.Common.Database
         {
         }
 
+        public async Task EnsureGuildDataExistsAsync(ulong guildId)
+        {
+            if (!await this.Guilds.AnyAsync(x => x.GuildId == guildId))
+            {
+                await this.Guilds.AddAsync(new DatabaseGuild()
+                {
+                    GuildId = guildId,
+                });
+                await this.SaveChangesAsync();
+            }
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             #if DEBUG

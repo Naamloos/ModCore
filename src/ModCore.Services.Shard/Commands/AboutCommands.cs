@@ -24,8 +24,8 @@ namespace ModCore.Services.Shard.Commands
             _logger = logger;
         }
 
-        [SlashCommand("Shows information about this bot.", dm_permission: true)]
-        public async ValueTask About(SlashCommandContext context)
+        [SlashCommand("about", "Shows information about this bot.", dm_permission: true)]
+        public async ValueTask AboutAsync(SlashCommandContext context)
         {
             if (context.EventData.Member.HasValue)
             {

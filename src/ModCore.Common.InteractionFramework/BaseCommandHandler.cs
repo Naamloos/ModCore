@@ -59,7 +59,7 @@ namespace ModCore.Common.InteractionFramework
 
             var command = new ApplicationCommand()
             {
-                Name = type.Name.ToLowerInvariant(),
+                Name = attr.Name,
                 Description = attr.Description,
                 NSFW = attr.Nsfw,
                 CanBeUsedInDM = attr.DmPermission,
@@ -120,7 +120,7 @@ namespace ModCore.Common.InteractionFramework
 
                 appCommands.Add(new ApplicationCommand()
                 {
-                    Name = method.Name.ToLowerInvariant(),
+                    Name = attr.Name,
                     Description = attr.Description,
                     NSFW = attr.Nsfw,
                     CanBeUsedInDM = attr.DmPermission,
@@ -128,7 +128,7 @@ namespace ModCore.Common.InteractionFramework
                     DefaultMemberPermissions = attr.Permissions == Permissions.None ? Optional<Permissions>.None : attr.Permissions,
                 });
 
-                executables.Add(method.Name.ToLowerInvariant(), async context => await ExecuteCommand(context, method, getTypeInstance(this.GetType(), services)));
+                executables.Add(attr.Name, async context => await ExecuteCommand(context, method, getTypeInstance(this.GetType(), services)));
             }
 
             return (executables, appCommands);
@@ -155,7 +155,7 @@ namespace ModCore.Common.InteractionFramework
 
                 appCommands.Add(new ApplicationCommand()
                 {
-                    Name = group.Name.ToLowerInvariant(),
+                    Name = attr.Name.ToLowerInvariant(),
                     Description = attr.Description,
                     NSFW = attr.Nsfw,
                     CanBeUsedInDM = attr.DmPermission,
@@ -188,13 +188,13 @@ namespace ModCore.Common.InteractionFramework
 
                 appCommands.Add(new ApplicationCommandOption()
                 {
-                    Name = method.Name.ToLowerInvariant(),
+                    Name = attr.Name,
                     Description = attr.Description,
                     Options = loadOptions(method),
                     Type = ApplicationCommandOptionType.Subcommand
                 });
 
-                executables.Add(parentName.ToLowerInvariant() + " " + method.Name.ToLowerInvariant(), 
+                executables.Add(parentName.ToLowerInvariant() + " " + attr.Name.ToLowerInvariant(), 
                     context => ExecuteCommand(context, method, getTypeInstance(parent, services)));
             }
 
@@ -217,7 +217,7 @@ namespace ModCore.Common.InteractionFramework
 
                 appCommands.Add(new ApplicationCommandOption()
                 {
-                    Name = group.Name.ToLowerInvariant(),
+                    Name = attr.Name,
                     Description = attr.Description,
                     Options = subCommands.Item2,
                     Type = ApplicationCommandOptionType.SubcommandGroup
@@ -269,7 +269,7 @@ namespace ModCore.Common.InteractionFramework
 
                 options.Add(new ApplicationCommandOption()
                 {
-                    Name = param.Name.ToLowerInvariant(),
+                    Name = attr.Name.ToLowerInvariant(),
                     Description = attr.Description,
                     Type = attr.Type,
                     Required = param.ParameterType.IsAssignableTo(typeof(Optional<>)) ? Optional<bool>.None : true

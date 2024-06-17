@@ -11,6 +11,7 @@ namespace ModCore.Common.InteractionFramework.Attributes
     [AttributeUsage(AttributeTargets.Parameter, AllowMultiple = false)]
     public class OptionAttribute : Attribute
     {
+        public string Name { get; set; }
         public string Description { get; set; }
         public ApplicationCommandOptionType Type { get; set; }
         public IEnumerable<ApplicationCommandOptionChoice>? Choices { get; set; }
@@ -20,8 +21,9 @@ namespace ModCore.Common.InteractionFramework.Attributes
         public int? MaxLength { get; set; }
         public bool AutoComplete { get; set; }
 
-        public OptionAttribute(string description, ApplicationCommandOptionType type) 
+        public OptionAttribute(string name, string description, ApplicationCommandOptionType type) 
         { 
+            Name = name;
             Description = description;
             Type = type;
         }

@@ -16,43 +16,64 @@ namespace ModCore.Common.Cache
         private JsonSerializerOptions _serializerOptions;
         private DiscordRest DiscordRest { get; set; }
 
-        public CacheService(IDistributedCache cache, DiscordRest restClient) 
+        public CacheService(IDistributedCache cache, DiscordRest restClient)
         {
             this._cache = cache;
             this._serializerOptions = new JsonSerializerOptions();
         }
 
-        public async ValueTask<(bool Success, T Value)> GetFromCacheOrRest<T>(Snowflake Id, Func<DiscordRest, Snowflake, ValueTask<RestResponse<T>>> fallback)
+        public async ValueTask<CacheResponse<T>> GetFromCacheOrRest<T>(Snowflake Id, Func<DiscordRest, Snowflake, ValueTask<RestResponse<T>>> fallback)
         {
+            var cache = TryGet<T>(Id);
+            if (cache.Success)
+            {
+                return cache;
+            }
+
             T returnValue = default(T);
-            bool success = TryGet<T>(Id, out returnValue);
-            if (!success)
+            var success = false;
+
+            try
             {
                 var fallbackResponse = await fallback(DiscordRest, Id);
-                if(fallbackResponse.Success)
+                if (fallbackResponse.Success)
                 {
                     returnValue = fallbackResponse.Value!;
                     Update<T>(Id, returnValue);
                     success = true;
                 }
             }
+            catch (Exception)
+            {
+                success = false;
+            }
 
-            return (success, returnValue);
+            return new CacheResponse<T>(success, returnValue);
         }
 
-        public bool TryGet<T>(Snowflake Id, out T? item)
+        public CacheResponse<T> TryGet<T>(Snowflake Id)
         {
             var typeName = typeof(T).Name;
             var cacheKey = $"{typeName} :: {Id}";
 
-            item = default(T);
+            var item = default(T);
+            var success = true;
 
             var cachedJson = _cache.GetString(cacheKey);
-            if(string.IsNullOrEmpty(cachedJson))
-                return false;
+            if (!string.IsNullOrEmpty(cachedJson))
+            {
+                try
+                {
+                    item = JsonSerializer.Deserialize<T>(cachedJson);
+                    success = true;
+                }
+                catch (Exception)
+                {
+                    success = false;
+                }
+            }
 
-            item = JsonSerializer.Deserialize<T>(cachedJson);
-            return true;
+            return new CacheResponse<T>(success, item);
         }
 
         public void Update<T>(Snowflake Id, T newItem)
@@ -73,22 +94,30 @@ namespace ModCore.Common.Cache
             _cache.SetString(cacheKey, JsonSerializer.Serialize<T>(newCacheItem, _serializerOptions));
         }
 
-        public bool GetMessageFromCache(Snowflake guildId, Snowflake channelId, Snowflake messageId, out MessageHistory? history)
+        public CacheResponse<MessageHistory> GetMessageFromCache(Snowflake guildId, Snowflake channelId, Snowflake messageId)
         {
-            history = default;
+            var history = default(MessageHistory);
+            var success = false;
 
             var cacheKey = $"message_cache :: {guildId} :: {channelId} :: {messageId}";
             var cachedJson = _cache.GetString(cacheKey);
-            if(string.IsNullOrEmpty(cachedJson))
+            if (!string.IsNullOrEmpty(cachedJson))
             {
-                return false;
+                try
+                {
+                    history = JsonSerializer.Deserialize<MessageHistory>(cachedJson);
+                    success = true;
+                }
+                catch (Exception)
+                {
+                    success = false;
+                }
             }
 
-            history = JsonSerializer.Deserialize<MessageHistory>(cachedJson);
-            return true;
+            return new CacheResponse<MessageHistory>(success, history);
         }
 
-        public void UpdateCachedMessage(Snowflake guildId, Snowflake channelId, Snowflake messageId, Message? message, 
+        public void UpdateCachedMessage(Snowflake guildId, Snowflake channelId, Snowflake messageId, Message? message,
             MessageChangeType changeType, out MessageHistory? history)
         {
             var cacheKey = $"message_cache :: {guildId} :: {channelId} :: {messageId}";
@@ -135,7 +164,7 @@ namespace ModCore.Common.Cache
                 object oldPropertyValue = property.GetValue(oldValue);
                 object newPropertyValue = property.GetValue(newValue);
 
-                if(property.PropertyType.IsInstanceOfType(typeof(Optional<>)))
+                if (property.PropertyType.IsInstanceOfType(typeof(Optional<>)))
                 {
                     // if no value is present in new, we keep old.
                     var prop = property.GetValue(newValue);
