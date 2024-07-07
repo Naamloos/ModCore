@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ModCore.Common.Database.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20240407181218_ChangesForMigrations")]
-    partial class ChangesForMigrations
+    [Migration("20240707020307_InitialBased")]
+    partial class InitialBased
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -120,10 +120,12 @@ namespace ModCore.Common.Database.Migrations
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseInfraction", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("GuildId")
                         .HasColumnType("numeric(20,0)")
@@ -313,10 +315,12 @@ namespace ModCore.Common.Database.Migrations
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseRoleMenu", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("CreatorId")
                         .HasColumnType("numeric(20,0)")
@@ -345,8 +349,8 @@ namespace ModCore.Common.Database.Migrations
                         .HasColumnType("numeric(20,0)")
                         .HasColumnName("role_id");
 
-                    b.Property<decimal>("MenuId")
-                        .HasColumnType("numeric(20,0)")
+                    b.Property<long>("MenuId")
+                        .HasColumnType("bigint")
                         .HasColumnName("menu_id");
 
                     b.HasKey("RoleId", "MenuId");
@@ -381,10 +385,12 @@ namespace ModCore.Common.Database.Migrations
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseStarboard", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("ChannelId")
                         .HasColumnType("numeric(20,0)")
@@ -416,8 +422,8 @@ namespace ModCore.Common.Database.Migrations
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseStarboardItem", b =>
                 {
-                    b.Property<decimal>("StarboardId")
-                        .HasColumnType("numeric(20,0)")
+                    b.Property<long>("StarboardId")
+                        .HasColumnType("bigint")
                         .HasColumnName("starboard_id");
 
                     b.Property<decimal>("MessageId")
@@ -449,10 +455,12 @@ namespace ModCore.Common.Database.Migrations
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseTag", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("AuthorId")
                         .HasColumnType("numeric(20,0)")
@@ -497,10 +505,12 @@ namespace ModCore.Common.Database.Migrations
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseTagHistory", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -508,8 +518,8 @@ namespace ModCore.Common.Database.Migrations
                         .HasColumnType("character varying(255)")
                         .HasColumnName("content");
 
-                    b.Property<decimal>("TagId")
-                        .HasColumnType("numeric(20,0)")
+                    b.Property<long>("TagId")
+                        .HasColumnType("bigint")
                         .HasColumnName("tag_id");
 
                     b.Property<DateTimeOffset>("Timestamp")
@@ -525,10 +535,12 @@ namespace ModCore.Common.Database.Migrations
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseTicket", b =>
                 {
-                    b.Property<decimal>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
+                        .HasColumnType("bigint")
                         .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
 
                     b.Property<decimal>("AuthorId")
                         .HasColumnType("numeric(20,0)")
@@ -563,10 +575,12 @@ namespace ModCore.Common.Database.Migrations
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseTimer", b =>
                 {
-                    b.Property<decimal>("TimerId")
+                    b.Property<long>("TimerId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("numeric(20,0)")
+                        .HasColumnType("bigint")
                         .HasColumnName("timer_id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("TimerId"));
 
                     b.Property<string>("Data")
                         .HasColumnType("jsonb")

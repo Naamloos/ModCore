@@ -11,7 +11,7 @@ namespace ModCore.Common.Database.Entities
     public class DatabaseStarboardItem
     {
         [Column("starboard_id")]
-        public ulong StarboardId { get; set; }
+        public long StarboardId { get; set; }
 
         [Column("message_id")]
         public ulong MessageId { get; set; }

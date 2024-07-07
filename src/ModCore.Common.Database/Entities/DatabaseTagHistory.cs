@@ -12,11 +12,10 @@ namespace ModCore.Common.Database.Entities
     public class DatabaseTagHistory
     {
         [Column("id")]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public ulong Id { get; set; }
+        public long Id { get; set; }
 
         [Column("tag_id")]
-        public ulong TagId { get; set; }
+        public long TagId { get; set; }
 
         [Column("content")]
         [MaxLength(255)]

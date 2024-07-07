@@ -11,7 +11,7 @@ namespace ModCore.Common.Database.Entities
     public class DatabaseRoleMenuRole
     {
         [Column("menu_id")]
-        public ulong MenuId { get; set; }
+        public long MenuId { get; set; }
 
         [Column("role_id")]
         public ulong RoleId { get; set; }

@@ -16,7 +16,6 @@ using System.Threading.Tasks;
 
 namespace ModCore.Services.Shard.Commands
 {
-    [SlashCommand("infractions", "Infraction management commands")]
     public class InfractionCommands : BaseCommandHandler
     {
         private readonly ILogger _logger;
@@ -30,7 +29,7 @@ namespace ModCore.Services.Shard.Commands
             _database = database;
         }
 
-        [SlashCommand("list", "Lists user infractions", permissions: Permissions.BanMembers)]
+        [SlashCommand("infractions", "Lists user infractions", permissions: Permissions.BanMembers)]
         public async ValueTask ListInfractionsAsync(SlashCommandContext context,
             [Option("user", "ID of the user to list infractions for", ApplicationCommandOptionType.User)]Snowflake user_id)
         {
@@ -61,7 +60,7 @@ namespace ModCore.Services.Shard.Commands
 
             // infractions exist, let's list them
             var sb = new StringBuilder();
-            sb.AppendLine($"🚫 Infractions for {fetchedUser.Value.Username}#{fetchedUser.Value.Discriminator}:");
+            sb.AppendLine($"🚫 Infractions for {fetchedUser.Value.Username}:");
             foreach (var infraction in infractions)
             {
                 sb.AppendLine($"`{infraction.Id}`: {infraction.Type} - {infraction.Reason}");

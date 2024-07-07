@@ -112,7 +112,7 @@ namespace ModCore.Common.Database
                 .HasKey(x => new { x.Id });
             modelBuilder.Entity<DatabaseStarboard>()
                 .Property(x => x.Id)
-                .ValueGeneratedOnAdd();
+                .UseIdentityAlwaysColumn();
             modelBuilder.Entity<DatabaseStarboard>()
                 .HasOne(x => x.Guild)
                 .WithMany(x => x.Starboards)
@@ -136,7 +136,7 @@ namespace ModCore.Common.Database
                 .HasKey(x => new {x.Id});
             modelBuilder.Entity<DatabaseTag>()
                 .Property(x => x.Id)
-                .ValueGeneratedOnAdd();
+                .UseIdentityAlwaysColumn();
             modelBuilder.Entity<DatabaseTag>()
                 .HasOne(x => x.Guild)
                 .WithMany(x => x.Tags)
@@ -207,7 +207,7 @@ namespace ModCore.Common.Database
                 .HasKey(x => x.Id);
             modelBuilder.Entity<DatabaseInfraction>()
                 .Property(x => x.Id)
-                .ValueGeneratedOnAdd();
+                .UseIdentityAlwaysColumn();
             modelBuilder.Entity<DatabaseInfraction>()
                 .HasOne(x =>x.Guild)
                 .WithMany(x => x.Infractions)
@@ -231,7 +231,7 @@ namespace ModCore.Common.Database
                 .HasKey(x => x.Id);
             modelBuilder.Entity<DatabaseTicket>()
                 .Property(x => x.Id)
-                .ValueGeneratedOnAdd();
+                .UseIdentityAlwaysColumn();
             modelBuilder.Entity<DatabaseTicket>()
                 .HasOne(x => x.Author)
                 .WithMany(x => x.Tickets)
@@ -247,7 +247,7 @@ namespace ModCore.Common.Database
                 .HasKey(x => x.Id);
             modelBuilder.Entity<DatabaseRoleMenu>()
                 .Property(x => x.Id)
-                .ValueGeneratedOnAdd();
+                .UseIdentityAlwaysColumn();
             modelBuilder.Entity<DatabaseRoleMenu>()
                 .HasOne(x => x.Guild)
                 .WithMany(x => x.RoleMenus)
@@ -281,7 +281,7 @@ namespace ModCore.Common.Database
                 .HasKey(x => x.TimerId);
             modelBuilder.Entity<DatabaseTimer>()
                 .Property(x => x.TimerId)
-                .ValueGeneratedOnAdd();
+                .UseIdentityAlwaysColumn();
 
             modelBuilder.Entity<DatabaseLevelSettings>()
                 .HasKey(x => x.GuildId);

@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace ModCore.Common.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialBased : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,7 +21,13 @@ namespace ModCore.Common.Database.Migrations
                     modlog_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
                     ticket_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
                     appeal_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
-                    nick_confirm_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true)
+                    nick_confirm_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
+                    last_seen_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    auto_role_enabled = table.Column<bool>(type: "boolean", nullable: false),
+                    embed_message_links_state = table.Column<int>(type: "integer", nullable: false),
+                    persist_user_roles = table.Column<bool>(type: "boolean", nullable: false),
+                    persist_user_overrides = table.Column<bool>(type: "boolean", nullable: false),
+                    persist_user_nicknames = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -31,7 +38,8 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_timers",
                 columns: table => new
                 {
-                    timer_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    timer_id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     guild_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     shard_id = table.Column<int>(type: "integer", nullable: false),
                     trigger_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -52,6 +60,27 @@ namespace ModCore.Common.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_mcore_user", x => x.user_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LevelSettings",
+                columns: table => new
+                {
+                    guild_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    levels_enabled = table.Column<bool>(type: "boolean", nullable: false),
+                    messages_enabled = table.Column<bool>(type: "boolean", nullable: false),
+                    redirect_messages = table.Column<bool>(type: "boolean", nullable: false),
+                    message_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LevelSettings", x => x.guild_id);
+                    table.ForeignKey(
+                        name: "FK_LevelSettings_mcore_guild_guild_id",
+                        column: x => x.guild_id,
+                        principalTable: "mcore_guild",
+                        principalColumn: "guild_id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -76,7 +105,8 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_infraction",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     guild_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     user_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     responsible_moderator_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
@@ -100,7 +130,7 @@ namespace ModCore.Common.Database.Migrations
                 columns: table => new
                 {
                     guild_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    logger_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    logger_channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
                     log_joins = table.Column<bool>(type: "boolean", nullable: false),
                     log_message_edit = table.Column<bool>(type: "boolean", nullable: false),
                     log_nicknames = table.Column<bool>(type: "boolean", nullable: false),
@@ -126,9 +156,11 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_rolemenu",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     guild_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    name = table.Column<decimal>(type: "numeric(20,0)", maxLength: 30, nullable: false)
+                    name = table.Column<string>(type: "character varying(30)", maxLength: 30, nullable: false),
+                    creator_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -145,7 +177,8 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_starboard",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     guild_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     enabled = table.Column<bool>(type: "boolean", nullable: false),
                     minimum_reactions = table.Column<int>(type: "integer", nullable: false),
@@ -320,7 +353,8 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_tag",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: true),
                     name = table.Column<string>(type: "character varying(35)", maxLength: 35, nullable: false),
                     author_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
@@ -350,7 +384,8 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_ticket",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
                     guild_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     author_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     name = table.Column<string>(type: "text", nullable: false),
@@ -378,7 +413,7 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_rolemenu_role",
                 columns: table => new
                 {
-                    menu_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    menu_id = table.Column<long>(type: "bigint", nullable: false),
                     role_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false)
                 },
                 constraints: table =>
@@ -396,7 +431,7 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_starboard_item",
                 columns: table => new
                 {
-                    starboard_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    starboard_id = table.Column<long>(type: "bigint", nullable: false),
                     message_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     channel_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
                     board_message_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
@@ -424,8 +459,9 @@ namespace ModCore.Common.Database.Migrations
                 name: "mcore_tag_history",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
-                    tag_id = table.Column<decimal>(type: "numeric(20,0)", nullable: false),
+                    id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                    tag_id = table.Column<long>(type: "bigint", nullable: false),
                     content = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
                     timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
@@ -524,6 +560,9 @@ namespace ModCore.Common.Database.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "LevelSettings");
+
             migrationBuilder.DropTable(
                 name: "mcore_appeal");
 

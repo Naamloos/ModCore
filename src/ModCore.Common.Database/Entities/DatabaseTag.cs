@@ -12,8 +12,7 @@ namespace ModCore.Common.Database.Entities
     public class DatabaseTag
     {
         [Column("id")]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public ulong Id { get; set; }
+        public long Id { get; set; }
 
         [Column("channel_id")]
         public ulong? ChannelId { get; set; } = null; // not set = global
