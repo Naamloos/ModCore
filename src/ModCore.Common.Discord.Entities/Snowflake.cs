@@ -23,7 +23,7 @@ namespace ModCore.Common.Discord.Entities
             snowflake = ((ulong)Timestamp.ToUnixTimeMilliseconds() - DISCORD_EPOCH) << 22;
         }
 
-        public static implicit operator ulong(Snowflake snowflake) { return snowflake; }
+        public static implicit operator ulong(Snowflake snowflake) { return snowflake.snowflake; }
         public static implicit operator Snowflake(ulong value) { return new Snowflake(value); }
         public static implicit operator Snowflake(DateTimeOffset timestamp) { return new Snowflake(timestamp); }
         public static implicit operator DateTimeOffset(Snowflake snowflake) { return snowflake.Timestamp; }

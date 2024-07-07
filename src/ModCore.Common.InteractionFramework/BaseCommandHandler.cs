@@ -22,9 +22,9 @@ namespace ModCore.Common.InteractionFramework
             classInstances.Add(this.GetType(), this);
         }
 
-        internal (Dictionary<string, Func<SlashCommandContext, ValueTask>>, List<ApplicationCommand>) LoadSlashCommands(IServiceProvider services)
+        internal (Dictionary<string, MethodInfo>, List<ApplicationCommand>) LoadSlashCommands(IServiceProvider services)
         {
-            Dictionary<string, Func<SlashCommandContext, ValueTask>> executables = new();
+            Dictionary<string, MethodInfo> executables = new();
             List<ApplicationCommand> commands = new();
 
             if (this.GetType().GetCustomAttribute<SlashCommandAttribute>() is not null)
@@ -37,9 +37,9 @@ namespace ModCore.Common.InteractionFramework
             }
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, ValueTask>>, List<ApplicationCommand>) loadAsTopLevel(IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadAsTopLevel(IServiceProvider services)
         {
-            var executables = new Dictionary<string, Func<SlashCommandContext, ValueTask>>();
+            var executables = new Dictionary<string, MethodInfo>();
 
             var attr = this.GetType().GetCustomAttribute<SlashCommandAttribute>();
 
@@ -81,9 +81,9 @@ namespace ModCore.Common.InteractionFramework
             return (executables, new List<ApplicationCommand>() { command });
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, ValueTask>>, List<ApplicationCommand>) loadAsContainer(IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadAsContainer(IServiceProvider services)
         {
-            var executables = new Dictionary<string, Func<SlashCommandContext, ValueTask>>();
+            var executables = new Dictionary<string, MethodInfo>();
             var appCommands = new List<ApplicationCommand>();
 
             var groups = loadGroups(this.GetType(), services);
@@ -104,9 +104,9 @@ namespace ModCore.Common.InteractionFramework
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, ValueTask>>, List<ApplicationCommand>) loadCommands(Type parent, IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadCommands(Type parent, IServiceProvider services)
         {
-            var executables = new Dictionary<string, Func<SlashCommandContext, ValueTask>>();
+            var executables = new Dictionary<string, MethodInfo>();
             var appCommands = new List<ApplicationCommand>();
 
             var methods = parent.GetMethods()
@@ -128,15 +128,15 @@ namespace ModCore.Common.InteractionFramework
                     DefaultMemberPermissions = attr.Permissions == Permissions.None ? Optional<Permissions>.None : attr.Permissions,
                 });
 
-                executables.Add(attr.Name, async context => await ExecuteCommand(context, method, getTypeInstance(this.GetType(), services)));
+                executables.Add(attr.Name, method);
             }
 
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, ValueTask>>, List<ApplicationCommand>) loadGroups(Type parent, IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadGroups(Type parent, IServiceProvider services)
         {
-            var executables = new Dictionary<string, Func<SlashCommandContext, ValueTask>>();
+            var executables = new Dictionary<string, MethodInfo>();
             var appCommands = new List<ApplicationCommand>();
 
             var groups = parent.GetNestedTypes()
@@ -172,9 +172,9 @@ namespace ModCore.Common.InteractionFramework
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, ValueTask>>, List<ApplicationCommandOption>) loadSubCommands(Type parent, string parentName, IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommandOption>) loadSubCommands(Type parent, string parentName, IServiceProvider services)
         {
-            var executables = new Dictionary<string, Func<SlashCommandContext, ValueTask>>();
+            var executables = new Dictionary<string, MethodInfo>();
             var appCommands = new List<ApplicationCommandOption>();
 
             var methods = parent.GetMethods()
@@ -194,16 +194,15 @@ namespace ModCore.Common.InteractionFramework
                     Type = ApplicationCommandOptionType.Subcommand
                 });
 
-                executables.Add(parentName.ToLowerInvariant() + " " + attr.Name.ToLowerInvariant(), 
-                    context => ExecuteCommand(context, method, getTypeInstance(parent, services)));
+                executables.Add(parentName.ToLowerInvariant() + " " + attr.Name.ToLowerInvariant(), method);
             }
 
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, Func<SlashCommandContext, ValueTask>>, List<ApplicationCommandOption>) loadSubGroups(Type parent, string parentName, IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommandOption>) loadSubGroups(Type parent, string parentName, IServiceProvider services)
         {
-            var executables = new Dictionary<string, Func<SlashCommandContext, ValueTask>>();
+            var executables = new Dictionary<string, MethodInfo>();
             var appCommands = new List<ApplicationCommandOption>();
 
             var groups = parent.GetNestedTypes()
@@ -276,26 +275,6 @@ namespace ModCore.Common.InteractionFramework
                 });
             }
             return options;
-        }
-
-        private async ValueTask ExecuteCommand(SlashCommandContext context, MethodInfo method, object instance)
-        {
-            List<object> parameters = [context];
-
-            foreach (var param in method.GetParameters().Skip(1))
-            {
-                var option = context.OptionValues.FirstOrDefault(x => x.Name.ToLowerInvariant() == param.Name.ToLowerInvariant());
-                if(option is null || !option.Value.HasValue)
-                {
-                    parameters.Add(null);
-                }
-                else
-                {
-                    parameters.Add(JsonSerializer.Deserialize(option.Value.Value, param.ParameterType, options: context.ServiceProvider.GetService<JsonSerializerOptions>())!);
-                }
-            }
-
-            await (ValueTask)method.Invoke(instance, parameters.ToArray())!;
         }
     }
 }

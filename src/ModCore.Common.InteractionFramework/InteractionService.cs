@@ -15,7 +15,7 @@ namespace ModCore.Common.InteractionFramework
         private DiscordRest Rest { get; set; }
 
         private List<ApplicationCommand> Commands { get; set; }
-        private Dictionary<string, Func<SlashCommandContext, ValueTask>> CommandHandlers { get; set; }
+        private Dictionary<string, ExecutableCommand> CommandHandlers { get; set; }
         private IServiceProvider Services { get; set; }
 
         public InteractionService(DiscordRest rest, IServiceProvider services)
@@ -52,8 +52,9 @@ namespace ModCore.Common.InteractionFramework
                 Commands.AddRange(loaded.Item2);
                 foreach(var command in loaded.Item1)
                 {
-                    Expression<Func<SlashCommandContext, ValueTask>> expression = x => command.Value(x);
-                    CommandHandlers.Add(command.Key, expression.Compile());
+                    //Expression<Func<SlashCommandContext, ValueTask>> expression = x => command.Value(x);
+
+                    CommandHandlers.Add(command.Key, new ExecutableCommand(enabledHandler, command.Value));
                 }
             }
         }
@@ -98,7 +99,7 @@ namespace ModCore.Common.InteractionFramework
 
                     using (var context = new SlashCommandContext(interactionCreate, Rest, gateway, options, Services))
                     {
-                        await CommandHandlers[qualifiedName](context);
+                        await CommandHandlers[qualifiedName].Execute(context);
                     }
                 }
             }
