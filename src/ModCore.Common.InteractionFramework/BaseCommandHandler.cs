@@ -50,8 +50,8 @@ namespace ModCore.Common.InteractionFramework
 
             var type = this.GetType();
 
-            var subCommands = loadSubCommands(type, type.Name, services);
-            var subGroups = loadSubGroups(type, type.Name, services);
+            var subCommands = loadSubCommands(type, attr.Name, services);
+            var subGroups = loadSubGroups(type, attr.Name, services);
 
             var options = new List<ApplicationCommandOption>();
             options.AddRange(subCommands.Item2);
@@ -146,8 +146,8 @@ namespace ModCore.Common.InteractionFramework
             {
                 var attr = group.GetCustomAttribute<SlashCommandAttribute>()!;
 
-                var subGroups = loadSubGroups(group, group.Name.ToLowerInvariant(), services);
-                var subCommands = loadSubCommands(group, group.Name.ToLowerInvariant(), services);
+                var subGroups = loadSubGroups(group, attr.Name.ToLowerInvariant(), services);
+                var subCommands = loadSubCommands(group, attr.Name.ToLowerInvariant(), services);
                 var options = new List<ApplicationCommandOption>();
 
                 options.AddRange(subGroups.Item2);
@@ -212,7 +212,7 @@ namespace ModCore.Common.InteractionFramework
             {
                 var attr = group.GetCustomAttribute<SlashCommandAttribute>()!;
 
-                var subCommands = loadSubCommands(group, group.Name.ToLowerInvariant(), services);
+                var subCommands = loadSubCommands(group, attr.Name.ToLowerInvariant(), services);
 
                 appCommands.Add(new ApplicationCommandOption()
                 {

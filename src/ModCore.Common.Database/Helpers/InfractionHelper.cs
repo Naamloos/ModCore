@@ -27,7 +27,7 @@ namespace ModCore.Common.Database.Helpers
             ulong responsible_moderator, string reason = null, bool notified = false)
         {
             // ensure data for this guild exists
-            await database.EnsureGuildDataExistsAsync(guildId);
+            await database.TouchGuild(guildId);
 
             var infraction = await database.Infractions.AddAsync(new DatabaseInfraction()
             {
@@ -37,7 +37,10 @@ namespace ModCore.Common.Database.Helpers
                 Reason = reason,
                 ResponsibleModerator = responsible_moderator,
                 UserNotified = notified,
+                Id = 0
             });
+
+            database.SaveChanges();
 
             return infraction.Entity;
         }

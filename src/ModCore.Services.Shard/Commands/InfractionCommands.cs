@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using ModCore.Common.Cache;
 using ModCore.Common.Database;
+using ModCore.Common.Database.Entities;
 using ModCore.Common.Database.Helpers;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Enums;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Services.Shard.Commands
 {
+    [SlashCommand("infractions", "Infraction management commands")]
     public class InfractionCommands : BaseCommandHandler
     {
         private readonly ILogger _logger;
@@ -28,7 +30,7 @@ namespace ModCore.Services.Shard.Commands
             _database = database;
         }
 
-        [SlashCommand("infractions", "Lists user infractions", permissions: Permissions.BanMembers)]
+        [SlashCommand("list", "Lists user infractions", permissions: Permissions.BanMembers)]
         public async ValueTask ListInfractionsAsync(SlashCommandContext context,
             [Option("user", "ID of the user to list infractions for", ApplicationCommandOptionType.User)]Snowflake user_id)
         {
@@ -72,9 +74,33 @@ namespace ModCore.Services.Shard.Commands
                 });
         }
 
-        public async ValueTask AddNoteAsync(SlashCommandContext context)
+        [SlashCommand("warn", "Adds a warning to a user (with DM)", permissions: Permissions.BanMembers)]
+        public async ValueTask AddNoteAsync(SlashCommandContext context,
+            [Option("user", "ID of the user to list infractions for", ApplicationCommandOptionType.User)] Snowflake user_id,
+            [Option("warning", "Optional text content of this warning", ApplicationCommandOptionType.String)] Optional<string> content)
         {
+            var fetchedUser = await _cache.GetFromCacheOrRest<User>(user_id, (rest, id) => rest.GetUserAsync(id));
+            if (!fetchedUser.Success)
+            {
+                await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token,
+                    InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
+                    {
+                        Flags = MessageFlags.Ephemeral,
+                        Content = "🚫 Failed to fetch user data."
+                    });
+                return;
+            }
 
+            var infractionHelper = new InfractionHelper(_database, user_id, context.EventData.GuildId.Value);
+            await infractionHelper.CreateInfractionAsync(InfractionType.Warning, 
+                context.EventData.Member.Value.User.Value.Id, content.HasValue? content : "❌ No reasopn given.", true);
+
+            await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token,
+                InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
+                {
+                    Flags = MessageFlags.Ephemeral,
+                    Content = $"Warned user <@{user_id}>" + (content.HasValue? $" for: ```{content.Value}```" : "")
+                });
         }
     }
 }

@@ -63,9 +63,10 @@ namespace ModCore.Common.Database
         {
         }
 
-        public async Task EnsureGuildDataExistsAsync(ulong guildId)
+        public async Task TouchGuild(ulong guildId)
         {
-            if (!await this.Guilds.AnyAsync(x => x.GuildId == guildId))
+            var guild = await this.Guilds.FindAsync(guildId);
+            if (guild is null)
             {
                 await this.Guilds.AddAsync(new DatabaseGuild()
                 {
@@ -73,6 +74,10 @@ namespace ModCore.Common.Database
                 });
                 await this.SaveChangesAsync();
             }
+            guild = await this.Guilds.FindAsync(guildId);
+            guild.LastSeenAt = DateTime.UtcNow;
+            this.Guilds.Update(guild);
+            await this.SaveChangesAsync();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

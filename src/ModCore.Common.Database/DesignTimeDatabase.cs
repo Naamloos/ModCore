@@ -35,7 +35,7 @@ namespace ModCore.Common.Database
             var options = new DbContextOptionsBuilder<DatabaseContext>()
                 .UseNpgsql(cStringBuilder.ToString());
 
-            return new DatabaseContext(options.Options);
+            return new DatabaseContext(cStringBuilder.ToString());
         }
     }
 }
