@@ -6,8 +6,10 @@ using ModCore.Common.Database.Helpers;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.InteractionFramework;
 using ModCore.Common.InteractionFramework.Attributes;
+using ModCore.Common.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,17 +61,26 @@ namespace ModCore.Services.Shard.Commands
             }
 
             // infractions exist, let's list them
-            var sb = new StringBuilder();
-            sb.AppendLine($"🚫 Infractions for {fetchedUser.Value.Username}:");
-            foreach (var infraction in infractions)
+            var embed = new Embed()
             {
-                sb.AppendLine($"`{infraction.Id}`: {infraction.Type} - {infraction.Reason}");
-            }
+                Author = new EmbedAuthor()
+                {
+                    Name = "🚫 Infractions for " + fetchedUser.Value!.Username,
+                    IconUrl = fetchedUser.Value.AvatarUrl
+                },
+                Color = ColorConverter.FromHex("#FF0000"),
+                Fields = infractions.Select(x => new EmbedField()
+                {
+                    Name = $"`{x.Id}`: **{x.Type}**",
+                    Value = x.Reason
+                }).ToList()
+            };
+
             await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token,
                 InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
                 {
                     Flags = MessageFlags.Ephemeral,
-                    Content = sb.ToString()
+                    Embeds = new[] { embed }
                 });
         }
 

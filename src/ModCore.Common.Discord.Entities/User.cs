@@ -59,5 +59,7 @@ namespace ModCore.Common.Discord.Entities
 
         private const string MENTION_FORMAT = "<@{0}>";
         public string Mention => string.Format(MENTION_FORMAT, Id);
+
+        public string AvatarUrl => !string.IsNullOrEmpty(AvatarHash) ? $"https://cdn.discordapp.com/avatars/{Id}/{AvatarHash}.png" : $"https://cdn.discordapp.com/embed/avatars/{Id % 5}.png";
     }
 }
