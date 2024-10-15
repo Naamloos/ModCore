@@ -32,8 +32,6 @@ namespace ModCore.Services.Jobs
                 WriteIndented = true
             };
 
-
-
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(options =>
                 {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Tools.DatabaseMigrator
 {
-    public static class Cons
+    public static class MigratorConsole
     {
         public static void Write(string message, ConsoleColor color = ConsoleColor.White)
         {

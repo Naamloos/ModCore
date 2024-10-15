@@ -46,23 +46,23 @@ namespace ModCore.Tools.DatabaseMigrator
             var migrations = _newDatabase.Database.GetPendingMigrations();
             if (migrations.Count() > 0)
             {
-                Cons.Write("Pending migrations found for new database. Apply? (y/N)");
+                MigratorConsole.Write("Pending migrations found for new database. Apply? (y/N)");
                 var confirm = (Console.ReadLine() ?? "n").Trim().ToLower() == "y";
                 if (!confirm)
                 {
-                    Cons.WriteLine("Migrations pending were not applied. Cancelling operation.", ConsoleColor.Red);
+                    MigratorConsole.WriteLine("Migrations pending were not applied. Cancelling operation.", ConsoleColor.Red);
                     return;
                 }
-                Cons.WriteLine("Applying latest migrations to new Database:");
+                MigratorConsole.WriteLine("Applying latest migrations to new Database:");
                 foreach (var migration in migrations)
                 {
-                    Cons.WriteLine(migration, ConsoleColor.Magenta);
+                    MigratorConsole.WriteLine(migration, ConsoleColor.Magenta);
                 }
                 _newDatabase.Database.Migrate();
-                Cons.WriteLine("Applied migrations!", ConsoleColor.Green);
+                MigratorConsole.WriteLine("Applied migrations!", ConsoleColor.Green);
             }
 
-            Cons.WriteLine("Starting migration from old to new database");
+            MigratorConsole.WriteLine("Starting migration from old to new database");
 
             // Guild configs must be ran first, to ensure that we create guild objects where needed.
             MigrateGuildConfigs();
@@ -76,19 +76,19 @@ namespace ModCore.Tools.DatabaseMigrator
             MigrateNicknameStates();
             MigrateTimers();
 
-            Cons.WriteLine("Done migrating v2 database to v3 database!", ConsoleColor.Green);
+            MigratorConsole.WriteLine("Done migrating v2 database to v3 database!", ConsoleColor.Green);
         }
 
         private void MigrateGuildConfigs()
         {
             foreach (var guildConfig in _oldDatabase.GuildConfig)
             {
-                Cons.WriteLine($"Migrating Guild config for {guildConfig.GuildId}");
+                MigratorConsole.WriteLine($"Migrating Guild config for {guildConfig.GuildId}");
                 var newGuild = GetOrCreateNewGuildEntity((ulong)guildConfig.GuildId);
 
                 if (string.IsNullOrWhiteSpace(guildConfig.Settings))
                 {
-                    Cons.WriteLine($"Guild with ID {guildConfig.GuildId} does not contain settings. Continuing.");
+                    MigratorConsole.WriteLine($"Guild with ID {guildConfig.GuildId} does not contain settings. Continuing.");
                     continue;
                 }
 
@@ -201,12 +201,12 @@ namespace ModCore.Tools.DatabaseMigrator
                 _newDatabase.SaveChanges();
             }
 
-            Cons.WriteLine("Done migrating guild configs!", ConsoleColor.Green);
+            MigratorConsole.WriteLine("Done migrating guild configs!", ConsoleColor.Green);
         }
 
         private void MigrateLevelData()
         {
-            Cons.WriteLine("Migrating stored level data");
+            MigratorConsole.WriteLine("Migrating stored level data");
             foreach (var levelData in _oldDatabase.Levels)
             {
                 var guild = GetOrCreateNewGuildEntity((ulong)levelData.GuildId);
@@ -223,12 +223,12 @@ namespace ModCore.Tools.DatabaseMigrator
                 _newDatabase.LevelData.Add(newLevelData);
             }
             _newDatabase.SaveChanges();
-            Cons.WriteLine("Done migrating level data!", ConsoleColor.Green);
+            MigratorConsole.WriteLine("Done migrating level data!", ConsoleColor.Green);
         }
 
         private void MigrateRoleStates()
         {
-            Cons.WriteLine("Migrating stored rolestates");
+            MigratorConsole.WriteLine("Migrating stored rolestates");
             foreach (var rolestate in _oldDatabase.RolestateRoles)
             {
                 var guild = GetOrCreateNewGuildEntity((ulong)rolestate.GuildId);
@@ -246,12 +246,12 @@ namespace ModCore.Tools.DatabaseMigrator
                 }
             }
             _newDatabase.SaveChanges();
-            Cons.WriteLine("Done migrating role states!", ConsoleColor.Green);
+            MigratorConsole.WriteLine("Done migrating role states!", ConsoleColor.Green);
         }
 
         private void MigrateRoleOverrides()
         {
-            Cons.WriteLine("Migrating stored overrides");
+            MigratorConsole.WriteLine("Migrating stored overrides");
             foreach (var rolestate in _oldDatabase.RolestateOverrides)
             {
                 var guild = GetOrCreateNewGuildEntity((ulong)rolestate.GuildId);
@@ -268,12 +268,12 @@ namespace ModCore.Tools.DatabaseMigrator
                 });
             }
             _newDatabase.SaveChanges();
-            Cons.WriteLine("Done migrating override states!", ConsoleColor.Green);
+            MigratorConsole.WriteLine("Done migrating override states!", ConsoleColor.Green);
         }
 
         private void MigrateNicknameStates()
         {
-            Cons.WriteLine("Migrating stored nicknames");
+            MigratorConsole.WriteLine("Migrating stored nicknames");
             foreach (var nickname in _oldDatabase.RolestateNicks)
             {
                 var guild = GetOrCreateNewGuildEntity((ulong)nickname.GuildId);
@@ -288,25 +288,25 @@ namespace ModCore.Tools.DatabaseMigrator
                 });
             }
             _newDatabase.SaveChanges();
-            Cons.WriteLine("Done migrating nickname states!", ConsoleColor.Green);
+            MigratorConsole.WriteLine("Done migrating nickname states!", ConsoleColor.Green);
         }
 
         private void MigrateTags()
         {
 
-            Cons.WriteLine("Done migrating tags!", ConsoleColor.Green);
+            MigratorConsole.WriteLine("Done migrating tags!", ConsoleColor.Green);
         }
 
         private void MigrateTimers()
         {
 
-            Cons.WriteLine("Done migrating timers!", ConsoleColor.Green);
+            MigratorConsole.WriteLine("Done migrating timers!", ConsoleColor.Green);
         }
 
         private void MigrateStarData()
         {
 
-            Cons.WriteLine("Done migrating guild starboard data!", ConsoleColor.Green);
+            MigratorConsole.WriteLine("Done migrating guild starboard data!", ConsoleColor.Green);
         }
 
         private DatabaseGuild GetOrCreateNewGuildEntity(ulong guildId)
@@ -326,7 +326,7 @@ namespace ModCore.Tools.DatabaseMigrator
 
             var newDbGuild = _newDatabase.Guilds.Add(newGuild);
             _newDatabase.SaveChanges();
-            Cons.WriteLine($"Created new Guild data for {guildId}", ConsoleColor.Magenta);
+            MigratorConsole.WriteLine($"Created new Guild data for {guildId}", ConsoleColor.Magenta);
             return newDbGuild.Entity;
         }
 
@@ -342,7 +342,7 @@ namespace ModCore.Tools.DatabaseMigrator
 
             var newDbUser = _newDatabase.Users.Add(newUser);
             _newDatabase.SaveChanges();
-            Cons.WriteLine($"Created new User data for {userId}", ConsoleColor.Magenta);
+            MigratorConsole.WriteLine($"Created new User data for {userId}", ConsoleColor.Magenta);
             return newDbUser.Entity;
         }
     }

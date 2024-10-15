@@ -60,7 +60,8 @@ namespace ModCore.Services.Shard.Commands
             {
                 var dm = await context.RestClient.CreateMessageAsync(dmChannel.Value.Id, new CreateMessage()
                 {
-                    Content = $"You were banned from {fetchGuild.Value.Name}.\nReason:\n```\n{givenReason}\n```"
+                    Content = $"You were banned from {fetchGuild.Value.Name}.\nReason:\n```\n{givenReason}\n```" +
+                        $"This server does **not** have appeals enabled."
                 });
                 sentDM = dm.Success;
             }
@@ -73,12 +74,12 @@ namespace ModCore.Services.Shard.Commands
                     new InteractionMessageResponse()
                     {
                         Content = $"Succesfully banned member <@{userToBan}>. Sent DM: {(sentDM ? "Yes" : "No")}.\n" +
-                        $"Reason:\n```\n{givenReason}\n```",
+                        $"Reason:\n```\n{givenReason}\n```\n",
                         Flags = MessageFlags.Ephemeral
                     });
 
                 var infractionHelper = new InfractionHelper(_database, userToBan, context.EventData.GuildId.Value);
-                await infractionHelper.CreateInfractionAsync(InfractionType.Ban, context.EventData.User.Value.Id, givenReason, sentDM);
+                await infractionHelper.CreateInfractionAsync(InfractionType.Ban, context.EventData.Member.Value.User.Value.Id, givenReason, sentDM);
             }
             else
             {
@@ -93,12 +94,24 @@ namespace ModCore.Services.Shard.Commands
         }
 
         [SlashCommand("hackban", "HackBans a user, by their ID.", permissions: Permissions.BanMembers)]
-        public async ValueTask HackBanAsync(SlashCommandContext context)
+        public async ValueTask HackBanAsync(SlashCommandContext context, 
+            [Option("user_id", "ID of the user to hackban", ApplicationCommandOptionType.String)]string id)
         {
+            if(!ulong.TryParse(id, out var userId))
+            {
+                await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, InteractionResponseType.ChannelMessageWithSource,
+                    new InteractionMessageResponse()
+                    {
+                        Content = $"⚠️ Your ID input could not be converted to a valid User ID!",
+                        Flags = MessageFlags.Ephemeral
+                    });
+                return;
+            }
+
             await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, InteractionResponseType.ChannelMessageWithSource,
                 new InteractionMessageResponse()
                 {
-                    Content = "⚠️ Not implemented yet!",
+                    Content = $"⚠️ Not implemented yet! {userId}",
                     Flags = MessageFlags.Ephemeral
                 });
         }
