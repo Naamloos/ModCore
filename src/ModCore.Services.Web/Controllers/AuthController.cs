@@ -9,12 +9,13 @@ namespace ModCore.Services.Web.Controllers
         [HttpGet("login")]
         public IActionResult Login()
         {
+            var redirect = HttpContext.Session.GetString("redirect") ?? "/";
             // check if already authenticated
             if (User.Identity.IsAuthenticated)
             {
-                return Redirect("/");
+                return Redirect(redirect);
             }
-            return Challenge(new AuthenticationProperties() { RedirectUri = "/" });
+            return Challenge(new AuthenticationProperties() { RedirectUri = redirect });
         }
 
         [HttpGet("logout")]

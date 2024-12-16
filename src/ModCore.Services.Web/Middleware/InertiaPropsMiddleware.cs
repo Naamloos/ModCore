@@ -1,4 +1,6 @@
 ﻿using InertiaCore;
+using ModCore.Common.Cache;
+using ModCore.Common.Discord.Entities.Interactions;
 
 namespace ModCore.Services.Web.Middleware
 {
@@ -25,6 +27,16 @@ through a wide range of hand-crafted features to make your life as a moderator o
                 username = context.User.Identity.Name,
                 avatar = context.User.Claims.FirstOrDefault(c => c.Type == "urn:discord:avatar:url")?.Value
             } : null);
+
+            var cacheService = context.RequestServices.GetRequiredService<CacheService>();
+            var configService = context.RequestServices.GetRequiredService<IConfiguration>();
+            ulong applicationId = ulong.Parse(configService["discord_client_id"]);
+            var app = await cacheService.GetFromCacheOrRest<Application>(applicationId, (rest, id) =>
+            {
+                return rest.GetApplicationAsync(id);
+            });
+
+            Inertia.Share("application", app.Success ? app.Value : null);
 
             await _next(context);
         }

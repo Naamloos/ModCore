@@ -123,6 +123,14 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<Guild>(HttpMethod.Get, url, route);
         }
 
+        public ValueTask<RestResponse<List<Guild>>> GetCurrentUserGuilds()
+        {
+            string route = "users/@me/guilds";
+            string url = $"users/@me/guilds";
+
+            return makeRequestAsync<List<Guild>>(HttpMethod.Get, url, route);
+        }
+
         public ValueTask<RestResponse<object>> CreateGuildBanAsync(Snowflake guildId, Snowflake userId, 
             int? delete_message_days = null, int? delete_message_seconds = null)
         {

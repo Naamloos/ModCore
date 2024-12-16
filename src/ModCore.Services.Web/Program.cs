@@ -9,6 +9,10 @@ using ModCore.Services.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Globalization;
+using ModCore.Common.Discord.Entities.Serializer;
+using System.Text.Json.Serialization;
+using System.Text.Json;
+using ModCore.Common.Cache;
 
 namespace ModCore.Common.Web
 {
@@ -45,6 +49,18 @@ namespace ModCore.Common.Web
 
             builder.Services.AddSession();
 
+            var jsonOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+                Converters = { new OptionalJsonSerializerFactory() },
+                WriteIndented = true
+            };
+
+            builder.Services.AddModcoreCacheService();
+
+            builder.Services.AddSingleton(jsonOptions);
+            builder.Services.AddDistributedMemoryCache();
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -68,6 +84,12 @@ namespace ModCore.Common.Web
                             user.GetString("id"),
                             user.GetString("avatar"),
                             user.GetString("avatar").StartsWith("a_") ? "gif" : "png"));
+
+                    options.Scope.Add("email"); // Could possibly be used in the future for email notifications?
+                    options.Scope.Add("identify"); // Identify current user in dashboard
+                    options.Scope.Add("guilds"); // List guilds for user
+                    options.Scope.Add("guilds.join"); // For support guild, User can easily join :3
+                    options.Scope.Add("guilds.members.read"); // List guild members, for configuration purposes.
                 });
 
             builder.Services.AddControllersWithViews();
@@ -92,6 +114,7 @@ namespace ModCore.Common.Web
             app.UseAuthorization();
 
             app.UseMiddleware<InertiaPropsMiddleware>();
+            app.UseMiddleware<AttributeMiddleware>();
 
             app.Run();
         }
