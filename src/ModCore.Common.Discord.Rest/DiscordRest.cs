@@ -18,9 +18,9 @@ namespace ModCore.Common.Discord.Rest
         private DiscordRestConfiguration Configuration;
         private RateLimitedRest RatelimitedRest;
         private JsonSerializerOptions JsonSerializerOptions;
-        private ILogger _logger;
+        private ILogger? _logger;
 
-        public DiscordRest(Action<DiscordRestConfiguration> configure, IServiceProvider services)
+        public DiscordRest(Action<DiscordRestConfiguration> configure, IServiceProvider? services = null)
         {
             Configuration = new DiscordRestConfiguration();
             configure(Configuration);
@@ -30,11 +30,16 @@ namespace ModCore.Common.Discord.Rest
                 Converters = { new OptionalJsonSerializerFactory() }
             };
 
-            var hostConfig = services.GetRequiredService<IConfiguration>();
+            var config = services?.GetService<IConfiguration>();
 
-            RatelimitedRest = new RateLimitedRest(Configuration, hostConfig.GetRequiredSection("discord_token").Value, JsonSerializerOptions);
+            if(config != null && string.IsNullOrEmpty(Configuration.Token))
+            {
+                Configuration.Token = config.GetRequiredSection("discord_token").Value!;
+            }
 
-            _logger = services.GetService<ILogger<DiscordRest>>();
+            RatelimitedRest = new RateLimitedRest(Configuration, Configuration.AuthType + " " + Configuration.Token, JsonSerializerOptions);
+
+            _logger = services?.GetService<ILogger<DiscordRest>>();
         }
 
         public ValueTask<RestResponse<User>> GetCurrentUserAsync()
@@ -148,12 +153,12 @@ namespace ModCore.Common.Discord.Rest
                 if(response.StatusCode == System.Net.HttpStatusCode.TooManyRequests && !retry)
                 {
                     // rate limited so....
-                    _logger.LogWarning("Rate limit hit! Retrying request.");
+                    _logger?.LogWarning("Rate limit hit! Retrying request.");
                     // TODO parse retry_after from body
                     return await makeRequestAsync<T>(method, url, route, body, true);
                 }
-                _logger.LogError(await response.Content.ReadAsStringAsync());
-                _logger.LogError(await response.RequestMessage.Content.ReadAsStringAsync());
+                _logger?.LogError(await response.Content.ReadAsStringAsync());
+                _logger?.LogError(await response.RequestMessage.Content.ReadAsStringAsync());
             }
 
             return new RestResponse<T>(deserializedResponse, response);

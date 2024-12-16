@@ -7,11 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNet.Security.OAuth.Discord" Version="9.0.0" />
     <PackageReference Include="AspNetCore.InertiaCore" Version="0.0.9" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="ClientApp\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModCore.Common.Cache\ModCore.Common.Cache.csproj" />
+    <ProjectReference Include="..\ModCore.Common.Database\ModCore.Common.Database.csproj" />
+    <ProjectReference Include="..\ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj" />
+    <ProjectReference Include="..\ModCore.Common.SettingsHelper\ModCore.Common.SettingsHelper.csproj" />
   </ItemGroup>
 
 </Project>

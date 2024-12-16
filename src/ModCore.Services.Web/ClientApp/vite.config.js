@@ -20,7 +20,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
-      "@/Layouts": path.resolve(__dirname, "src/Layouts"), // Ensure alias matches import paths
     },
   },
   build: {

@@ -25,7 +25,7 @@ namespace ModCore.Common.Discord.Rest
                 BaseAddress = new Uri($"https://discord.com/api/v{API_VERSION}")
             };
 
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"Bot {token}");
+            httpClient.DefaultRequestHeaders.Add("Authorization", $"{token}");
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("ModCore3 (https://github.com/Naamloos/ModCore)");
         }
 

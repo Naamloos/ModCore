@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace ModCore.Services.Shard
+namespace ModCore.Common.SettingsHelper
 {
     /// <summary>
     /// Services will just use the IConfiguration utility to fetch info from this, 
@@ -10,6 +10,12 @@ namespace ModCore.Services.Shard
     {
         [JsonPropertyName("discord_token")]
         public string Token { get; set; } = "";
+
+        [JsonPropertyName("discord_client_id")]
+        public string ClientId { get; set; } = "";
+
+        [JsonPropertyName("discord_client_secret")]
+        public string ClientSecret { get; set; } = "";
 
         [JsonPropertyName("shard_count")]
         public int ShardCount { get; set; } = 1;

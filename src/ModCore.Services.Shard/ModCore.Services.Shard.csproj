@@ -26,6 +26,7 @@
     <ProjectReference Include="..\ModCore.Common.Discord.Gateway\ModCore.Common.Discord.Gateway.csproj" />
     <ProjectReference Include="..\ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj" />
     <ProjectReference Include="..\ModCore.Common.InteractionFramework\ModCore.Common.InteractionFramework.csproj" />
+    <ProjectReference Include="..\ModCore.Common.SettingsHelper\ModCore.Common.SettingsHelper.csproj" />
   </ItemGroup>
 
 </Project>

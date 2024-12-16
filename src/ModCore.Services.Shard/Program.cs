@@ -15,6 +15,7 @@ using ModCore.Common.Cache;
 using ModCore.Services.Shard.EventHandlers;
 using ModCore.Common.Database;
 using ModCore.Common.Utils;
+using ModCore.Common.SettingsHelper;
 
 namespace ModCore.Services.Shard
 {
@@ -28,27 +29,9 @@ namespace ModCore.Services.Shard
                 .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
 
+            SettingsHelper.EnsureSettingsExist();
+
             var jsonOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
-            {
-                WriteIndented = true
-            };
-
-            if (!File.Exists("settings.json"))
-            {
-                File.Create("settings.json").Close();
-                File.WriteAllText("settings.json", JsonSerializer.Serialize(new Settings(), jsonOptions));
-                logger.Information("Settings file not found. Created one. Please fill with required values!");
-                return;
-            }
-            else
-            {
-                // ensure new config values are written
-                var contents = File.ReadAllText("settings.json");
-                var settings = JsonSerializer.Deserialize<Settings>(contents);
-                File.WriteAllText("settings.json", JsonSerializer.Serialize(settings, jsonOptions));
-            }
-
-            jsonOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
                 Converters = { new OptionalJsonSerializerFactory() },
