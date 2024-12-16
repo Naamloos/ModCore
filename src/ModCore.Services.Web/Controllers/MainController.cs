@@ -27,8 +27,16 @@ namespace ModCore.Common.Web.Controllers
             });
         }
 
+        [RouteMiddleware(typeof(RequireAuthentication))]
         [HttpGet("dashboard")]
-        public async Task<IActionResult> Dashboard([FromServices] UserDiscordRest userDiscord)
+        public async Task<IActionResult> Dashboard()
+        {
+            return Inertia.Render("Dashboard/Index");
+        }
+
+        [RouteMiddleware(typeof(RequireAuthentication))]
+        [HttpGet("dashboard/servers")]
+        public async Task<IActionResult> Servers([FromServices] UserDiscordRest userDiscord)
         {
             var restClient = await userDiscord.GetDiscordRestAsync();
 
@@ -42,35 +50,49 @@ namespace ModCore.Common.Web.Controllers
 
             var serverList = servers.Value.OrderBy(x => x.Name);
 
-            return Inertia.Render("Dashboard/ServerList", new
+            return Inertia.Render("Dashboard/Servers/Index", new
             {
                 Servers = serverList
             });
         }
 
-        [HttpGet("currentUser")]
-        public async Task<IActionResult> Test([FromServices]UserDiscordRest userDiscord)
+        [RouteMiddleware(typeof(RequireAuthentication))]
+        [HttpGet("dashboard/servers/{server_id}")]
+        public async Task<IActionResult> ManageServer([FromRoute(Name = "server_id")] ulong server_id, 
+            [FromServices] UserDiscordRest userDiscord, [FromServices] DiscordRest restClient)
         {
-            var restClient = await userDiscord.GetDiscordRestAsync();
+            var userRestClient = await userDiscord.GetDiscordRestAsync();
 
-            if(restClient == null)
+            if (userRestClient == null)
             {
                 return Redirect("/login");
             }
 
-            return new JsonResult((await restClient.GetCurrentUserAsync()).Value);
+            var servers = await userRestClient.GetCurrentUserGuilds();
+            // check if the server is in the user's guild list
+            if (!servers.Success || !servers.Value.Any(x => x.Id == server_id))
+            {
+                return Redirect("/dashboard");
+            }
+
+            var server = await restClient.GetGuildAsync(server_id, true);
+
+            return Inertia.Render("Dashboard/Servers/Manage", new
+            {
+                Server = server.Success? server.Value : null
+            });
         }
 
-        [HttpGet("test")]
         [RouteMiddleware(typeof(RequireAuthentication))]
-        public async Task<IActionResult> Test()
+        [HttpGet("currentUser")]
+        public async Task<IActionResult> Test([FromServices]UserDiscordRest userDiscord)
         {
-            return new ContentResult()
+            var restClient = await userDiscord.GetDiscordRestAsync();
+            if (restClient == null)
             {
-                Content = "Authorized!",
-                ContentType = "text/plain",
-                StatusCode = 200
-            };
+                return Redirect("/login");
+            }
+            return new JsonResult((await restClient.GetCurrentUserAsync()).Value);
         }
     }
 }

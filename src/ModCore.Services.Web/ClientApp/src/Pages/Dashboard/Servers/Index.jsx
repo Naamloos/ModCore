@@ -2,7 +2,7 @@ import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout.jsx";
 import Logo from "@/Resources/logo.png";
 
-export default function IndexPage(props) 
+export default function Index(props) 
 {
     const { authenticated, user, servers } = props;
 
@@ -18,11 +18,11 @@ export default function IndexPage(props)
             <MainLayout>
                 <div className="bg-gray-900 p-6 m-4 rounded-lg shadow-lg">
                     {/* Discord server list */}
-                    <h1 className="text-center text-3xl font-extrabold tracking-tight text-white mb-6">
+                    <h1 className="text-center text-3xl font-extrabold tracking-tight text-white">
                         Your Servers
                     </h1>
                     <div className="flex justify-center">
-                        <div className="grid grid-cols-1 gap-4 mt-8 max-w-xl">
+                        <div className="grid grid-cols-1 gap-4 mt-4 max-w-xl">
                             {servers.map((server) => {
                                 let icon = server.icon ? server.icon : null;
                                 if (icon) {

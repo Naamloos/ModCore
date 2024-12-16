@@ -37,7 +37,7 @@ namespace ModCore.Common.Discord.Rest
                 Configuration.Token = config.GetRequiredSection("discord_token").Value!;
             }
 
-            RatelimitedRest = new RateLimitedRest(Configuration, Configuration.AuthType + " " + Configuration.Token, JsonSerializerOptions);
+            RatelimitedRest = new RateLimitedRest(Configuration, JsonSerializerOptions);
 
             _logger = services?.GetService<ILogger<DiscordRest>>();
         }
@@ -166,7 +166,8 @@ namespace ModCore.Common.Discord.Rest
                     return await makeRequestAsync<T>(method, url, route, body, true);
                 }
                 _logger?.LogError(await response.Content.ReadAsStringAsync());
-                _logger?.LogError(await response.RequestMessage.Content.ReadAsStringAsync());
+                if(response.RequestMessage?.Content != null)
+                    _logger?.LogError(await response.RequestMessage.Content.ReadAsStringAsync());
             }
 
             return new RestResponse<T>(deserializedResponse, response);

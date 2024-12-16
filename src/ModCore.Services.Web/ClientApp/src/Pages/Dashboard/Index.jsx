@@ -2,7 +2,7 @@ import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout.jsx";
 import Logo from "@/Resources/logo.png";
 
-export default function IndexPage(props) 
+export default function Index(props) 
 {
     const { authenticated, user, application } = props;
 
@@ -14,36 +14,32 @@ export default function IndexPage(props)
             <Head title="Welcome" />
 
             <MainLayout>
-                <div className="bg-gray-900 p-6 m-4 rounded-lg shadow-lg">
-                    {/* Discord server list */}
-                    <h1 className="text-center text-3xl font-extrabold tracking-tight text-white mb-6">
-                        Your Servers
-                    </h1>
-                    <div className="flex justify-center">
-                        <div className="grid grid-cols-1 gap-4 mt-8 max-w-xl">
-                            {servers.map((server) => {
-                                let icon = server.icon ? server.icon : null;
-                                if (icon) {
-                                    let ext = icon.includes("a_") ? ".gif" : ".png";
-                                    icon = "https://cdn.discordapp.com/icons/" + server.id + "/" + icon + ext;
-                                } else {
-                                    icon = "https://cdn.discordapp.com/embed/avatars/0.png";
-                                }
-                                return (
-                                    <a 
-                                        href={"/dashboard/servers/" + server.id}
-                                        className="cursor-pointer"
-                                    >
-                                        <div key={server.id} className="flex items-center bg-gray-800 p-4 rounded-lg shadow-md hover:bg-gray-700 transition duration-300 ease-in-out">
-                                            <img src={icon} className="h-12 w-12 rounded-full mr-4" />
-                                            <div className="flex-grow text-lg text-white truncate">
-                                                {server.name}
-                                            </div>
-                                        </div>
-                                    </a>
-                                );
-                            })}
+                <div className="bg-gray-900 p-6 m-4 rounded-lg shadow-lg flex flex-col items-center">
+                    <div className="text-center">
+                        <div className="flex justify-center items-center mb-4">
+                            <img src={`https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`} className="h-16 w-16" alt="Application Icon" />
+                            <h1 className="text-3xl font-extrabold tracking-tight text-white ml-4">
+                                Welcome to ModCore Dashboard
+                            </h1>
                         </div>
+                    </div>
+
+                    <div className="mt-4 md:mt-0 md:ml-4 p-4 flex items-center w-full md:w-auto">
+                        <div className="mr-4">
+                            <img src={user.avatar} alt="User Avatar" className="h-12 w-12 rounded-full" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-white">{user.username}</h2>
+                        </div>
+                    </div>
+
+                    <div className="mt-6 grid grid-flow-col gap-2">
+                        <a href="/dashboard/servers" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Manage Servers
+                        </a>
+                        <a href="/dashboard/servers" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            Manage Profile
+                        </a>
                     </div>
                 </div>
             </MainLayout>

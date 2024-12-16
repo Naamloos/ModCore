@@ -84,6 +84,8 @@ namespace ModCore.Common.Web
                             user.GetString("id"),
                             user.GetString("avatar"),
                             user.GetString("avatar").StartsWith("a_") ? "gif" : "png"));
+                    options.Prompt = "none";
+                    options.ClaimActions.MapJsonKey("urn:discord:id", "id");
 
                     options.Scope.Add("email"); // Could possibly be used in the future for email notifications?
                     options.Scope.Add("identify"); // Identify current user in dashboard

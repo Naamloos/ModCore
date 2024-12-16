@@ -19,7 +19,7 @@ export default function MainLayout({ title = "", children }) {
                         {authenticated ? <>
                             <span>Logged in as: <span className="text-green-400">{user.username}</span></span>
                             <img src={user.avatar} className="h-10 w-10 rounded-full mr-2" /> 
-                            <a href="/dashboard" className="bg-[#7289da] text-white px-4 py-2 rounded hover:bg-[#677bc4] transition duration-300">
+                            <a href="/dashboard" className="bg-blue-400 text-white px-4 py-2 rounded hover:bg-[#677bc4] transition duration-300">
                                 Dashboard
                             </a>
                             <a href="/logout" className="bg-red-400 text-white px-4 py-2 rounded hover:bg-red-300 transition duration-300">
@@ -33,7 +33,7 @@ export default function MainLayout({ title = "", children }) {
                     </nav>
                 </div>
             </header>
-            <main className="container mx-auto p-4 flex-grow">
+            <main className="mx-auto py-4 sm:px-8 flex-grow w-full max-w-6xl">
                 {children}
             </main>
             <footer className="bg-gray-900 p-4">
