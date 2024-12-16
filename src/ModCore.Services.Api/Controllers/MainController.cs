@@ -1,6 +1,7 @@
+using InertiaCore;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ModCore.Common.Api.Controllers
+namespace ModCore.Common.Web.Controllers
 {
     [ApiController]
     [Route("/")] // "[Controller]"
@@ -14,9 +15,9 @@ namespace ModCore.Common.Api.Controllers
         }
 
         [HttpGet]
-        public string Get()
+        public async Task<IActionResult> Get()
         {
-            return "ModCore API";
+            return Inertia.Render("Index");
         }
     }
 }

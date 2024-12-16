@@ -1,0 +1,20 @@
+﻿﻿@using InertiaCore
+@using InertiaCore.Utils
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    @await Inertia.Head(Model)
+</head>
+
+<body>
+    @Vite.ReactRefresh()
+    @await Inertia.Html(Model)
+    @Vite.Input("src/App.jsx")
+
+</body>
+
+</html>
