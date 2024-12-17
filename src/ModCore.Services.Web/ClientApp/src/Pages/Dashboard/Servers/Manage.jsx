@@ -19,6 +19,14 @@ export default function Index(props)
         icon = "https://cdn.discordapp.com/embed/avatars/0.png";
     }
 
+    function snowflakeToDate(snowflake) {
+        const epoch = 1420070400000; // Discord epoch in milliseconds
+        const timestamp = BigInt(snowflake) >> 22n;
+        return new Date(Number(timestamp) + epoch);
+    }
+
+    const serverCreationDate = server? snowflakeToDate(server.id).toLocaleDateString() : null;
+
     return (
         <>
             <Head title="Welcome" />
@@ -56,7 +64,7 @@ export default function Index(props)
                                     <li><strong>Server ID:</strong> {server.id}</li>
                                     <li><strong>Owner ID:</strong> {server.owner_id}</li>
                                     <li><strong>Member Count:</strong> ~{server.approximate_member_count.value}</li>
-                                    <li><strong>Created At:</strong> {new Date(server.createdAt).toLocaleDateString()}</li>
+                                    <li><strong>Created At:</strong> {serverCreationDate}</li>
                                 </ul>
 
                                 {/* Create a menu for managing the following options: AutoRole, BanAppeal, Infractions, Levels, Logging, ProfileStates, Rolemenus, Starboards, Tags, Tickets, Welcomer */}
