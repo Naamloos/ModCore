@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ModCore.Common.Database;
+using ModCore.Common.Database.Entities;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;
@@ -76,6 +77,21 @@ namespace ModCore.Services.Shard.EventHandlers
             {
                 _logger.LogCritical("Failed to fetch application info!");
             }
+
+            foreach(var guild in data.Guilds)
+            {
+                _logger.LogInformation("Guild Registered: {0}", guild.Name);
+
+                ulong guildId = guild.Id;
+                if (!_database.Guilds.Any(x => x.GuildId == guildId))
+                {
+                    _database.Guilds.Add(new DatabaseGuild()
+                    {
+                        GuildId = guildId
+                    });
+                }
+            }
+            await _database.SaveChangesAsync();
 
             if (!initialized)
             {

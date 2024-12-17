@@ -19,7 +19,7 @@ export default function Index(props)
                 <div className="bg-gray-900 p-6 m-4 rounded-lg shadow-lg">
                     {/* Discord server list */}
                     <h1 className="text-center text-3xl font-extrabold tracking-tight text-white">
-                        Your Servers
+                        Your Servers with ModCore
                     </h1>
                     <div className="flex justify-center">
                         <div className="grid grid-cols-1 gap-4 mt-4 max-w-xl">

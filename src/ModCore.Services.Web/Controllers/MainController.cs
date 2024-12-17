@@ -1,5 +1,7 @@
 using InertiaCore;
 using Microsoft.AspNetCore.Mvc;
+using ModCore.Common.Database;
+using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Rest;
 using ModCore.Services.Web.Attributes;
 using ModCore.Services.Web.Middleware;
@@ -36,7 +38,7 @@ namespace ModCore.Common.Web.Controllers
 
         [RouteMiddleware(typeof(RequireAuthentication))]
         [HttpGet("dashboard/servers")]
-        public async Task<IActionResult> Servers([FromServices] UserDiscordRest userDiscord)
+        public async Task<IActionResult> Servers([FromServices] UserDiscordRest userDiscord, [FromServices]DatabaseContext database)
         {
             var restClient = await userDiscord.GetDiscordRestAsync();
 
@@ -48,7 +50,10 @@ namespace ModCore.Common.Web.Controllers
             // TODO cache, and only list servers that user is admin in
             var servers = await restClient.GetCurrentUserGuilds();
 
-            var serverList = servers.Value.OrderBy(x => x.Name);
+            IEnumerable<Guild> serverList = servers.Value.OrderBy(x => x.Name);
+            var serverIds = serverList.Select(x => x.Id.Value).ToArray();
+            var dbServerIds = database.Guilds.Where(x => serverIds.Contains(x.GuildId)).Select(x => x.GuildId).ToArray();
+            serverList = serverList.Where(x => dbServerIds.Contains(x.Id.Value)).ToList();
 
             return Inertia.Render("Dashboard/Servers/Index", new
             {
