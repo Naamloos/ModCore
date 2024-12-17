@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ModCore.Common.Database.Entities
@@ -13,6 +14,7 @@ namespace ModCore.Common.Database.Entities
         [Column("guild_id")]
         public ulong GuildId { get; set; }
 
+        [JsonPropertyName("role_id")]
         [Column("role_id")]
         public ulong RoleId { get; set; }
 

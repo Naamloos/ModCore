@@ -22,9 +22,10 @@ namespace ModCore.Common.Discord.Rest
 
             httpClient = new HttpClient()
             {
-                BaseAddress = new Uri($"https://discord.com/api/v{API_VERSION}")
+                BaseAddress = new Uri($"https://discord.com/api/v{API_VERSION}/")
             };
 
+            // DON'T use this httpclient elsewhere, like sentry or some shit. Just sayin.
             httpClient.DefaultRequestHeaders.Add("Authorization", $"{configuration.AuthType} {configuration.Token}");
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("ModCore3 (https://github.com/Naamloos/ModCore)");
         }

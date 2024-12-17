@@ -36,7 +36,7 @@ namespace ModCore.Common.Discord.Entities.Guilds
         public Optional<bool> Pending { get; set; }
 
         [JsonPropertyName("permissions")]
-        public Optional<string> Permissions { get; set; }
+        public Optional<Permissions> Permissions { get; set; }
 
         [JsonPropertyName("communication_disabled_until")]
         public Optional<DateTimeOffset?> CommunicationDisabledUntil { get; set; }

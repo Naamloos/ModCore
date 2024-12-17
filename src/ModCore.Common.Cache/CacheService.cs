@@ -2,6 +2,7 @@
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Messages;
+using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Rest;
 using System.Reflection;
@@ -19,13 +20,17 @@ namespace ModCore.Common.Cache
         public CacheService(IDistributedCache cache, DiscordRest restClient)
         {
             this._cache = cache;
-            this._serializerOptions = new JsonSerializerOptions();
+            this._serializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+                Converters = { new OptionalJsonSerializerFactory() }
+            };
             this.DiscordRest = restClient;
         }
 
-        public async ValueTask<CacheResponse<T>> GetFromCacheOrRest<T>(Snowflake Id, Func<DiscordRest, Snowflake, ValueTask<RestResponse<T>>> fallback)
+        public async ValueTask<CacheResponse<T>> GetFromCacheOrRest<T, TKey>(TKey Id, Func<DiscordRest, TKey, ValueTask<RestResponse<T>>> fallback)
         {
-            var cache = TryGet<T>(Id);
+            var cache = TryGet<T, TKey>(Id);
             if (cache.Success)
             {
                 return cache;
@@ -40,7 +45,7 @@ namespace ModCore.Common.Cache
                 if (fallbackResponse.Success)
                 {
                     returnValue = fallbackResponse.Value!;
-                    Update<T>(Id, returnValue);
+                    Update<T, TKey>(Id, returnValue);
                     success = true;
                 }
             }
@@ -52,9 +57,9 @@ namespace ModCore.Common.Cache
             return new CacheResponse<T>(success, returnValue);
         }
 
-        public CacheResponse<T> TryGet<T>(Snowflake Id)
+        public CacheResponse<T> TryGet<T, TKey>(TKey Id)
         {
-            var cacheKey = getCacheKey<T>(Id);
+            var cacheKey = getCacheKey<T, TKey>(Id);
 
             var item = default(T);
             var success = false;
@@ -64,7 +69,7 @@ namespace ModCore.Common.Cache
             {
                 try
                 {
-                    item = JsonSerializer.Deserialize<T>(cachedJson);
+                    item = JsonSerializer.Deserialize<T>(cachedJson, _serializerOptions);
                     success = true;
                 }
                 catch (Exception)
@@ -76,9 +81,9 @@ namespace ModCore.Common.Cache
             return new CacheResponse<T>(success, item);
         }
 
-        public void Update<T>(Snowflake Id, T newItem)
+        public void Update<T, TKey>(TKey Id, T newItem)
         {
-            var cacheKey = getCacheKey<T>(Id);
+            var cacheKey = getCacheKey<T, TKey>(Id);
 
             var cachedJson = _cache.GetString(cacheKey);
             if (string.IsNullOrEmpty(cachedJson))
@@ -105,7 +110,7 @@ namespace ModCore.Common.Cache
             {
                 try
                 {
-                    history = JsonSerializer.Deserialize<MessageHistory>(cachedJson);
+                    history = JsonSerializer.Deserialize<MessageHistory>(cachedJson, _serializerOptions);
                     success = true;
                 }
                 catch (Exception)
@@ -154,10 +159,11 @@ namespace ModCore.Common.Cache
             _cache.Refresh(cacheKey);
         }
 
-        private string getCacheKey<T>(Snowflake Id)
+        private string getCacheKey<T, TKey>(TKey Id)
         {
             var typeName = typeof(T).Name;
-            return $"{typeName} :: {Id}";
+            object idObj = Id as object;
+            return $"{typeName} :: {idObj.ToString()}";
         }
 
         private string getMessageCacheKey(Snowflake guildId, Snowflake channelId, Snowflake messageId)

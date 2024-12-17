@@ -10,20 +10,20 @@ mkdirSync(outDir, { recursive: true });
 
 export default defineConfig({
   plugins: [
-    laravel({
-      input: ["src/App.jsx"],
-      publicDirectory: outDir,
-      refresh: true,
-    }),
-    react(),
+   laravel({
+    input: ["src/App.tsx"],
+    publicDirectory: outDir,
+    refresh: true,
+   }),
+   react(),
   ],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-    },
+   alias: {
+    "@": path.resolve(__dirname, "src"),
+   },
   },
   build: {
-    outDir,
-    emptyOutDir: true,
+   outDir,
+   emptyOutDir: true,
   },
 });

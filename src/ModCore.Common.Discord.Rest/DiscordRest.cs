@@ -144,6 +144,13 @@ namespace ModCore.Common.Discord.Rest
             });
         }
 
+        public ValueTask<RestResponse<Member>> GetGuildMemberAsync(Snowflake guildId, Snowflake userId)
+        {
+            string route = "guilds/:guild_id/members/:user_id";
+            string url = $"guilds/{guildId}/members/{userId}";
+            return makeRequestAsync<Member>(HttpMethod.Get, url, route);
+        }
+
         private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null, bool retry = false)
         {
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(method, route, url, body);

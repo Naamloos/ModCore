@@ -38,7 +38,7 @@ namespace ModCore.Services.Shard.Commands
             [Option("reason", "Reason to ban user", ApplicationCommandOptionType.String)] Optional<string> reason, 
             [Option("notify", "Whether to notify said user", ApplicationCommandOptionType.Boolean)] Optional<bool> notify)
         {
-            var fetchGuild = await _cache.GetFromCacheOrRest<Guild>(context.EventData.GuildId, (rest, id) => rest.GetGuildAsync(id));
+            var fetchGuild = await _cache.GetFromCacheOrRest(context.EventData.GuildId, (rest, id) => rest.GetGuildAsync(id));
             if(!fetchGuild.Success)
             {
                 // failure! tell user.

@@ -5,14 +5,16 @@ import { createRoot } from "react-dom/client";
 import { createInertiaApp } from "@inertiajs/react";
 import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 
+/* @ts-ignore */
 const appTitle = import.meta.env.VITE_APP_TITLE;
 
 createInertiaApp({
-  title: (title) => title ? `${title} - ${appTitle}` : appTitle,
+  title: (title) => (title ? `${title} - ${appTitle}` : appTitle),
   resolve: (name) =>
     resolvePageComponent(
-      `./Pages/${name}.jsx`,
-      import.meta.glob("./Pages/**/*.jsx")
+      `./Pages/${name}.tsx`,
+      /* @ts-ignore */
+      import.meta.glob("./Pages/**/*.{jsx,tsx}")
     ),
 
   setup({ el, App, props }) {

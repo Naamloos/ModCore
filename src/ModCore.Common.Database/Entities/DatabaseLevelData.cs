@@ -24,7 +24,7 @@ namespace ModCore.Common.Database.Entities
         [Column("last_xp_grant")]
         public DateTimeOffset LastGrant { get; set; }
 
-        public DatabaseGuild Guild { get; set; }
+        public virtual DatabaseGuild Guild { get; set; }
         public virtual DatabaseUser User { get; set; }
     }
 }

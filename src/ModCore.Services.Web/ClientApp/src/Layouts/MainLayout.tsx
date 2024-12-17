@@ -1,9 +1,10 @@
 import { Link, usePage } from '@inertiajs/react';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 
-export default function MainLayout({ title = "", children }) {
-    const { authenticated, user, application } = usePage().props;
+export default function MainLayout({ title, children } : PropsWithChildren<{title?: string }>) {
+    const { user, application } : {user: any, application: any} = usePage().props as any;
     const copyrightYear = new Date().getFullYear();
+    const authenticated = user != null;
 
     return (
         <div className="min-h-screen flex flex-col bg-gray-800 text-white">
@@ -12,7 +13,7 @@ export default function MainLayout({ title = "", children }) {
                     <div className="flex items-center">
                         <a href="/" className="flex items-center">
                             <img src={`https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`} className="h-8 w-8 mr-2" />
-                            <h1 className="text-2xl font-bold">ModCore {(title != '') && (' - ' + title)}</h1>
+                            <h1 className="text-2xl font-bold">ModCore {(title != undefined) && (' - ' + title)}</h1>
                         </a>
                     </div>
                     <nav className="grid grid-flow-col gap-2 items-center mt-2 sm:mt-0">

@@ -1,15 +1,15 @@
 import { Head, usePage } from "@inertiajs/react";
-import MainLayout from "@/Layouts/MainLayout.jsx";
-import Logo from "@/Resources/logo.png";
+import MainLayout from "@/Layouts/MainLayout.js";
 
-export default function Index(props) 
+export default function Index(props : any) 
 {
-    const { authenticated, user, server } = props;
-
-    console.log(server);
+    const { user, server, permissions, databaseServer } = props;
+    const authenticated = user != null;
 
     if(!authenticated)
         window.location.href = "/login";
+
+    console.log(databaseServer);
 
     let icon = server?.icon ? server.icon : null;
     if (icon) {
@@ -19,7 +19,7 @@ export default function Index(props)
         icon = "https://cdn.discordapp.com/embed/avatars/0.png";
     }
 
-    function snowflakeToDate(snowflake) {
+    function snowflakeToDate(snowflake : string) {
         const epoch = 1420070400000; // Discord epoch in milliseconds
         const timestamp = BigInt(snowflake) >> 22n;
         return new Date(Number(timestamp) + epoch);
@@ -114,10 +114,22 @@ export default function Index(props)
                                     </a>
                                 </div>
 
+                                {/* List permissions (list of strings) */}
+                                <h3 className="text-xl font-semibold mt-2">Your permissions in this Guild</h3>
+                                <div className="whitespace-pre-wrap text-xs">
+                                    {permissions.map((feature : any) => {
+                                        return (
+                                            <span className="inline-block bg-gray-800 text-orange-400 px-2 py-1 my-1 rounded-md mr-2">
+                                                {feature}
+                                            </span>
+                                        );
+                                    })}
+                                </div>
+
                                 {/* List server.features (list of strings) */}
                                 <h3 className="text-xl font-semibold mt-2">Discord Guild Features</h3>
                                 <div className="whitespace-pre-wrap text-xs">
-                                    {server.features.map((feature) => {
+                                    {server.features.map((feature : any) => {
                                         return (
                                             <span className="inline-block bg-gray-800 text-orange-400 px-2 py-1 my-1 rounded-md mr-2">
                                                 {feature}

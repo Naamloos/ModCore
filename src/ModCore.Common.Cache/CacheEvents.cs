@@ -34,13 +34,13 @@ namespace ModCore.Common.Cache
         public async ValueTask HandleEvent(GuildCreate data)
         {
             _logger.LogInformation("Updated guild cache for {guildname} via GUILD_CREATE", data.Name);
-            _cache.Update<Guild>(data.Id, data);
+            _cache.Update<Guild, ulong>(data.Id, data);
         }
 
         public async ValueTask HandleEvent(GuildUpdate data)
         {
             _logger.LogInformation("Updated guild cache for {guildname} via GUILD_UPDATE", data.Name);
-            _cache.Update<Guild>(data.Id, data);
+            _cache.Update<Guild, ulong>(data.Id, data);
         }
 
         // The following 4 methods keep a local message history cache, which is essentially very useful for moderators trying to snipe multiple edits.

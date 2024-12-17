@@ -35,7 +35,7 @@ namespace ModCore.Services.Shard.Commands
         public async ValueTask ListInfractionsAsync(SlashCommandContext context,
             [Option("user", "ID of the user to list infractions for", ApplicationCommandOptionType.User)]Snowflake user_id)
         {
-            var fetchedUser = await _cache.GetFromCacheOrRest<User>(user_id, (rest, id) => rest.GetUserAsync(id));
+            var fetchedUser = await _cache.GetFromCacheOrRest(user_id, (rest, id) => rest.GetUserAsync(id));
             if(!fetchedUser.Success)
             {
                 await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, 
@@ -89,7 +89,7 @@ namespace ModCore.Services.Shard.Commands
             [Option("user", "ID of the user to list infractions for", ApplicationCommandOptionType.User)] Snowflake user_id,
             [Option("warning", "Optional text content of this warning", ApplicationCommandOptionType.String)] Optional<string> content)
         {
-            var fetchedUser = await _cache.GetFromCacheOrRest<User>(user_id, (rest, id) => rest.GetUserAsync(id));
+            var fetchedUser = await _cache.GetFromCacheOrRest(user_id, (rest, id) => rest.GetUserAsync(id));
             if (!fetchedUser.Success)
             {
                 await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token,

@@ -1,10 +1,10 @@
 import { Head, usePage } from "@inertiajs/react";
-import MainLayout from "@/Layouts/MainLayout.jsx";
-import Logo from "@/Resources/logo.png";
+import MainLayout from "@/Layouts/MainLayout";
 
-export default function Index(props) 
+export default function Index(props : any) 
 {
-    const { authenticated, user, servers } = props;
+    const { user, servers } : {user: any, servers: any} = props;
+    const authenticated = user != null;
 
     console.log(servers);
 
@@ -23,7 +23,7 @@ export default function Index(props)
                     </h1>
                     <div className="flex justify-center">
                         <div className="grid grid-cols-1 gap-4 mt-4 max-w-xl">
-                            {servers.map((server) => {
+                            {servers.map((server : any) => {
                                 let icon = server.icon ? server.icon : null;
                                 if (icon) {
                                     let ext = icon.includes("a_") ? ".gif" : ".png";

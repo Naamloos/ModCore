@@ -1,10 +1,11 @@
 import { Head, usePage } from "@inertiajs/react";
-import MainLayout from "../Layouts/MainLayout.jsx";
+import MainLayout from "@/Layouts/MainLayout.js";
 import { IconBrandGithub } from "@tabler/icons-react";
 
-export default function IndexPage(props) 
+export default function IndexPage(props : any) 
 {
-    const { apptitle, appdescription, dotnetVersion, authenticated, user, application } = props;
+    const { dotnetVersion, user, application } = props;
+    const authenticated = user != null;
 
     if(authenticated)
         console.log(user);
@@ -21,14 +22,15 @@ export default function IndexPage(props)
                         <h1 className="text-center sm:text-left text-4xl sm:text-6xl font-extrabold tracking-tight">
                             Welcome to <br />
                             <span className="bg-gradient-to-t from-[#089fdf] to-blue-100 bg-clip-text text-transparent">
-                                {apptitle}
+                                ModCore
                             </span>
                         </h1>
                     </div>
 
                     <div className="bg-gray-900 py-6 pt-2 m-4 max-w-xl rounded-lg shadow-lg">
                         <p className="text-left text-lg max-w-xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
-                            {appdescription}
+                            ModCore is your assistant for Discord server moderation and management 
+                            through a wide range of hand-crafted features to make your life as a moderator or administrator a breeze!
                         </p>
                         <p className="text-center text-lg max-w-xl mx-auto mt-8 px-4 sm:px-6 lg:px-8 flex justify-center">
                             Built with&nbsp;

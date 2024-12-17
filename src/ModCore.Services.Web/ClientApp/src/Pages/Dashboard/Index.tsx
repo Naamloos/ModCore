@@ -1,10 +1,10 @@
 import { Head, usePage } from "@inertiajs/react";
-import MainLayout from "@/Layouts/MainLayout.jsx";
-import Logo from "@/Resources/logo.png";
+import MainLayout from "@/Layouts/MainLayout.js";
 
-export default function Index(props) 
+export default function Index(props : any) 
 {
-    const { authenticated, user, application } = props;
+    const { user, application } = props;
+    const authenticated = user != null;
 
     if(!authenticated)
         window.location.href = "/login";

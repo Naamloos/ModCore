@@ -17,7 +17,7 @@ namespace ModCore.Common.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityAlwaysColumns(modelBuilder);
@@ -34,7 +34,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasKey("GuildId", "RoleId");
 
-                    b.ToTable("mcore_autorole");
+                    b.ToTable("mcore_autorole", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseBanAppeal", b =>
@@ -56,7 +56,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("mcore_appeal");
+                    b.ToTable("mcore_appeal", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseGuild", b =>
@@ -112,7 +112,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasKey("GuildId");
 
-                    b.ToTable("mcore_guild");
+                    b.ToTable("mcore_guild", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseInfraction", b =>
@@ -153,7 +153,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("mcore_infraction");
+                    b.ToTable("mcore_infraction", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseLevelData", b =>
@@ -178,7 +178,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("mcore_leveldata");
+                    b.ToTable("mcore_leveldata", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseLevelSettings", b =>
@@ -205,7 +205,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasKey("GuildId");
 
-                    b.ToTable("LevelSettings");
+                    b.ToTable("LevelSettings", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseLoggerSettings", b =>
@@ -256,7 +256,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasKey("GuildId");
 
-                    b.ToTable("mcore_logger_settings");
+                    b.ToTable("mcore_logger_settings", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseNicknameState", b =>
@@ -278,7 +278,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("mcore_nickname_state");
+                    b.ToTable("mcore_nickname_state", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseOverrideState", b =>
@@ -307,7 +307,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("mcore_override_state");
+                    b.ToTable("mcore_override_state", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseRoleMenu", b =>
@@ -337,7 +337,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("mcore_rolemenu");
+                    b.ToTable("mcore_rolemenu", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseRoleMenuRole", b =>
@@ -354,7 +354,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("MenuId");
 
-                    b.ToTable("mcore_rolemenu_role");
+                    b.ToTable("mcore_rolemenu_role", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseRoleState", b =>
@@ -377,7 +377,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("mcore_role_state");
+                    b.ToTable("mcore_role_state", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseStarboard", b =>
@@ -414,7 +414,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("mcore_starboard");
+                    b.ToTable("mcore_starboard", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseStarboardItem", b =>
@@ -447,7 +447,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("AuthorId");
 
-                    b.ToTable("mcore_starboard_item");
+                    b.ToTable("mcore_starboard_item", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseTag", b =>
@@ -497,7 +497,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("mcore_tag");
+                    b.ToTable("mcore_tag", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseTagHistory", b =>
@@ -527,7 +527,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("TagId");
 
-                    b.ToTable("mcore_tag_history");
+                    b.ToTable("mcore_tag_history", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseTicket", b =>
@@ -567,7 +567,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasIndex("GuildId");
 
-                    b.ToTable("mcore_ticket");
+                    b.ToTable("mcore_ticket", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseTimer", b =>
@@ -601,7 +601,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasKey("TimerId");
 
-                    b.ToTable("mcore_timers");
+                    b.ToTable("mcore_timers", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseUser", b =>
@@ -613,7 +613,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("mcore_user");
+                    b.ToTable("mcore_user", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseWelcomeSettings", b =>
@@ -657,7 +657,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasKey("GuildId");
 
-                    b.ToTable("mcore_welcomer");
+                    b.ToTable("mcore_welcomer", (string)null);
                 });
 
             modelBuilder.Entity("ModCore.Common.Database.Entities.DatabaseAutoRole", b =>
