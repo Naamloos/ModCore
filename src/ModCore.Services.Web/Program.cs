@@ -29,7 +29,20 @@ namespace ModCore.Common.Web
             builder.Configuration.AddJsonFile("settings.json");
             builder.Configuration.AddEnvironmentVariables();
 
-            builder.Services.AddControllers();
+            var jsonOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+                Converters = { new OptionalJsonSerializerFactory() },
+                WriteIndented = true
+            };
+
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+                    options.JsonSerializerOptions.Converters.Add(new OptionalJsonSerializerFactory());
+                    options.JsonSerializerOptions.WriteIndented = true;
+                });
 
             builder.Services.AddInertia();
 
@@ -48,13 +61,6 @@ namespace ModCore.Common.Web
             builder.Services.AddTransient<UserDiscordRest>();
 
             builder.Services.AddSession();
-
-            var jsonOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-                Converters = { new OptionalJsonSerializerFactory() },
-                WriteIndented = true
-            };
 
             builder.Services.AddModcoreCacheService();
 

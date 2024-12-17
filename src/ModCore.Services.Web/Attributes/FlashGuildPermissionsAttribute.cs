@@ -16,7 +16,10 @@ namespace ModCore.Services.Web.Attributes
 
         public async Task<Permissions> GetPermissionsAsync(HttpContext httpContext)
         {
-            var serverId = ulong.Parse((string)httpContext.GetRouteValue(_serverIdParameter));
+            if(!ulong.TryParse((string)httpContext.GetRouteValue(_serverIdParameter), out ulong serverId))
+            {
+                return Permissions.None;
+            }
             var userId = ulong.Parse(httpContext.User.Claims.FirstOrDefault(x => x.Type == "urn:discord:id")?.Value);
 
             var restClient = httpContext.RequestServices.GetRequiredService<DiscordRest>();

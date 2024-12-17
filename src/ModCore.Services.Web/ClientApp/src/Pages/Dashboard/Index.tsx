@@ -1,9 +1,9 @@
 import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout.js";
+import { PageProps } from "@/Types/PageProps";
 
-export default function Index(props : any) 
+export default function Index({user, application} : PageProps) 
 {
-    const { user, application } = props;
     const authenticated = user != null;
 
     if(!authenticated)
@@ -26,10 +26,10 @@ export default function Index(props : any)
 
                     <div className="mt-4 md:mt-0 md:ml-4 p-4 flex items-center w-full md:w-auto">
                         <div className="mr-4">
-                            <img src={user.avatar} alt="User Avatar" className="h-12 w-12 rounded-full" />
+                            <img src={user!.avatar} alt="User Avatar" className="h-12 w-12 rounded-full" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white">{user.username}</h2>
+                            <h2 className="text-xl font-bold text-white">{user!.username}</h2>
                         </div>
                     </div>
 

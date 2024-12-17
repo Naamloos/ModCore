@@ -1,9 +1,9 @@
 import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
+import { PagePropsWith } from "@/Types/PageProps";
 
-export default function Index(props : any) 
+export default function Index({user, servers} : PagePropsWith<{servers: any}>) 
 {
-    const { user, servers } : {user: any, servers: any} = props;
     const authenticated = user != null;
 
     console.log(servers);

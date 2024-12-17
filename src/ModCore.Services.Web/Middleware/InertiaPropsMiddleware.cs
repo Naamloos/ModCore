@@ -3,7 +3,10 @@ using Microsoft.AspNetCore.Http.Features;
 using ModCore.Common.Cache;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Services.Web.Attributes;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
 namespace ModCore.Services.Web.Middleware
@@ -20,6 +23,7 @@ namespace ModCore.Services.Web.Middleware
         {
             Inertia.Share("user", context.User.Identity.IsAuthenticated? new
             {
+                id = context.User.Claims.FirstOrDefault(c => c.Type == "urn:discord:id")?.Value,
                 username = context.User.Identity.Name,
                 avatar = context.User.Claims.FirstOrDefault(c => c.Type == "urn:discord:avatar:url")?.Value
             } : null);
@@ -32,7 +36,15 @@ namespace ModCore.Services.Web.Middleware
                 return rest.GetApplicationAsync(id);
             });
 
-            Inertia.Share("application", app.Success ? app.Value : null);
+            // workaround for Optional<T> serialization
+            var serializedApp = JsonSerializer.SerializeToDocument(app.Value, options: new JsonSerializerOptions()
+            {
+                Converters = { new OptionalJsonSerializerFactory() },
+                WriteIndented = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+            });
+
+            Inertia.Share("application", app.Success ? serializedApp : null);
 
             var attributes = context.Features.Get<IEndpointFeature>()?.Endpoint?.Metadata.GetOrderedMetadata<FlashGuildPermissionsAttribute>();
             if (attributes != null && attributes.Any())

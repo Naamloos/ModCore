@@ -1,16 +1,11 @@
 import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout.js";
 import { IconBrandGithub } from "@tabler/icons-react";
+import { PagePropsWith } from "@/Types/PageProps";
 
-export default function IndexPage(props : any) 
+export default function IndexPage(props : PagePropsWith<{dotnetVersion : string}>) 
 {
-    const { dotnetVersion, user, application } = props;
-    const authenticated = user != null;
-
-    if(authenticated)
-        console.log(user);
-
-    console.log(application);
+    const { dotnetVersion, application } = props;
 
     return (
         <>
