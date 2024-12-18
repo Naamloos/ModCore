@@ -60,6 +60,52 @@ namespace ModCore.Services.Web.Controllers
         }
 
         [RouteMiddleware(typeof(RequireAuthentication))]
+        [HttpGet("servers/{server_id}/datadump")]
+        [FlashGuildPermissions(nameof(server_id))]
+        public async Task<IActionResult> ServerConfigDownload([FromRoute] ulong server_id,
+            [FromServices] UserDiscordRest userDiscord, [FromServices] DiscordRest restClient,
+            [FromServices] DatabaseContext database)
+        {
+            var userId = ulong.Parse(HttpContext.User.Claims.FirstOrDefault(x => x.Type == "urn:discord:id")?.Value);
+
+            var gateResponse = await new ServerPermissionGate(server_id, userId, Permissions.Administrator)
+                .CheckAsync(HttpContext);
+            if (gateResponse != null)
+            {
+                return gateResponse;
+            }
+
+            var userRestClient = await userDiscord.GetDiscordRestAsync();
+            if (userRestClient == null)
+            {
+                return Redirect("/login");
+            }
+
+            var servers = await userRestClient.GetCurrentUserGuilds();
+            // check if the server is in the user's guild list
+            if (!servers.Success || !servers.Value.Any(x => x.Id == server_id))
+            {
+                return Redirect("/dashboard");
+            }
+
+            var server = await restClient.GetGuildAsync(server_id, true);
+
+            var dbServer = database.Guilds.FirstOrDefault(x => x.GuildId == server_id);
+            if (dbServer == null)
+            {
+                return NotFound();
+            }
+            var serializerOptions = new JsonSerializerOptions()
+            {
+                Converters = { new OptionalJsonSerializerFactory() },
+                WriteIndented = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+            };
+            // TODO F U L L  data dump, all starboard ids, tags, etc etc
+            return File(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(dbServer, serializerOptions)), "application/json", $"{server_id}.json");
+        }
+
+        [RouteMiddleware(typeof(RequireAuthentication))]
         [HttpGet("servers/{server_id}")]
         [FlashGuildPermissions(nameof(server_id))]
         public async Task<IActionResult> ServerOverview([FromRoute] ulong server_id,

@@ -1,4 +1,4 @@
-export type Application = 
+export type DiscordApplication = 
 {
     id: string,
     icon: string,

@@ -1,10 +1,10 @@
-import { Application } from "./Application"
-import { ModCoreUser } from "./ModCoreUser"
+import { DiscordApplication } from "./DiscordApplication"
+import { User } from "./User"
 
 export type PageProps =
 {
-    user: ModCoreUser | null,
-    application: Application
+    user: User | null,
+    application: DiscordApplication
 }
 
 export type PagePropsWith<T> = PageProps & T
