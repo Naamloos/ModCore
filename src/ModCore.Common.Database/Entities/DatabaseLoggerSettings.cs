@@ -11,6 +11,7 @@ namespace ModCore.Common.Database.Entities
     [Table("mcore_logger_settings")]
     public class DatabaseLoggerSettings
     {
+        [JsonIgnore]
         [Column("guild_id")]
         public ulong GuildId { get; set; }
 
@@ -54,6 +55,7 @@ namespace ModCore.Common.Database.Entities
         [Column("log_role_edit")]
         public bool LogRoleEdits { get; set; }
 
+        [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
     }
 }

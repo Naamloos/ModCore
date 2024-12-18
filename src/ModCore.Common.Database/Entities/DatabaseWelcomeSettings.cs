@@ -11,6 +11,7 @@ namespace ModCore.Common.Database.Entities
     [Table("mcore_welcomer")]
     public class DatabaseWelcomeSettings
     {
+        [JsonIgnore]
         [Column("guild_id")]
         public ulong GuildId { get; set; }
 
@@ -50,6 +51,7 @@ namespace ModCore.Common.Database.Entities
         [Column("enabled")]
         public bool Enabled = false;
 
+        [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
     }
 

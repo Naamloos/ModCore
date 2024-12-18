@@ -1,8 +1,14 @@
 import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
 import { PagePropsWith } from "@/Types/PageProps";
+import { DiscordGuild } from "@/Types/DiscordGuild";
 
-export default function Index({user, servers} : PagePropsWith<{servers: any}>) 
+type IndexPageProps =
+{
+    servers: DiscordGuild[]
+}
+
+export default function Index({user, servers} : PagePropsWith<IndexPageProps>) 
 {
     const authenticated = user != null;
 

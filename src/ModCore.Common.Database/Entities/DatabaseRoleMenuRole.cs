@@ -11,7 +11,7 @@ namespace ModCore.Common.Database.Entities
     [Table("mcore_rolemenu_role")]
     public class DatabaseRoleMenuRole
     {
-        [JsonPropertyName("id")]
+        [JsonIgnore]
         [Column("menu_id")]
         public long MenuId { get; set; }
 
@@ -19,6 +19,7 @@ namespace ModCore.Common.Database.Entities
         [Column("role_id")]
         public ulong RoleId { get; set; }
 
+        [JsonIgnore]
         public virtual DatabaseRoleMenu Menu { get; set; }
     }
 }

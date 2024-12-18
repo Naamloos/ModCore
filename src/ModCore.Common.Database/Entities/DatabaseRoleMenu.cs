@@ -16,18 +16,20 @@ namespace ModCore.Common.Database.Entities
         [Column("id")]
         public long Id { get; set; }
 
+        [JsonIgnore]
         [Column("guild_id")]
         public ulong GuildId { get; set; }
 
         [JsonPropertyName("name")]
         [Column("name")]
         [MaxLength(30)]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
 
         [JsonPropertyName("creator_id")]
         [Column("creator_id")]
         public ulong CreatorId { get; set; }
 
+        [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
         [JsonPropertyName("roles")]
         public virtual ICollection<DatabaseRoleMenuRole> Roles { get; set; } = new HashSet<DatabaseRoleMenuRole>();

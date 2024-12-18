@@ -1,8 +1,17 @@
 import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout.js";
 import { PagePropsWith } from "@/Types/PageProps";
+import { DiscordGuild } from "@/Types/DiscordGuild";
+import { ModCoreGuild } from "@/Types/DatabaseTypes/ModCoreGuild";
 
-export default function Index({user, server, permissions, databaseServer} : PagePropsWith<{server: any, permissions: any, databaseServer: any}>) 
+type ManagePageProps =
+{
+    server: DiscordGuild,
+    permissions: string[],
+    databaseServer: ModCoreGuild
+}
+
+export default function Manage({user, server, permissions, databaseServer} : PagePropsWith<ManagePageProps>) 
 {
     const authenticated = user != null;
 
@@ -63,7 +72,7 @@ export default function Index({user, server, permissions, databaseServer} : Page
                                 <ul className="list-disc list-inside">
                                     <li><strong>Server ID:</strong> {server.id}</li>
                                     <li><strong>Owner ID:</strong> {server.owner_id}</li>
-                                    <li><strong>Member Count:</strong> ~{server.approximate_member_count.value}</li>
+                                    <li><strong>Member Count:</strong> ~{server.approximate_member_count}</li>
                                     <li><strong>Created At:</strong> {serverCreationDate}</li>
                                 </ul>
 

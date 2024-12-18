@@ -11,6 +11,7 @@ namespace ModCore.Common.Database.Entities
     [Table("mcore_autorole")]
     public class DatabaseAutoRole
     {
+        [JsonIgnore]
         [Column("guild_id")]
         public ulong GuildId { get; set; }
 
@@ -18,6 +19,7 @@ namespace ModCore.Common.Database.Entities
         [Column("role_id")]
         public ulong RoleId { get; set; }
 
+        [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
     }
 }

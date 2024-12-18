@@ -3,10 +3,13 @@ import MainLayout from "@/Layouts/MainLayout.js";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { PagePropsWith } from "@/Types/PageProps";
 
-export default function IndexPage(props : PagePropsWith<{dotnetVersion : string}>) 
+type IndexPageProps =
 {
-    const { dotnetVersion, application } = props;
+    dotnetVersion: string
+}
 
+export default function IndexPage({ dotnetVersion, application } : PagePropsWith<IndexPageProps>) 
+{
     return (
         <>
             <MainLayout>

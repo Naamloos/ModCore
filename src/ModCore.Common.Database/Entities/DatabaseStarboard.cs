@@ -15,6 +15,7 @@ namespace ModCore.Common.Database.Entities
         [Column("id")]
         public long Id { get; set; }
 
+        [JsonIgnore]
         [Column("guild_id")]
         public ulong GuildId { get; set; }
 
@@ -34,7 +35,9 @@ namespace ModCore.Common.Database.Entities
         [Column("channel_id")]
         public ulong ChannelId { get; set; }
 
+        [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
+        [JsonIgnore]
         public virtual ICollection<DatabaseStarboardItem> Items { get; set; } = new HashSet<DatabaseStarboardItem>();
     }
 }

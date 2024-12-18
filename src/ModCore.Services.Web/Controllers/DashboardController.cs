@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using ModCore.Common.Database;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
+using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Rest;
 using ModCore.Services.Web.Attributes;
 using ModCore.Services.Web.Gates;
 using ModCore.Services.Web.Middleware;
 using ModCore.Services.Web.Services;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ModCore.Services.Web.Controllers
 {
@@ -41,11 +43,19 @@ namespace ModCore.Services.Web.Controllers
             IEnumerable<Guild> serverList = servers.Value.OrderBy(x => x.Name);
             var serverIds = serverList.Select(x => x.Id.Value).ToArray();
             var dbServerIds = database.Guilds.Where(x => serverIds.Contains(x.GuildId)).Select(x => x.GuildId).ToArray();
-            serverList = serverList.Where(x => dbServerIds.Contains(x.Id.Value)).ToList();
+            var serializerOptions = new JsonSerializerOptions()
+            {
+                Converters = { new OptionalJsonSerializerFactory() },
+                WriteIndented = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+            };
+            var serverListSerialized = serverList.Where(x => dbServerIds.Contains(x.Id.Value))
+                .Select(x => JsonSerializer.SerializeToDocument(x, options: serializerOptions))
+                .ToList();
 
             return Inertia.Render("Dashboard/Servers/Index", new
             {
-                Servers = serverList
+                Servers = serverListSerialized
             });
         }
 
@@ -82,10 +92,17 @@ namespace ModCore.Services.Web.Controllers
             var server = await restClient.GetGuildAsync(server_id, true);
             var dbServer = database.Guilds.FirstOrDefault(x => x.GuildId == server_id);
 
+            var serializerOptions = new JsonSerializerOptions()
+            {
+                Converters = { new OptionalJsonSerializerFactory() },
+                WriteIndented = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+            };
+
             return Inertia.Render("Dashboard/Servers/Manage", new
             {
-                Server = server.Success ? server.Value : null,
-                DatabaseServer = JsonSerializer.SerializeToDocument(dbServer)
+                Server = server.Success ? JsonSerializer.SerializeToDocument(server.Value, options: serializerOptions) : null,
+                DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions)
             });
         }
     }

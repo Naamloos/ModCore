@@ -10,6 +10,7 @@ namespace ModCore.Common.Database.Entities
 {
     public class DatabaseLevelSettings
     {
+        [JsonIgnore]
         [Column("guild_id")]
         public ulong GuildId { get; set; }
 
@@ -29,6 +30,7 @@ namespace ModCore.Common.Database.Entities
         [Column("message_channel_id")]
         public ulong ChannelId { get; set; } = 0;
 
+        [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
     }
 }
