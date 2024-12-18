@@ -1,7 +1,7 @@
 import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout.js";
 import { PagePropsWith } from "@/Types/PageProps";
-import { DiscordGuild } from "@/Types/DiscordGuild";
+import { DiscordGuild } from "@/Types/DiscordTypes/DiscordGuild";
 import { ModCoreGuild } from "@/Types/DatabaseTypes/ModCoreGuild";
 
 type ManagePageProps =

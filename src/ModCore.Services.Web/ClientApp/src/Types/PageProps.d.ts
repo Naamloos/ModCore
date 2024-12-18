@@ -1,4 +1,4 @@
-import { DiscordApplication } from "./DiscordApplication"
+import { DiscordApplication } from "./DiscordTypes/DiscordApplication"
 import { User } from "./User"
 
 export type PageProps =
