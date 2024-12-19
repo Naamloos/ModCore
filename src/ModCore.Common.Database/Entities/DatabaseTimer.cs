@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ModCore.Common.Database.Entities
@@ -12,21 +13,27 @@ namespace ModCore.Common.Database.Entities
     [Table("mcore_timers")]
     public class DatabaseTimer
     {
+        [JsonPropertyName("timer_id")]
         [Column("timer_id")]
         public long TimerId { get; set; }
 
+        [JsonPropertyName("guild_id")]
         [Column("guild_id")]
         public ulong GuildId { get; set; }
 
+        [JsonIgnore]
         [Column("shard_id")]
         public int ShardId { get; set; } = 0;
-        
+
+        [JsonPropertyName("trigger_at")]
         [Column("trigger_at")]
         public DateTimeOffset TriggersAt { get; set; }
 
+        [JsonPropertyName("type")]
         [Column("type")]
         public TimerTypes Type { get; set; }
 
+        [JsonPropertyName("data")]
         [Column("data", TypeName = "jsonb")]
         public string? Data { get; set; }
 

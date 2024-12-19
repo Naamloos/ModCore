@@ -39,7 +39,7 @@ namespace ModCore.Common.Web
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
-                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
                     options.JsonSerializerOptions.Converters.Add(new OptionalJsonSerializerFactory());
                     options.JsonSerializerOptions.WriteIndented = true;
                 });

@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
 using System.Text.Json.Serialization;
 
@@ -52,7 +53,16 @@ namespace ModCore.Services.Web.Entities
                 GuildId = id
             };
 
-            var dbGuild = database.Guilds.Find(id);
+            var dbGuild = database.Guilds
+                .Include(x => x.Starboards)
+                .Include(x => x.AutoRoles)
+                .Include(x => x.RoleMenus)
+                    .ThenInclude(x => x.Roles)
+                .Include(x => x.LoggerSettings)
+                .Include(x => x.WelcomeSettings)
+                .Include(x => x.LevelSettings)
+                .FirstOrDefault(x => x.GuildId == id);
+
             // Dumping data from DB
             if (dbGuild != null) 
             {
