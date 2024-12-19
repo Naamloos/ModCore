@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ModCore.Common.Database;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ModCore.Common.Database.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241218204602_StarboardFixes")]
+    partial class StarboardFixes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -223,7 +226,7 @@ namespace ModCore.Common.Database.Migrations
 
                     b.HasKey("GuildId");
 
-                    b.ToTable("mcore_levelsettings");
+                    b.ToTable("LevelSettings");
 
                     b.HasAnnotation("Relational:JsonPropertyName", "level_settings");
                 });
@@ -518,8 +521,8 @@ namespace ModCore.Common.Database.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
                         .HasColumnName("content");
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -536,8 +539,8 @@ namespace ModCore.Common.Database.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
+                        .HasMaxLength(35)
+                        .HasColumnType("character varying(35)")
                         .HasColumnName("name");
 
                     b.HasKey("Id");

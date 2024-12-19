@@ -18,14 +18,14 @@ namespace ModCore.Common.Database.Entities
         public ulong? ChannelId { get; set; } = null; // not set = global
 
         [Column("name")]
-        [MaxLength(35)]
+        [MaxLength(100)]
         public string Name { get; set; }
 
         [Column("author_id")]
         public ulong AuthorId { get; set; }
 
         [Column("content")]
-        [MaxLength(255)]
+        [MaxLength(2000)]
         public string Content { get; set; }
 
         [Column("modifed_at")]

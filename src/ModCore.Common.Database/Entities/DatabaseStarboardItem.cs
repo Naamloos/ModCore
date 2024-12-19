@@ -25,10 +25,11 @@ namespace ModCore.Common.Database.Entities
         [Column("author_id")]
         public ulong AuthorId { get; set; }
 
-        [Column("star_amount")]
-        public ulong StarAmount { get; set; }
+        [Column("stargazer_id")] // Member that starred
+        public ulong StargazerId { get; set; }
 
         public virtual DatabaseStarboard Starboard { get; set; }
         public virtual DatabaseUser Author { get; set; }
+        public virtual DatabaseUser Stargazer { get; set; }
     }
 }

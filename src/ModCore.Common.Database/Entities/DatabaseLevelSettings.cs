@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Database.Entities
 {
+    [Table("mcore_levelsettings")]
     public class DatabaseLevelSettings
     {
         [JsonIgnore]

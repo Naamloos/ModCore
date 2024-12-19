@@ -23,6 +23,6 @@ namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.DatabaseEntities
         public int Id { get; set; }
 
         [Column("nickname")]
-        public string Nickname { get; set; }
+        public string? Nickname { get; set; }
     }
 }

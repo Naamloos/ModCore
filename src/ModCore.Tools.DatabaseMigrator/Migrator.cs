@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
+using ModCore.Common.Database.Timers;
 using ModCore.Tools.DatabaseMigrator.ClassicDatabase;
+using ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities;
 using Npgsql;
 using System;
 using System.Collections.Generic;
@@ -64,10 +66,10 @@ namespace ModCore.Tools.DatabaseMigrator
 
             MigratorConsole.WriteLine("Starting migration from old to new database");
 
-            // Guild configs must be ran first, to ensure that we create guild objects where needed.
-            MigrateGuildConfigs();
+            //// Guild configs must be ran first, to ensure that we create guild objects where needed.
+            //MigrateGuildConfigs();
 
-            // Then, we migrate levels and stars
+            //// Then, we migrate levels and stars
             MigrateLevelData();
             MigrateStarData();
             MigrateTags();
@@ -83,12 +85,18 @@ namespace ModCore.Tools.DatabaseMigrator
         {
             foreach (var guildConfig in _oldDatabase.GuildConfig)
             {
-                MigratorConsole.WriteLine($"Migrating Guild config for {guildConfig.GuildId}");
+                MigratorConsole.WriteLine($"Migrating Guild config for {guildConfig.GuildId}", ConsoleColor.Magenta);
                 var newGuild = GetOrCreateNewGuildEntity((ulong)guildConfig.GuildId);
+
+                if(newGuild == null)
+                {
+                    MigratorConsole.WriteLine("Guild is null, skipping.", ConsoleColor.Red);
+                    continue;
+                }
 
                 if (string.IsNullOrWhiteSpace(guildConfig.Settings))
                 {
-                    MigratorConsole.WriteLine($"Guild with ID {guildConfig.GuildId} does not contain settings. Continuing.");
+                    MigratorConsole.WriteLine($"Guild with ID {guildConfig.GuildId} does not contain settings. Continuing.", ConsoleColor.Red);
                     continue;
                 }
 
@@ -96,28 +104,30 @@ namespace ModCore.Tools.DatabaseMigrator
 
                 // Not to be migrated:
                 // - LinkFilter / Invite blocker (will differ too much)
-                // - selfrole/reaction role: currently deprecated / unused so no data
+                // - selfrole/reaction role: currently deprecated / unused so no data, replaced by role menus
 
                 // Logger
-                newGuild.LoggerSettings = new DatabaseLoggerSettings()
-                {
-                    Guild = newGuild,
-                    GuildId = newGuild.GuildId,
-                    LogAvatars = settings.Logging.AvatarLog_Enable,
-                    LogChannels = false,
-                    LoggerChannelId = (ulong)settings.Logging.ChannelId,
-                    LogGuildEdits = false,
-                    LogInvites = settings.Logging.InviteLog_Enable,
-                    LogJoins = settings.Logging.JoinLog_Enable,
-                    LogMessageEdits = settings.Logging.EditLog_Enable,
-                    LogNicknames = settings.Logging.NickameLog_Enable,
-                    LogRoleAssignment = settings.Logging.RoleLog_Enable,
-                    LogRoleEdits = settings.Logging.RoleLog_Enable
-                };
+                newGuild.LoggerSettings.LogAvatars = settings.Logging.AvatarLog_Enable;
+                newGuild.LoggerSettings.LogChannels = false;
+                newGuild.LoggerSettings.LoggerChannelId = (ulong)settings.Logging.ChannelId;
+                newGuild.LoggerSettings.LogGuildEdits = false;
+                newGuild.LoggerSettings.LogInvites = settings.Logging.InviteLog_Enable;
+                newGuild.LoggerSettings.LogJoins = settings.Logging.JoinLog_Enable;
+                newGuild.LoggerSettings.LogMessageEdits = settings.Logging.EditLog_Enable;
+                newGuild.LoggerSettings.LogNicknames = settings.Logging.NickameLog_Enable;
+                newGuild.LoggerSettings.LogRoleAssignment = settings.Logging.RoleLog_Enable;
+                newGuild.LoggerSettings.LogRoleEdits = settings.Logging.RoleLog_Enable;
 
                 // Autorole
                 foreach (var roleId in settings.AutoRole.RoleIds)
                 {
+                    // avoid doubles
+                    if (_newDatabase.AutoRoles.Any(x =>
+                        x.RoleId == roleId &&
+                        x.GuildId == newGuild.GuildId
+                    ))
+                        continue;
+
                     _newDatabase.AutoRoles.Add(new DatabaseAutoRole()
                     {
                         Guild = newGuild,
@@ -130,27 +140,31 @@ namespace ModCore.Tools.DatabaseMigrator
                 // Starboard Config
                 if (settings.Starboard.ChannelId != 0)
                 {
-                    _newDatabase.Starboards.Add(new DatabaseStarboard()
+                    // Create starboard if not exists
+                    if (!_newDatabase.Starboards.Any(x =>
+                        x.ChannelId == settings.Starboard.ChannelId &&
+                        x.GuildId == newGuild.GuildId
+                    ))
                     {
-                        GuildId = newGuild.GuildId,
-                        Enabled = settings.Starboard.Enable,
-                        Emoji = settings.Starboard.Emoji.EmojiId == 0 ? settings.Starboard.Emoji.EmojiName : $"{settings.Starboard.Emoji.EmojiName}:{settings.Starboard.Emoji.EmojiId}",
-                        MinimumReactions = settings.Starboard.Minimum,
-                        ChannelId = settings.Starboard.ChannelId,
-                        Guild = newGuild
-                    });
+                        _newDatabase.Starboards.Add(new DatabaseStarboard()
+                        {
+                            GuildId = newGuild.GuildId,
+                            Enabled = settings.Starboard.Enable,
+                            Emoji = settings.Starboard.Emoji.EmojiId == 0 ? settings.Starboard.Emoji.EmojiName : $"{settings.Starboard.Emoji.EmojiName}:{settings.Starboard.Emoji.EmojiId}",
+                            MinimumReactions = settings.Starboard.Minimum,
+                            ChannelId = settings.Starboard.ChannelId,
+                            Guild = newGuild
+                        });
+                        _newDatabase.SaveChanges();
+                    }
                 }
 
                 // Welcomer Config
                 if (settings.Welcome.Enable)
                 {
-                    _newDatabase.WelcomeSettings.Add(new DatabaseWelcomeSettings()
-                    {
-                        ChannelId = settings.Welcome.ChannelId,
-                        Guild = newGuild,
-                        GuildId = newGuild.GuildId,
-                        Message = settings.Welcome.Message,
-                    });
+                    newGuild.WelcomeSettings.ChannelId = settings.Welcome.ChannelId;
+                    newGuild.WelcomeSettings.Enabled = settings.Welcome.Enable;
+                    newGuild.WelcomeSettings.Message = settings.Welcome.Message;
                 }
 
                 // Nickname Confirm Config
@@ -160,33 +174,42 @@ namespace ModCore.Tools.DatabaseMigrator
                 }
 
                 // Level Settings
-                _newDatabase.LevelSettings.Add(new DatabaseLevelSettings()
-                {
-                    ChannelId = settings.Levels.ChannelId,
-                    Guild = newGuild,
-                    GuildId = newGuild.GuildId,
-                    Enabled = settings.Levels.Enabled,
-                    MessagesEnabled = settings.Levels.MessagesEnabled,
-                    RedirectMessages = settings.Levels.RedirectMessages,
-                });
+                newGuild.LevelSettings.ChannelId = settings.Levels.ChannelId;
+                newGuild.LevelSettings.Enabled = settings.Levels.Enabled;
+                newGuild.LevelSettings.MessagesEnabled = settings.Levels.MessagesEnabled;
+                newGuild.LevelSettings.RedirectMessages = settings.Levels.RedirectMessages;
+
 
                 // Role Menu Config
                 foreach (var roleMenu in settings.RoleMenus)
                 {
-                    var menu = _newDatabase.RoleMenus.Add(new DatabaseRoleMenu()
+                    if (!_newDatabase.RoleMenus.Any(x =>
+                        x.GuildId == newGuild.GuildId &&
+                        x.Name == roleMenu.Name
+                    ))
                     {
-                        Guild = newGuild,
-                        GuildId = newGuild.GuildId,
-                        Name = roleMenu.Name,
-                        CreatorId = roleMenu.CreatorId,
-                    }).Entity;
-                    foreach (var role in roleMenu.RoleIds)
-                    {
-                        _newDatabase.RoleMenusRoles.Add(new DatabaseRoleMenuRole()
+                        var menu = _newDatabase.RoleMenus.Add(new DatabaseRoleMenu()
                         {
-                            Menu = menu,
-                            RoleId = role
-                        });
+                            Guild = newGuild,
+                            GuildId = newGuild.GuildId,
+                            Name = roleMenu.Name,
+                            CreatorId = roleMenu.CreatorId,
+                        }).Entity;
+                        foreach (var role in roleMenu.RoleIds)
+                        {
+                            if (_newDatabase.RoleMenusRoles.Any(x =>
+                                x.MenuId == menu.Id &&
+                                x.RoleId == role
+                            ))
+                                continue;
+
+                            _newDatabase.RoleMenusRoles.Add(new DatabaseRoleMenuRole()
+                            {
+                                Menu = menu,
+                                RoleId = role
+                            });
+                            _newDatabase.SaveChanges();
+                        }
                     }
                 }
 
@@ -206,11 +229,24 @@ namespace ModCore.Tools.DatabaseMigrator
 
         private void MigrateLevelData()
         {
-            MigratorConsole.WriteLine("Migrating stored level data");
+            MigratorConsole.WriteLine("Migrating stored level data", ConsoleColor.Magenta);
             foreach (var levelData in _oldDatabase.Levels)
             {
                 var guild = GetOrCreateNewGuildEntity((ulong)levelData.GuildId);
                 var user = GetOrCreateNewUserEntity((ulong)levelData.UserId);
+
+                if(guild == null || user == null)
+                {
+                    MigratorConsole.WriteLine("Guild or User is null, skipping.", ConsoleColor.Red);
+                    continue;
+                }
+
+                if (_newDatabase.LevelData.Any(x => 
+                    x.UserId == user.UserId &&
+                    x.GuildId == guild.GuildId
+                ))
+                    continue;
+
                 var newLevelData = new DatabaseLevelData()
                 {
                     Experience = levelData.Experience,
@@ -221,6 +257,7 @@ namespace ModCore.Tools.DatabaseMigrator
                     UserId = user.UserId
                 };
                 _newDatabase.LevelData.Add(newLevelData);
+                _newDatabase.SaveChanges();
             }
             _newDatabase.SaveChanges();
             MigratorConsole.WriteLine("Done migrating level data!", ConsoleColor.Green);
@@ -228,13 +265,27 @@ namespace ModCore.Tools.DatabaseMigrator
 
         private void MigrateRoleStates()
         {
-            MigratorConsole.WriteLine("Migrating stored rolestates");
+            MigratorConsole.WriteLine("Migrating stored rolestates", ConsoleColor.Magenta);
             foreach (var rolestate in _oldDatabase.RolestateRoles)
             {
                 var guild = GetOrCreateNewGuildEntity((ulong)rolestate.GuildId);
                 var user = GetOrCreateNewUserEntity((ulong)rolestate.MemberId);
+
+                if(guild == null || user == null)
+                {
+                    MigratorConsole.WriteLine("Guild or User is null, skipping.", ConsoleColor.Red);
+                    continue;
+                }
+
                 foreach (var role in rolestate.RoleIds)
                 {
+                    if (_newDatabase.RoleStates.Any(x =>
+                        x.UserId == user.UserId &&
+                        x.RoleId == (ulong)role &&
+                        x.GuildId == guild.GuildId
+                    ))
+                        continue;
+
                     _newDatabase.RoleStates.Add(new DatabaseRoleState()
                     {
                         Guild = guild,
@@ -243,6 +294,7 @@ namespace ModCore.Tools.DatabaseMigrator
                         UserId = user.UserId,
                         RoleId = (ulong)role
                     });
+                    _newDatabase.SaveChanges();
                 }
             }
             _newDatabase.SaveChanges();
@@ -251,11 +303,25 @@ namespace ModCore.Tools.DatabaseMigrator
 
         private void MigrateRoleOverrides()
         {
-            MigratorConsole.WriteLine("Migrating stored overrides");
+            MigratorConsole.WriteLine("Migrating stored overrides", ConsoleColor.Magenta);
             foreach (var rolestate in _oldDatabase.RolestateOverrides)
             {
                 var guild = GetOrCreateNewGuildEntity((ulong)rolestate.GuildId);
                 var user = GetOrCreateNewUserEntity((ulong)rolestate.MemberId);
+
+                if (guild == null || user == null)
+                {
+                    MigratorConsole.WriteLine("Guild or User is null, skipping.", ConsoleColor.Red);
+                    continue;
+                }
+
+                if (_newDatabase.OverrideStates.Any(x =>
+                    x.UserId == user.UserId &&
+                    x.GuildId == guild.GuildId &&
+                    x.ChannelId == (ulong)rolestate.ChannelId
+                ))
+                    continue;
+
                 _newDatabase.OverrideStates.Add(new DatabaseOverrideState()
                 {
                     Guild = guild,
@@ -266,6 +332,7 @@ namespace ModCore.Tools.DatabaseMigrator
                     User = user,
                     UserId = user.UserId,
                 });
+                _newDatabase.SaveChanges();
             }
             _newDatabase.SaveChanges();
             MigratorConsole.WriteLine("Done migrating override states!", ConsoleColor.Green);
@@ -273,11 +340,30 @@ namespace ModCore.Tools.DatabaseMigrator
 
         private void MigrateNicknameStates()
         {
-            MigratorConsole.WriteLine("Migrating stored nicknames");
+            MigratorConsole.WriteLine("Migrating stored nicknames", ConsoleColor.Magenta);
             foreach (var nickname in _oldDatabase.RolestateNicks)
             {
                 var guild = GetOrCreateNewGuildEntity((ulong)nickname.GuildId);
                 var user = GetOrCreateNewUserEntity((ulong)nickname.MemberId);
+
+                if(string.IsNullOrWhiteSpace(nickname.Nickname))
+                {
+                    MigratorConsole.WriteLine("Nickname is null, skipping.", ConsoleColor.Red);
+                    continue;
+                }
+
+                if (guild == null || user == null)
+                {
+                    MigratorConsole.WriteLine("Guild or User is null, skipping.", ConsoleColor.Red);
+                    continue;
+                }
+
+                if (_newDatabase.NicknameStates.Any(x =>
+                    x.UserId == user.UserId &&
+                    x.GuildId == guild.GuildId
+                ))
+                    continue;
+
                 _newDatabase.NicknameStates.Add(new DatabaseNicknameState()
                 {
                     Guild = guild,
@@ -286,6 +372,7 @@ namespace ModCore.Tools.DatabaseMigrator
                     UserId = user.UserId,
                     Nickname = nickname.Nickname
                 });
+                _newDatabase.SaveChanges();
             }
             _newDatabase.SaveChanges();
             MigratorConsole.WriteLine("Done migrating nickname states!", ConsoleColor.Green);
@@ -293,19 +380,155 @@ namespace ModCore.Tools.DatabaseMigrator
 
         private void MigrateTags()
         {
+            MigratorConsole.WriteLine("Migrating stored tags", ConsoleColor.Magenta);
+            foreach (var tag in _oldDatabase.Tags)
+            {
+                var guild = GetOrCreateNewGuildEntity((ulong)tag.GuildId);
+                var usre = GetOrCreateNewUserEntity((ulong)tag.OwnerId);
 
+                if (guild == null || usre == null)
+                {
+                    MigratorConsole.WriteLine("Guild or User is null, skipping.", ConsoleColor.Red);
+                    continue;
+                }
+
+                if (_newDatabase.Tags.Any(x =>
+                    x.GuildId == guild.GuildId &&
+                    x.Name == tag.Name
+                ))
+                    continue;
+
+                if(string.IsNullOrWhiteSpace(tag.Contents))
+                {
+                    MigratorConsole.WriteLine($"Tag {tag.Name} has no content, skipping.", ConsoleColor.Red);
+                    continue;
+                }
+
+                var content = tag.Contents;
+                if(content.Length > 2000)
+                {
+                    content = content.Substring(0, 2000);
+                }
+
+                _newDatabase.Tags.Add(new DatabaseTag()
+                {
+                    Guild = guild,
+                    GuildId = guild.GuildId,
+                    Name = tag.Name,
+                    AuthorId = (ulong)tag.OwnerId,
+                    ChannelId = (ulong)tag.ChannelId,
+                    CreatedAt = tag.CreatedAt,
+                    Content = content,
+                    ModifiedAt = tag.CreatedAt
+                });
+                _newDatabase.SaveChanges();
+            }
+            _newDatabase.SaveChanges();
             MigratorConsole.WriteLine("Done migrating tags!", ConsoleColor.Green);
         }
 
         private void MigrateTimers()
         {
+            MigratorConsole.WriteLine("Migrating stored timers", ConsoleColor.Magenta);
+            foreach (var timer in _oldDatabase.Timers)
+            {
+                // types: reminder, unban. others are deprecated.
+                if (timer.ActionType != TimerActionType.Reminder && timer.ActionType != TimerActionType.Unban) continue;
 
+                var guild = GetOrCreateNewGuildEntity((ulong)timer.GuildId);
+
+                if (guild == null)
+                {
+                    MigratorConsole.WriteLine("Guild or User is null, skipping.", ConsoleColor.Red);
+                    continue;
+                }
+
+                var newTimer = new DatabaseTimer()
+                {
+                    GuildId = guild.GuildId,
+                    ShardId = 0,
+                    TriggersAt = timer.DispatchAt,
+                    Type = timer.ActionType == TimerActionType.Reminder ? TimerTypes.Reminder : TimerTypes.Unban
+                };
+
+                if(newTimer.Type == TimerTypes.Reminder)
+                {
+                    newTimer.SetData(ConvertReminderTimer(timer.GetData<TimerReminderData>(), (ulong)timer.ChannelId, (ulong)timer.UserId));
+                }
+                else
+                {
+                    newTimer.SetData(ConvertUnbanTimer(timer.GetData<TimerUnbanData>()));
+                }
+                _newDatabase.Timers.Add(newTimer);
+                _newDatabase.SaveChanges();
+            }
+            _newDatabase.SaveChanges();
             MigratorConsole.WriteLine("Done migrating timers!", ConsoleColor.Green);
+        }
+
+        private UnbanTimerData ConvertUnbanTimer(TimerUnbanData oldData)
+        {
+            return new UnbanTimerData()
+            {
+                UserId = (ulong)oldData.UserId,
+                DisplayName = oldData.DisplayName
+            };
+        }
+
+        private ReminderTimerData ConvertReminderTimer(TimerReminderData oldData, ulong channelId, ulong userId)
+        {
+            return new ReminderTimerData()
+            {
+                ChannelId = channelId,
+                CreatedAt = DateTimeOffset.FromUnixTimeMilliseconds(oldData.OriginalUnix),
+                Snoozed = oldData.Snoozed,
+                Text = oldData.ReminderText,
+                UserId = userId
+            };
         }
 
         private void MigrateStarData()
         {
+            MigratorConsole.WriteLine("Migrating stored star data", ConsoleColor.Magenta);
+            DatabaseStarboard? starboard = null;
 
+            foreach(var starData in _oldDatabase.StarDatas)
+            {
+                var guild = GetOrCreateNewGuildEntity((ulong)starData.GuildId);
+                var user = GetOrCreateNewUserEntity((ulong)starData.StargazerId);
+                var author = GetOrCreateNewUserEntity((ulong)starData.AuthorId);
+
+                if (guild == null || user == null || author == null)
+                {
+                    MigratorConsole.WriteLine("Guild, User or Author is null, skipping.", ConsoleColor.Red);
+                    continue;
+                }
+
+                if (starboard == null)
+                {
+                    starboard = _newDatabase.Starboards.First(x => x.GuildId == guild.GuildId);
+                }
+
+                // Skip if key already exists to avoid doubles
+                if (_newDatabase.StarboardItems.Any(x =>
+                    x.StarboardId == starboard.Id &&
+                    x.MessageId == (ulong)starData.MessageId &&
+                    x.ChannelId == (ulong)starData.ChannelId &&
+                    x.StargazerId == (ulong)starData.StargazerId
+                ))
+                    continue;
+
+                _newDatabase.StarboardItems.Add(new DatabaseStarboardItem()
+                {
+                    StarboardId = starboard.Id,
+                    AuthorId = (ulong)starData.AuthorId,
+                    BoardMessageId = (ulong)starData.StarboardMessageId,
+                    MessageId = (ulong)starData.MessageId,
+                    ChannelId = (ulong)starData.ChannelId,
+                    StargazerId = (ulong)starData.StargazerId,
+                });
+                _newDatabase.SaveChanges();
+            }
             MigratorConsole.WriteLine("Done migrating guild starboard data!", ConsoleColor.Green);
         }
 
@@ -313,6 +536,12 @@ namespace ModCore.Tools.DatabaseMigrator
         {
             DatabaseGuild guild = _newDatabase.Guilds.FirstOrDefault(x => x.GuildId == guildId);
             if (guild != default) return guild;
+
+            if(guildId == null || guildId == 0)
+            {
+                MigratorConsole.WriteLine("Guild ID is null or 0, skipping.", ConsoleColor.Red);
+                return null;
+            }
 
             var newGuild = new DatabaseGuild()
             {
@@ -334,6 +563,12 @@ namespace ModCore.Tools.DatabaseMigrator
         {
             DatabaseUser user = _newDatabase.Users.FirstOrDefault(x => x.UserId == userId);
             if (user != default) return user;
+
+            if (userId == null || userId == 0)
+            {
+                MigratorConsole.WriteLine("User ID is null or 0, skipping.", ConsoleColor.Red);
+                return null;
+            }
 
             var newUser = new DatabaseUser()
             {

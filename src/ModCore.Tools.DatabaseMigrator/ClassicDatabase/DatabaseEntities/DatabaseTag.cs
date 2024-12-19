@@ -31,7 +31,7 @@ namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.DatabaseEntities
         [Column("created_at", TypeName = "timestamptz")]
         public DateTime CreatedAt { get; set; }
 
-        [Column("contents")]
-        public string Contents { get; set; }
+        [Column("contents", TypeName = "text")]
+        public string? Contents { get; set; }
     }
 }

@@ -18,6 +18,7 @@ namespace ModCore.Common.Database.Entities
         public virtual ICollection<DatabaseOverrideState> OverrideStates { get; set; } = new HashSet<DatabaseOverrideState>();
         public virtual ICollection<DatabaseRoleState> RoleStates { get; set; } = new HashSet<DatabaseRoleState>();
         public virtual ICollection<DatabaseStarboardItem> StarboardItems { get; set; } = new HashSet<DatabaseStarboardItem>();
+        public virtual ICollection<DatabaseStarboardItem> StarredItems { get; set; } = new HashSet<DatabaseStarboardItem>();
         public virtual ICollection<DatabaseTag> Tags { get; set; } = new HashSet<DatabaseTag>();
         public virtual ICollection<DatabaseBanAppeal> BanAppeals { get; set; } = new HashSet<DatabaseBanAppeal>();
         public virtual ICollection<DatabaseTicket> Tickets { get; set; } = new HashSet<DatabaseTicket>();

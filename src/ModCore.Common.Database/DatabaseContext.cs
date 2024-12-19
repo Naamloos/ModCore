@@ -120,7 +120,7 @@ namespace ModCore.Common.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DatabaseStarboardItem>()
-                .HasKey(x => new { x.StarboardId, x.MessageId, x.ChannelId });
+                .HasKey(x => new { x.StarboardId, x.MessageId, x.ChannelId, x.StargazerId });
             modelBuilder.Entity<DatabaseStarboardItem>()
                 .HasOne(x => x.Starboard)
                 .WithMany(x => x.Items)
@@ -130,6 +130,11 @@ namespace ModCore.Common.Database
                 .HasOne(x => x.Author)
                 .WithMany(x => x.StarboardItems)
                 .HasForeignKey(x => x.AuthorId)
+                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<DatabaseStarboardItem>()
+                .HasOne(x => x.Stargazer)
+                .WithMany(x => x.StarredItems)
+                .HasForeignKey(x => x.StargazerId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DatabaseTag>()

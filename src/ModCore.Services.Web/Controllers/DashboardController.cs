@@ -7,6 +7,7 @@ using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Rest;
 using ModCore.Services.Web.Attributes;
+using ModCore.Services.Web.Entities;
 using ModCore.Services.Web.Gates;
 using ModCore.Services.Web.Middleware;
 using ModCore.Services.Web.Services;
@@ -89,20 +90,21 @@ namespace ModCore.Services.Web.Controllers
             }
 
             var server = await restClient.GetGuildAsync(server_id, true);
-
-            var dbServer = database.Guilds.FirstOrDefault(x => x.GuildId == server_id);
-            if (dbServer == null)
+            if(!server.Success)
             {
                 return NotFound();
             }
+
+            var dump = GuildDump.Create(server_id, database);
+
             var serializerOptions = new JsonSerializerOptions()
             {
                 Converters = { new OptionalJsonSerializerFactory() },
                 WriteIndented = true,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
             };
-            // TODO F U L L  data dump, all starboard ids, tags, etc etc
-            return File(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(dbServer, serializerOptions)), "application/json", $"{server_id}.json");
+
+            return File(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(dump, serializerOptions)), "application/json", $"{server_id}.json");
         }
 
         [RouteMiddleware(typeof(RequireAuthentication))]

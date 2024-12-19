@@ -13,7 +13,7 @@ namespace ModCore.Common.Database.Entities
     public class DatabaseTimer
     {
         [Column("timer_id")]
-        public long TimerId { get; set; } = 1;
+        public long TimerId { get; set; }
 
         [Column("guild_id")]
         public ulong GuildId { get; set; }
