@@ -7,6 +7,7 @@ using ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities;
 using Npgsql;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,7 +49,7 @@ namespace ModCore.Tools.DatabaseMigrator
             var migrations = _newDatabase.Database.GetPendingMigrations();
             if (migrations.Count() > 0)
             {
-                MigratorConsole.Write("Pending migrations found for new database. Apply? (y/N)");
+                MigratorConsole.Write("Pending migrations found for new database. Apply? (y/N): ");
                 var confirm = (Console.ReadLine() ?? "n").Trim().ToLower() == "y";
                 if (!confirm)
                 {
@@ -66,6 +67,9 @@ namespace ModCore.Tools.DatabaseMigrator
 
             MigratorConsole.WriteLine("Starting migration from old to new database");
 
+            var sw = new Stopwatch();
+            sw.Start();
+
             //// Guild configs must be ran first, to ensure that we create guild objects where needed.
             MigrateGuildConfigs();
 
@@ -78,7 +82,10 @@ namespace ModCore.Tools.DatabaseMigrator
             MigrateNicknameStates();
             MigrateTimers();
 
+            sw.Stop();
+
             MigratorConsole.WriteLine("Done migrating v2 database to v3 database!", ConsoleColor.Green);
+            MigratorConsole.WriteLine($"Migration took {sw.ElapsedMilliseconds}ms! ({sw.Elapsed.ToString()})", ConsoleColor.Cyan);
         }
 
         private void MigrateGuildConfigs()
