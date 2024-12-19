@@ -67,7 +67,7 @@ namespace ModCore.Tools.DatabaseMigrator
             MigratorConsole.WriteLine("Starting migration from old to new database");
 
             //// Guild configs must be ran first, to ensure that we create guild objects where needed.
-            //MigrateGuildConfigs();
+            MigrateGuildConfigs();
 
             //// Then, we migrate levels and stars
             MigrateLevelData();
