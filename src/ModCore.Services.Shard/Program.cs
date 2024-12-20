@@ -63,7 +63,7 @@ namespace ModCore.Services.Shard
                     {
                         config.Intents = Intents.AllUnprivileged | Intents.MessageContents;
                         config.SubscribeEvents<StartupEvents>();
-                        config.SubscribeEvents<MessageEvents>();
+                        config.SubscribeEvents<MessageCacheEvents>();
                         config.SubscribeEvents<SimpleEvalEvent>();
 
                         // These events live in the cache service.

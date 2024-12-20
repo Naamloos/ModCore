@@ -34,6 +34,7 @@ namespace ModCore.Common.Discord.Rest
         {
             RateLimitBucket bucket;
 
+            // TODO (de)serialize from distributed cache
             if (!buckets.TryGetValue(route, out bucket))
             {
                 bucket = new RateLimitBucket();

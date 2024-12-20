@@ -1,6 +1,7 @@
 ﻿using InertiaCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using ModCore.Common.Cache;
 using ModCore.Common.Database;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
@@ -24,48 +25,14 @@ namespace ModCore.Services.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
-            return Inertia.Render("Dashboard/Index");
-        }
-
-        [RouteMiddleware(typeof(RequireAuthentication))]
-        [HttpGet("servers")]
-        public async Task<IActionResult> ServerList([FromServices] UserDiscordRest userDiscord, [FromServices] DatabaseContext database)
-        {
-            var restClient = await userDiscord.GetDiscordRestAsync();
-
-            if (restClient == null)
-            {
-                return Redirect("/login");
-            }
-
-            // TODO cache, and only list servers that user is admin in
-            var servers = await restClient.GetCurrentUserGuilds();
-
-            IEnumerable<Guild> serverList = servers.Value.OrderBy(x => x.Name);
-            var serverIds = serverList.Select(x => x.Id.Value).ToArray();
-            var dbServerIds = database.Guilds.Where(x => serverIds.Contains(x.GuildId)).Select(x => x.GuildId).ToArray();
-            var serializerOptions = new JsonSerializerOptions()
-            {
-                Converters = { new OptionalJsonSerializerFactory() },
-                WriteIndented = true,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-            };
-            var serverListSerialized = serverList.Where(x => dbServerIds.Contains(x.Id.Value))
-                .Select(x => JsonSerializer.SerializeToDocument(x, options: serializerOptions))
-                .ToList();
-
-            return Inertia.Render("Dashboard/Servers/Index", new
-            {
-                Servers = serverListSerialized
-            });
+            return Inertia.Render("Dashboard/Dashboard");
         }
 
         [RouteMiddleware(typeof(RequireAuthentication))]
         [HttpGet("servers/{server_id}/datadump")]
-        [FlashGuildPermissions(nameof(server_id))]
         public async Task<IActionResult> ServerConfigDownload([FromRoute] ulong server_id,
             [FromServices] UserDiscordRest userDiscord, [FromServices] DiscordRest restClient,
-            [FromServices] DatabaseContext database)
+            [FromServices] DatabaseContext database, [FromServices] CacheService cacheService)
         {
             var userId = ulong.Parse(HttpContext.User.Claims.FirstOrDefault(x => x.Type == "urn:discord:id")?.Value);
 
@@ -82,9 +49,16 @@ namespace ModCore.Services.Web.Controllers
                 return Redirect("/login");
             }
 
-            var servers = await userRestClient.GetCurrentUserGuilds();
+            var cacheGuilds = cacheService.TryGet<List<CurrentUserGuild>, string>("userGuilds:" + userId);
+            var servers = cacheGuilds.Value;
+            if (!cacheGuilds.Success)
+            {
+                var restGuilds = await userRestClient.GetCurrentUserGuilds();
+                servers = restGuilds.Value;
+                cacheService.Update("userGuilds:" + userId, servers);
+            }
             // check if the server is in the user's guild list
-            if (!servers.Success || !servers.Value.Any(x => x.Id == server_id))
+            if (servers == default || !servers.Any(x => x.Id == server_id))
             {
                 return Redirect("/dashboard");
             }
@@ -109,10 +83,9 @@ namespace ModCore.Services.Web.Controllers
 
         [RouteMiddleware(typeof(RequireAuthentication))]
         [HttpGet("servers/{server_id}")]
-        [FlashGuildPermissions(nameof(server_id))]
         public async Task<IActionResult> ServerOverview([FromRoute] ulong server_id,
             [FromServices] UserDiscordRest userDiscord, [FromServices] DiscordRest restClient,
-            [FromServices] DatabaseContext database)
+            [FromServices] DatabaseContext database, [FromServices] CacheService cacheService)
         {
             var userId = ulong.Parse(HttpContext.User.Claims.FirstOrDefault(x => x.Type == "urn:discord:id")?.Value);
 
@@ -130,14 +103,20 @@ namespace ModCore.Services.Web.Controllers
                 return Redirect("/login");
             }
 
-            var servers = await userRestClient.GetCurrentUserGuilds();
+            var cacheGuilds = cacheService.TryGet<List<CurrentUserGuild>, string>("userGuilds:" + userId);
+            var servers = cacheGuilds.Value;
+            if (!cacheGuilds.Success)
+            {
+                var restGuilds = await userRestClient.GetCurrentUserGuilds(withCounts: true);
+                servers = restGuilds.Value;
+                cacheService.Update("userGuilds:" + userId, servers);
+            }
             // check if the server is in the user's guild list
-            if (!servers.Success || !servers.Value.Any(x => x.Id == server_id))
+            if (servers == default || !servers.Any(x => x.Id == server_id))
             {
                 return Redirect("/dashboard");
             }
 
-            var server = await restClient.GetGuildAsync(server_id, true);
             var dbServer = database.Guilds.FirstOrDefault(x => x.GuildId == server_id);
 
             var serializerOptions = new JsonSerializerOptions()
@@ -147,9 +126,11 @@ namespace ModCore.Services.Web.Controllers
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
             };
 
+            var userServer = servers.Where(x => x.Id == server_id).FirstOrDefault();
+
             return Inertia.Render("Dashboard/Servers/Manage", new
             {
-                Server = server.Success ? JsonSerializer.SerializeToDocument(server.Value, options: serializerOptions) : null,
+                Server = userServer != default? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions) : null,
                 DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions)
             });
         }

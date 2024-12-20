@@ -10,7 +10,7 @@ namespace ModCore.Common.Discord.Gateway.EventData.Incoming
     public record MessageCreate : Message, IPublishable
     {
         [JsonPropertyName("guild_id")]
-        public Snowflake? GuildId { get; set; }
+        public Optional<Snowflake> GuildId { get; set; }
 
         [JsonPropertyName("member")]
         public Member Member { get; set; }

@@ -9,7 +9,7 @@ namespace ModCore.Services.Web.Controllers
         [HttpGet("login")]
         public IActionResult Login()
         {
-            var redirect = HttpContext.Session.GetString("redirect") ?? "/";
+            var redirect = HttpContext.Session.GetString("redirect") ?? "/dashboard";
             // check if already authenticated
             if (User.Identity.IsAuthenticated)
             {

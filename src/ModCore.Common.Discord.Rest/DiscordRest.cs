@@ -63,17 +63,16 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<Application>(HttpMethod.Get, url, route);
         }
 
-        // TODO this sucks, properly implement. this is jsut here for "ayo it work" atm.
         public ValueTask<RestResponse<Message>> CreateMessageAsync(Snowflake channelId, CreateMessage content)
         {
-            string route = "channels/:channel_id/messages";
+            string route = $"channels/{channelId}/messages";
             string url = $"channels/{channelId}/messages";
             return makeRequestAsync<Message>(HttpMethod.Post, url, route, content);
         }
 
         public ValueTask<RestResponse<Message>> ModifyMessageAsync(Snowflake channelId, Snowflake messageId, CreateMessage content)
         {
-            string route = "channels/:channel_id/messages/:message_id";
+            string route = $"channels/{channelId}/messages/:message_id";
             string url = $"channels/{channelId}/messages/{messageId}";
             return makeRequestAsync<Message>(HttpMethod.Patch, url, route, content);
         }
@@ -95,7 +94,7 @@ namespace ModCore.Common.Discord.Rest
         public ValueTask<RestResponse<object>> CreateInteractionResponseAsync(Snowflake interactionId, string interationToken,
             InteractionResponseType type, InteractionResponseData data)
         {
-            string route = "interactions/:interaction_id/:interaction_token/callback";
+            string route = $"interactions/{interactionId}/{interationToken}/callback";
             string url = $"interactions/{interactionId}/{interationToken}/callback";
             return makeRequestAsync<object>(HttpMethod.Post, url, route, new InteractionResponse()
             {
@@ -117,24 +116,24 @@ namespace ModCore.Common.Discord.Rest
 
         public ValueTask<RestResponse<Guild>> GetGuildAsync(Snowflake guildId, bool withCounts = false)
         {
-            string route = "guilds/:guild_id";
+            string route = $"guilds/{guildId}";
             string url = $"guilds/{guildId}?with_counts={withCounts}";
 
             return makeRequestAsync<Guild>(HttpMethod.Get, url, route);
         }
 
-        public ValueTask<RestResponse<List<Guild>>> GetCurrentUserGuilds()
+        public ValueTask<RestResponse<List<CurrentUserGuild>>> GetCurrentUserGuilds(bool withCounts = false)
         {
             string route = "users/@me/guilds";
-            string url = $"users/@me/guilds";
+            string url = $"users/@me/guilds?with_counts={withCounts}";
 
-            return makeRequestAsync<List<Guild>>(HttpMethod.Get, url, route);
+            return makeRequestAsync<List<CurrentUserGuild>>(HttpMethod.Get, url, route);
         }
 
         public ValueTask<RestResponse<object>> CreateGuildBanAsync(Snowflake guildId, Snowflake userId, 
             int? delete_message_days = null, int? delete_message_seconds = null)
         {
-            string route = "guilds/:guild_id/bans/:user_id";
+            string route = $"guilds/{guildId}/bans/:user_id";
             string url = $"guilds/{guildId}/bans/{userId}";
 
             return makeRequestAsync<object>(HttpMethod.Put, url, route, new CreateGuildBan()
@@ -146,7 +145,7 @@ namespace ModCore.Common.Discord.Rest
 
         public ValueTask<RestResponse<Member>> GetGuildMemberAsync(Snowflake guildId, Snowflake userId)
         {
-            string route = "guilds/:guild_id/members/:user_id";
+            string route = $"guilds/{guildId}/members/:user_id";
             string url = $"guilds/{guildId}/members/{userId}";
             return makeRequestAsync<Member>(HttpMethod.Get, url, route);
         }

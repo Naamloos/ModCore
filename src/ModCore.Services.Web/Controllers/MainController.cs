@@ -25,7 +25,13 @@ namespace ModCore.Common.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            return Inertia.Render("Index", new
+            if (HttpContext?.User?.Identity?.IsAuthenticated == true)
+            {
+                // Redirect to /dashboard
+                return Redirect("/dashboard");
+            }
+
+            return Inertia.Render("Home", new
             {
                 dotnetVersion = Environment.Version
             });

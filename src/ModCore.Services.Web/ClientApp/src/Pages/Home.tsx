@@ -1,5 +1,5 @@
 import { Head, usePage } from "@inertiajs/react";
-import MainLayout from "@/Layouts/MainLayout.js";
+import HomeLayout from "@/Layouts/HomeLayout.js";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { PagePropsWith } from "@/Types/PageProps";
 
@@ -12,10 +12,10 @@ export default function IndexPage({ dotnetVersion, application } : PagePropsWith
 {
     return (
         <>
-            <MainLayout>
+            <HomeLayout>
                 <Head title="Welcome" />
-                <div className="text-center text-lg max-w-2xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col items-center justify-center mt-12 sm:mt-24 sm:flex-row pb-4">
+                <div className="text-center text-lg max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col items-center justify-center mt-8 sm:flex-row pb-4">
                         <img src={`https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`} alt="Logo" className="mb-4 sm:mb-0 sm:mr-4 h-24 w-24 sm:h-36 sm:w-36" />
                         <h1 className="text-center sm:text-left text-4xl sm:text-6xl font-extrabold tracking-tight">
                             Welcome to <br />
@@ -38,6 +38,12 @@ export default function IndexPage({ dotnetVersion, application } : PagePropsWith
                             &nbsp;&nbsp;GitHub:&nbsp;
                             <a href="https://github.com/Naamloos/ModCore/" target="_blank" className="text-blue-400 hover:text-blue-200 inline-block justify-center">
                                 <IconBrandGithub size={24} />
+                            </a>
+                        </p>
+                        <p className="text-center text-lg max-w-xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
+                            {/* Dashboard Button */}
+                            <a href="/login" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-4">
+                                Log into Dashboard with Discord
                             </a>
                         </p>
                     </div>
@@ -87,7 +93,7 @@ export default function IndexPage({ dotnetVersion, application } : PagePropsWith
                         </div>
                     </div>
                 </div>
-            </MainLayout>
+            </HomeLayout>
         </>
     );
 }

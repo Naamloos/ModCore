@@ -10,7 +10,7 @@ namespace ModCore.Common.Discord.Entities.Guilds
         public bool IsOwner { get; set; }
 
         [JsonPropertyName("permissions")]
-        public string? Permissions { get; set; }
+        public Permissions Permissions { get; set; }
     }
 
     public record Guild

@@ -16,6 +16,7 @@ using Microsoft.CodeAnalysis.Scripting;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using ModCore.Common.Utils;
 using System.Diagnostics;
+using ModCore.Common.Database;
 
 namespace ModCore.Services.Shard.EventHandlers
 {
@@ -26,14 +27,16 @@ namespace ModCore.Services.Shard.EventHandlers
         private readonly ILogger _logger;
         private readonly DiscordRest _api;
         private readonly Gateway _gateway;
+        private readonly TransientService<DatabaseContext> _database;
         private User _modCore;
         private Application _app;
 
-        public SimpleEvalEvent(ILogger<SimpleEvalEvent> logger, DiscordRest api, Gateway gateway) 
+        public SimpleEvalEvent(ILogger<SimpleEvalEvent> logger, DiscordRest api, Gateway gateway, TransientService<DatabaseContext> database) 
         {
             this._logger = logger;
             this._api = api;
             this._gateway = gateway;
+            this._database = database;
         }
 
         private Regex codeRegex = new Regex(@"```c?s?((.|\n)*?)```", RegexOptions.Compiled);
@@ -104,7 +107,7 @@ namespace ModCore.Services.Shard.EventHandlers
             var resultEmbed = new Embed()
                 .WithTitle("Evaluation Results");
 
-            var variables = new EvalVariables(_gateway, _api, context);
+            var variables = new EvalVariables(_gateway, _api, context, _database);
             var options = ScriptOptions.Default
                 .WithImports("System", 
                     "System.Collections.Generic", 
@@ -113,7 +116,8 @@ namespace ModCore.Services.Shard.EventHandlers
                     "System.Threading.Tasks", 
                     "ModCore.Common.Discord.Gateway", 
                     "ModCore.Common.Discord.Rest", 
-                    "ModCore.Common.Discord.Entities")
+                    "ModCore.Common.Discord.Entities",
+                    "Microsoft.EntityFrameworkCore")
                 .WithReferences(AppDomain.CurrentDomain.GetAssemblies().Where(xa => !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location)));
 
             try
@@ -155,12 +159,14 @@ namespace ModCore.Services.Shard.EventHandlers
             public Gateway Gateway { get; set; }
             public DiscordRest Rest { get; set; }
             public MessageCreate Context { get; set; }
+            public DatabaseContext Database { get; set; }
 
-            public EvalVariables(Gateway gateway, DiscordRest rest, MessageCreate context)
+            public EvalVariables(Gateway gateway, DiscordRest rest, MessageCreate context, TransientService<DatabaseContext> database)
             {
                 this.Gateway = gateway;
                 this.Rest = rest;
                 this.Context = context;
+                this.Database = database.GetTransient();
             }
         }
     }
