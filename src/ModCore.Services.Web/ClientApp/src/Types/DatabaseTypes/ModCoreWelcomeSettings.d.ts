@@ -1,18 +1,12 @@
+import { DiscordEmbed } from "../DiscordTypes/DiscordEmbed";
+
 export type ModCoreWelcomeSettings = {
     channel_id: bigint;
-    message_id: string;
-    image_b64: string | null;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    shape: WelcomeImageShape;
+    welcome_message_json: string;
     enabled: boolean;
 };
 
-export enum WelcomeImageShape 
-{
-    Circle = 1,
-    Square = 0,
-    Squircle = 2
+export type WelcomeMessageJson = {
+    content: string;
+    embeds: DiscordEmbed[];
 }

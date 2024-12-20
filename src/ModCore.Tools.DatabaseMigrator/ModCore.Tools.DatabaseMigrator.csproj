@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ModCore.Common.Database\ModCore.Common.Database.csproj" />
+    <ProjectReference Include="..\ModCore.Common.Discord.Entities\ModCore.Common.Discord.Entities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

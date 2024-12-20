@@ -38,7 +38,7 @@ namespace ModCore.Common.Database.Entities
         public string? Data { get; set; }
 
         public T GetData<T>() where T : class, ITimerData 
-            => JsonSerializer.Deserialize<T>(Data);
+            => JsonSerializer.Deserialize<T>(Data!)!;
 
         public void SetData<T>(T data) where T : class, ITimerData 
             => Data = JsonSerializer.Serialize(data);

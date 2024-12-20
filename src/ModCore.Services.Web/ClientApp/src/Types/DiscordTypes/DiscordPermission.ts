@@ -85,7 +85,7 @@ export const DiscordPermissionFlags: { [key in DiscordPermission]: bigint } = {
     MODERATE_MEMBERS: 1n << 40n,
 };
 
-export function hasPermission(permissions: bigint, permission: DiscordPermissionFlag): boolean {
+export function hasPermission(permissions: bigint, permission: DiscordPermission): boolean {
     return (permissions & DiscordPermissionFlags[permission]) === DiscordPermissionFlags[permission];
 }
 

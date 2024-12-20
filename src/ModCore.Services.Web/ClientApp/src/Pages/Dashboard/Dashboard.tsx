@@ -81,7 +81,7 @@ export default function Index({ user, application }: PageProps) {
                 <FakeDiscordMessage
                     content="Welcome to the ModCore Dashboard! Here you can manage your ban appeals, tickets, reminders, and server levels."
                     className="mt-8"
-                    embed={{
+                    embeds={[{
                         title: "Welcome to ModCore!",
                         description: "ModCore is your assistant for Discord server moderation and management through a wide range of hand-crafted features to make your life as a moderator or administrator a breeze!",
                         thumbnail: {
@@ -108,7 +108,7 @@ export default function Index({ user, application }: PageProps) {
                             icon_url: user!.avatar,
                             text: "For " + user!.username + " <3",
                         }
-                    }}
+                    }]}
                 />
             </DashboardLayout>
         </>

@@ -2,6 +2,8 @@
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
 using ModCore.Common.Database.Timers;
+using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Tools.DatabaseMigrator.ClassicDatabase;
 using ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities;
 using Npgsql;
@@ -10,6 +12,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ModCore.Tools.DatabaseMigrator
@@ -95,7 +98,7 @@ namespace ModCore.Tools.DatabaseMigrator
                 MigratorConsole.WriteLine($"Migrating Guild config for {guildConfig.GuildId}", ConsoleColor.Magenta);
                 var newGuild = GetOrCreateNewGuildEntity((ulong)guildConfig.GuildId);
 
-                if(newGuild == null)
+                if (newGuild == null)
                 {
                     MigratorConsole.WriteLine("Guild is null, skipping.", ConsoleColor.Red);
                     continue;
@@ -171,7 +174,8 @@ namespace ModCore.Tools.DatabaseMigrator
                 {
                     newGuild.WelcomeSettings.ChannelId = settings.Welcome.ChannelId;
                     newGuild.WelcomeSettings.Enabled = settings.Welcome.Enable;
-                    newGuild.WelcomeSettings.Message = settings.Welcome.Message;
+                    if(!string.IsNullOrEmpty(settings.Welcome.Message))
+                        newGuild.WelcomeSettings.SetData(ConvertWelcomeMessage(settings.Welcome.Message, settings.Welcome.IsEmbed));
                 }
 
                 // Nickname Confirm Config
@@ -234,6 +238,50 @@ namespace ModCore.Tools.DatabaseMigrator
             MigratorConsole.WriteLine("Done migrating guild configs!", ConsoleColor.Green);
         }
 
+        private static readonly Regex WelcomeRegex = new("{{(.*?)}}", RegexOptions.Compiled);
+        private CreateMessage ConvertWelcomeMessage(string message, bool isEmbed)
+        {
+            string imageUrl = null;
+            string embedTitle = null;
+            var createMessage = new CreateMessage();
+            var matches = WelcomeRegex.Matches(message);
+            var cleanedMessage = message;
+            WelcomeRegex.Replace(message, match =>
+            {
+                var key = match.Groups[1].Value;
+
+                if (key.StartsWith("image:"))
+                {
+                    imageUrl = key.Substring(6);
+                    return "";
+                }
+                else if (key.StartsWith("embed-title:"))
+                {
+                    embedTitle = key.Substring(12);
+                    return "";
+                }
+                // no match = dont replace
+                return match.Value;
+            });
+            if (isEmbed)
+            {
+                createMessage.Embeds = new Embed[]
+                {
+                    new Embed()
+                    {
+                        Title = embedTitle ?? Optional<string>.None,
+                        Description = cleanedMessage,
+                        Image = imageUrl != null ? new EmbedImage() { Url = imageUrl } : Optional<EmbedImage>.None
+                    }
+                };
+            }
+            else
+            {
+                createMessage.Content = cleanedMessage;
+            }
+            return createMessage;
+        }
+
         private void MigrateLevelData()
         {
             MigratorConsole.WriteLine("Migrating stored level data", ConsoleColor.Magenta);
@@ -242,13 +290,13 @@ namespace ModCore.Tools.DatabaseMigrator
                 var guild = GetOrCreateNewGuildEntity((ulong)levelData.GuildId);
                 var user = GetOrCreateNewUserEntity((ulong)levelData.UserId);
 
-                if(guild == null || user == null)
+                if (guild == null || user == null)
                 {
                     MigratorConsole.WriteLine("Guild or User is null, skipping.", ConsoleColor.Red);
                     continue;
                 }
 
-                if (_newDatabase.LevelData.Any(x => 
+                if (_newDatabase.LevelData.Any(x =>
                     x.UserId == user.UserId &&
                     x.GuildId == guild.GuildId
                 ))
@@ -278,7 +326,7 @@ namespace ModCore.Tools.DatabaseMigrator
                 var guild = GetOrCreateNewGuildEntity((ulong)rolestate.GuildId);
                 var user = GetOrCreateNewUserEntity((ulong)rolestate.MemberId);
 
-                if(guild == null || user == null)
+                if (guild == null || user == null)
                 {
                     MigratorConsole.WriteLine("Guild or User is null, skipping.", ConsoleColor.Red);
                     continue;
@@ -353,7 +401,7 @@ namespace ModCore.Tools.DatabaseMigrator
                 var guild = GetOrCreateNewGuildEntity((ulong)nickname.GuildId);
                 var user = GetOrCreateNewUserEntity((ulong)nickname.MemberId);
 
-                if(string.IsNullOrWhiteSpace(nickname.Nickname))
+                if (string.IsNullOrWhiteSpace(nickname.Nickname))
                 {
                     MigratorConsole.WriteLine("Nickname is null, skipping.", ConsoleColor.Red);
                     continue;
@@ -405,14 +453,14 @@ namespace ModCore.Tools.DatabaseMigrator
                 ))
                     continue;
 
-                if(string.IsNullOrWhiteSpace(tag.Contents))
+                if (string.IsNullOrWhiteSpace(tag.Contents))
                 {
                     MigratorConsole.WriteLine($"Tag {tag.Name} has no content, skipping.", ConsoleColor.Red);
                     continue;
                 }
 
                 var content = tag.Contents;
-                if(content.Length > 2000)
+                if (content.Length > 2000)
                 {
                     content = content.Substring(0, 2000);
                 }
@@ -458,7 +506,7 @@ namespace ModCore.Tools.DatabaseMigrator
                     Type = timer.ActionType == TimerActionType.Reminder ? TimerTypes.Reminder : TimerTypes.Unban
                 };
 
-                if(newTimer.Type == TimerTypes.Reminder)
+                if (newTimer.Type == TimerTypes.Reminder)
                 {
                     newTimer.SetData(ConvertReminderTimer(timer.GetData<TimerReminderData>(), (ulong)timer.ChannelId, (ulong)timer.UserId));
                 }
@@ -499,7 +547,7 @@ namespace ModCore.Tools.DatabaseMigrator
             MigratorConsole.WriteLine("Migrating stored star data", ConsoleColor.Magenta);
             DatabaseStarboard? starboard = null;
 
-            foreach(var starData in _oldDatabase.StarDatas)
+            foreach (var starData in _oldDatabase.StarDatas)
             {
                 var guild = GetOrCreateNewGuildEntity((ulong)starData.GuildId);
                 var user = GetOrCreateNewUserEntity((ulong)starData.StargazerId);
@@ -544,7 +592,7 @@ namespace ModCore.Tools.DatabaseMigrator
             DatabaseGuild guild = _newDatabase.Guilds.FirstOrDefault(x => x.GuildId == guildId);
             if (guild != default) return guild;
 
-            if(guildId == null || guildId == 0)
+            if (guildId == null || guildId == 0)
             {
                 MigratorConsole.WriteLine("Guild ID is null or 0, skipping.", ConsoleColor.Red);
                 return null;
