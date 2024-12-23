@@ -244,9 +244,7 @@ export default function Configure({
                                     </button>
                                 </div>
                             </div>
-                            <div ref={fakeDiscordMessageRef}
-                                className="transition-all duration-150 ease-out transform"
-                            >
+                            <div ref={fakeDiscordMessageRef}>
                                 <FakeDiscordMessage
                                     content={data.messagePayload.content}
                                     embeds={
