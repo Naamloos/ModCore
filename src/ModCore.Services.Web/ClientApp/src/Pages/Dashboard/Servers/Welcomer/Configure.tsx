@@ -11,17 +11,36 @@ import EmbedForm from "./Partials/EmbedForm";
 import ToggleSwitch from "@/Components/Forms/ToggleSwitch";
 import TextArea from "@/Components/Forms/TextArea";
 import { useEffect, useRef, useState } from "react";
+import DiscordMessageVisualizerProxy from "./Partials/DiscordMessageVisualizerProxy";
 
 type ManagePageProps = {
     server: DiscordGuild;
     permissions: string[];
-    databaseServer: ModCoreGuild;
+    welcomeSettings: {
+        enabled: boolean;
+        channel_id: string;
+        welcome_message_json: string;
+    };
 };
+
+const availablePlaceholders = [
+    "username",
+    "mention",
+    "userid",
+    "guildname",
+    "channelname",
+    "membercount",
+    "owner-username",
+    "guild-icon-url",
+    "avatar",
+    "channel-count",
+    "role-count"
+];
 
 export default function Configure({
     user,
     server,
-    databaseServer,
+    welcomeSettings
 }: PagePropsWith<ManagePageProps>) {
     const authenticated = user != null;
 
@@ -40,21 +59,23 @@ export default function Configure({
         icon = "https://cdn.discordapp.com/embed/avatars/0.png";
     }
 
+    console.log(welcomeSettings);
+
     const originalWelcomeJson = JSON.parse(
-        databaseServer.welcome_settings.welcome_message_json ?? "{}"
+        welcomeSettings.welcome_message_json ?? "{}"
     ) as WelcomeMessageJson;
 
     // inertia UseForm:
     const { data, setData, post, processing, errors } = useForm({
-        messagePayload: originalWelcomeJson,
-        enabled: databaseServer.welcome_settings.enabled ?? false,
-        channelId: databaseServer.welcome_settings.channel_id ?? 0,
+        message_payload: originalWelcomeJson,
+        enabled: welcomeSettings.enabled ?? false,
+        channel_id: welcomeSettings.channel_id ?? 0,
     });
 
     // Function to update the messagePayload
     function setContent(content: string) {
-        setData("messagePayload", {
-            ...data.messagePayload,
+        setData("message_payload", {
+            ...data.message_payload,
             content,
         });
     }
@@ -64,7 +85,7 @@ export default function Configure({
     }
 
     function setChannelId(channelId: string) {
-        setData("channelId", BigInt(channelId));
+        setData("channel_id", BigInt(channelId));
     }
 
     const fakeDiscordMessageRef = useRef<HTMLDivElement>(null);
@@ -173,7 +194,7 @@ export default function Configure({
                                             label="Message Content"
                                             rows={4}
                                             placeholder="Welcome, {{mention}}!"
-                                            value={data.messagePayload.content}
+                                            value={data.message_payload.content}
                                             onUpdate={setContent}
                                         />
                                     </div>
@@ -182,7 +203,7 @@ export default function Configure({
                                             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                                             onClick={() =>
                                                 post(
-                                                    `/dashboard/servers/${server.id}/welcomer/configure`
+                                                    `/dashboard/servers/${server.id}/welcome`
                                                 )
                                             }
                                             disabled={processing}
@@ -195,7 +216,7 @@ export default function Configure({
                                     <h2 className="text-xl font-bold text-white mb-4">
                                         Embeds
                                     </h2>
-                                    {data.messagePayload.embeds?.map(
+                                    {data.message_payload.embeds?.map(
                                         (embed, index) => (
                                             <EmbedForm
                                                 key={index}
@@ -203,40 +224,40 @@ export default function Configure({
                                                 embed={embed}
                                                 update={(newEmbed) => {
                                                     const newEmbeds = [
-                                                        ...data.messagePayload
+                                                        ...data.message_payload
                                                             .embeds,
                                                     ];
                                                     newEmbeds[index] = newEmbed;
-                                                    setData("messagePayload", {
-                                                        ...data.messagePayload,
+                                                    setData("message_payload", {
+                                                        ...data.message_payload,
                                                         embeds: newEmbeds,
                                                     });
                                                 }}
                                                 remove={() => {
                                                     const newEmbeds = [
-                                                        ...data.messagePayload
+                                                        ...data.message_payload
                                                             .embeds,
                                                     ];
                                                     newEmbeds.splice(index, 1);
-                                                    setData("messagePayload", {
-                                                        ...data.messagePayload,
+                                                    setData("message_payload", {
+                                                        ...data.message_payload,
                                                         embeds: newEmbeds,
                                                     });
                                                 }}
                                             />
                                         )
                                     )}
-                                    {(data.messagePayload.embeds?.length ?? 0) < 3 && (
+                                    {(data.message_payload.embeds?.length ?? 0) < 3 && (
                                         <button
                                             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
                                             onClick={() => {
                                                 const newEmbeds = [
-                                                    ...(data.messagePayload
+                                                    ...(data.message_payload
                                                         .embeds || []),
                                                     {},
                                                 ];
-                                                setData("messagePayload", {
-                                                    ...data.messagePayload,
+                                                setData("message_payload", {
+                                                    ...data.message_payload,
                                                     embeds: newEmbeds,
                                                 });
                                             }}
@@ -247,10 +268,19 @@ export default function Configure({
                                 </div>
                             </div>
                             <div ref={fakeDiscordMessageRef}>
-                                <FakeDiscordMessage
-                                    content={data.messagePayload.content}
+                                <div className="bg-gray-800 p-4 rounded-lg shadow-md mt-4">
+                                    Available Placeholders:
+                                    <br/>
+                                    {availablePlaceholders.map((placeholder) => (
+                                        <code className="ml-2 text-blue-600 bg-gray-900 p-0.5 rounded-md text-sm" key={placeholder}>
+                                            {'{'}{'{'}{placeholder}{'}'}{'}'}
+                                        </code>
+                                    ))}
+                                </div>
+                                <DiscordMessageVisualizerProxy
+                                    content={data.message_payload.content}
                                     embeds={
-                                        data.messagePayload.embeds ?? undefined
+                                        data.message_payload.embeds ?? undefined
                                     }
                                     className="h-fit w-full mt-4 sticky top-0"
                                 />

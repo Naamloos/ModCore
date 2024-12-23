@@ -3,6 +3,7 @@ using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Entities.Serializer;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,8 @@ namespace ModCore.Common.Database.Entities
         public ulong ChannelId { get; set; }
 
         [JsonPropertyName("welcome_message_json")]
-        [Column("welcome_message_json", TypeName = "jsonb")]
+        [Column("welcome_message_json")]
+        [MaxLength(100000)]
         public string WelcomeMessageJson { get; set; }
 
         [JsonPropertyName("enabled")]

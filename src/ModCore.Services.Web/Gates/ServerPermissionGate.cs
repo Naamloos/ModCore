@@ -10,18 +10,17 @@ namespace ModCore.Services.Web.Gates
     public class ServerPermissionGate : IGate
     {
         private readonly ulong _serverId;
-        private readonly ulong _userId;
         private readonly Permissions _permissions;
 
-        public ServerPermissionGate(ulong serverId, ulong userId, Permissions permissions)
+        public ServerPermissionGate(ulong serverId, Permissions permissions)
         {
             _serverId = serverId;
-            _userId = userId;
             _permissions = permissions;
         }
 
         public async Task<IActionResult?> CheckAsync(HttpContext httpContext)
         {
+            var userId = ulong.Parse(httpContext.User.Claims.FirstOrDefault(x => x.Type == "urn:discord:id")?.Value);
             var restClient = httpContext.RequestServices.GetRequiredService<DiscordRest>();
             var cacheHandler = httpContext.RequestServices.GetRequiredService<CacheService>();
             
@@ -29,7 +28,7 @@ namespace ModCore.Services.Web.Gates
             if (!guild.Success)
                 return new UnauthorizedResult();
             // get member
-            var member = await restClient.GetGuildMemberAsync(_serverId, _userId);
+            var member = await restClient.GetGuildMemberAsync(_serverId, userId);
 
             if (!member.Success)
                 return new UnauthorizedResult();
