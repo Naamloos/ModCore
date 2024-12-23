@@ -68,51 +68,52 @@ export default function Configure({
     }
 
     const fakeDiscordMessageRef = useRef<HTMLDivElement>(null);
+    const formBoundRef = useRef<HTMLDivElement>(null);
     const [minScroll, setMinScroll] = useState<number | null>(null);
-    const [initialRect, setInitialRect] = useState<DOMRect | null>(null);
 
     useEffect(() => {
-        if (fakeDiscordMessageRef.current && initialRect === null) {
-            const rect = fakeDiscordMessageRef.current.getBoundingClientRect();
-            setInitialRect(rect);
-        }
+        const handleScroll = () => {
+            if (!fakeDiscordMessageRef.current || !formBoundRef.current) return;
 
-        let scrollFunc = () => {
-            if (fakeDiscordMessageRef.current) 
-            {
-                const rect = fakeDiscordMessageRef.current.getBoundingClientRect();
+            const formRect = formBoundRef.current.getBoundingClientRect();
+            const fakeMessageRect = fakeDiscordMessageRef.current.getBoundingClientRect();
 
-                if (rect.top < 0 && minScroll === null) {
-                    setMinScroll(window.scrollY);
-                }
+            if (fakeMessageRect.top < 0 && minScroll === null) {
+                setMinScroll(window.scrollY);
+            }
 
-                if (initialRect === null)
-                {
-                    return;
-                }
-
-                if (minScroll !== null) {
-                    if (window.scrollY >= minScroll) {
-                        fakeDiscordMessageRef.current.style.position = "absolute";
-                        fakeDiscordMessageRef.current.style.top = `${window.scrollY - minScroll}px`;
-                        fakeDiscordMessageRef.current.style.left = `${initialRect.left - 89}px`;
-                        fakeDiscordMessageRef.current.style.width = `${initialRect.width}px`;
-                    } else {
-                        fakeDiscordMessageRef.current.style.position = "";
-                        fakeDiscordMessageRef.current.style.top = "";
-                        fakeDiscordMessageRef.current.style.left = "";
-                        fakeDiscordMessageRef.current.style.width = "";
-                    }
+            if (minScroll !== null) {
+                if (window.scrollY >= minScroll) {
+                    fakeDiscordMessageRef.current.style.position = "fixed";
+                    fakeDiscordMessageRef.current.style.top = "0";
+                    fakeDiscordMessageRef.current.style.left = `${formRect.right + 16}px`;
+                    fakeDiscordMessageRef.current.style.width = `${window.innerWidth - formRect.right - 32}px`;
+                } else {
+                    fakeDiscordMessageRef.current.style.position = "";
+                    fakeDiscordMessageRef.current.style.top = "";
+                    fakeDiscordMessageRef.current.style.left = "";
+                    fakeDiscordMessageRef.current.style.width = "";
                 }
             }
         };
 
-        window.addEventListener("scroll", scrollFunc);
+        const handleResize = () => {
+            if (!fakeDiscordMessageRef.current || !formBoundRef.current) return;
+
+            const formRect = formBoundRef.current.getBoundingClientRect();
+            fakeDiscordMessageRef.current.style.width = `${window.innerWidth - formRect.right - 32}px`;
+
+            handleScroll();
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        window.addEventListener("resize", handleResize);
 
         return () => {
-            window.removeEventListener("scroll", scrollFunc);
+            window.removeEventListener("scroll", handleScroll);
+            window.removeEventListener("resize", handleResize);
         };
-    }, [initialRect, minScroll]);
+    }, [minScroll]);
 
     return (
         <>
@@ -158,7 +159,10 @@ export default function Configure({
                         </div>
                         <div className="grid md:grid-cols-2 gap-4 relative">
                             <div>
-                                <div className="bg-gray-800 p-4 rounded-lg shadow-md mt-4">
+                                <div 
+                                    className="bg-gray-800 p-4 rounded-lg shadow-md mt-4"
+                                    ref={formBoundRef}
+                                >
                                     <div className="mb-4">
                                         <ToggleSwitch
                                             enabled={data.enabled}
