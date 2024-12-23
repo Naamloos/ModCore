@@ -64,6 +64,9 @@ export default function FakeDiscordMessage({
                             <div className={`grid ${embed.thumbnail?.url ? 'grid-cols-[auto_80px]' : ''} gap-4`}>
                                 <div>
                                     {embed.title && (
+                                        embed.url? <a href="#" className="text-lg font-semibold text-white hover:underline">
+                                            {embed.title}
+                                        </a> :
                                         <h3 className="text-lg font-semibold text-white">
                                             {embed.title}
                                         </h3>
@@ -115,7 +118,7 @@ export default function FakeDiscordMessage({
                                     {embed.footer.icon_url && (
                                         <img
                                             src={embed.footer.icon_url}
-                                            className="h-4 w-4 mr-2"
+                                            className="h-4 w-4 mr-2 rounded-full"
                                             alt="Footer Icon"
                                         />
                                     )}

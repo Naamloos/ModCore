@@ -226,22 +226,24 @@ export default function Configure({
                                             />
                                         )
                                     )}
-                                    <button
-                                        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                                        onClick={() => {
-                                            const newEmbeds = [
-                                                ...(data.messagePayload
-                                                    .embeds || []),
-                                                {},
-                                            ];
-                                            setData("messagePayload", {
-                                                ...data.messagePayload,
-                                                embeds: newEmbeds,
-                                            });
-                                        }}
-                                    >
-                                        Add Embed
-                                    </button>
+                                    {(data.messagePayload.embeds?.length ?? 0) < 3 && (
+                                        <button
+                                            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                                            onClick={() => {
+                                                const newEmbeds = [
+                                                    ...(data.messagePayload
+                                                        .embeds || []),
+                                                    {},
+                                                ];
+                                                setData("messagePayload", {
+                                                    ...data.messagePayload,
+                                                    embeds: newEmbeds,
+                                                });
+                                            }}
+                                        >
+                                            Add Embed
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                             <div ref={fakeDiscordMessageRef}>

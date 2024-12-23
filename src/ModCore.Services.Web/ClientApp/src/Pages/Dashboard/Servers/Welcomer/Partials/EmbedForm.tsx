@@ -4,6 +4,8 @@ import EmbedFieldForm from "./EmbedFieldForm";
 import TextArea from "@/Components/Forms/TextArea";
 import TextBox from "@/Components/Forms/TextBox";
 import { IconCross, IconCrossOff, IconX } from "@tabler/icons-react";
+import ColorPicker from "@/Components/Forms/ColorPicker";
+import ToggleSwitch from "@/Components/Forms/ToggleSwitch";
 
 interface EmbedFormProps {
     index: number;
@@ -57,11 +59,11 @@ export default function EmbedForm({
                 </div>
                 <div className="mb-4">
                     <TextBox
-                        label="Author Name"
-                        placeholder="Author Name"
-                        value={embed.author?.name ?? ""}
+                        label="Title"
+                        placeholder="Title"
+                        value={embed.title ?? ""}
                         onUpdate={(value) => {
-                            let newEmbed = { ...embed, author: { ...embed.author, name: value } };
+                            let newEmbed = { ...embed, title: value };
                             update(newEmbed);
                         }}
                     />
@@ -90,26 +92,171 @@ export default function EmbedForm({
                     />
                 </div>
                 <div className="mb-4">
-                    <label
-                        className="block text-white mb-2"
-                        htmlFor={`embed-color-${index}`}
-                    >
-                        Color
-                    </label>
-                    <input
-                        type="color"
-                        id={`embed-color-${index}`}
-                        className="w-full p-2 rounded bg-gray-600 text-white"
+                    <ColorPicker
+                        label="Color"
                         value={`#${
                             embed.color?.toString(16).padStart(6, "0") ??
                             "000000"
                         }`}
-                        onChange={(e) => {
-                            let newEmbed = { ...embed, color: parseInt(e.target.value.slice(1).toUpperCase(), 16) };
+                        onUpdate={(value) => {
+                            let newEmbed = { ...embed, color: parseInt(value.slice(1).toUpperCase(), 16) };
                             update(newEmbed);
                         }}
                     />
                 </div>
+                <div className="mb-4">
+                    <ToggleSwitch
+                        enabled={!!embed.author}
+                        label="Has Author?"
+                        onUpdate={(value) => {
+                            let newEmbed = { ...embed };
+                            if (value) {
+                                newEmbed.author = { name: "", url: "", icon_url: "" };
+                            } else {
+                                delete newEmbed.author;
+                            }
+                            update(newEmbed);
+                        }}
+                    />
+                </div>
+                {embed.author && <>
+                    <div className="mb-4">
+                        <TextBox
+                            label="Author Name"
+                            placeholder="Author Name"
+                            value={embed.author?.name ?? ""}
+                            onUpdate={(value) => {
+                                let newEmbed = { ...embed, author: { ...embed.author, name: value } };
+                                update(newEmbed);
+                            }}
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <TextBox
+                            label="Author URL"
+                            placeholder="Author URL"
+                            value={embed.author?.url ?? ""}
+                            onUpdate={(value) => {
+                                let newEmbed : DiscordEmbed = { ...embed };
+                                newEmbed.author = { ...embed.author, name: embed.author?.name ?? "", url: value };
+                                update(newEmbed);
+                            }}
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <TextBox
+                            label="Author Icon URL"
+                            placeholder="Author Icon URL"
+                            value={embed.author?.icon_url ?? ""}
+                            onUpdate={(value) => {
+                                let newEmbed = { ...embed, author: { ...embed.author, name: embed.author?.name ?? "", icon_url: value } };
+                                update(newEmbed);
+                            }}
+                        />
+                    </div>
+                </>}
+
+                <div className="mb-4">
+                    <ToggleSwitch
+                        enabled={!!embed.footer}
+                        label="Has Footer?"
+                        onUpdate={(value) => {
+                            let newEmbed = { ...embed };
+                            if (value) {
+                                newEmbed.footer = { text: "", icon_url: "" };
+                            } else {
+                                delete newEmbed.footer;
+                            }
+                            update(newEmbed);
+                        }}
+                    />
+                </div>
+
+                {embed.footer && <>
+                    <div className="mb-4">
+                        <TextBox
+                            label="Footer Text"
+                            placeholder="Footer Text"
+                            value={embed.footer?.text ?? ""}
+                            onUpdate={(value) => {
+                                let newEmbed = { ...embed, footer: { ...embed.footer, text: value } };
+                                update(newEmbed);
+                            }}
+                        />
+                    </div>
+                    <div className="mb-4">
+                        <TextBox
+                            label="Footer Icon URL"
+                            placeholder="Footer Icon URL"
+                            value={embed.footer?.icon_url ?? ""}
+                            onUpdate={(value) => {
+                                let newEmbed = { ...embed, footer: { ...embed.footer, text: embed.footer?.text ?? "", icon_url: value } };
+                                update(newEmbed);
+                            }}
+                        />
+                    </div>
+                </>}
+
+                <div className="mb-4">
+                    <ToggleSwitch
+                        enabled={!!embed.image}
+                        label="Has Image?"
+                        onUpdate={(value) => {
+                            let newEmbed = { ...embed };
+                            if (value) {
+                                newEmbed.image = { url: "" };
+                            } else {
+                                delete newEmbed.image;
+                            }
+                            update(newEmbed);
+                        }}
+                    />
+                </div>
+
+                {embed.image && <>
+                    <div className="mb-4">
+                        <TextBox
+                            label="Image URL"
+                            placeholder="Image URL"
+                            value={embed.image?.url ?? ""}
+                            onUpdate={(value) => {
+                                let newEmbed = { ...embed, image: { ...embed.image, url: value } };
+                                update(newEmbed);
+                            }}
+                        />
+                    </div>
+                </>}
+
+                <div className="mb-4">
+                    <ToggleSwitch
+                        enabled={!!embed.thumbnail}
+                        label="Has Thumbnail?"
+                        onUpdate={(value) => {
+                            let newEmbed = { ...embed };
+                            if (value) {
+                                newEmbed.thumbnail = { url: "" };
+                            } else {
+                                delete newEmbed.thumbnail;
+                            }
+                            update(newEmbed);
+                        }}
+                    />
+                </div>
+
+                {embed.thumbnail && <>
+                    <div className="mb-4">
+                        <TextBox
+                            label="Thumbnail URL"
+                            placeholder="Thumbnail URL"
+                            value={embed.thumbnail?.url ?? ""}
+                            onUpdate={(value) => {
+                                let newEmbed = { ...embed, thumbnail: { ...embed.thumbnail, url: value } };
+                                update(newEmbed);
+                            }}
+                        />
+                    </div>
+                </>}
+
                 <div className="mb-4">
                     <h4 className="text-md font-semibold text-white mb-2">
                         Fields
