@@ -12,6 +12,7 @@ import ToggleSwitch from "@/Components/Forms/ToggleSwitch";
 import TextArea from "@/Components/Forms/TextArea";
 import { useEffect, useRef, useState } from "react";
 import DiscordMessageVisualizerProxy from "./Partials/DiscordMessageVisualizerProxy";
+import DiscordChannelPicker from "@/Components/Forms/DiscordChannelPicker";
 
 type ManagePageProps = {
     server: DiscordGuild;
@@ -69,7 +70,7 @@ export default function Configure({
     const { data, setData, post, processing, errors } = useForm({
         message_payload: originalWelcomeJson,
         enabled: welcomeSettings.enabled ?? false,
-        channel_id: welcomeSettings.channel_id ?? 0,
+        channel_id: welcomeSettings.channel_id ?? String(0),
     });
 
     // Function to update the messagePayload
@@ -85,7 +86,7 @@ export default function Configure({
     }
 
     function setChannelId(channelId: string) {
-        setData("channel_id", BigInt(channelId));
+        setData("channel_id", channelId);
     }
 
     const fakeDiscordMessageRef = useRef<HTMLDivElement>(null);
@@ -189,6 +190,13 @@ export default function Configure({
                                             enabled={data.enabled}
                                             onUpdate={setEnabled}
                                             label="Enabled"
+                                        />
+                                        <DiscordChannelPicker
+                                            label="Welcome Channel"
+                                            placeholder="Select a channel..."
+                                            value={data.channel_id}
+                                            onUpdate={setChannelId}
+                                            required
                                         />
                                         <TextArea
                                             label="Message Content"

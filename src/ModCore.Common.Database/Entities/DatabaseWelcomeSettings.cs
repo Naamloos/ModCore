@@ -11,6 +11,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using ModCore.Common.Utils;
 
 namespace ModCore.Common.Database.Entities
 {
@@ -22,6 +23,7 @@ namespace ModCore.Common.Database.Entities
         public ulong GuildId { get; set; }
 
         [JsonPropertyName("channel_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         [Column("channel_id")]
         public ulong ChannelId { get; set; }
 
@@ -32,25 +34,15 @@ namespace ModCore.Common.Database.Entities
 
         [JsonPropertyName("enabled")]
         [Column("enabled")]
-        public bool Enabled = false;
+        public bool Enabled { get; set; } = false;
 
         [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
 
         public T GetData<T>() where T : CreateMessage
-            => JsonSerializer.Deserialize<T>(WelcomeMessageJson, options: new JsonSerializerOptions()
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                WriteIndented = true,
-                Converters = { new OptionalJsonSerializerFactory() },
-            })!;
+            => JsonSerializer.Deserialize<T>(WelcomeMessageJson, options: JsonSerializerOptionsFactory.GetOptions())!;
 
         public void SetData<T>(T data) where T : CreateMessage
-            => WelcomeMessageJson = JsonSerializer.Serialize(data, options: new JsonSerializerOptions()
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                WriteIndented = true,
-                Converters = { new OptionalJsonSerializerFactory() },
-            });
+            => WelcomeMessageJson = JsonSerializer.Serialize(data, options: JsonSerializerOptionsFactory.GetOptions());
     }
 }

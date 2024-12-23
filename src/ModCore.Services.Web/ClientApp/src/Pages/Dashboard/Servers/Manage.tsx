@@ -24,6 +24,7 @@ import {
 import { hasPermissionsFromString } from "@/Types/DiscordTypes/DiscordPermission";
 import ModuleCard from "@/Components/ModuleCard";
 import ConfirmPopup from "@/Components/ConfirmPopup";
+import { useState } from "react";
 
 type ManagePageProps = {
     server: DiscordGuild;
@@ -126,9 +127,6 @@ export default function Manage({
         window.location.href = "/login";
     }
 
-    console.log(databaseServer);
-    console.log(server);
-
     let icon = server?.icon ? server.icon : null;
     if (icon) {
         let ext = icon.includes("a_") ? ".gif" : ".png";
@@ -147,6 +145,9 @@ export default function Manage({
     const serverCreationDate = server
         ? snowflakeToDate(server.id).toLocaleDateString()
         : null;
+
+    const [resetModal, setResetModal] = useState(false);
+    const [leaveModal, setLeaveModal] = useState(false);
 
     return (
         <>
@@ -225,27 +226,45 @@ export default function Manage({
                                     These actions are irreversible! Proceed with
                                     caution!
                                 </p>
+                                <ConfirmPopup
+                                    message="Are you sure you want to reset ModCore in this server?"
+                                    content="This will reset all settings and data associated with ModCore in this server."
+                                    confirmText="Reset Server"
+                                    cancelText="Cancel"
+                                    onConfirm={() => {
+                                        setResetModal(false);
+                                    }}
+                                    onCancel={() => {
+                                        setResetModal(false);
+                                    }}
+                                    visible={resetModal}
+                                />
+                                <ConfirmPopup
+                                    message="Are you sure you want to leave this server?"
+                                    content="This will remove ModCore from this server, and delete all data associated with this server."
+                                    confirmText="Leave Server"
+                                    cancelText="Cancel"
+                                    onConfirm={() => {
+                                        setLeaveModal(false);
+                                    }}
+                                    onCancel={() => {
+                                        setLeaveModal(false);
+                                    }}
+                                    visible={leaveModal}
+                                />
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <a
-                                        href={
-                                            "/dashboard/servers/" +
-                                            server.id +
-                                            "/reset"
-                                        }
+                                    <button
+                                        onClick={() => setResetModal(true)}
                                         className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                                     >
                                         Reset Server
-                                    </a>
-                                    <a
-                                        href={
-                                            "/dashboard/servers/" +
-                                            server.id +
-                                            "/leave"
-                                        }
+                                    </button>
+                                    <button
+                                        onClick={() => setLeaveModal(true)}
                                         className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                                     >
                                         Leave Server
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>

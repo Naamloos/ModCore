@@ -13,6 +13,6 @@ namespace ModCore.Services.Web.RequestBodies
         public CreateMessage MessagePayload { get; set; } = new CreateMessage();
 
         [JsonPropertyName("channel_id")]
-        public ulong ChannelId { get; set; }
+        public Snowflake ChannelId { get; set; } = 0;
     }
 }

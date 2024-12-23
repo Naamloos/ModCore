@@ -8,6 +8,7 @@ using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Entities.Serializer;
+using ModCore.Common.Utils;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -24,11 +25,7 @@ namespace ModCore.Common.Discord.Rest
         {
             Configuration = new DiscordRestConfiguration();
             configure(Configuration);
-            JsonSerializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-                Converters = { new OptionalJsonSerializerFactory() }
-            };
+            JsonSerializerOptions = JsonSerializerOptionsFactory.GetOptions();
 
             var config = services?.GetService<IConfiguration>();
 
@@ -148,6 +145,13 @@ namespace ModCore.Common.Discord.Rest
             string route = $"guilds/{guildId}/members/:user_id";
             string url = $"guilds/{guildId}/members/{userId}";
             return makeRequestAsync<Member>(HttpMethod.Get, url, route);
+        }
+
+        public ValueTask<RestResponse<List<Channel>>> GetGuildChannelsAsync(Snowflake guildId)
+        {
+            string route = $"guilds/{guildId}/channels";
+            string url = $"guilds/{guildId}/channels";
+            return makeRequestAsync<List<Channel>>(HttpMethod.Get, url, route);
         }
 
         private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null, bool retry = false)

@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ModCore.Common.Utils\ModCore.Common.Utils.csproj" />
+  </ItemGroup>
+
 </Project>

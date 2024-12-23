@@ -14,6 +14,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Database.Entities;
+using ModCore.Common.Utils;
 
 namespace ModCore.Services.Web.Controllers
 {
@@ -37,19 +38,18 @@ namespace ModCore.Services.Web.Controllers
             if (dbServer == null)
                 return NotFound();
 
-            var serializerOptions = new JsonSerializerOptions()
-            {
-                Converters = { new OptionalJsonSerializerFactory() },
-                WriteIndented = true,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-            };
+            var serializerOptions = JsonSerializerOptionsFactory.GetOptions();
 
             var userServer = servers.Where(x => x.Id == server_id).FirstOrDefault();
+
+            var channels = await this.GetGuildChannelsAsync(server_id);
+
             return Inertia.Render("Dashboard/Servers/Welcomer/Configure", new
             {
                 Server = userServer != default ? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions) : null,
                 DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions),
-                WelcomeSettings = database.WelcomeSettings.FirstOrDefault(x => x.GuildId == server_id) ?? new DatabaseWelcomeSettings()
+                WelcomeSettings = database.WelcomeSettings.FirstOrDefault(x => x.GuildId == server_id) ?? new DatabaseWelcomeSettings(),
+                Channels = JsonSerializer.SerializeToDocument(channels, options: serializerOptions)
             });
         }
 

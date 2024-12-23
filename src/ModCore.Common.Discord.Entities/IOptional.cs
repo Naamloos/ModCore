@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Entities
 {
-    public struct Optional<T> : Optional
+    public struct Optional<T> : IOptional
     {
         public T Value { get; private set; } = default(T);
         public bool HasValue { get; private set; } = false;
@@ -33,5 +33,8 @@ namespace ModCore.Common.Discord.Entities
         }
     }
 
-    public interface Optional { }
+    public interface IOptional
+    {
+        bool HasValue { get; }
+    }
 }

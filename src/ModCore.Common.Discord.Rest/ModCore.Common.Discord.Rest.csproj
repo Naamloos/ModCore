@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ModCore.Common.Discord.Entities\ModCore.Common.Discord.Entities.csproj" />
+    <ProjectReference Include="..\ModCore.Common.Utils\ModCore.Common.Utils.csproj" />
   </ItemGroup>
 
 </Project>

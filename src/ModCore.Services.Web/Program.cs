@@ -13,6 +13,7 @@ using ModCore.Common.Discord.Entities.Serializer;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 using ModCore.Common.Cache;
+using ModCore.Common.Utils;
 
 namespace ModCore.Common.Web
 {
@@ -29,12 +30,7 @@ namespace ModCore.Common.Web
             builder.Configuration.AddJsonFile("settings.json");
             builder.Configuration.AddEnvironmentVariables();
 
-            var jsonOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-                Converters = { new OptionalJsonSerializerFactory() },
-                WriteIndented = true
-            };
+            var jsonOptions = JsonSerializerOptionsFactory.GetOptions();
 
             builder.Services.AddControllers()
                 .AddJsonOptions(options =>

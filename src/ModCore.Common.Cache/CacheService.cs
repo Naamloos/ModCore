@@ -5,6 +5,7 @@ using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Rest;
+using ModCore.Common.Utils;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -20,11 +21,7 @@ namespace ModCore.Common.Cache
         public CacheService(IDistributedCache cache, DiscordRest restClient)
         {
             this._cache = cache;
-            this._serializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-                Converters = { new OptionalJsonSerializerFactory() }
-            };
+            this._serializerOptions = JsonSerializerOptionsFactory.GetOptions();
             this.DiscordRest = restClient;
         }
 

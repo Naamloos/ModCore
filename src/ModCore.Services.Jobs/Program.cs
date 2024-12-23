@@ -25,12 +25,7 @@ namespace ModCore.Services.Jobs
                 .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
 
-            var jsonOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-                Converters = { new OptionalJsonSerializerFactory() },
-                WriteIndented = true
-            };
+            var jsonOptions = JsonSerializerOptionsFactory.GetOptions();
 
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(options =>

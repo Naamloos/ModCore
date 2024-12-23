@@ -7,6 +7,7 @@ using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Serializer;
+using ModCore.Common.Utils;
 using ModCore.Services.Web.Attributes;
 using ModCore.Services.Web.Services;
 using System.Text.Json;
@@ -41,12 +42,7 @@ namespace ModCore.Services.Web.Middleware
             });
 
             // workaround for Optional<T> serialization
-            var serializedApp = JsonSerializer.SerializeToDocument(app.Value, options: new JsonSerializerOptions()
-            {
-                Converters = { new OptionalJsonSerializerFactory() },
-                WriteIndented = true,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-            });
+            var serializedApp = JsonSerializer.SerializeToDocument(app.Value, options: JsonSerializerOptionsFactory.GetOptions());
 
             Inertia.Share("application", app.Success ? serializedApp : null);
 
@@ -67,12 +63,7 @@ namespace ModCore.Services.Web.Middleware
 
                 var serverIds = guilds.Select(x => x.Id.Value).ToArray();
                 var dbServerIds = databaseContext.Guilds.Where(x => serverIds.Contains(x.GuildId)).Select(x => x.GuildId).ToArray();
-                var serializerOptions = new JsonSerializerOptions()
-                {
-                    Converters = { new OptionalJsonSerializerFactory() },
-                    WriteIndented = true,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-                };
+                var serializerOptions = JsonSerializerOptionsFactory.GetOptions();
                 var serverListSerialized = guilds.Where(x => dbServerIds.Contains(x.Id.Value))
                     .Where(x => x.Permissions.HasFlag(Permissions.ManageGuild))
                     .Select(x => JsonSerializer.SerializeToDocument(x, options: serializerOptions))

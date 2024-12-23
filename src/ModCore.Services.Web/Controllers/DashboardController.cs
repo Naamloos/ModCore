@@ -7,6 +7,7 @@ using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Rest;
+using ModCore.Common.Utils;
 using ModCore.Services.Web.Attributes;
 using ModCore.Services.Web.Entities;
 using ModCore.Services.Web.Gates;
@@ -49,12 +50,7 @@ namespace ModCore.Services.Web.Controllers
 
             var dump = GuildDump.Create(server_id, database);
 
-            var serializerOptions = new JsonSerializerOptions()
-            {
-                Converters = { new OptionalJsonSerializerFactory() },
-                WriteIndented = true,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-            };
+            var serializerOptions = JsonSerializerOptionsFactory.GetOptions();
 
             return File(System.Text.Encoding.UTF8.GetBytes(JsonSerializer.Serialize(dump, serializerOptions)), "application/json", $"{server_id}.json");
         }
@@ -76,12 +72,7 @@ namespace ModCore.Services.Web.Controllers
             if (dbServer == null)
                 return NotFound();
 
-            var serializerOptions = new JsonSerializerOptions()
-            {
-                Converters = { new OptionalJsonSerializerFactory() },
-                WriteIndented = true,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-            };
+            var serializerOptions = JsonSerializerOptionsFactory.GetOptions();
 
             var userServer = servers.Where(x => x.Id == server_id).FirstOrDefault();
 

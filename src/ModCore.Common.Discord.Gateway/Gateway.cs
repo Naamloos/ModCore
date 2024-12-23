@@ -11,6 +11,7 @@ using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.EventData.Outgoing;
 using ModCore.Common.Discord.Gateway.Events;
+using ModCore.Common.Utils;
 using System.Buffers;
 using System.Net.WebSockets;
 using System.Text.Json;
@@ -84,11 +85,7 @@ namespace ModCore.Common.Discord.Gateway
             gatewayUrl = uribuilder.ToString();
             // TODO gateway url should not be hard-coded, we should ask the API what to connect to..
 
-            this.jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default)
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
-                Converters = { new OptionalJsonSerializerFactory() }
-            };
+            this.jsonSerializerOptions = JsonSerializerOptionsFactory.GetOptions();
 
             // Semaphore for sending websocket data
             this.sendingSemaphore = new SemaphoreSlim(1);

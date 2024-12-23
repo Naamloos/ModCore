@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ModCore.Common.Cache;
 using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Channels;
 using ModCore.Common.Discord.Entities.Guilds;
+using ModCore.Common.Discord.Rest;
 using ModCore.Services.Web.Gates;
 using ModCore.Services.Web.Services;
 using ModCore.Services.Web.Validators;
@@ -45,6 +47,18 @@ namespace ModCore.Services.Web
         public static async Task<IActionResult?> GateAsync(this ControllerBase controller, IGate gate)
         {
             return await gate.CheckAsync(controller.HttpContext);
+        }
+
+        public static async Task<List<Channel>> GetGuildChannelsAsync(this ControllerBase controller, ulong server_id)
+        {
+            var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
+            var restClient = controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
+            var channels = await cacheService.GetFromCacheOrRest($"channels:{server_id}", async (rest, id) =>
+            {
+                return await rest.GetGuildChannelsAsync(server_id);
+            });
+
+            return channels.Success ? channels.Value : new List<Channel>();
         }
     }
 }
