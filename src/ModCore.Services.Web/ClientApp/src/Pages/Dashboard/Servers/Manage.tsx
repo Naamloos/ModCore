@@ -23,6 +23,7 @@ import {
 } from "@tabler/icons-react";
 import { hasPermissionsFromString } from "@/Types/DiscordTypes/DiscordPermission";
 import ModuleCard from "@/Components/ModuleCard";
+import ConfirmPopup from "@/Components/ConfirmPopup";
 
 type ManagePageProps = {
     server: DiscordGuild;

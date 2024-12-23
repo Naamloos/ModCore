@@ -2,6 +2,7 @@ import { Head, usePage } from "@inertiajs/react";
 import HomeLayout from "@/Layouts/HomeLayout.js";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { PagePropsWith } from "@/Types/PageProps";
+import SignInWithDiscord from "@/Components/SignInWithDiscord";
 
 type IndexPageProps =
 {
@@ -41,10 +42,9 @@ export default function IndexPage({ dotnetVersion, application } : PagePropsWith
                             </a>
                         </p>
                         <p className="text-center text-lg max-w-xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
-                            {/* Dashboard Button */}
-                            <a href="/login" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-4">
-                                Log into Dashboard with Discord
-                            </a>
+                            <SignInWithDiscord onClick={() => {
+                                window.location.href = "/login";
+                            }} />
                         </p>
                     </div>
 

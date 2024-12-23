@@ -182,7 +182,7 @@ namespace ModCore.Services.Web.Controllers
 
             var userServer = servers.Where(x => x.Id == server_id).FirstOrDefault();
 
-            return Inertia.Render("Dashboard/Servers/WelcomeSettings", new
+            return Inertia.Render("Dashboard/Servers/Welcomer/Configure", new
             {
                 Server = userServer != default ? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions) : null,
                 DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions)

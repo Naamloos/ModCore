@@ -28,9 +28,12 @@ export interface DiscordEmbed {
         icon_url?: string;
         proxy_icon_url?: string;
     };
-    fields?: Array<{
-        name: string;
-        value: string;
-        inline?: boolean;
-    }>;
+    fields?: Array<DiscordEmbedField>;
+}
+
+export interface DiscordEmbedField 
+{
+    name: string;
+    value: string;
+    inline?: boolean;
 }

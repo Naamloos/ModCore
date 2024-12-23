@@ -19,6 +19,7 @@ export default function Sidebar() {
                 className={`bg-gray-900 h-screen fixed left-0 top-0 flex flex-col items-center py-4 border-r border-gray-800 transition-all duration-300 ${
                     isCollapsed ? "w-[4.5rem]" : "w-64"
                 }`}
+                style={{ zIndex: 1000 }}
             >
                 <div
                     className="flex-1 overflow-y-scroll overflow-x-visible w-full px-2 block"

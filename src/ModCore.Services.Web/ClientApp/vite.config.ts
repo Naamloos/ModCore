@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import laravel from "laravel-vite-plugin";
 import path from "path";
 import { mkdirSync } from "fs";
+import svgr from "vite-plugin-svgr";
+import dts from "vite-plugin-dts";
 
 const outDir = "../wwwroot/build";
 
@@ -16,6 +18,12 @@ export default defineConfig({
     refresh: true,
    }),
    react(),
+   svgr({
+     svgrOptions: {
+       icon: true,
+     },
+   }),
+   dts()
   ],
   resolve: {
    alias: {
@@ -25,5 +33,5 @@ export default defineConfig({
   build: {
    outDir,
    emptyOutDir: true,
-  },
+  }
 });

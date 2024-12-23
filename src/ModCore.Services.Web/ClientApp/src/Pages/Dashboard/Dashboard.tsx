@@ -10,6 +10,8 @@ import {
 } from "@tabler/icons-react";
 import ModuleCard from "@/Components/ModuleCard";
 import FakeDiscordMessage from "@/Components/FakeDiscordMessage";
+import { useState } from "react";
+import ConfirmPopup from "@/Components/ConfirmPopup";
 
 // modules with name, description, link and icon (component)
 // Your ban appeals, Your tickets, Your reminders, Your server levels
@@ -42,6 +44,8 @@ const modules = [
 
 export default function Index({ user, application }: PageProps) {
     const authenticated = user != null;
+
+    const [modalOpen, setModalOpen] = useState(true);
 
     if (!authenticated) window.location.href = "/login";
 
