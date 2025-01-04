@@ -60,5 +60,17 @@ namespace ModCore.Services.Web
 
             return channels.Success ? channels.Value : new List<Channel>();
         }
+
+        public static async Task<Role[]> GetGuildRolesAsync(this ControllerBase controller, ulong server_id)
+        {
+            var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
+            var restClient = controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
+            var guild = await cacheService.GetFromCacheOrRest(server_id, async (rest, id) =>
+            {
+                return await rest.GetGuildAsync(server_id, true);
+            });
+
+            return guild.Success ? guild.Value.Roles : new Role[0];
+        }
     }
 }

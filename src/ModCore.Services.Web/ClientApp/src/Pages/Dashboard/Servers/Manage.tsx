@@ -37,61 +37,61 @@ const modules = (id : string) => [
     {
         name: "AutoRole",
         description: "Automatically assign roles to new members.",
-        link: `/dashboard/servers/${id}/autoroles`,
+        link: `/dashboard/servers/${id}/autorole`,
         icon: <IconRobot size={48} color="#00BFFF" />, // DeepSkyBlue
     },
     {
         name: "Ban Appeal",
         description: "Allow members to appeal their bans.",
-        link: `/dashboard/servers/${id}/appeals`,
+        link: `/dashboard/todo`,
         icon: <IconHammer size={48} color="#8B4513" />, // SaddleBrown
     },
     {
         name: "Infractions",
         description: "Track and manage member infractions.",
-        link: `/dashboard/servers/${id}/infractions`,
+        link: `/dashboard/todo`,
         icon: <IconMoodAngry size={48} color="#FF4500" />, // OrangeRed
     },
     {
         name: "Levels",
         description: "Implement a leveling system for members.",
-        link: `/dashboard/servers/${id}/levels`,
+        link: `/dashboard/todo`,
         icon: <IconChartLine size={48} color="#00CED1" />, // DarkTurquoise
     },
     {
         name: "Logging",
         description: "Log server events and activities.",
-        link: `/dashboard/servers/${id}/logging`,
+        link: `/dashboard/todo`,
         icon: <IconTree size={48} color="#32CD32" />, // LimeGreen
     },
     {
         name: "Profile States",
         description: "Manage member profile states.",
-        link: `/dashboard/servers/${id}/states`,
+        link: `/dashboard/todo`,
         icon: <IconMoon size={48} color="#4682B4" />, // SteelBlue
     },
     {
         name: "Role Menus",
         description: "Create and manage role menus.",
-        link: `/dashboard/servers/${id}/rolemenus`,
+        link: `/dashboard/todo`,
         icon: <IconBook size={48} color="#1E90FF" />, // DodgerBlue
     },
     {
         name: "Starboards",
         description: "Set up starboards for starred messages.",
-        link: `/dashboard/servers/${id}/starboards`,
+        link: `/dashboard/todo`,
         icon: <IconStar size={48} color="#FFD700" />, // Gold
     },
     {
         name: "Tags",
         description: "Create and manage custom tags.",
-        link: `/dashboard/servers/${id}/tags`,
+        link: `/dashboard/todo`,
         icon: <IconTag size={48} color="#FFA500" />, // Orange
     },
     {
         name: "Tickets",
         description: "Manage support tickets.",
-        link: `/dashboard/servers/${id}/tickets`,
+        link: `/dashboard/todo`,
         icon: <IconTicket size={48} color="#9370DB" />, // MediumPurple
     },
     {
@@ -103,13 +103,13 @@ const modules = (id : string) => [
     {
         name: "Nickname Approval",
         description: "Approve or reject member nicknames.",
-        link: `/dashboard/servers/${id}/nicknames`,
+        link: `/dashboard/todo`,
         icon: <IconNotebook size={48} color="#4169E1" />, // RoyalBlue
     },
     {
         name: "Jump Link Embed",
         description: "Embed jump links in messages.",
-        link: `/dashboard/servers/${id}/jumplinkembed`,
+        link: `/dashboard/todo`,
         icon: <IconJumpRope size={48} color="#00FA9A" />, // MediumSpringGreen
     },
 ];

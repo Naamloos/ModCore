@@ -19,25 +19,25 @@ const modules = [
     {
         name: "Ban Appeals",
         description: "View statuses of your ban appeals.",
-        link: "/dashboard/user/appeals",
+        link: "/dashboard/todo",
         icon: <IconHammer size={48} color="red" />,
     },
     {
         name: "Tickets",
         description: "View statuses of your support tickets.",
-        link: "/dashboard/user/tickets",
+        link: "/dashboard/todo",
         icon: <IconTicket size={48} color="orange" />,
     },
     {
         name: "Reminders",
         description: "Display your set reminders.",
-        link: "/dashboard/user/reminders",
+        link: "/dashboard/todo",
         icon: <IconClock size={48} color="#0023FF" />,
     },
     {
         name: "Server Levels",
         description: "Display your server levels.",
-        link: "/dashboard/user/levels",
+        link: "/dashboard/todo",
         icon: <IconChartLine size={48} color="cyan" />,
     },
 ];

@@ -15,6 +15,7 @@ using ModCore.Services.Web.Middleware;
 using ModCore.Services.Web.RequestBodies;
 using ModCore.Services.Web.Services;
 using ModCore.Services.Web.Validators;
+using Npgsql.Internal;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -81,6 +82,13 @@ namespace ModCore.Services.Web.Controllers
                 Server = userServer != default ? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions) : null,
                 DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions)
             });
+        }
+
+
+        [HttpGet("todo")]
+        public async Task<IActionResult> TodoAsync([FromServices] DatabaseContext database)
+        {
+            return Inertia.Render("Dashboard/Todo");
         }
     }
 }

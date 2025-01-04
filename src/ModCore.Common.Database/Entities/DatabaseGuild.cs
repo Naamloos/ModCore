@@ -17,10 +17,6 @@ namespace ModCore.Common.Database.Entities
         [Column("guild_id")]
         public ulong GuildId { get; set; }
 
-        [JsonPropertyName("logging_channel_id")]
-        [Column("logging_channel_id")]
-        public ulong? LoggingChannelId { get; set; } = null;
-
         [JsonPropertyName("modlog_channel_id")]
         [Column("modlog_channel_id")]
         public ulong? ModlogChannelId { get; set; } = null;

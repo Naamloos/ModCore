@@ -1,4 +1,5 @@
 import { ModCoreAutorole } from "./ModCoreAutorole";
+import { ModCoreLevelSettings } from "./ModCoreLevelSettings";
 import { ModCoreLoggerSettings } from "./ModCoreLoggerSettings";
 import { ModCoreRoleMenu } from "./ModCoreRoleMenu";
 import { ModCoreStarboard } from "./ModCoreStarboard";
