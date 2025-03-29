@@ -6,6 +6,7 @@ import {
     IconChartLine,
     IconClock,
     IconHammer,
+    IconTag,
     IconTicket,
 } from "@tabler/icons-react";
 import ModuleCard from "@/Components/ModuleCard";
@@ -20,13 +21,13 @@ const modules = [
         name: "Ban Appeals",
         description: "View statuses of your ban appeals.",
         link: "/dashboard/todo",
-        icon: <IconHammer size={48} color="red" />,
+        icon: <IconHammer size={48} color="#8B4513" />,
     },
     {
         name: "Tickets",
         description: "View statuses of your support tickets.",
         link: "/dashboard/todo",
-        icon: <IconTicket size={48} color="orange" />,
+        icon: <IconTicket size={48} color="#9370DB" />,
     },
     {
         name: "Reminders",
@@ -38,8 +39,14 @@ const modules = [
         name: "Server Levels",
         description: "Display your server levels.",
         link: "/dashboard/todo",
-        icon: <IconChartLine size={48} color="cyan" />,
+        icon: <IconChartLine size={48} color="#00CED1" />,
     },
+    {
+        name: "Tags",
+        description: "Manage your owned tags.",
+        link: "/dashboard/tags",
+        icon: <IconTag size={48} color="#FFA500" />,
+    }
 ];
 
 export default function Index({ user, application }: PageProps) {
