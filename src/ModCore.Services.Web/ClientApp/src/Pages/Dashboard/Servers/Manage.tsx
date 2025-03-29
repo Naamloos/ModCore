@@ -25,6 +25,7 @@ import { hasPermissionsFromString } from "@/Types/DiscordTypes/DiscordPermission
 import ModuleCard from "@/Components/ModuleCard";
 import ConfirmPopup from "@/Components/ConfirmPopup";
 import { useState } from "react";
+import { Button } from "../../../Components/ui/button";
 
 type ManagePageProps = {
     server: DiscordGuild;
@@ -216,7 +217,7 @@ export default function Manage({
                                 ))}
                             </div>
                             {/* Danger Zone */}
-                            <div className="border-red-500 border-solid border-2 rounded p-4 mt-16 sm:mx-16">
+                            <div className="border-red-500 border-solid p-4 mt-16 sm:mx-16 rounded-xl border bg-card text-card-foreground shadow">
                                 <h3 className="text-xl text-red-500 font-bold mb-4 text-center">
                                     <IconAlertSquareRounded className="inline" />
                                     &nbsp;Danger Zone&nbsp;
@@ -253,18 +254,20 @@ export default function Manage({
                                     visible={leaveModal}
                                 />
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <button
+                                    <Button
+                                        variant={"destructive"}
                                         onClick={() => setResetModal(true)}
-                                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                                        className="py-2 px-4"
                                     >
                                         Reset Server
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
+                                        variant={"destructive"}
                                         onClick={() => setLeaveModal(true)}
-                                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                                        className="py-2 px-4"
                                     >
                                         Leave Server
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         </div>

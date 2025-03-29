@@ -1,5 +1,12 @@
 import { DiscordChannel } from "@/Types/DiscordTypes/DiscordChannel";
 import { usePage } from "@inertiajs/react";
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from "@/Components/ui/select";
 
 interface DiscordChannelPickerProps {
     label: string;
@@ -26,30 +33,25 @@ export default function DiscordChannelPicker({
         );
     }
 
-    console.log(value);
-
     return (
         <>
-            <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            <label className="block mb-2 text-sm font-medium text-gray-200 dark:text-white">
                 {label}
             </label>
-            <div className="relative">
-                <select
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    required={required}
-                    value={value}
-                    onChange={(e) => onUpdate(e.target.value)}
-                >
-                    <option value="">{placeholder}</option>
+            <Select onValueChange={onUpdate} defaultValue={value}>
+                <SelectTrigger className="w-full">
+                    <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+                <SelectContent>
                     {channels
                         .filter((channel) => channel.type === 0)
                         .map((channel) => (
-                            <option key={channel.id} value={channel.id} selected={channel.id === value}>
+                            <SelectItem key={channel.id} value={channel.id}>
                                 #{channel.name}
-                            </option>
+                            </SelectItem>
                         ))}
-                </select>
-            </div>
+                </SelectContent>
+            </Select>
         </>
     );
 }

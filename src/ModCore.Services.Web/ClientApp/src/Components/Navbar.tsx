@@ -2,6 +2,7 @@ import { DiscordApplication } from "@/Types/DiscordTypes/DiscordApplication";
 import { User } from "@/Types/User";
 import { usePage } from "@inertiajs/react";
 import { IconLogout, IconMenu } from "@tabler/icons-react";
+import LogoImage from "@/Assets/logo.png";
 
 export default function Navbar({
     isMenuOpen,
@@ -29,7 +30,7 @@ export default function Navbar({
                 <div className="hidden md:block" />
                 <div className="text-white font-medium flex items-center gap-2">
                     <img
-                        src={`https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`}
+                        src={LogoImage}
                         className="h-10 w-10 inline-block"
                         alt="Application Icon"
                     />

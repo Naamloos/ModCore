@@ -65,6 +65,11 @@ export default function Index({ user, application }: PageProps) {
                     </h1>
                 </div>
 
+                <FakeDiscordMessage
+                    content="Welcome to the ModCore Dashboard! Here you can manage your ban appeals, tickets, reminders, and server levels."
+                    className="mt-8"
+                />
+
                 <h3 className="text-xl font-semibold my-4 text-white">
                     Your Modules
                 </h3>
@@ -81,39 +86,6 @@ export default function Index({ user, application }: PageProps) {
                         ))}
                     </div>
                 </div>
-
-                <FakeDiscordMessage
-                    content="Welcome to the ModCore Dashboard! Here you can manage your ban appeals, tickets, reminders, and server levels."
-                    className="mt-8"
-                    embeds={[{
-                        title: "Welcome to ModCore!",
-                        description: "ModCore is your assistant for Discord server moderation and management through a wide range of hand-crafted features to make your life as a moderator or administrator a breeze!",
-                        thumbnail: {
-                            url: `https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`,
-                        },
-                        fields: [
-                            {
-                                name: "Dashboard",
-                                value: "Manage your ban appeals, tickets, reminders, server levels, and more.",
-                                inline: true,
-                            },
-                            {
-                                name: "Support",
-                                value: "Need help? Join our support server!",
-                                inline: true,
-                            },
-                            {
-                                name: "GitHub",
-                                value: "Contribute to ModCore on GitHub! github.com/Naamloos/ModCore",
-                                inline: false,
-                            }
-                        ],
-                        footer: {
-                            icon_url: user!.avatar,
-                            text: "For " + user!.username + " <3",
-                        }
-                    }]}
-                />
             </DashboardLayout>
         </>
     );

@@ -3,95 +3,151 @@ import HomeLayout from "@/Layouts/HomeLayout.js";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { PagePropsWith } from "@/Types/PageProps";
 import SignInWithDiscord from "@/Components/SignInWithDiscord";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/Components/ui/card";
+import { Separator } from "@/Components/ui/separator";
+import LogoImage from "@/Assets/logo.png";
 
-type IndexPageProps =
-{
-    dotnetVersion: string
-}
+type IndexPageProps = {
+    dotnetVersion: string;
+};
 
-export default function IndexPage({ dotnetVersion, application } : PagePropsWith<IndexPageProps>) 
-{
+export default function IndexPage({ dotnetVersion, application }: PagePropsWith<IndexPageProps>) {
     return (
         <>
             <HomeLayout>
                 <Head title="Welcome" />
-                <div className="text-center text-lg max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col items-center justify-center mt-8 sm:flex-row pb-4">
-                        <img src={`https://cdn.discordapp.com/app-icons/${application.id}/${application.icon}.png`} alt="Logo" className="mb-4 sm:mb-0 sm:mr-4 h-24 w-24 sm:h-36 sm:w-36" />
-                        <h1 className="text-center sm:text-left text-4xl sm:text-6xl font-extrabold tracking-tight">
-                            Welcome to <br />
-                            <span className="bg-gradient-to-t from-[#089fdf] to-blue-100 bg-clip-text text-transparent">
-                                ModCore
-                            </span>
-                        </h1>
-                    </div>
-
-                    <div className="bg-gray-900 py-6 pt-2 m-4 max-w-xl rounded-lg shadow-lg">
-                        <p className="text-left text-lg max-w-xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
-                            ModCore is your assistant for Discord server moderation and management 
-                            through a wide range of hand-crafted features to make your life as a moderator or administrator a breeze!
-                        </p>
-                        <p className="text-center text-lg max-w-xl mx-auto mt-8 px-4 sm:px-6 lg:px-8 flex justify-center">
-                            Built with&nbsp;
-                            <a href="https://dot.net" target="_blank" className="text-blue-400 hover:text-blue-200">
-                                .NET {dotnetVersion}
-                            </a>
-                            &nbsp;&nbsp;GitHub:&nbsp;
-                            <a href="https://github.com/Naamloos/ModCore/" target="_blank" className="text-blue-400 hover:text-blue-200 inline-block justify-center">
-                                <IconBrandGithub size={24} />
-                            </a>
-                        </p>
-                        <p className="text-center text-lg max-w-xl mx-auto mt-8 px-4 sm:px-6 lg:px-8">
-                            <SignInWithDiscord onClick={() => {
-                                window.location.href = "/login";
-                            }} />
-                        </p>
-                    </div>
-
-                    <div className="mt-12 max-w-2xl">
-                        <div className="flex flex-col sm:flex-row items-center mb-8 bg-gray-900 py-6 px-2 m-4 max-w-xl rounded-lg shadow-lg">
-                            <img src="https://placehold.co/600x400" alt="Feature 1" className="mb-4 sm:mb-0 sm:mx-4 w-64" />
-                            <div className="sm:text-left">
-                                <h2 className="text-xl font-bold">Manage your Discord server effectively.</h2>
-                                <p className="text-base">
-                                    ModCore is a powerful moderation bot that helps you keep your server safe and clean.
-                                    It is jam-packed with features that help you manage your server effectively.
-                                </p>
-                            </div>
+                <div className="container mx-auto px-4 py-8">
+                    {/* Hero Section */}
+                    <section className="text-center">
+                        <div className="flex flex-col items-center justify-center">
+                            <img
+                                src={LogoImage}
+                                alt="Logo"
+                                className="h-24 w-24 md:h-36 md:w-36"
+                                style={{ animation: 'shake 0.5s', animationIterationCount: 'infinite' }}
+                                onMouseEnter={(e) => {
+                                    (e.target as HTMLImageElement).style.animationPlayState = 'running';
+                                }}
+                                onMouseLeave={(e) => {
+                                    (e.target as HTMLImageElement).style.animationPlayState = 'paused';
+                                }}
+                            />
+                            <h1 className="text-4xl md:text-5xl font-bold mt-4 bg-gradient-to-r from-[#089fe0] to-[#00d4ff] text-transparent bg-clip-text">
+                                Welcome to <span>ModCore</span>
+                            </h1>
+                            <p className="text-gray-300 mt-2 text-lg">
+                                Your assistant for Discord server moderation and management.
+                            </p>
+                            <style>
+                                {`
+                                @keyframes shake {
+                                    0% { transform: translate(1px, 1px) rotate(0deg); }
+                                    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+                                    20% { transform: translate(-3px, 0px) rotate(1deg); }
+                                    30% { transform: translate(3px, 2px) rotate(0deg); }
+                                    40% { transform: translate(1px, -1px) rotate(1deg); }
+                                    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+                                    60% { transform: translate(-3px, 1px) rotate(0deg); }
+                                    70% { transform: translate(3px, 1px) rotate(-1deg); }
+                                    80% { transform: translate(-1px, -1px) rotate(1deg); }
+                                    90% { transform: translate(1px, 2px) rotate(0deg); }
+                                    100% { transform: translate(1px, -2px) rotate(-1deg); }
+                                }
+                                `}
+                            </style>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row-reverse items-center mb-8 bg-gray-900 py-6 px-2 m-4 max-w-xl rounded-lg shadow-lg">
-                            <img src="https://placehold.co/600x400" alt="Feature 1" className="mb-4 sm:mb-0 sm:mx-4 w-64" />
-                            <div className="sm:text-right">
-                                <h2 className="text-xl font-bold">Keep track of great messages.</h2>
-                                <p className="text-base">
-                                    ModCore has a starboard feature that allows you to keep track of great messages.
-                                    You can configure the starboard to your liking and keep your server active.
+                        <Card className="mt-8 w-full max-w-3xl mx-auto bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-xl rounded-lg">
+                            <CardHeader>
+                                <CardTitle className="text-2xl font-semibold">About ModCore</CardTitle>
+                                <CardDescription className="text-gray-400">
+                                    Learn more about what ModCore can do for your server.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-left text-sm md:text-base text-gray-300">
+                                    ModCore is designed to simplify Discord server management with a range of features that make moderation a breeze.
                                 </p>
-                            </div>
-                        </div>
+                                <Separator className="my-4 bg-gray-700" />
+                                <div className="flex items-center justify-center space-x-4">
+                                    <p className="text-gray-400 text-xs md:text-sm">
+                                        Built with .NET {dotnetVersion}
+                                    </p>
+                                    <a
+                                        href="https://github.com/Naamloos/ModCore/"
+                                        target="_blank"
+                                        className="text-blue-500 hover:text-blue-400 transition-transform transform hover:scale-110"
+                                    >
+                                        <IconBrandGithub size={20} />
+                                    </a>
+                                </div>
+                                <div className="mt-4">
+                                    <SignInWithDiscord onClick={() => {
+                                        window.location.href = "/login";
+                                    }} />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </section>
 
-                        <div className="flex flex-col sm:flex-row items-center mb-8 bg-gray-900 py-6 px-2 m-4 max-w-xl rounded-lg shadow-lg">
-                            <img src="https://placehold.co/600x400" alt="Feature 1" className="mb-4 sm:mb-0 sm:mx-4 w-64" />
-                            <div className="sm:text-left">
-                                <h2 className="text-xl font-bold">Keep out bad actors.</h2>
-                                <p className="text-base">
-                                    ModCore has a powerful moderation system that allows you to keep out bad actors.
-                                    You can configure the moderation system to your liking and keep your server safe.
-                                </p>
-                            </div>
-                        </div>
+                    {/* Features Section */}
+                    <section className="mt-12">
+                        <h2 className="text-3xl font-semibold text-center mb-8 bg-gradient-to-r from-[#089fe0] to-[#00d4ff] text-transparent bg-clip-text">
+                            Key Features
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {/* Feature 1 */}
+                            <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-lg rounded-lg hover:shadow-2xl transition-shadow">
+                                <CardHeader>
+                                    <CardTitle className="text-lg font-semibold">Effective Server Management</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <img
+                                        src="https://placehold.co/600x400"
+                                        alt="Feature 1"
+                                        className="mb-4 rounded-md"
+                                    />
+                                    <p className="text-sm md:text-base text-gray-300">
+                                        ModCore helps you keep your server safe and clean with powerful moderation tools.
+                                    </p>
+                                </CardContent>
+                            </Card>
 
-                        <div className="flex flex-col sm:flex-row-reverse items-center mb-8 bg-gray-900 py-6 px-2 m-4 max-w-xl rounded-lg shadow-lg">
-                            <img src="https://placehold.co/600x400" alt="Feature 1" className="mb-4 sm:mb-0 sm:mx-4 w-64" />
-                            <div className="sm:text-right">
-                                <h2 className="text-xl font-bold">And more!</h2>
-                                <p className="text-base">
-                                    Add ModCore to your server and explore the features it has to offer.
-                                </p>
-                            </div>
+                            {/* Feature 2 */}
+                            <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-lg rounded-lg hover:shadow-2xl transition-shadow">
+                                <CardHeader>
+                                    <CardTitle className="text-lg font-semibold">Starboard for Great Messages</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <img
+                                        src="https://placehold.co/600x400"
+                                        alt="Feature 2"
+                                        className="mb-4 rounded-md"
+                                    />
+                                    <p className="text-sm md:text-base text-gray-300">
+                                        Keep track of great messages with a customizable starboard feature.
+                                    </p>
+                                </CardContent>
+                            </Card>
+
+                            {/* Feature 3 */}
+                            <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-lg rounded-lg hover:shadow-2xl transition-shadow">
+                                <CardHeader>
+                                    <CardTitle className="text-lg font-semibold">Powerful Moderation System</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <img
+                                        src="https://placehold.co/600x400"
+                                        alt="Feature 3"
+                                        className="mb-4 rounded-md"
+                                    />
+                                    <p className="text-sm md:text-base text-gray-300">
+                                        Keep out bad actors with a robust moderation system.
+                                    </p>
+                                </CardContent>
+                            </Card>
                         </div>
-                    </div>
+                    </section>
                 </div>
             </HomeLayout>
         </>

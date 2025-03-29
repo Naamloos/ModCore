@@ -1,8 +1,9 @@
-import TextArea from "@/Components/Forms/TextArea";
-import TextBox from "@/Components/Forms/TextBox";
-import ToggleSwitch from "@/Components/Forms/ToggleSwitch";
+import { Input } from "@/Components/ui/input";
+import { Textarea } from "@/Components/ui/textarea";
+import { Switch } from "@/Components/ui/switch";
 import { DiscordEmbedField } from "@/Types/DiscordTypes/DiscordEmbed";
 import { useState } from "react";
+import { Button } from "@/Components/ui/button";
 
 interface EmbedFieldFormProps {
     embedIndex: number;
@@ -21,49 +22,55 @@ export default function EmbedFieldForm({
 }: EmbedFieldFormProps) {
     return (
         <>
-            <div key={fieldIndex} className="mb-4 p-2 border-gray-500 border-[1px] rounded-lg">
+            <div key={fieldIndex} className="mb-4 p-2 border-input border-[1px] rounded-lg">
                 <div className="mb-2">
-                    <TextBox
-                        label="Field Name"
+                    <label className="block text-sm font-medium text-gray-200">
+                        Field Name
+                    </label>
+                    <Input
                         placeholder="Field Name"
                         value={field.name}
-                        onUpdate={(value) => {
-                            let newField = { ...field, name: value };
+                        onChange={(e) => {
+                            let newField = { ...field, name: e.target.value };
                             update(newField);
                         }}
                     />
                 </div>
                 <div className="mb-2">
-                    <TextArea
-                        label="Field Value"
+                    <label className="block text-sm font-medium text-gray-200">
+                        Field Value
+                    </label>
+                    <Textarea
                         rows={3}
                         placeholder="Field Value"
                         value={field.value}
-                        onUpdate={(value) => {
-                            let newField = { ...field, value: value };
+                        onChange={(e) => {
+                            let newField = { ...field, value: e.target.value };
                             update(newField);
                         }}
                     />
                 </div>
-                <div className="mb-2">
-                    <ToggleSwitch
-                        enabled={field.inline ?? false}
-                        onUpdate={(enabled) => {
+                <div className="mb-2 flex items-center">
+                    <Switch
+                        checked={field.inline ?? false}
+                        onCheckedChange={(enabled) => {
                             let newField = {
                                 ...field,
                                 inline: enabled,
                             };
                             update(newField);
                         }}
-                        label="Inline"
                     />
+                    <label className="ml-2 text-sm font-medium text-gray-200">
+                        Inline
+                    </label>
                 </div>
-                <button
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded mt-2"
+                <Button
+                    variant="destructive"
                     onClick={remove}
                 >
                     Remove Field
-                </button>
+                </Button>
             </div>
         </>
     );

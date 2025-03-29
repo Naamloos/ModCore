@@ -20,22 +20,27 @@ export default function DashboardLayout({ children }: PropsWithChildren<{}>) {
     return (
         <>
             {/* Layout with a sidebar */}
-            <div className={`min-h-screen bg-gray-950 text-white overflow-x-hidden overflow-y-hidden`}>
+            <div className="min-h-screen bg-gray-950 text-white">
                 <div className="md:block hidden">
                     <Sidebar />
                 </div>
                 <div className="md:hidden block">
                     <MobileServerMenu isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                 </div>
-                {(!isMenuOpen) && <>
-                    <header className="md:ml-12">
-                        <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
-                    </header>
-                    <main className={`-m-4 md:ml-12 py-10 px-6 sm:px-10 mt-10 md:mt-0 p-6`}>
-                        {children}
-                    </main>
-                </>}
+                {(!isMenuOpen) && (
+                    <>
+                        <header className="md:ml-12">
+                            <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
+                        </header>
+                        <main className="md:ml-12 py-10 px-6 sm:px-10 mt-10 md:mt-0">
+                            <div className="container mx-auto relative">
+                                {children}
+                            </div>
+                        </main>
+                    </>
+                )}
             </div>
         </>
     );
+
 }

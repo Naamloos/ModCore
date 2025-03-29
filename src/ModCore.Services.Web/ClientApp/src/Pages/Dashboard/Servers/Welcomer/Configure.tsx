@@ -13,6 +13,15 @@ import TextArea from "@/Components/Forms/TextArea";
 import { useEffect, useRef, useState } from "react";
 import DiscordMessageVisualizerProxy from "./Partials/DiscordMessageVisualizerProxy";
 import DiscordChannelPicker from "@/Components/Forms/DiscordChannelPicker";
+import { Button } from "@/Components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/Components/ui/card";
 
 type ManagePageProps = {
     server: DiscordGuild;
@@ -89,54 +98,6 @@ export default function Configure({
         setData("channel_id", channelId);
     }
 
-    const fakeDiscordMessageRef = useRef<HTMLDivElement>(null);
-    const formBoundRef = useRef<HTMLDivElement>(null);
-    const [minScroll, setMinScroll] = useState<number | null>(null);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            if (!fakeDiscordMessageRef.current || !formBoundRef.current) return;
-
-            const formRect = formBoundRef.current.getBoundingClientRect();
-            const fakeMessageRect = fakeDiscordMessageRef.current.getBoundingClientRect();
-
-            if (fakeMessageRect.top < 0 && minScroll === null) {
-                setMinScroll(window.scrollY);
-            }
-
-            if (minScroll !== null) {
-                if (window.scrollY >= minScroll) {
-                    fakeDiscordMessageRef.current.style.position = "fixed";
-                    fakeDiscordMessageRef.current.style.top = "0";
-                    fakeDiscordMessageRef.current.style.left = `${formRect.right + 16}px`;
-                    fakeDiscordMessageRef.current.style.width = `${window.innerWidth - formRect.right - 32}px`;
-                } else {
-                    fakeDiscordMessageRef.current.style.position = "";
-                    fakeDiscordMessageRef.current.style.top = "";
-                    fakeDiscordMessageRef.current.style.left = "";
-                    fakeDiscordMessageRef.current.style.width = "";
-                }
-            }
-        };
-
-        const handleResize = () => {
-            if (!fakeDiscordMessageRef.current || !formBoundRef.current) return;
-
-            const formRect = formBoundRef.current.getBoundingClientRect();
-            fakeDiscordMessageRef.current.style.width = `${window.innerWidth - formRect.right - 32}px`;
-
-            handleScroll();
-        };
-
-        window.addEventListener("scroll", handleScroll);
-        window.addEventListener("resize", handleResize);
-
-        return () => {
-            window.removeEventListener("scroll", handleScroll);
-            window.removeEventListener("resize", handleResize);
-        };
-    }, [minScroll]);
-
     return (
         <>
             <Head title="Welcome Message Configuration" />
@@ -161,14 +122,11 @@ export default function Configure({
                     </div>
                 )}
                 {server && (
-                    <>
+                    <div className="pb-20">
                         {/* Back to Overview link */}
-                        <a
-                            href={`/dashboard/servers/${server.id}`}
-                            className="text-blue-400 hover:text-blue-300"
-                        >
-                            &lt;&lt; Back to Overview
-                        </a>
+                        <Button variant={"outline"} onClick={()=> window.location.href = `/dashboard/servers/${server.id}`} className="mb-4">
+                            Back to Overview
+                        </Button>
                         <div className="md:flex items-center mb-4">
                             <img
                                 src={icon}
@@ -179,36 +137,48 @@ export default function Configure({
                                 {server.name}: Welcome Message
                             </h1>
                         </div>
-                        <div className="grid md:grid-cols-2 gap-4 relative">
-                            <div>
-                                <div 
-                                    className="bg-gray-800 p-4 rounded-lg shadow-md mt-4"
-                                    ref={formBoundRef}
-                                >
-                                    <div className="mb-4">
-                                        <ToggleSwitch
-                                            enabled={data.enabled}
-                                            onUpdate={setEnabled}
-                                            label="Enabled"
-                                        />
-                                        <DiscordChannelPicker
-                                            label="Welcome Channel"
-                                            placeholder="Select a channel..."
-                                            value={data.channel_id}
-                                            onUpdate={setChannelId}
-                                            required
-                                        />
-                                        <TextArea
-                                            label="Message Content"
-                                            rows={4}
-                                            placeholder="Welcome, {{mention}}!"
-                                            value={data.message_payload.content}
-                                            onUpdate={setContent}
-                                        />
-                                    </div>
-                                    <div className="mt-4 mb-4">
-                                        <button
-                                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        
+                        {/* Update the flex layout structure */}
+                        <div className="mt-6 md:flex md:space-x-6 relative"
+                            style={{alignItems: "start"}}
+                        >
+                            {/* Left column */}
+                            <div className="w-full md:w-1/2 mb-6 md:mb-0">
+                                <Card className="w-full bg-gray-900 p-6 rounded-lg shadow-lg">
+                                    <CardHeader>
+                                        <CardTitle className="text-2xl">
+                                            Welcome Message Configuration
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Configure the welcome message that is sent to new members when they join the server.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-6">
+                                            <ToggleSwitch
+                                                enabled={data.enabled}
+                                                onUpdate={setEnabled}
+                                                label="Enabled"
+                                            />
+                                            <DiscordChannelPicker
+                                                label="Welcome Channel"
+                                                placeholder="Select a channel..."
+                                                value={data.channel_id}
+                                                onUpdate={setChannelId}
+                                                required
+                                            />
+                                            <TextArea
+                                                label="Message Content"
+                                                rows={4}
+                                                placeholder="Welcome, {{mention}}!"
+                                                value={data.message_payload.content}
+                                                onUpdate={setContent}
+                                            />
+                                        </div>
+                                    </CardContent>
+                                    <CardFooter>
+                                        <Button
+                                            className="w-full"
                                             onClick={() =>
                                                 post(
                                                     `/dashboard/servers/${server.id}/welcome`
@@ -217,84 +187,108 @@ export default function Configure({
                                             disabled={processing}
                                         >
                                             {processing ? "Saving..." : "Save"}
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="bg-gray-800 p-4 rounded-lg shadow-md mt-4">
-                                    <h2 className="text-xl font-bold text-white mb-4">
-                                        Embeds
-                                    </h2>
-                                    {data.message_payload.embeds?.map(
-                                        (embed, index) => (
-                                            <EmbedForm
-                                                key={index}
-                                                index={index}
-                                                embed={embed}
-                                                update={(newEmbed) => {
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                                <Card className="w-full bg-gray-900 p-6 rounded-lg shadow-lg mt-6">
+                                    <CardHeader>
+                                        <CardTitle className="text-2xl">
+                                            Embeds
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Configure the embeds that are sent with the welcome message.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="space-y-4">
+                                            {data.message_payload.embeds?.map(
+                                                (embed, index) => (
+                                                    <EmbedForm
+                                                        key={index}
+                                                        index={index}
+                                                        embed={embed}
+                                                        update={(newEmbed) => {
+                                                            const newEmbeds = [
+                                                                ...data.message_payload
+                                                                    .embeds,
+                                                            ];
+                                                            newEmbeds[index] = newEmbed;
+                                                            setData("message_payload", {
+                                                                ...data.message_payload,
+                                                                embeds: newEmbeds,
+                                                            });
+                                                        }}
+                                                        remove={() => {
+                                                            const newEmbeds = [
+                                                                ...data.message_payload
+                                                                    .embeds,
+                                                            ];
+                                                            newEmbeds.splice(index, 1);
+                                                            setData("message_payload", {
+                                                                ...data.message_payload,
+                                                                embeds: newEmbeds,
+                                                            });
+                                                        }}
+                                                    />
+                                                )
+                                            )}
+                                        </div>
+                                        {(data.message_payload.embeds?.length ?? 0) < 3 && (
+                                            <Button
+                                                className="w-full"
+                                                onClick={() => {
                                                     const newEmbeds = [
-                                                        ...data.message_payload
-                                                            .embeds,
+                                                        ...(data.message_payload
+                                                            .embeds || []),
+                                                        {},
                                                     ];
-                                                    newEmbeds[index] = newEmbed;
                                                     setData("message_payload", {
                                                         ...data.message_payload,
                                                         embeds: newEmbeds,
                                                     });
                                                 }}
-                                                remove={() => {
-                                                    const newEmbeds = [
-                                                        ...data.message_payload
-                                                            .embeds,
-                                                    ];
-                                                    newEmbeds.splice(index, 1);
-                                                    setData("message_payload", {
-                                                        ...data.message_payload,
-                                                        embeds: newEmbeds,
-                                                    });
-                                                }}
-                                            />
-                                        )
-                                    )}
-                                    {(data.message_payload.embeds?.length ?? 0) < 3 && (
-                                        <button
-                                            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                                            onClick={() => {
-                                                const newEmbeds = [
-                                                    ...(data.message_payload
-                                                        .embeds || []),
-                                                    {},
-                                                ];
-                                                setData("message_payload", {
-                                                    ...data.message_payload,
-                                                    embeds: newEmbeds,
-                                                });
-                                            }}
-                                        >
-                                            Add Embed
-                                        </button>
-                                    )}
-                                </div>
+                                            >
+                                                Add Embed
+                                            </Button>
+                                        )}
+                                    </CardContent>
+                                </Card>
                             </div>
-                            <div ref={fakeDiscordMessageRef}>
-                                <div className="bg-gray-800 p-4 rounded-lg shadow-md mt-4">
-                                    Available Placeholders:
-                                    <br/>
-                                    {availablePlaceholders.map((placeholder) => (
-                                        <code className="ml-2 text-blue-600 bg-gray-900 p-0.5 rounded-md text-sm" key={placeholder}>
-                                            {'{'}{'{'}{placeholder}{'}'}{'}'}
-                                        </code>
-                                    ))}
-                                </div>
+                            
+                            {/* Right column - properly sticky */}
+                            <div className="w-full md:w-1/2 md:sticky md:top-10 self-start">
+                                <Card className="w-full bg-gray-900 p-6 rounded-lg shadow-lg">
+                                    <CardHeader>
+                                        <CardTitle className="text-2xl">
+                                            Available Placeholders
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Use these placeholders to customize your welcome message.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="flex flex-wrap gap-2">
+                                            {availablePlaceholders.map((placeholder) => (
+                                                <code
+                                                    className="text-blue-400 bg-gray-800 p-1 rounded-md text-sm"
+                                                    key={placeholder}
+                                                >
+                                                    {'{'}{'{'}{placeholder}{'}'}{'}'}
+                                                </code>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
                                 <DiscordMessageVisualizerProxy
                                     content={data.message_payload.content}
                                     embeds={
                                         data.message_payload.embeds ?? undefined
                                     }
-                                    className="h-fit w-full mt-4 sticky top-0"
+                                    className="bg-gray-900 p-6 mt-6 rounded-xl border bg-card text-card-foreground shadow"
                                 />
                             </div>
                         </div>
-                    </>
+                    </div>
                 )}
             </DashboardLayout>
         </>

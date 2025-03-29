@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Input } from '../ui/input';
 
 interface ColorPickerProps {
     label: string;
@@ -18,17 +19,17 @@ export default function ColorPicker({ label, value, onUpdate }: ColorPickerProps
         <div className="mb-5">
             <label className="block mb-2 text-sm font-medium text-white">{label}</label>
             <div className="flex items-center">
-                <input
+                <Input
                     type="color"
                     value={color}
                     onChange={handleChange}
-                    className="w-10 h-10 p-0 border-none cursor-pointer rounded-md"
+                    className="w-10 h-10 p-0 cursor-pointer rounded-md"
                 />
-                <input
+                <Input
                     type="text"
                     value={color}
                     onChange={handleChange}
-                    className="ml-2 p-2.5 bg-gray-600 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="ml-2 p-2.5"
                 />
             </div>
         </div>

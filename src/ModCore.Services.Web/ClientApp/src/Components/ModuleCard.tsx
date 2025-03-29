@@ -4,7 +4,7 @@ export default function ModuleCard({link, name, icon, description} : {link: stri
 {
     return <>
         <div
-            className="bg-gray-900 p-5 rounded-lg shadow-md h-32 flex flex-col justify-center cursor-pointer hover:bg-gray-700 hover:animate-pulse"
+            className="bg-gray-900 p-5 h-32 flex flex-col justify-center cursor-pointer hover:bg-gray-700 hover:animate-pulse rounded-xl border bg-card text-card-foreground shadow"
             onClick={() =>
                 (window.location.href = link)
             }
