@@ -44,7 +44,7 @@ const modules = [
     {
         name: "Tags",
         description: "Manage your owned tags.",
-        link: "/dashboard/tags",
+        link: "/dashboard/todo",
         icon: <IconTag size={48} color="#FFA500" />,
     }
 ];
