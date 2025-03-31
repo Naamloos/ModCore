@@ -47,7 +47,7 @@ namespace ModCore.Services.Web.Controllers
                 Server = userServer != default ? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions) : null,
                 DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions),
                 // Add any specific data needed for logging settings
-                LoggerSettings = database.LoggerSettings.FirstOrDefault(x => x.GuildId == server_id) ?? new DatabaseLoggerSettings()
+                Settings = database.LoggerSettings.FirstOrDefault(x => x.GuildId == server_id) ?? new DatabaseLoggerSettings()
             });
         }
 

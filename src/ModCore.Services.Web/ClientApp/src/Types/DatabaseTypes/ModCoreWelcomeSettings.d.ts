@@ -1,7 +1,7 @@
 import { DiscordEmbed } from "../DiscordTypes/DiscordEmbed";
 
 export type ModCoreWelcomeSettings = {
-    channel_id: bigint;
+    channel_id: string;
     welcome_message_json: string;
     enabled: boolean;
 };

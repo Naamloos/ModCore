@@ -11,16 +11,19 @@ namespace ModCore.Common.Database.Entities
     [Table("mcore_ticket")]
     public class DatabaseTicket
     {
-        [JsonIgnore]
+        [JsonPropertyName("id")]
         [Column("id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public long Id { get; set; }
 
-        [JsonIgnore]
+        [JsonPropertyName("guild_id")]
         [Column("guild_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong GuildId { get; set; }
 
         [JsonPropertyName("author_id")]
         [Column("author_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong AuthorId { get; set; }
 
         [JsonPropertyName("name")]
@@ -33,6 +36,7 @@ namespace ModCore.Common.Database.Entities
 
         [JsonPropertyName("ticket_thread_id")]
         [Column("ticket_thread_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong? TicketThreadId { get; set; }
 
         [JsonIgnore]

@@ -13,10 +13,12 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonIgnore]
         [Column("guild_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong GuildId { get; set; }
 
         [JsonPropertyName("user_id")]
         [Column("user_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong UserId { get; set; }
 
         [JsonPropertyName("nickname")]

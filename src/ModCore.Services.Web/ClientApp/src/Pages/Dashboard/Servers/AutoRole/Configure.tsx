@@ -23,16 +23,8 @@ interface ConfigureAutoRoleProps {
     roles: DiscordRole[];
 }
 
-interface UpdateAutorolesRequest {
-    enabled: boolean;
-    removeRoles: string[];
-    addRoles: string[];
-}
-
 export default function Configure({
-    user,
     server,
-    databaseGuild,
     enabled,
     roles,
 }: PagePropsWith<ConfigureAutoRoleProps>) {

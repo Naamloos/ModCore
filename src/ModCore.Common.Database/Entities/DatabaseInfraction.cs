@@ -13,18 +13,22 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonIgnore]
         [Column("id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public long Id { get; set; }
 
         [JsonIgnore]
         [Column("guild_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong GuildId { get; set; }
 
         [JsonPropertyName("user_id")]
         [Column("user_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong UserId { get; set; }
 
         [JsonPropertyName("responsible_moderator_id")]
         [Column("responsible_moderator_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong ResponsibleModerator {  get; set; }
 
         [JsonPropertyName("reason")]

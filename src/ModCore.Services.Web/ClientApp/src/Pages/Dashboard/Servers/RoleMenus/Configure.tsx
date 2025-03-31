@@ -10,15 +10,17 @@ import {
     CardTitle,
 } from "@/Components/ui/card";
 import { useState } from "react";
+import ModCoreRoleMenu from "../../../../Types/DatabaseTypes/ModCoreRoleMenu";
 
 interface ConfigureRoleMenusProps {
     server: DiscordGuild;
-    // Add props for role menu data
+    menus: ModCoreRoleMenu[];
 }
 
 export default function Configure({
     user,
     server,
+    menus,
 }: PagePropsWith<ConfigureRoleMenusProps>) {
     let icon = server?.icon ? server.icon : null;
     if (icon) {

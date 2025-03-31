@@ -14,10 +14,12 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonPropertyName("id")]
         [Column("id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public long Id { get; set; }
 
         [JsonPropertyName("channel_id")]
         [Column("channel_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong? ChannelId { get; set; } = null; // not set = global
 
         [JsonPropertyName("name")]
@@ -27,6 +29,7 @@ namespace ModCore.Common.Database.Entities
 
         [JsonPropertyName("author_id")]
         [Column("author_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong AuthorId { get; set; }
 
         [JsonPropertyName("content")]
@@ -42,8 +45,9 @@ namespace ModCore.Common.Database.Entities
         [Column("created_at")]
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
-        [JsonIgnore]
+        [JsonPropertyName("guild_id")]
         [Column("guild_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong GuildId { get; set; }
 
         [JsonIgnore]

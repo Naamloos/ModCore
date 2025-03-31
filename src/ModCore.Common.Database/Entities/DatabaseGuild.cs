@@ -15,18 +15,22 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonIgnore]
         [Column("guild_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong GuildId { get; set; }
 
         [JsonPropertyName("modlog_channel_id")]
         [Column("modlog_channel_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong? ModlogChannelId { get; set; } = null;
 
         [JsonPropertyName("ticket_channel_id")]
         [Column("ticket_channel_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong? TicketChannelId { get; set; } = null;
 
         [JsonPropertyName("appeal_channel_id")]
         [Column("appeal_channel_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong? AppealChannelId { get; set; } = null;
 
         /// <summary>
@@ -34,6 +38,7 @@ namespace ModCore.Common.Database.Entities
         /// </summary>
         [JsonPropertyName("nick_confirm_channel_id")]
         [Column("nick_confirm_channel_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong? NicknameConfirmationChannelId { get; set; } = 0;
 
         [JsonPropertyName("last_seen_at")]

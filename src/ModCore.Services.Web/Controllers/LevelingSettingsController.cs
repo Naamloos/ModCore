@@ -44,11 +44,14 @@ namespace ModCore.Services.Web.Controllers
 
             var channels = await this.GetGuildChannelsAsync(server_id);
 
+            var settings = database.LevelSettings.FirstOrDefault(x => x.GuildId == server_id);
+
             return Inertia.Render("Dashboard/Servers/Leveling/Configure", new
             {
                 Server = userServer != default ? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions) : null,
                 DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions),
-                Channels = JsonSerializer.SerializeToDocument(channels, options: serializerOptions)
+                Channels = JsonSerializer.SerializeToDocument(channels, options: serializerOptions),
+                Settings = JsonSerializer.SerializeToDocument(settings, options: serializerOptions)
             });
         }
 

@@ -46,13 +46,15 @@ namespace ModCore.Services.Web.Controllers
 
             var starboards = database.Starboards.Where(x => x.GuildId == server_id).ToList();
 
+            var emojis = await this.GetGuildEmojisAsync(server_id);
+
             return Inertia.Render("Dashboard/Servers/Starboards/Configure", new
             {
                 Server = userServer != default ? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions) : null,
                 DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions),
                 Channels = JsonSerializer.SerializeToDocument(channels, options: serializerOptions),
-                Starboards = JsonSerializer.SerializeToDocument(starboards, options: serializerOptions)
-                // Add any specific data needed for starboards settings
+                Starboards = JsonSerializer.SerializeToDocument(starboards, options: serializerOptions),
+                Emojis = JsonSerializer.SerializeToDocument(emojis, options: serializerOptions)
             });
         }
 

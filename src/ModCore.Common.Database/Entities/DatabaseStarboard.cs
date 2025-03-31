@@ -13,10 +13,12 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonPropertyName("id")]
         [Column("id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public long Id { get; set; }
 
         [JsonIgnore]
         [Column("guild_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong GuildId { get; set; }
 
         [JsonPropertyName("enabled")]
@@ -33,6 +35,7 @@ namespace ModCore.Common.Database.Entities
 
         [JsonPropertyName("channel_id")]
         [Column("channel_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong ChannelId { get; set; }
 
         [JsonIgnore]

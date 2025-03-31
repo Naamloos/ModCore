@@ -7,11 +7,12 @@ import {
     SelectContent,
     SelectItem,
 } from "@/Components/ui/select";
+import { useEffect, useState } from "react";
 
 interface DiscordChannelPickerProps {
     label: string;
     placeholder: string;
-    value?: string;
+    value?: string | number;
     onUpdate: (value?: string) => void;
     required?: boolean;
 }
@@ -38,7 +39,12 @@ export default function DiscordChannelPicker({
             <label className="block mb-2 text-sm font-medium text-gray-200 dark:text-white">
                 {label}
             </label>
-            <Select onValueChange={(val) => onUpdate(val == "#"? undefined : val)} defaultValue={value} value={value}>
+            <Select
+                onValueChange={(val) => {
+                    onUpdate(val === "#" ? undefined : val);
+                }}
+                value={String(value) || "#"}
+            >
                 <SelectTrigger className="w-full">
                     <SelectValue placeholder={placeholder} />
                 </SelectTrigger>

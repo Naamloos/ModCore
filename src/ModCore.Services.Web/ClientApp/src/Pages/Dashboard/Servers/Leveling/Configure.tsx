@@ -14,19 +14,21 @@ import { Switch } from "@/Components/ui/switch";
 import { useState } from "react";
 import DiscordChannelPicker from "../../../../Components/Forms/DiscordChannelPicker";
 import { useForm } from "@inertiajs/react";
+import ModCoreLevelSettings from "../../../../Types/DatabaseTypes/ModCoreLevelSettings";
 
 interface ConfigureLevelingProps {
     server: DiscordGuild;
+    settings: ModCoreLevelSettings;
 }
 
 export default function Configure({
-    user,
     server,
+    settings,
 }: PagePropsWith<ConfigureLevelingProps>) {
-    const [enabled, setEnabled] = useState(false);
-    const [messagesEnabled, setMessagesEnabled] = useState(false);
-    const [redirectMessages, setRedirectMessages] = useState(false);
-    const [channelId, setChannelId] = useState<string | undefined>("");
+    const [enabled, setEnabled] = useState(settings.enabled);
+    const [messagesEnabled, setMessagesEnabled] = useState(settings.messages_enabled);
+    const [redirectMessages, setRedirectMessages] = useState(settings.redirect_messages);
+    const [channelId, setChannelId] = useState<string | undefined>(settings.message_channel_id.toString());
 
     let icon = server?.icon ? server.icon : null;
     if (icon) {

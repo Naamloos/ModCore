@@ -13,6 +13,7 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonPropertyName("user_id")]
         [Column("user_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong UserId { get; set; }
 
         [JsonPropertyName("level_data")]

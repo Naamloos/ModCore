@@ -14,10 +14,12 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonIgnore]
         [Column("id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public long Id { get; set; }
 
         [JsonIgnore]
         [Column("tag_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public long TagId { get; set; }
 
         [JsonPropertyName("content")]

@@ -1,4 +1,5 @@
-export type ModCoreAutorole =
+export default interface ModCoreAutorole
 {
-    role_id: bigint;
+    guild_id: string;
+    role_id: string;
 }

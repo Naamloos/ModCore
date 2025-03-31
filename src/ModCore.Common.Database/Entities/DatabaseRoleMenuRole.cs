@@ -13,10 +13,12 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonIgnore]
         [Column("menu_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public long MenuId { get; set; }
 
         [JsonPropertyName("role_id")]
         [Column("role_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong RoleId { get; set; }
 
         [JsonIgnore]

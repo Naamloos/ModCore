@@ -61,6 +61,18 @@ namespace ModCore.Services.Web
             return channels.Success ? channels.Value : new List<Channel>();
         }
 
+        public static async Task<List<Emoji>> GetGuildEmojisAsync(this ControllerBase controller, ulong server_id)
+        {
+            var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
+            var restClient = controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
+            var emojis = await cacheService.GetFromCacheOrRest($"emojis:{server_id}", async (rest, id) =>
+            {
+                return await rest.GetGuildEmojisAsync(server_id);
+            });
+
+            return emojis.Success ? emojis.Value : new List<Emoji>();
+        }
+
         public static async Task<Role[]> GetGuildRolesAsync(this ControllerBase controller, ulong server_id)
         {
             var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();

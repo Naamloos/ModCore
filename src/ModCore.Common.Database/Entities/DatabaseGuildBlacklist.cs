@@ -12,6 +12,7 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonPropertyName("guild_id")]
         [Column("guild_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong GuildId { get; set; }
 
         [JsonPropertyName("block_reason")]

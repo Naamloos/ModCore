@@ -1,10 +1,9 @@
-import { ModCoreRoleMenuRole } from "./ModCoreRoleMenuRole";
+import ModCoreRoleMenuRole from "./ModCoreRoleMenuRole";
 
-export type ModCoreRoleMenu =
-{
-    id: bigint;
-    guild_id: bigint;
+export default interface ModCoreRoleMenu {
+    id: string;
+    guild_id: string;
     name: string;
-    creator_id: bigint;
+    creator_id: string;
     roles: ModCoreRoleMenuRole[];
 }

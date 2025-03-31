@@ -1,6 +1,6 @@
-export type ModCoreLoggerSettings =
-{
-    logger_channel_id: bigint;
+export default interface ModCoreLoggerSettings {
+    guild_id: string;
+    logger_channel_id?: string;
     log_joins: boolean;
     log_message_edit: boolean;
     log_nicknames: boolean;

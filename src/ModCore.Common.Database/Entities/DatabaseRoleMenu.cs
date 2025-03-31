@@ -14,10 +14,12 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonPropertyName("id")]
         [Column("id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public long Id { get; set; }
 
         [JsonIgnore]
         [Column("guild_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong GuildId { get; set; }
 
         [JsonPropertyName("name")]
@@ -27,6 +29,7 @@ namespace ModCore.Common.Database.Entities
 
         [JsonPropertyName("creator_id")]
         [Column("creator_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong CreatorId { get; set; }
 
         [JsonIgnore]

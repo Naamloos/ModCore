@@ -67,6 +67,7 @@ const modules = (id : string) => [
         description: "Log server events and activities.",
         link: `/dashboard/servers/${id}/logging`,
         icon: <IconTree size={48} color="#32CD32" />, // LimeGreen
+        done: true
     },
     {
         name: "Profile States",

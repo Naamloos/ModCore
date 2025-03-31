@@ -20,6 +20,7 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonIgnore]
         [Column("guild_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong GuildId { get; set; }
 
         [JsonPropertyName("channel_id")]

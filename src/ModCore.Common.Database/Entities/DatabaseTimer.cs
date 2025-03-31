@@ -15,14 +15,17 @@ namespace ModCore.Common.Database.Entities
     {
         [JsonPropertyName("timer_id")]
         [Column("timer_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public long TimerId { get; set; }
 
         [JsonPropertyName("guild_id")]
         [Column("guild_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public ulong GuildId { get; set; }
 
         [JsonIgnore]
         [Column("shard_id")]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
         public int ShardId { get; set; } = 0;
 
         [JsonPropertyName("trigger_at")]

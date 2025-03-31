@@ -9,25 +9,20 @@ import {
     CardHeader,
     CardTitle,
 } from "@/Components/ui/card";
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/Components/ui/form";
 import { Input } from "@/Components/ui/input";
 import { Switch } from "@/Components/ui/switch";
+import ModCoreLoggerSettings from "../../../../Types/DatabaseTypes/ModCoreLoggerSettings";
+import { useForm } from "@inertiajs/react";
+import { Label } from "@/components/ui/label";
 
 interface ConfigureLoggingProps {
     server: DiscordGuild;
+    settings: ModCoreLoggerSettings;
 }
 
 export default function Configure({
-    user,
     server,
+    settings,
 }: PagePropsWith<ConfigureLoggingProps>) {
     let icon = server?.icon ? server.icon : null;
     if (icon) {
@@ -37,6 +32,24 @@ export default function Configure({
     } else {
         icon = "https://cdn.discordapp.com/embed/avatars/0.png";
     }
+
+    const { data, setData, post, processing, errors, reset } = useForm({
+        loggerChannelId: settings.logger_channel_id || "",
+        logJoins: settings.log_joins || false,
+        logMessageEdit: settings.log_message_edit || false,
+        logNicknames: settings.log_nicknames || false,
+        logAvatars: settings.log_avatars || false,
+        logInvites: settings.log_invites || false,
+        logChannels: settings.log_channels || false,
+        logGuildEdit: settings.log_guild_edit || false,
+        logRoleEdit: settings.log_role_edit || false,
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Handle form submission here
+        console.log(data);
+    };
 
     return (
         <>
@@ -70,217 +83,170 @@ export default function Configure({
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form>
-                            <FormField
-                                name="loggerChannelId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Logger Channel ID</FormLabel>
-                                        <FormControl>
-                                            <Input type="text" {...field} />
-                                        </FormControl>
-                                        <FormDescription>
-                                            The channel where log messages will
-                                            be sent.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                name="logJoins"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                            <FormLabel className="text-base">
-                                                Log Joins
-                                            </FormLabel>
-                                            <FormDescription>
-                                                Log when users join the server.
-                                            </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                name="logMessageEdit"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                            <FormLabel className="text-base">
-                                                Log Message Edits
-                                            </FormLabel>
-                                            <FormDescription>
-                                                Log when messages are edited.
-                                            </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                name="logNicknames"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                            <FormLabel className="text-base">
-                                                Log Nicknames
-                                            </FormLabel>
-                                            <FormDescription>
-                                                Log when users change their
-                                                nicknames.
-                                            </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                name="logAvatars"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                            <FormLabel className="text-base">
-                                                Log Avatars
-                                            </FormLabel>
-                                            <FormDescription>
-                                                Log when users change their
-                                                avatars.
-                                            </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                name="logInvites"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                            <FormLabel className="text-base">
-                                                Log Invites
-                                            </FormLabel>
-                                            <FormDescription>
-                                                Log when invites are created or
-                                                deleted.
-                                            </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                name="logRoleAssignment"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                            <FormLabel className="text-base">
-                                                Log Role Assignment
-                                            </FormLabel>
-                                            <FormDescription>
-                                                Log when roles are assigned or
-                                                removed from users.
-                                            </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                name="logChannels"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                            <FormLabel className="text-base">
-                                                Log Channels
-                                            </FormLabel>
-                                            <FormDescription>
-                                                Log when channels are created,
-                                                updated, or deleted.
-                                            </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                name="logGuildEdit"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                            <FormLabel className="text-base">
-                                                Log Guild Edits
-                                            </FormLabel>
-                                            <FormDescription>
-                                                Log when the guild is edited.
-                                            </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                name="logRoleEdit"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                        <div className="space-y-0.5">
-                                            <FormLabel className="text-base">
-                                                Log Role Edits
-                                            </FormLabel>
-                                            <FormDescription>
-                                                Log when roles are edited.
-                                            </FormDescription>
-                                        </div>
-                                        <FormControl>
-                                            <Switch
-                                                checked={field.value}
-                                                onCheckedChange={field.onChange}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
+                        <form onSubmit={handleSubmit}>
+                            <div className="grid gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="loggerChannelId">
+                                        Logger Channel ID
+                                    </Label>
+                                    <Input
+                                        id="loggerChannelId"
+                                        value={data.loggerChannelId}
+                                        onChange={(e) =>
+                                            setData("loggerChannelId", e.target.value)
+                                        }
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        The channel where log messages will be
+                                        sent.
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="logJoins" className="text-base">
+                                            Log Joins
+                                        </Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Log when users join the server.
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="logJoins"
+                                        checked={data.logJoins}
+                                        onCheckedChange={(checked) =>
+                                            setData("logJoins", checked)
+                                        }
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="logMessageEdit" className="text-base">
+                                            Log Message Edits
+                                        </Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Log when messages are edited.
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="logMessageEdit"
+                                        checked={data.logMessageEdit}
+                                        onCheckedChange={(checked) =>
+                                            setData("logMessageEdit", checked)
+                                        }
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="logNicknames" className="text-base">
+                                            Log Nicknames
+                                        </Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Log when users change their nicknames.
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="logNicknames"
+                                        checked={data.logNicknames}
+                                        onCheckedChange={(checked) =>
+                                            setData("logNicknames", checked)
+                                        }
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="logAvatars" className="text-base">
+                                            Log Avatars
+                                        </Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Log when users change their avatars.
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="logAvatars"
+                                        checked={data.logAvatars}
+                                        onCheckedChange={(checked) =>
+                                            setData("logAvatars", checked)
+                                        }
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="logInvites" className="text-base">
+                                            Log Invites
+                                        </Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Log when invites are created or deleted.
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="logInvites"
+                                        checked={data.logInvites}
+                                        onCheckedChange={(checked) =>
+                                            setData("logInvites", checked)
+                                        }
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="logChannels" className="text-base">
+                                            Log Channels
+                                        </Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Log when channels are created, updated, or
+                                            deleted.
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="logChannels"
+                                        checked={data.logChannels}
+                                        onCheckedChange={(checked) =>
+                                            setData("logChannels", checked)
+                                        }
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="logGuildEdit" className="text-base">
+                                            Log Guild Edits
+                                        </Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Log when the guild is edited.
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="logGuildEdit"
+                                        checked={data.logGuildEdit}
+                                        onCheckedChange={(checked) =>
+                                            setData("logGuildEdit", checked)
+                                        }
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <Label htmlFor="logRoleEdit" className="text-base">
+                                            Log Role Edits
+                                        </Label>
+                                        <p className="text-sm text-muted-foreground">
+                                            Log when roles are edited.
+                                        </p>
+                                    </div>
+                                    <Switch
+                                        id="logRoleEdit"
+                                        checked={data.logRoleEdit}
+                                        onCheckedChange={(checked) =>
+                                            setData("logRoleEdit", checked)
+                                        }
+                                    />
+                                </div>
+                            </div>
                             <Button type="submit">Submit</Button>
                         </form>
                     </CardContent>
