@@ -6,7 +6,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/Components/ui/card";
-import { Label } from "@/Components/ui/label";
 import { Switch } from "@/Components/ui/switch";
 import DiscordRolePicker from "@/Components/Forms/DiscordRolePicker";
 import DashboardLayout from "@/Layouts/DashboardLayout";
@@ -101,7 +100,7 @@ export default function Configure({
                                 value={isEnabled ? "true" : "false"}
                             />
                             <div className="flex items-center justify-between space-x-2">
-                                <Label htmlFor="enabled">Enable Auto Role</Label>
+                                <label htmlFor="enabled">Enable Auto Role</label>
                                 <Switch
                                     id="enabled"
                                     checked={isEnabled}
@@ -118,9 +117,9 @@ export default function Configure({
                                 />
 
                                 <div>
-                                    <Label className="block mb-2 text-sm font-medium">
+                                    <label className="block mb-2 text-sm font-medium">
                                         Automatically Granted Roles
-                                    </Label>
+                                    </label>
                                     <div className="flex flex-col mt-2">
                                         {enabledRoles.map((role) => {
                                             let name =

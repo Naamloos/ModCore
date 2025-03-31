@@ -11,8 +11,8 @@ import {
 interface DiscordChannelPickerProps {
     label: string;
     placeholder: string;
-    value: string;
-    onUpdate: (value: string) => void;
+    value?: string;
+    onUpdate: (value?: string) => void;
     required?: boolean;
 }
 
@@ -38,11 +38,16 @@ export default function DiscordChannelPicker({
             <label className="block mb-2 text-sm font-medium text-gray-200 dark:text-white">
                 {label}
             </label>
-            <Select onValueChange={onUpdate} defaultValue={value}>
+            <Select onValueChange={(val) => onUpdate(val == "#"? undefined : val)} defaultValue={value} value={value}>
                 <SelectTrigger className="w-full">
                     <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
                 <SelectContent>
+                    {!required && (
+                        <SelectItem key="none" value="#">
+                            None
+                        </SelectItem>
+                    )}
                     {channels
                         .filter((channel) => channel.type === 0)
                         .map((channel) => (

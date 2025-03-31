@@ -1,22 +1,27 @@
-import { Head, usePage } from "@inertiajs/react";
-import HomeLayout from "@/Layouts/HomeLayout.js";
+import { Head } from "@inertiajs/react";
 import { PageProps } from "@/Types/PageProps";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import {
     IconChartLine,
     IconClock,
     IconHammer,
+    IconPlus,
     IconTag,
     IconTicket,
 } from "@tabler/icons-react";
 import ModuleCard from "@/Components/ModuleCard";
 import FakeDiscordMessage from "@/Components/FakeDiscordMessage";
 import { useState } from "react";
-import ConfirmPopup from "@/Components/ConfirmPopup";
 
 // modules with name, description, link and icon (component)
 // Your ban appeals, Your tickets, Your reminders, Your server levels
 const modules = [
+    {
+        name: "Add to Server",
+        description: "Add the ModCore to a new server.",
+        link: "/dashboard/todo",
+        icon: <IconPlus size={48} color="#7289DA" />,
+    },
     {
         name: "Ban Appeals",
         description: "View statuses of your ban appeals.",
@@ -89,6 +94,7 @@ export default function Index({ user, application }: PageProps) {
                                 description={module.description} 
                                 link={module.link} 
                                 icon={module.icon}
+                                done={false}
                             />
                         ))}
                     </div>

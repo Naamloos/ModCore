@@ -24,7 +24,7 @@ export default function IndexPage({ dotnetVersion, application }: PagePropsWith<
                                 src={LogoImage}
                                 alt="Logo"
                                 className="h-24 w-24 md:h-36 md:w-36"
-                                style={{ animation: 'shake 0.5s', animationIterationCount: 'infinite' }}
+                                style={{ animation: 'shake 0.5s', animationIterationCount: 'infinite', animationPlayState: 'paused' }}
                                 onMouseEnter={(e) => {
                                     (e.target as HTMLImageElement).style.animationPlayState = 'running';
                                 }}

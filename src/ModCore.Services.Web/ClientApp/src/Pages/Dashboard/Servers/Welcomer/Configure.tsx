@@ -28,7 +28,7 @@ type ManagePageProps = {
     permissions: string[];
     welcomeSettings: {
         enabled: boolean;
-        channel_id: string;
+        channel_id?: string;
         welcome_message_json: string;
     };
 };
@@ -94,8 +94,8 @@ export default function Configure({
         setData("enabled", enabled);
     }
 
-    function setChannelId(channelId: string) {
-        setData("channel_id", channelId);
+    function setChannelId(channelId?: string) {
+        setData("channel_id", channelId ?? "");
     }
 
     return (

@@ -26,6 +26,7 @@ import ModuleCard from "@/Components/ModuleCard";
 import ConfirmPopup from "@/Components/ConfirmPopup";
 import { useState } from "react";
 import { Button } from "../../../Components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../../../Components/ui/dialog";
 
 type ManagePageProps = {
     server: DiscordGuild;
@@ -40,6 +41,7 @@ const modules = (id : string) => [
         description: "Automatically assign roles to new members.",
         link: `/dashboard/servers/${id}/autorole`,
         icon: <IconRobot size={48} color="#00BFFF" />, // DeepSkyBlue
+        done: true,
     },
     {
         name: "Ban Appeal",
@@ -56,13 +58,14 @@ const modules = (id : string) => [
     {
         name: "Levels",
         description: "Implement a leveling system for members.",
-        link: `/dashboard/todo`,
+        link: `/dashboard/servers/${id}/leveling`,
         icon: <IconChartLine size={48} color="#00CED1" />, // DarkTurquoise
+        done: true
     },
     {
         name: "Logging",
         description: "Log server events and activities.",
-        link: `/dashboard/todo`,
+        link: `/dashboard/servers/${id}/logging`,
         icon: <IconTree size={48} color="#32CD32" />, // LimeGreen
     },
     {
@@ -74,25 +77,28 @@ const modules = (id : string) => [
     {
         name: "Role Menus",
         description: "Create and manage role menus.",
-        link: `/dashboard/todo`,
+        link: `/dashboard/servers/${id}/rolemenus`,
         icon: <IconBook size={48} color="#1E90FF" />, // DodgerBlue
+        done: true
     },
     {
         name: "Starboards",
         description: "Set up starboards for starred messages.",
-        link: `/dashboard/todo`,
+        link: `/dashboard/servers/${id}/starboards`,
         icon: <IconStar size={48} color="#FFD700" />, // Gold
+        done: true
     },
     {
         name: "Tags",
         description: "Create and manage custom tags.",
-        link: `/dashboard/todo`,
+        link: `/dashboard/servers/${id}/tags`,
         icon: <IconTag size={48} color="#FFA500" />, // Orange
+        done: true
     },
     {
         name: "Tickets",
         description: "Manage support tickets.",
-        link: `/dashboard/todo`,
+        link: `/dashboard/servers/${id}/tickets`,
         icon: <IconTicket size={48} color="#9370DB" />, // MediumPurple
     },
     {
@@ -100,6 +106,7 @@ const modules = (id : string) => [
         description: "Set up welcome messages for new members.",
         link: `/dashboard/servers/${id}/welcome`,
         icon: <IconHandStop size={48} color="#3CB371" />, // MediumSeaGreen
+        done: true
     },
     {
         name: "Nickname Approval",
@@ -213,46 +220,66 @@ export default function Manage({
                                         description={module.description} 
                                         link={module.link} 
                                         icon={module.icon}
+                                        done={module.done ?? false}
                                     />
                                 ))}
                             </div>
                             {/* Danger Zone */}
-                            <div className="border-red-500 border-solid p-4 mt-16 sm:mx-16 rounded-xl border bg-card text-card-foreground shadow">
-                                <h3 className="text-xl text-red-500 font-bold mb-4 text-center">
+                            <div className="border-red-900 border-solid p-4 mt-16 sm:mx-16 rounded-xl border bg-card text-card-foreground shadow">
+                                <h3 className="text-xl font-bold mb-4 text-center">
                                     <IconAlertSquareRounded className="inline" />
                                     &nbsp;Danger Zone&nbsp;
                                     <IconAlertSquareRounded className="inline" />
                                 </h3>
-                                <p className="text-center text-red-500 mb-4">
+                                <p className="text-center mb-4">
                                     These actions are irreversible! Proceed with
                                     caution!
                                 </p>
-                                <ConfirmPopup
-                                    message="Are you sure you want to reset ModCore in this server?"
-                                    content="This will reset all settings and data associated with ModCore in this server."
-                                    confirmText="Reset Server"
-                                    cancelText="Cancel"
-                                    onConfirm={() => {
-                                        setResetModal(false);
-                                    }}
-                                    onCancel={() => {
-                                        setResetModal(false);
-                                    }}
-                                    visible={resetModal}
-                                />
-                                <ConfirmPopup
-                                    message="Are you sure you want to leave this server?"
-                                    content="This will remove ModCore from this server, and delete all data associated with this server."
-                                    confirmText="Leave Server"
-                                    cancelText="Cancel"
-                                    onConfirm={() => {
-                                        setLeaveModal(false);
-                                    }}
-                                    onCancel={() => {
-                                        setLeaveModal(false);
-                                    }}
-                                    visible={leaveModal}
-                                />
+                                <Dialog open={resetModal} onOpenChange={setResetModal}>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                            <DialogTitle>Reset Server</DialogTitle>
+                                            <DialogDescription>
+                                                Are you sure you want to reset ModCore in this server?
+                                                This will reset all settings and data associated with ModCore in this server.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <Button variant={"destructive"} onClick={() => {
+                                                // Perform reset logic here
+                                                setResetModal(false);
+                                            }}>
+                                                Reset Server
+                                            </Button>
+                                            <Button type="button" variant="secondary" onClick={() => setResetModal(false)}>
+                                                Cancel
+                                            </Button>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+
+                                <Dialog open={leaveModal} onOpenChange={setLeaveModal}>
+                                    <DialogContent className="sm:max-w-[425px]">
+                                        <DialogHeader>
+                                            <DialogTitle>Leave Server</DialogTitle>
+                                            <DialogDescription>
+                                                Are you sure you want to leave this server?
+                                                This will remove ModCore from this server and delete all associated data.
+                                            </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <Button variant={"destructive"} onClick={() => {
+                                                // Perform leave server logic here
+                                                setLeaveModal(false);
+                                            }}>
+                                                Leave Server
+                                            </Button>
+                                            <Button type="button" variant="secondary" onClick={() => setLeaveModal(false)}>
+                                                Cancel
+                                            </Button>
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <Button
                                         variant={"destructive"}

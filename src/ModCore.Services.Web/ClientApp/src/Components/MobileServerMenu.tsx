@@ -1,67 +1,76 @@
-import Sidebar from "@/Components/Sidebar";
 import { DiscordGuild } from "@/Types/DiscordTypes/DiscordGuild";
 import { User } from "@/Types/User";
 import { usePage } from "@inertiajs/react";
 import { IconCross, IconX } from "@tabler/icons-react";
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/Components/ui/sheet";
+import { ScrollArea } from "@/Components/ui/scroll-area";
+import { Button } from "@/Components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/Components/ui/avatar";
 
-export default function MobileServerMenu({ isMenuOpen, setIsMenuOpen} : {isMenuOpen: boolean, setIsMenuOpen: (value: boolean) => void}) 
-{
+export default function MobileServerMenu({
+    isMenuOpen,
+    setIsMenuOpen,
+}: {
+    isMenuOpen: boolean;
+    setIsMenuOpen: (value: boolean) => void;
+}) {
     const { user_guilds, server } = usePage<{
         user_guilds: DiscordGuild[];
         server: DiscordGuild | undefined;
     }>().props;
 
     return (
-        <>
-            {isMenuOpen && (
-                <div className="bg-gray-900 fixed inset-0 z-50 flex flex-col items-center py-4 overflow-auto">
-                    <button
-                        className="text-gray-400 hover:text-white transition-colors mb-4"
-                        onClick={() => setIsMenuOpen(false)}
-                    >
-                        <div className="flex justify-center items-center h-6 w-6">
-                            <IconX size={24} />
-                        </div>
-                    </button>
-                    {user_guilds.map((discordGuild) => (
-                        <div
-                            key={discordGuild.id}
-                            className={`relative group flex items-center w-full cursor-pointer mb-3 px-12${
-                                discordGuild.id === (server?.id ?? 0) ? " bg-gray-700" : ""
-                            }`}
-                            onClick={() => {
-                                window.location.href = `/dashboard/servers/${discordGuild.id}`;
-                            }}
-                        >
-                            <button
-                                className={`w-12 h-12 rounded-full transition-all duration-200 relative group flex-shrink-0 ${
-                                    discordGuild.id === (server?.id ?? 0)
-                                        ? "rounded-2xl"
-                                        : "hover:rounded-2xl hover:bg-gray-700"
+        <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <SheetContent 
+                side="left" 
+                className="w-3/4 bg-gray-900 border-r border-gray-800 md:hidden"
+                style={{ backdropFilter: 'blur(10px)' }}
+            >
+                <SheetHeader className="mb-4">
+                    <SheetTitle>Server Menu</SheetTitle>
+                    <SheetDescription>
+                        Select a server to manage.
+                    </SheetDescription>
+                </SheetHeader>
+                <ScrollArea className="h-[calc(100vh-100px)]">
+                    <div className="flex flex-col space-y-2 px-2">
+                        {user_guilds.map((discordGuild) => (
+                            <Button
+                                key={discordGuild.id}
+                                variant="ghost"
+                                className={`justify-start w-full hover:bg-gray-700 ${
+                                    discordGuild.id === (server?.id ?? 0) ? "bg-gray-700" : ""
                                 }`}
+                                onClick={() => {
+                                    window.location.href = `/dashboard/servers/${discordGuild.id}`;
+                                    setIsMenuOpen(false); // Close the menu after selecting a server
+                                }}
                             >
-                                {discordGuild.icon ? (
-                                    <img
-                                        src={`https://cdn.discordapp.com/icons/${discordGuild.id}/${discordGuild.icon}.png`}
-                                        alt={discordGuild.name}
-                                        className="w-full h-full rounded-inherit object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center rounded-inherit text-white font-medium">
-                                        {discordGuild.name
-                                            .split(" ")
-                                            .map((word) => word.charAt(0))
-                                            .join("")}
-                                    </div>
-                                )}
-                            </button>
-                            <span className="ml-4 text-white text-ellipsis whitespace-nowrap overflow-hidden">
-                                {discordGuild.name}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </>
+                                <Avatar className="mr-2 h-8 w-8">
+                                    {discordGuild.icon ? (
+                                        <AvatarImage src={`https://cdn.discordapp.com/icons/${discordGuild.id}/${discordGuild.icon}.png`} alt={discordGuild.name} />
+                                    ) : (
+                                        <AvatarFallback>
+                                            {discordGuild.name
+                                                .split(" ")
+                                                .map((word) => word.charAt(0))
+                                                .join("")}
+                                        </AvatarFallback>
+                                    )}
+                                </Avatar>
+                                <span>{discordGuild.name}</span>
+                            </Button>
+                        ))}
+                    </div>
+                </ScrollArea>
+            </SheetContent>
+        </Sheet>
     );
 }

@@ -28,26 +28,6 @@ export default function Sidebar() {
                     onMouseEnter={() => setIsCollapsed(false)}
                     onMouseLeave={() => setIsCollapsed(true)}
                 >
-                    <div className="relative group flex items-center w-full cursor-pointer hover:bg-gray-600 p-1 rounded-md mb-1">
-                        <button className="w-12 h-12 rounded-full transition-all duration-200 relative group flex-shrink-0 text-3xl -m-1"
-                            onClick={() => {
-                                window.location.href = "/dashboard/servers/add";
-                            }}
-                        >
-                            <div className="flex justify-center items-center h-12 w-12">
-                                <IconPlus size={24} />
-                            </div>
-                        </button>
-                        {!isCollapsed && (
-                            <span className="ml-4 text-white text-ellipsis whitespace-nowrap overflow-hidden">
-                                Add Server
-                            </span>
-                        )}
-                    </div>
-
-                    {/* divider */}
-                    <div className="w-full h-px bg-gray-400 mb-1"></div>
-
                     {user_guilds.map((discordGuild) => (
                         <div
                             key={discordGuild.id}
@@ -78,7 +58,12 @@ export default function Sidebar() {
                                 )}
                             </button>
                             {!isCollapsed && (
-                                <span className="ml-4 text-white text-ellipsis whitespace-nowrap overflow-hidden">
+                                <span className="ml-4 text-white text-ellipsis whitespace-nowrap overflow-hidden transition-opacity duration-300 opacity-100">
+                                    {discordGuild.name}
+                                </span>
+                            )}
+                            {isCollapsed && (
+                                <span className="ml-4 text-white text-ellipsis whitespace-nowrap overflow-hidden transition-opacity duration-300 opacity-0">
                                     {discordGuild.name}
                                 </span>
                             )}
