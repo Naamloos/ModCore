@@ -11,6 +11,7 @@ import {
 } from "@/Components/ui/card";
 import { useState } from "react";
 import ModCoreRoleMenu from "../../../../Types/DatabaseTypes/ModCoreRoleMenu";
+import { router } from "@inertiajs/react";
 
 interface ConfigureRoleMenusProps {
     server: DiscordGuild;
@@ -42,7 +43,7 @@ export default function Configure({
                 <Button
                     variant={"outline"}
                     onClick={() =>
-                        (window.location.href = `/dashboard/servers/${server.id}`)
+                        router.visit(`/dashboard/servers/${server.id}`)
                     }
                     className="mb-4"
                 >

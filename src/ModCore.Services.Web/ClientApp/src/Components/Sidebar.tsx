@@ -1,6 +1,6 @@
 import { DiscordGuild } from "@/Types/DiscordTypes/DiscordGuild";
 import { User } from "@/Types/User";
-import { usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { IconPlus } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 
@@ -33,7 +33,7 @@ export default function Sidebar() {
                             key={discordGuild.id}
                             className="relative group flex items-center w-full cursor-pointer hover:bg-gray-600 p-1 rounded-md mb-1"
                             onClick={() => {
-                                window.location.href = `/dashboard/servers/${discordGuild.id}`;
+                                router.visit(`/dashboard/servers/${discordGuild.id}`);
                             }}
                         >
                             {discordGuild.id === (server?.id ?? 0) && (

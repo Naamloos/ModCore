@@ -1,4 +1,4 @@
-import { Head, usePage } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import HomeLayout from "@/Layouts/HomeLayout.js";
 import { PagePropsWith } from "@/Types/PageProps";
 import { DiscordGuild } from "@/Types/DiscordTypes/DiscordGuild";
@@ -118,8 +118,9 @@ const modules = (id : string) => [
     {
         name: "Jump Link Embed",
         description: "Embed jump links in messages.",
-        link: `/dashboard/todo`,
+        link: `/dashboard/servers/${id}/jumplink`,
         icon: <IconJumpRope size={48} color="#00FA9A" />, // MediumSpringGreen
+        done: true
     },
 ];
 
@@ -130,10 +131,10 @@ export default function Manage({
 }: PagePropsWith<ManagePageProps>) {
     const authenticated = user != null;
 
-    if (!authenticated) window.location.href = "/login";
+    if (!authenticated) router.visit("/login");
 
     if (!hasPermissionsFromString(server.permissions, "MANAGE_GUILD")) {
-        window.location.href = "/login";
+        router.visit("/login");
     }
 
     let icon = server?.icon ? server.icon : null;

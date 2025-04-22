@@ -13,7 +13,7 @@ import { Input } from "@/Components/ui/input";
 import { Switch } from "@/Components/ui/switch";
 import { useState } from "react";
 import DiscordChannelPicker from "../../../../Components/Forms/DiscordChannelPicker";
-import { useForm } from "@inertiajs/react";
+import { router, useForm } from "@inertiajs/react";
 import ModCoreLevelSettings from "../../../../Types/DatabaseTypes/ModCoreLevelSettings";
 
 interface ConfigureLevelingProps {
@@ -63,7 +63,7 @@ export default function Configure({
                 <Button
                     variant={"outline"}
                     onClick={() =>
-                        (window.location.href = `/dashboard/servers/${server.id}`)
+                        router.visit(`/dashboard/servers/${server.id}`)
                     }
                     className="mb-4"
                 >

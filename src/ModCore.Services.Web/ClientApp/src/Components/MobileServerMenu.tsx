@@ -1,6 +1,6 @@
 import { DiscordGuild } from "@/Types/DiscordTypes/DiscordGuild";
 import { User } from "@/Types/User";
-import { usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { IconCross, IconX } from "@tabler/icons-react";
 import {
     Sheet,
@@ -49,7 +49,7 @@ export default function MobileServerMenu({
                                     discordGuild.id === (server?.id ?? 0) ? "bg-gray-700" : ""
                                 }`}
                                 onClick={() => {
-                                    window.location.href = `/dashboard/servers/${discordGuild.id}`;
+                                    router.visit(`/dashboard/servers/${discordGuild.id}`);
                                     setIsMenuOpen(false); // Close the menu after selecting a server
                                 }}
                             >

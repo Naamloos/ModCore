@@ -12,8 +12,9 @@ import {
 import { Input } from "@/Components/ui/input";
 import { Switch } from "@/Components/ui/switch";
 import ModCoreLoggerSettings from "../../../../Types/DatabaseTypes/ModCoreLoggerSettings";
-import { useForm } from "@inertiajs/react";
+import { router, useForm } from "@inertiajs/react";
 import { Label } from "@/components/ui/label";
+import DiscordChannelPicker from "../../../../Components/Forms/DiscordChannelPicker";
 
 interface ConfigureLoggingProps {
     server: DiscordGuild;
@@ -57,7 +58,7 @@ export default function Configure({
                 <Button
                     variant={"outline"}
                     onClick={() =>
-                        (window.location.href = `/dashboard/servers/${server.id}`)
+                        router.visit(`/dashboard/servers/${server.id}`)
                     }
                     className="mb-4"
                 >
@@ -86,15 +87,14 @@ export default function Configure({
                         <form onSubmit={handleSubmit}>
                             <div className="grid gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="loggerChannelId">
-                                        Logger Channel ID
-                                    </Label>
-                                    <Input
-                                        id="loggerChannelId"
+                                    <DiscordChannelPicker
+                                        label="Select Logger Channel"
+                                        placeholder="Select a channel"
                                         value={data.loggerChannelId}
-                                        onChange={(e) =>
-                                            setData("loggerChannelId", e.target.value)
+                                        onUpdate={(value) =>
+                                            setData("loggerChannelId", value || '')
                                         }
+                                        required
                                     />
                                     <p className="text-sm text-muted-foreground">
                                         The channel where log messages will be
@@ -247,7 +247,7 @@ export default function Configure({
                                     />
                                 </div>
                             </div>
-                            <Button type="submit">Submit</Button>
+                            <Button type="submit" className="mt-2">Submit</Button>
                         </form>
                     </CardContent>
                 </Card>

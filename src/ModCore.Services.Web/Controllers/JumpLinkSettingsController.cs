@@ -1,27 +1,20 @@
-using InertiaCore;
+﻿using InertiaCore;
 using Microsoft.AspNetCore.Mvc;
-using ModCore.Common.Cache;
+using ModCore.Common.Database.Entities;
 using ModCore.Common.Database;
 using ModCore.Common.Discord.Entities.Enums;
-using ModCore.Common.Discord.Entities.Serializer;
-using ModCore.Common.Discord.Rest;
+using ModCore.Common.Utils;
 using ModCore.Services.Web.Attributes;
 using ModCore.Services.Web.Gates;
 using ModCore.Services.Web.Middleware;
-using ModCore.Services.Web.RequestBodies;
-using ModCore.Services.Web.Services;
-using System.Text.Json.Serialization;
 using System.Text.Json;
-using ModCore.Common.Discord.Entities.Messages;
-using ModCore.Common.Database.Entities;
-using ModCore.Common.Utils;
 
 namespace ModCore.Services.Web.Controllers
 {
-    [Route("dashboard/servers/{server_id}/logging")]
+    [Route("dashboard/servers/{server_id}/jumplink")]
     [RouteMiddleware(typeof(RequireAuthentication))]
     [ApiController]
-    public class LoggingSettingsController : ControllerBase
+    public class JumpLinkSettingsController : ControllerBase
     {
         [RouteMiddleware(typeof(RequireAuthentication))]
         [HttpGet]
@@ -42,18 +35,11 @@ namespace ModCore.Services.Web.Controllers
 
             var userServer = servers.Where(x => x.Id == server_id).FirstOrDefault();
 
-            var channels = await this.GetGuildChannelsAsync(server_id);
-
-            return Inertia.Render("Dashboard/Servers/Logging/Configure", new
+            return Inertia.Render("Dashboard/Servers/JumpLinkEmbed/Configure", new
             {
                 Server = userServer != default ? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions) : null,
                 DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions),
-                // Add any specific data needed for logging settings
-                Settings = database.LoggerSettings.FirstOrDefault(x => x.GuildId == server_id) ?? new DatabaseLoggerSettings(),
-                Channels = JsonSerializer.SerializeToDocument(channels, options: serializerOptions),
             });
         }
-
-        // Add a post method here to update the logging settings
     }
 }

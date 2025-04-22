@@ -15,6 +15,7 @@ import { DiscordRole } from "@/Types/DiscordTypes/DiscordRole";
 import { PagePropsWith } from "@/Types/PageProps";
 import { useState } from "react";
 import { Button } from "@/Components/ui/button";
+import { router } from "@inertiajs/react";
 
 interface ConfigureAutoRoleProps {
     server: DiscordGuild;
@@ -57,7 +58,7 @@ export default function Configure({
     return (
         <>
             <DashboardLayout>
-                <Button variant={"outline"} onClick={()=> window.location.href = `/dashboard/servers/${server.id}`} className="mb-4">
+                <Button variant={"outline"} onClick={()=> router.visit(`/dashboard/servers/${server.id}`)} className="mb-4">
                     Back to Overview
                 </Button>
                 <div className="md:flex items-center mb-4">

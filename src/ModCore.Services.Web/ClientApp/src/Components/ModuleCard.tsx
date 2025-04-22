@@ -1,6 +1,7 @@
 import { JSX } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Tilt } from "./ui/tilt";
+import { router } from "@inertiajs/react";
 
 export default function ModuleCard({link, name, icon, description, done} : {link: string, name: string, icon: JSX.Element, description: string, done: boolean})
 {
@@ -14,14 +15,14 @@ export default function ModuleCard({link, name, icon, description, done} : {link
                     {
                         if(done)
                         {
-                            window.location.href = link
+                            router.visit(link);
                         }
                         else
                         {
                             toast({
                                 title: "Module In Development",
                                 description: "This module is still in development! Please be patient.",
-                            })
+                            });
                         }
                     }
                 }

@@ -1,4 +1,4 @@
-import { Head, useForm, usePage } from "@inertiajs/react";
+import { Head, router, useForm, usePage } from "@inertiajs/react";
 import HomeLayout from "@/Layouts/HomeLayout.js";
 import { PagePropsWith } from "@/Types/PageProps";
 import { DiscordGuild } from "@/Types/DiscordTypes/DiscordGuild";
@@ -54,10 +54,10 @@ export default function Configure({
 }: PagePropsWith<ManagePageProps>) {
     const authenticated = user != null;
 
-    if (!authenticated) window.location.href = "/login";
+    if (!authenticated) router.visit("/login");
 
     if (!hasPermissionsFromString(server.permissions, "MANAGE_GUILD")) {
-        window.location.href = "/login";
+        router.visit("/login");
     }
 
     let icon = server?.icon ? server.icon : null;
@@ -124,7 +124,7 @@ export default function Configure({
                 {server && (
                     <div className="pb-20">
                         {/* Back to Overview link */}
-                        <Button variant={"outline"} onClick={()=> window.location.href = `/dashboard/servers/${server.id}`} className="mb-4">
+                        <Button variant={"outline"} onClick={() => router.visit(`/dashboard/servers/${server.id}`)} className="mb-4">
                             Back to Overview
                         </Button>
                         <div className="md:flex items-center mb-4">

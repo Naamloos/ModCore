@@ -10,7 +10,7 @@ import {
     CardTitle,
 } from "@/Components/ui/card";
 import { useEffect, useState } from "react";
-import { useForm, usePage } from "@inertiajs/react";
+import { router, useForm, usePage } from "@inertiajs/react";
 import DiscordChannelPicker from "../../../../Components/Forms/DiscordChannelPicker";
 import { Input } from "../../../../Components/ui/input";
 import ModCoreStarboard from "../../../../Types/DatabaseTypes/ModCoreStarboard";
@@ -69,7 +69,7 @@ export default function Configure({
                 <Button
                     variant={"outline"}
                     onClick={() =>
-                        (window.location.href = `/dashboard/servers/${server.id}`)
+                        router.visit(`/dashboard/servers/${server.id}`)
                     }
                     className="mb-4"
                 >

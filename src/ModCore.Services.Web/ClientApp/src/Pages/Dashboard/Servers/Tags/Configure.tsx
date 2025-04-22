@@ -42,6 +42,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/Components/ui/alert-dialog";
+import { router } from "@inertiajs/react";
 
 interface ConfigureTagsProps {
     server: DiscordGuild;
@@ -171,7 +172,7 @@ export default function Configure({
                 <Button
                     variant={"outline"}
                     onClick={() =>
-                        (window.location.href = `/dashboard/servers/${server.id}`)
+                        router.visit(`/dashboard/servers/${server.id}`)
                     }
                     className="mb-4"
                 >

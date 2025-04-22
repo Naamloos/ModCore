@@ -1,4 +1,4 @@
-import { Head, usePage } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import HomeLayout from "@/Layouts/HomeLayout.js";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { PagePropsWith } from "@/Types/PageProps";
@@ -83,7 +83,7 @@ export default function IndexPage({ dotnetVersion, application }: PagePropsWith<
                                 </div>
                                 <div className="mt-4">
                                     <SignInWithDiscord onClick={() => {
-                                        window.location.href = "/login";
+                                        router.visit("/login");
                                     }} />
                                 </div>
                             </CardContent>

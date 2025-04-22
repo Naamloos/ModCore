@@ -9,6 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/Components/ui/card";
+import { router } from "@inertiajs/react";
 
 interface ConfigureTicketsProps {
     server: DiscordGuild;
@@ -31,7 +32,7 @@ export default function Configure({
     return (
         <>
             <DashboardLayout>
-                <Button variant={"outline"} onClick={()=> window.location.href = `/dashboard/servers/${server.id}`} className="mb-4">
+                <Button variant={"outline"} onClick={() => router.visit(`/dashboard/servers/${server.id}`)} className="mb-4">
                     Back to Overview
                 </Button>
                 <div className="md:flex items-center mb-4">

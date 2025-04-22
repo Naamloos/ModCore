@@ -1,4 +1,4 @@
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import { PageProps } from "@/Types/PageProps";
 import DashboardLayout from "@/Layouts/DashboardLayout";
 import {
@@ -59,7 +59,7 @@ export default function Index({ user, application }: PageProps) {
 
     const [modalOpen, setModalOpen] = useState(true);
 
-    if (!authenticated) window.location.href = "/login";
+    if (!authenticated) router.visit("/login");
 
     return (
         <>

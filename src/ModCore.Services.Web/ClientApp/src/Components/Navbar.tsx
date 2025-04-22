@@ -1,6 +1,6 @@
 import { DiscordApplication } from "@/Types/DiscordTypes/DiscordApplication";
 import { User } from "@/Types/User";
-import { usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { IconLogout, IconMenu } from "@tabler/icons-react";
 import LogoImage from "@/Assets/logo.png";
 
@@ -41,7 +41,7 @@ export default function Navbar({
                         className="w-12 h-12 mt-3 rounded-xl mb-3 hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                         onClick={() => {
                             // Add your logout logic here
-                            window.location.href = "/logout";
+                            router.visit("/logout");
                         }}
                     >
                         <IconLogout size={24} />
@@ -49,7 +49,7 @@ export default function Navbar({
                     <button
                         className="w-12 h-12 mt-3 rounded-xl mb-3 hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                         onClick={() => {
-                            window.location.href = "/dashboard";
+                            router.visit("/dashboard");
                         }}
                     >
                         <img

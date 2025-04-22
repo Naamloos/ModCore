@@ -1,4 +1,4 @@
-import { Head, usePage } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import HomeLayout from "@/Layouts/HomeLayout.js";
 import { PageProps, PagePropsWith } from "@/Types/PageProps";
 import { DiscordGuild } from "@/Types/DiscordTypes/DiscordGuild";
@@ -29,7 +29,7 @@ import { useState } from "react";
 export default function Todo({ user }: PageProps) {
     const authenticated = user != null;
 
-    if (!authenticated) window.location.href = "/login";
+    if (!authenticated) router.visit("/login");
 
     return (
         <>
