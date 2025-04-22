@@ -129,9 +129,6 @@ export default function Manage({
     server,
     databaseServer,
 }: PagePropsWith<ManagePageProps>) {
-    const authenticated = user != null;
-
-    if (!authenticated) router.visit("/login");
 
     if (!hasPermissionsFromString(server.permissions, "MANAGE_GUILD")) {
         router.visit("/login");
@@ -226,8 +223,8 @@ export default function Manage({
                                     />
                                 ))}
                             </div>
-                            {/* Danger Zone */}
-                            <div className="border-red-900 border-solid p-4 mt-16 sm:mx-16 rounded-xl border bg-card text-card-foreground shadow">
+                            {/* Danger Zone, extra margin so it's not immediately visible */}
+                            <div className="border-red-900 border-solid p-4 mt-60 sm:mx-16 rounded-xl border bg-card text-card-foreground shadow">
                                 <h3 className="text-xl font-bold mb-4 text-center">
                                     <IconAlertSquareRounded className="inline" />
                                     &nbsp;Danger Zone&nbsp;

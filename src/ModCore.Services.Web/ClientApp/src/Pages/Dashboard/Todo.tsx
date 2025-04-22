@@ -27,9 +27,6 @@ import ConfirmPopup from "@/Components/ConfirmPopup";
 import { useState } from "react";
 
 export default function Todo({ user }: PageProps) {
-    const authenticated = user != null;
-
-    if (!authenticated) router.visit("/login");
 
     return (
         <>

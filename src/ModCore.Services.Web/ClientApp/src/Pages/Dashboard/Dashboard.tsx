@@ -55,11 +55,7 @@ const modules = [
 ];
 
 export default function Index({ user, application }: PageProps) {
-    const authenticated = user != null;
-
     const [modalOpen, setModalOpen] = useState(true);
-
-    if (!authenticated) router.visit("/login");
 
     return (
         <>

@@ -52,9 +52,6 @@ export default function Configure({
     server,
     welcomeSettings
 }: PagePropsWith<ManagePageProps>) {
-    const authenticated = user != null;
-
-    if (!authenticated) router.visit("/login");
 
     if (!hasPermissionsFromString(server.permissions, "MANAGE_GUILD")) {
         router.visit("/login");

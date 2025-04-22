@@ -3,9 +3,14 @@ import Navbar from "@/Components/Navbar";
 import Sidebar from "@/Components/Sidebar";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { Toaster } from "../Components/ui/toaster";
+import { router, usePage } from "@inertiajs/react";
+import { User } from "../Types/User";
 
 export default function DashboardLayout({ children }: PropsWithChildren<{}>) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { user } = usePage<{ user: User }>().props;
+    const authenticated = user != null;
+    if(!authenticated) router.visit("/login");
 
     // useEffect that sets isMenuOpen to false when window resizes
     useEffect(() => {
@@ -32,7 +37,7 @@ export default function DashboardLayout({ children }: PropsWithChildren<{}>) {
                     <header className="md:ml-12">
                         <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
                     </header>
-                    <main className="md:ml-12 py-10 px-6 sm:px-10 mt-10 md:mt-0">
+                    <main className="md:ml-12 py-10 px-6 sm:px-10">
                         <div className="container mx-auto relative">
                             {children}
                         </div>
