@@ -104,7 +104,7 @@ export default function IndexPage({
                 <div className="mt-4">
                   <SignInWithDiscord
                     onClick={() => {
-                      router.visit("/login");
+                      window.location.href = "/login";
                     }}
                   />
                 </div>
