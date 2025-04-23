@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint ./src"
   },
   "dependencies": {
     "@emoji-mart/data": "^1.2.1",
@@ -26,6 +27,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "emoji-mart": "^5.6.0",
+    "eslint-define-config": "^2.1.0",
     "framer-motion": "^12.6.2",
     "lucide-react": "^0.485.0",
     "react-hook-form": "^7.55.0",
@@ -35,6 +37,11 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@eslint-react/eslint-plugin": "^1.48.4",
+    "@eslint/css": "^0.7.0",
+    "@eslint/js": "^9.25.1",
+    "@eslint/json": "^0.12.0",
+    "@eslint/markdown": "^6.4.0",
     "@inertiajs/react": "^1.0.0",
     "@types/node": "^22.10.2",
     "@types/react": "^19.0.1",
@@ -42,17 +49,26 @@
     "@vitejs/plugin-react": "^3.0.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.4.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.0.0",
+    "jiti": "^2.4.2",
     "laravel-vite-plugin": "^0.7.4",
     "postcss": "^8.4.49",
     "postcss-preset-mantine": "^1.8.0",
     "postcss-simple-vars": "^7.0.1",
-    "prettier": "^3.0.0",
+    "prettier": "3.5.3",
     "prettier-plugin-tailwindcss": "^0.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tailwindcss": "^3.4.16",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.31.0",
     "vite": "^4.0.0",
+    "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-svgr": "^4.3.0"
   }
 }

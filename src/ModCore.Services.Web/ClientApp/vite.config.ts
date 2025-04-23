@@ -5,6 +5,7 @@ import path from "path";
 import { mkdirSync } from "fs";
 import svgr from "vite-plugin-svgr";
 import dts from "vite-plugin-dts";
+import eslint from 'vite-plugin-eslint';
 
 const outDir = "../wwwroot/build";
 
@@ -23,7 +24,8 @@ export default defineConfig({
        icon: true,
      },
    }),
-   dts()
+   dts(),
+   eslint(),
   ],
   resolve: {
    alias: {
