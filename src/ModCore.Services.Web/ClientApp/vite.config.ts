@@ -24,8 +24,7 @@ export default defineConfig({
        icon: true,
      },
    }),
-   dts(),
-   eslint(),
+   dts()
   ],
   resolve: {
    alias: {

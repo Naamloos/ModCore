@@ -41,7 +41,7 @@ export default function Navbar({
             className="w-12 h-12 mt-3 rounded-xl mb-3 hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
             onClick={() => {
               // Add your logout logic here
-              router.visit("/logout");
+              window.location.href = "/logout";
             }}
             type="button"
           >

@@ -13,6 +13,7 @@ import {
 import { Separator } from "@/Components/ui/separator";
 // @ts-expect-error This works.
 import LogoImage from "@/Assets/logo.png";
+import { Tilt } from "../Components/ui/tilt";
 
 type IndexPageProps = {
   dotnetVersion: string;
@@ -81,7 +82,7 @@ export default function IndexPage({
                   Learn more about what ModCore can do for your server.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-6">
                 <p className="text-left text-sm md:text-base text-gray-300">
                   ModCore is designed to simplify Discord server management with
                   a range of features that make moderation a breeze.
@@ -118,7 +119,7 @@ export default function IndexPage({
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Feature 1 */}
-              <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-lg rounded-lg hover:shadow-2xl transition-shadow">
+              <HoverCard className="bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-lg rounded-lg hover:shadow-2xl transition-shadow">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold">
                     Effective Server Management
@@ -135,10 +136,10 @@ export default function IndexPage({
                     powerful moderation tools.
                   </p>
                 </CardContent>
-              </Card>
+              </HoverCard>
 
               {/* Feature 2 */}
-              <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-lg rounded-lg hover:shadow-2xl transition-shadow">
+              <HoverCard className="bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-lg rounded-lg hover:shadow-2xl transition-shadow">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold">
                     Starboard for Great Messages
@@ -155,10 +156,10 @@ export default function IndexPage({
                     feature.
                   </p>
                 </CardContent>
-              </Card>
+              </HoverCard>
 
               {/* Feature 3 */}
-              <Card className="bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-lg rounded-lg hover:shadow-2xl transition-shadow">
+              <HoverCard className="bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-lg rounded-lg hover:shadow-2xl transition-shadow">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold">
                     Powerful Moderation System
@@ -174,7 +175,7 @@ export default function IndexPage({
                     Keep out bad actors with a robust moderation system.
                   </p>
                 </CardContent>
-              </Card>
+              </HoverCard>
             </div>
           </section>
         </div>
@@ -182,3 +183,12 @@ export default function IndexPage({
     </>
   );
 }
+
+// Simple quick easy and lazy way to upgrade behavior of the card
+const HoverCard = (props: React.HTMLAttributes<HTMLDivElement>) => {
+  return (
+    <Tilt rotationFactor={10} isRevese>
+      <Card {...props}>{props.children}</Card>
+    </Tilt>
+  );
+};
