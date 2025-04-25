@@ -1,4 +1,5 @@
 ﻿using ModCore.Common.Discord.Entities.Channels;
+using ModCore.Common.Discord.Entities.Components;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Interactions;
@@ -88,7 +89,7 @@ namespace ModCore.Common.Discord.Entities.Messages
         public Optional<Channel> Thread { get; set; }
 
         [JsonPropertyName("components")]
-        public Optional<MessageComponent[]> Components { get; set; }
+        public Optional<Component[]> Components { get; set; }
 
         [JsonPropertyName("sticker_items")]
         public Optional<MessageStickerItem[]> StickerItems { get; set; }

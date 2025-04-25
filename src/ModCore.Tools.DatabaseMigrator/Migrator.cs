@@ -602,7 +602,7 @@ namespace ModCore.Tools.DatabaseMigrator
             {
                 GuildId = guildId,
                 AppealChannelId = 0,
-                LoggingChannelId = 0,
+                //LoggingChannelId = 0,
                 NicknameConfirmationChannelId = 0,
                 ModlogChannelId = 0,
                 TicketChannelId = 0

@@ -7,10 +7,12 @@ using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.InteractionFramework;
 using ModCore.Common.InteractionFramework.Attributes;
 using ModCore.Common.Utils;
+using ModCore.Common.Xaml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace ModCore.Services.Shard.Commands
@@ -22,6 +24,28 @@ namespace ModCore.Services.Shard.Commands
         public AboutCommands(ILogger<AboutCommands> logger)
         {
             _logger = logger;
+        }
+
+        [SlashCommand("testxaml", "Tests Xaml")]
+        public async ValueTask TestXamlAsync(SlashCommandContext context)
+        {
+            var data = context.EventData;
+
+            DiscordXaml resolver = new DiscordXaml();
+
+            var view = await resolver.CompileXamlAsync("ModCore.Common.Xaml.SampleView.xaml", new SampleViewModel(
+                "I got filled through a binding", 
+                new Common.Discord.Entities.Guilds.Emoji()
+                {
+                    Id = 784477585139695626,
+                    Name = "yep"
+                }));
+
+            var resp = await context.RestClient.CreateInteractionResponseAsync(data.Id, data.Token, InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
+            {
+                Flags = MessageFlags.ComponentsV2,
+                Components = view.ToArray()
+            });
         }
 
         [SlashCommand("about", "Shows information about this bot.", dm_permission: true)]

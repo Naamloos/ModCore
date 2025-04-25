@@ -27,6 +27,7 @@
     <ProjectReference Include="..\ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj" />
     <ProjectReference Include="..\ModCore.Common.InteractionFramework\ModCore.Common.InteractionFramework.csproj" />
     <ProjectReference Include="..\ModCore.Common.SettingsHelper\ModCore.Common.SettingsHelper.csproj" />
+    <ProjectReference Include="..\ModCore.Common.Xaml\ModCore.Common.Xaml.csproj" />
   </ItemGroup>
 
 </Project>

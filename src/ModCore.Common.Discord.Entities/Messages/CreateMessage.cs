@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
+﻿using ModCore.Common.Discord.Entities.Components;
+using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Messages;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ namespace ModCore.Common.Discord.Entities.Messages
         public Optional<MessageReference> MessageReference { get; set; }
 
         [JsonPropertyName("components")]
-        public Optional<MessageComponent[]> Components { get; set; }
+        public Optional<Component[]> Components { get; set; }
 
         [JsonPropertyName("sticker_ids")]
         public Optional<Snowflake[]> StickerIds { get; set; }

@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Services.Jobs", "Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Common.SettingsHelper", "ModCore.Common.SettingsHelper\ModCore.Common.SettingsHelper.csproj", "{B5AE3E70-9F04-4803-8F45-A7563CFDE23A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Common.Xaml", "ModCore.Common.Xaml\ModCore.Common.Xaml.csproj", "{134EC3B8-5C96-456E-BDE7-0696D7F38186}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{B5AE3E70-9F04-4803-8F45-A7563CFDE23A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B5AE3E70-9F04-4803-8F45-A7563CFDE23A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B5AE3E70-9F04-4803-8F45-A7563CFDE23A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{134EC3B8-5C96-456E-BDE7-0696D7F38186}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{134EC3B8-5C96-456E-BDE7-0696D7F38186}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{134EC3B8-5C96-456E-BDE7-0696D7F38186}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{134EC3B8-5C96-456E-BDE7-0696D7F38186}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -104,6 +110,7 @@ Global
 		{757E24B7-C527-4410-9B08-61167C68862E} = {97FEEA02-770A-4D8E-AFF9-C407D8A37504}
 		{29629521-6EA7-447A-9630-DCBFA978C0CA} = {13222A28-2536-425B-B054-0DB5CD45AE53}
 		{B5AE3E70-9F04-4803-8F45-A7563CFDE23A} = {41BA1590-3611-42E3-AA71-53260FD0CBC5}
+		{134EC3B8-5C96-456E-BDE7-0696D7F38186} = {41BA1590-3611-42E3-AA71-53260FD0CBC5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {09EBF130-3F44-4893-A11C-C265A10DC043}

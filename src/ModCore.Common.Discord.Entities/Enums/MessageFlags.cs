@@ -19,6 +19,7 @@ namespace ModCore.Common.Discord.Entities.Enums
         Loading = 1 << 7,
         FailedToMentionSomeRolesInThread = 1 << 8,
         SuppressNotifications = 1 << 12,
-        IsVoiceMessage = 1 << 13
+        IsVoiceMessage = 1 << 13,
+        ComponentsV2 = 1 << 15,
     }
 }
