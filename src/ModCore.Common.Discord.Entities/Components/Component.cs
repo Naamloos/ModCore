@@ -10,12 +10,17 @@ namespace ModCore.Common.Discord.Entities.Components
 {
     [JsonDerivedType(typeof(ActionRow))]
     [JsonDerivedType(typeof(Button))]
+    [JsonDerivedType(typeof(Container))]
+    [JsonDerivedType(typeof(StringSelect))]
+    [JsonDerivedType(typeof(TextDisplay))]
+    [JsonDerivedType(typeof(Section))]
+    [JsonDerivedType(typeof(Thumbnail))]
     public class Component
     {
         [JsonPropertyName("type")]
-        public ComponentType Type { get; set; }
+        public virtual ComponentType Type { get; set; }
 
         [JsonPropertyName("id")]
-        public int? Id { get; set; } = Random.Shared.Next();
+        public Optional<int> Id { get; set; } = Optional<int>.None;
     }
 }

@@ -2,6 +2,7 @@
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Gateway.EventData.Outgoing;
 using ModCore.Common.Discord.Gateway.Events;
+using System.Reflection;
 
 namespace ModCore.Common.Discord.Gateway
 {
@@ -17,6 +18,27 @@ namespace ModCore.Common.Discord.Gateway
         {
             var type = typeof(T);
             subscribers.Add(type);
+        }
+
+        public void SubscribeEvents(Assembly assembly)
+        {
+            var types = assembly.GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract && typeof(ISubscriber).IsAssignableFrom(t));
+            foreach (var type in types)
+            {
+                if (type.IsGenericType)
+                {
+                    var genericType = type.GetGenericTypeDefinition();
+                    if (genericType == typeof(ISubscriber<>))
+                    {
+                        subscribers.Add(type);
+                    }
+                }
+                else
+                {
+                    subscribers.Add(type);
+                }
+            }
         }
     }
 }

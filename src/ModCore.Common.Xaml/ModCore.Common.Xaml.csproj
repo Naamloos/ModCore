@@ -23,16 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="SampleView.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="SampleView.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
     <PackageReference Include="Portable.Xaml" Version="0.26.0" />
     <PackageReference Include="System.Threading" Version="4.3.0" />

@@ -12,6 +12,7 @@ using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.InteractionFramework;
 using ModCore.Common.Utils;
+using ModCore.Services.Shard.Services;
 using System.Reflection;
 
 namespace ModCore.Services.Shard.EventHandlers
@@ -28,8 +29,6 @@ namespace ModCore.Services.Shard.EventHandlers
         private readonly InteractionService _interactions;
         private readonly TransientService<DatabaseContext> _database;
         private readonly TimerService _timerService;
-
-        private bool commandsRegistered = false;
         private bool initialized = false;
 
         public StartupEvents(ILogger<StartupEvents> logger, DiscordRest rest, 

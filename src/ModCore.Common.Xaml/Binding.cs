@@ -1,15 +1,20 @@
+using ModCore.Common.Discord.Entities;
 using Portable.Xaml.Markup;
 using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace ModCore.Common.Xaml
 {
     [MarkupExtensionReturnType(typeof(object))]
-    [TypeForwardedFrom("PresentationFramework.dll")]
+    [XamlSetMarkupExtension("Binding")]
     public class Binding : MarkupExtension
     {
+        [ConstructorArgument("path")]
         public string Path { get; set; }
+
+        public Binding() { }
 
         public Binding(string path)
         {
@@ -18,33 +23,48 @@ namespace ModCore.Common.Xaml
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
+            // Can't do anything without a service provider
             if (serviceProvider == null)
-                throw new ArgumentNullException(nameof(serviceProvider));
+                return null!;
 
-            // Retrieve the IProvideValueTarget service  
+            // Retrieve the IProvideValueTarget service    
             var provideValueTarget = serviceProvider.GetService(typeof(IProvideValueTarget)) as IProvideValueTarget;
             if (provideValueTarget == null)
-                throw new InvalidOperationException("IProvideValueTarget service is not available.");
+                return null!;
 
-            // Ensure the target object and property are valid  
+            // Ensure the target object and property are valid    
             var targetObject = provideValueTarget.TargetObject;
-            var targetProperty = provideValueTarget.TargetProperty;
+            var targetProperty = provideValueTarget.TargetProperty as PropertyInfo;
             if (targetObject == null || targetProperty == null)
-                throw new InvalidOperationException("Target object or property is null.");
+                return null!;
 
-            // Use BindingContext.Value for runtime binding resolution  
+            // Use BindingContext.Value for runtime binding resolution    
             var bindingContext = BindingContext.Value;
             if (bindingContext == null)
-                return $"Unable to resolve binding {Path}";
+                return null!;
 
-            // Resolve the binding value dynamically  
+            // Resolve the binding value dynamically    
             var propertyInfo = bindingContext.GetType().GetProperty(Path);
             if (propertyInfo == null)
-                throw new InvalidOperationException($"Property '{Path}' not found on binding context.");
+                return null!;
 
-            return propertyInfo.GetValue(bindingContext);
+            // Get the value from the binding context.
+            object value = propertyInfo.GetValue(bindingContext);
+
+            // If we're working with an Optional<T>, we need some special hax.
+            if (targetProperty.PropertyType.IsGenericType && targetProperty.PropertyType.GetGenericTypeDefinition() == typeof(Optional<>))
+            {
+                // Get generic argument type
+                var genericArgument = targetProperty.PropertyType.GetGenericArguments()[0];
+                // Create a new Optional<T> instance with the resolved value  
+                var optionalType = typeof(Optional<>).MakeGenericType(genericArgument);
+                // It shouldn't matter whether this is a Nullable type or not, but this resolves out issues with Optionals.
+                return Activator.CreateInstance(optionalType, value)!;
+            }
+
+            return value ?? null!;
         }
 
-        public static AsyncLocal<object> BindingContext = new AsyncLocal<object>();
+        public static AsyncLocal<object?> BindingContext = new AsyncLocal<object?>();
     }
 }

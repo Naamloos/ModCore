@@ -4,23 +4,30 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Entities.Components
 {
     public class StringSelect : InteractiveComponent
     {
-        public ComponentType Type { get; set; } = ComponentType.StringSelect;
+        [JsonPropertyName("type")]
+        public override ComponentType Type { get; set; } = ComponentType.StringSelect;
 
+        [JsonPropertyName("options")]
         public List<SelectOption> Options { get; set; } = new List<SelectOption>();
 
-        public string? Placeholder { get; set; } = null;
+        [JsonPropertyName("placeholder")]
+        public Optional<string> Placeholder { get; set; } = Optional<string>.None;
 
-        public int? MinValues { get; set; } = null;
+        [JsonPropertyName("min_values")]
+        public Optional<int> MinValues { get; set; } = Optional<int>.None;
 
-        public int? MaxValues { get; set; } = null;
+        [JsonPropertyName("max_values")]
+        public Optional<int> MaxValues { get; set; } = Optional<int>.None;
 
-        public bool? Disabled { get; set; } = false;
+        [JsonPropertyName("disabled")]
+        public Optional<bool> Disabled { get; set; } = Optional<bool>.None;
     }
 
     public class SelectOption

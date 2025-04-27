@@ -16,6 +16,8 @@ using ModCore.Services.Shard.EventHandlers;
 using ModCore.Common.Database;
 using ModCore.Common.Utils;
 using ModCore.Common.SettingsHelper;
+using System.Reflection;
+using ModCore.Services.Shard.Services;
 
 namespace ModCore.Services.Shard
 {
@@ -57,12 +59,7 @@ namespace ModCore.Services.Shard
                     services.AddDiscordGateway(config =>
                     {
                         config.Intents = Intents.AllUnprivileged | Intents.MessageContents;
-                        config.SubscribeEvents<StartupEvents>();
-                        config.SubscribeEvents<MessageCacheEvents>();
-                        config.SubscribeEvents<SimpleEvalEvent>();
-
-                        // These events live in the cache service.
-                        config.SubscribeEvents<CacheEvents>();
+                        config.SubscribeEvents(Assembly.GetExecutingAssembly());
 
                         config.Activity = new Activity()
                         {

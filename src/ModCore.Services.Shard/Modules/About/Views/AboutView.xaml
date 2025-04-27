@@ -1,0 +1,44 @@
+﻿<DiscordView
+    xmlns="clr-namespace:ModCore.Common.Xaml;assembly=ModCore.Common.Xaml"
+    xmlns:Discord="clr-namespace:ModCore.Common.Discord.Entities.Components;assembly=ModCore.Common.Discord.Entities"
+	xmlns:x="clr-namespace:System;assembly=mscorlib"
+>
+	<Discord:Container
+		AccentColor="{Binding AccentColor}"
+	>
+		<!-- TODO: add ModCore logo to the right. Add a Section with a Thumbnail accessory. -->
+		<Discord:Container.Components>
+			<Discord:Section>
+				<Discord:Section.Components>
+					<Discord:TextDisplay>
+						<Discord:TextDisplay.Content>
+							# Welcome to ModCore v3
+						</Discord:TextDisplay.Content>
+					</Discord:TextDisplay>
+					<Discord:TextDisplay>
+						<Discord:TextDisplay.Content xml:space="preserve">
+							**Main Developer**&#x0a;[Naamloos](https://github.com/Naamloos)
+						</Discord:TextDisplay.Content>
+					</Discord:TextDisplay>
+					<Discord:TextDisplay>
+						<Discord:TextDisplay.Content xml:space="preserve">
+							**Want to contribute?**&#x0a;Contributions are always welcome at our [GitHub repo](https://github.com/Naamloos/ModCore).
+						</Discord:TextDisplay.Content>
+					</Discord:TextDisplay>
+				</Discord:Section.Components>
+				<Discord:Section.Accessory>
+					<Discord:Thumbnail
+						Media="{Binding AvatarMedia}"	
+					/>
+				</Discord:Section.Accessory>
+			</Discord:Section>
+			<Discord:TextDisplay>
+				<Discord:TextDisplay.Content xml:space="preserve">
+					**Donate?**&#x0a;Currently, ModCore is hosted off my (Naamloos's) own money. Donations are always welcome over at [Ko-Fi](https://ko-fi.com/Naamloos)!
+				</Discord:TextDisplay.Content>
+			</Discord:TextDisplay>
+			<Discord:TextDisplay Content="{Binding PreviousContributors}" />
+			<Discord:TextDisplay Content="{Binding Version}" />
+		</Discord:Container.Components>
+	</Discord:Container>
+</DiscordView>

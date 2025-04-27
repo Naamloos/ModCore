@@ -12,25 +12,25 @@ namespace ModCore.Common.Discord.Entities.Components
     public class Button : InteractiveComponent
     {
         [JsonPropertyName("type")]
-        public ComponentType Type { get; set; } = ComponentType.Button;
+        public override ComponentType Type { get; set; } = ComponentType.Button;
 
         [JsonPropertyName("style")]
         public ButtonStyle Style { get; set; } = ButtonStyle.Primary;
 
         [JsonPropertyName("label")]
-        public string? Label { get; set; } = null;
+        public Optional<string> Label { get; set; } = Optional<string>.None;
 
         [JsonPropertyName("emoji")]
-        public Emoji? Emoji { get; set; } = null;
+        public Optional<Emoji> Emoji { get; set; } = Optional<Emoji>.None;
 
         [JsonPropertyName("sku_id")]
-        public Snowflake? SkuId { get; set; } = null;
+        public Optional<Snowflake> SkuId { get; set; } = Optional<Snowflake>.None;
 
         [JsonPropertyName("url")]
-        public string? Url { get; set; } = null;
+        public Optional<string> Url { get; set; } = Optional<string>.None;
 
         [JsonPropertyName("disabled")]
-        public bool? Disabled { get; set; } = null;
+        public Optional<bool> Disabled { get; set; } = Optional<bool>.None;
     }
 
     public enum ButtonStyle

@@ -12,12 +12,10 @@ namespace ModCore.Services.Shard.EventHandlers
 {
     public class MessageCacheEvents : ISubscriber<MessageCreate>, ISubscriber<MessageUpdate>, ISubscriber<MessageDelete>, ISubscriber<MessageBulkDelete>
     {
-        private readonly ILogger _logger;
         private readonly CacheService _cache;
 
-        public MessageCacheEvents(ILogger<StartupEvents> logger, CacheService cacheService)
+        public MessageCacheEvents(CacheService cacheService)
         {
-            _logger = logger;
             _cache = cacheService;
         }
 

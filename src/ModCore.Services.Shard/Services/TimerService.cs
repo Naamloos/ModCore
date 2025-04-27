@@ -12,7 +12,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModCore.Services.Shard
+namespace ModCore.Services.Shard.Services
 {
     public class TimerService
     {

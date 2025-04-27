@@ -6,6 +6,7 @@ using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.InteractionFramework;
 using ModCore.Common.InteractionFramework.Attributes;
+using ModCore.Services.Shard.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace ModCore.Services.Shard.Commands
+namespace ModCore.Services.Shard.Modules.Reminders
 {
     [SlashCommand("remind", "Reminder commands")]
     public class ReminderCommands : BaseCommandHandler
@@ -29,9 +30,9 @@ namespace ModCore.Services.Shard.Commands
 
         // TODO use the new jobs system for this? should be more reliable
         [SlashCommand("me", "Reminds you at a given time.")]
-        public async ValueTask Me(SlashCommandContext ctx, 
-            [Option("in", "Time to trigger at", ApplicationCommandOptionType.String)]string time,
-            [Option("about", "What to remind you about", ApplicationCommandOptionType.String)]string about)
+        public async ValueTask Me(SlashCommandContext ctx,
+            [Option("in", "Time to trigger at", ApplicationCommandOptionType.String)] string time,
+            [Option("about", "What to remind you about", ApplicationCommandOptionType.String)] string about)
         {
             var trigger = DateTimeOffset.UtcNow.AddSeconds(5);
 

@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Entities.Components
 {
-    public class ActionRow : Component
+    public class TextDisplay : Component
     {
         [JsonPropertyName("type")]
-        public override ComponentType Type { get; set; } = ComponentType.ActionRow;
+        public override ComponentType Type { get; set; } = ComponentType.TextDisplay;
 
-        [JsonPropertyName("components")]
-        public List<Component> Components { get; set; } = new List<Component>();
+        [JsonPropertyName("content")]
+        public string Content { get; set; } = string.Empty;
     }
 }
