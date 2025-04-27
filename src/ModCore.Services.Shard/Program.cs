@@ -18,6 +18,7 @@ using ModCore.Common.Utils;
 using ModCore.Common.SettingsHelper;
 using System.Reflection;
 using ModCore.Services.Shard.Services;
+using ModCore.Common.Xaml;
 
 namespace ModCore.Services.Shard
 {
@@ -75,6 +76,7 @@ namespace ModCore.Services.Shard
                     services.AddDistributedMemoryCache();
                     services.AddModcoreCacheService();
                     services.AddDbContext<DatabaseContext>();
+                    services.AddDiscordXaml(Assembly.GetExecutingAssembly());
 
                     // Helper for scoped and transient services
                     services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));

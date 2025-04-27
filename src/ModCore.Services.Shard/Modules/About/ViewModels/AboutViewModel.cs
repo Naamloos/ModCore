@@ -22,7 +22,7 @@ namespace ModCore.Services.Shard.Modules.About.ViewModels
             {
                 Url = $"https://cdn.discordapp.com/avatars/{modCoreSelf.Id}/{modCoreSelf.AvatarHash}.png"
             };
-            PreviousContributors = "**Special thanks to all of these wonderful previous contributors:**\n"
+            PreviousContributors = "**Special thanks to all of these wonderful v2 contributors:**\n"
                 + string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})"));
         }
 

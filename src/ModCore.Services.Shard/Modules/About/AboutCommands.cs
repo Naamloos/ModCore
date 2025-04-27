@@ -21,12 +21,15 @@ namespace ModCore.Services.Shard.Modules.About
     public class AboutCommands : BaseCommandHandler
     {
         private readonly ILogger _logger;
+        private readonly DiscordXaml _xamlCompiler;
 
-        public AboutCommands(ILogger<AboutCommands> logger)
+        public AboutCommands(ILogger<AboutCommands> logger, DiscordXaml xamlCompiler)
         {
             _logger = logger;
+            _xamlCompiler = xamlCompiler;
         }
 
+        private const string ABOUT_VIEW_XAML = "ModCore.Services.Shard.Modules.About.Views.AboutView.xaml";
         [SlashCommand("about", "Shows information about this bot.", dm_permission: true)]
         public async ValueTask AboutAsync(SlashCommandContext context)
         {
@@ -39,11 +42,7 @@ namespace ModCore.Services.Shard.Modules.About
 
             // Create viewmodel and compile XAML with Bindings
             var viewModel = new AboutViewModel(modcoreSelf.Value);
-            var xamlCompiler = new DiscordXaml();
-            var compiledComponentList = await xamlCompiler.CompileXamlAsync(
-                "ModCore.Services.Shard.Modules.About.Views.AboutView.xaml",
-                viewModel,
-                this.GetType().Assembly);
+            var compiledComponentList = await _xamlCompiler.CompileXamlAsync(ABOUT_VIEW_XAML, viewModel);
 
             await context.RestClient.CreateInteractionResponseAsync(data.Id, data.Token, InteractionResponseType.ChannelMessageWithSource,
                 new InteractionMessageResponse()

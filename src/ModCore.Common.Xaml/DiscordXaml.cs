@@ -6,12 +6,18 @@ namespace ModCore.Common.Xaml
 {
     public class DiscordXaml
     {
-        public async ValueTask<IReadOnlyList<Component>> CompileXamlAsync(string resourceName, object? bindingContext, Assembly? parentAssembly = null)
+        private readonly Assembly parentAssembly;
+
+        public DiscordXaml(Assembly assembly)
+        {
+            parentAssembly = assembly;
+        }
+
+        public async ValueTask<IReadOnlyList<Component>> CompileXamlAsync(string resourceName, object? bindingContext)
         {
             await Task.Yield();
 
-            var assembly = parentAssembly ?? this.GetType().Assembly;
-            using var stream = assembly.GetManifestResourceStream(resourceName);
+            using var stream = parentAssembly.GetManifestResourceStream(resourceName);
             if (stream == null)
                 throw new Exception($"XAML resource '{resourceName}' not found.");
 
