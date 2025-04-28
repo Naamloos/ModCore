@@ -149,7 +149,7 @@ namespace ModCore.Common.Cache
                 return;
             }
 
-            history = JsonSerializer.Deserialize<MessageHistory>(cachedJson);
+            history = JsonSerializer.Deserialize<MessageHistory>(cachedJson, _serializerOptions);
             history.History.Add(newChange);
 
             _cache.SetString(cacheKey, JsonSerializer.Serialize(history, _serializerOptions));
