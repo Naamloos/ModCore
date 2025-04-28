@@ -13,7 +13,7 @@ namespace ModCore.Common.Utils
 
         public T GetTransient()
         {
-            return _services.GetRequiredService<T>();
+            return _services.CreateScope().ServiceProvider.GetRequiredService<T>();
         }
 
         public static implicit operator T(TransientService<T> value) { return value.GetTransient(); }

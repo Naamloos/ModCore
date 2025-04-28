@@ -31,7 +31,7 @@ namespace ModCore.Common.Database.Entities
         [JsonPropertyName("welcome_message_json")]
         [Column("welcome_message_json")]
         [MaxLength(100000)]
-        public string WelcomeMessageJson { get; set; }
+        public string WelcomeMessageJson { get; set; } = "{}";
 
         [JsonPropertyName("enabled")]
         [Column("enabled")]

@@ -19,12 +19,14 @@ using System.Reflection;
 using ModCore.Common.Xaml;
 using ModCore.Services.Shard.Modules.Timers.Services;
 using ModCore.Services.Shard.Abstractions;
+using Microsoft.EntityFrameworkCore;
+using Serilog.Core;
 
 namespace ModCore.Services.Shard
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
@@ -96,7 +98,35 @@ namespace ModCore.Services.Shard
                 })
                 .Build();
 
+
+            await ApplyMigrations(host);
+
             host.Run();
+        }
+
+        private static async Task ApplyMigrations(IHost host)
+        {
+            using (var scope = host.Services.CreateScope())
+            {
+                var database = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+                var pendingMigrations = await database.Database.GetPendingMigrationsAsync();
+                if (pendingMigrations.Any())
+                {
+                    logger.LogInformation("Applied pending database migrations: {0}", string.Join(", ", pendingMigrations));
+                    foreach (var migration in pendingMigrations)
+                    {
+                        logger.LogInformation("Pending migration: {0}", migration);
+                        await database.Database.MigrateAsync(migration);
+                        await database.SaveChangesAsync();
+                    }
+                }
+                else
+                {
+                    logger.LogInformation("No pending database migrations.");
+                }
+            }
         }
     }
 }

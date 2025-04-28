@@ -45,17 +45,6 @@ namespace ModCore.Services.Shard.Modules.Startup.Events
         public async ValueTask HandleEvent(Hello data)
         {
             _logger.LogInformation("Hello from event handler!");
-            var database = _database.GetTransient();
-            var pendingMigrations = await database.Database.GetPendingMigrationsAsync();
-            if (pendingMigrations.Any())
-            {
-                _logger.LogInformation("Applied pending database migrations: {0}", string.Join(", ", pendingMigrations));
-                await database.Database.MigrateAsync();
-            }
-            else
-            {
-                _logger.LogInformation("No pending database migrations.");
-            }
         }
 
         public async ValueTask HandleEvent(Ready data)

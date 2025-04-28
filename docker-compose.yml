@@ -9,34 +9,50 @@ services:
       - modcore_postgres:/var/lib/postgresql/data
     environment:
       - 'POSTGRES_HOST_AUTH_METHOD=trust'
+    env_file:
+      - .env
   
-  api:
-    build: ./api.dockerfile
+  web:
+    build: 
+      context: ./src
+      dockerfile: ./Dockerfiles/web.dockerfile
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    links:
+      - postgres
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+
+  jobs:
+    build:
+      context: ./src
+      dockerfile: ./Dockerfiles/jobs.dockerfile
     restart: unless-stopped
     links:
+      - postgres
+    env_file:
+      - .env
+    depends_on:
       - postgres
 
   # Shards, these define websocket connections with Discord's gateway.
   # Ensure shard_count is correct in .env!!!
   shard_0:
-    build: ./shard.dockerfile
+    build: 
+      context: ./src
+      dockerfile: ./Dockerfiles/shard.dockerfile
     restart: unless-stopped
     links:
       - postgres
     environment:
-      - SHARD_ID=0
+      - current_shard=0
     env_file:
       - .env
-      
-  shard_1:
-    build: ./shard.dockerfile
-    restart: unless-stopped
-    links:
+    depends_on:
       - postgres
-    environment:
-      - SHARD_ID=1
-    env_file:
-      - .env
       
 volumes:
   modcore_postgres:

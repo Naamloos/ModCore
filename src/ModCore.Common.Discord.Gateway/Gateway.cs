@@ -430,6 +430,11 @@ namespace ModCore.Common.Discord.Gateway
                 logger.LogError("Caught exception of type {0}!", ex.GetType());
                 logger.LogError("Event Handler: {0} ({1})", subscriber.GetType(), typeof(T).Name);
                 logger.LogError("Message: {0}\n{1}", ex.Message ?? "None provided.", ex.StackTrace);
+                if(ex.InnerException != null)
+                {
+                    logger.LogError("Inner Exception: {0}", ex.InnerException.Message);
+                    logger.LogError("Inner Stack Trace: {0}", ex.InnerException.StackTrace);
+                }
             }
         }
     }

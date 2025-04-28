@@ -1,0 +1,32 @@
+<Solution>
+  <Folder Name="/Common/">
+    <Project Path="ModCore.Common.Cache/ModCore.Common.Cache.csproj" />
+    <Project Path="ModCore.Common.Database/ModCore.Common.Database.csproj" />
+    <Project Path="ModCore.Common.Discord.Entities/ModCore.Common.Discord.Entities.csproj" />
+    <Project Path="ModCore.Common.Discord.Gateway/ModCore.Common.Discord.Gateway.csproj" />
+    <Project Path="ModCore.Common.Discord.Rest/ModCore.Common.Discord.Rest.csproj" />
+    <Project Path="ModCore.Common.InteractionFramework/ModCore.Common.InteractionFramework.csproj" />
+    <Project Path="ModCore.Common.SettingsHelper/ModCore.Common.SettingsHelper.csproj" />
+    <Project Path="ModCore.Common.Utils/ModCore.Common.Utils.csproj" />
+    <Project Path="ModCore.Common.Xaml/ModCore.Common.Xaml.csproj" />
+  </Folder>
+  <Folder Name="/Dockerfiles/">
+    <File Path="Dockerfiles/jobs.dockerfile" />
+    <File Path="Dockerfiles/shard.dockerfile" />
+    <File Path="Dockerfiles/web.dockerfile" />
+  </Folder>
+  <Folder Name="/Repository/">
+    <File Path="../CONTRIBUTING.md" />
+    <File Path="../docker-compose.yml" />
+    <File Path="../LICENSE" />
+    <File Path="../README.md" />
+  </Folder>
+  <Folder Name="/Services/">
+    <Project Path="ModCore.Services.Jobs/ModCore.Services.Jobs.csproj" />
+    <Project Path="ModCore.Services.Shard/ModCore.Services.Shard.csproj" />
+    <Project Path="ModCore.Services.Web/ModCore.Services.Web.csproj" />
+  </Folder>
+  <Folder Name="/Tools/">
+    <Project Path="ModCore.Tools.DatabaseMigrator/ModCore.Tools.DatabaseMigrator.csproj" />
+  </Folder>
+</Solution>
