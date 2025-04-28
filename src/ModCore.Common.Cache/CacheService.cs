@@ -158,14 +158,15 @@ namespace ModCore.Common.Cache
 
         private string getCacheKey<T, TKey>(TKey Id)
         {
-            var typeName = typeof(T).Name;
-            object idObj = Id as object;
-            return $"{typeName} :: {idObj.ToString()}";
+            var typeName = typeof(T).Name.Replace(":", "\\:"); // Escape colons in type name
+            return $"{typeName}:{Id!.ToString()!.Replace(":", "\\:")}"; // Escape colons in Id
         }
 
         private string getMessageCacheKey(Snowflake guildId, Snowflake channelId, Snowflake messageId)
         {
-            return $"message_cache :: {guildId} :: {channelId} :: {messageId}";
+            return $"message_cache:{guildId.ToString().Replace(":", "\\:")}" +
+                $":{channelId.ToString().Replace(":", "\\:")}" +
+                $":{messageId.ToString().Replace(":", "\\:")}"; // Escape colons in all parts
         }
 
         private T mergeObjects<T>(T oldValue, T newValue)
@@ -175,8 +176,8 @@ namespace ModCore.Common.Cache
 
             foreach (var property in type.GetProperties())
             {
-                object oldPropertyValue = property.GetValue(oldValue);
-                object newPropertyValue = property.GetValue(newValue);
+                object oldPropertyValue = property.GetValue(oldValue)!;
+                object newPropertyValue = property.GetValue(newValue)!;
 
                 if (property.PropertyType.IsInstanceOfType(typeof(Optional<>)))
                 {
