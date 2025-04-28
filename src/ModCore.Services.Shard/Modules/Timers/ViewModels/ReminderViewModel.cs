@@ -19,7 +19,7 @@ namespace ModCore.Services.Shard.Modules.Timers.ViewModels
         {
             Message = timerData.Text;
             var now = DateTimeOffset.UtcNow;
-            PingMessage = $"## ⏰ Hey, <@{timerData.UserId}>!\nAt <t:{timerData.CreatedAt.ToUnixTimeSeconds()}:f> you set a reminder to trigger <t:{now.ToUnixTimeSeconds()}:R>!";
+            PingMessage = $"## ⏰ Hey, <@{timerData.UserId}>!\n-# At <t:{timerData.CreatedAt.ToUnixTimeSeconds()}:f> you set a reminder to trigger <t:{now.ToUnixTimeSeconds()}:R>!";
         }
     }
 }
