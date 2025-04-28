@@ -4,9 +4,12 @@ using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
 using ModCore.Common.Database.Timers;
 using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Rest;
+using ModCore.Common.Xaml;
 using ModCore.Services.Shard.Abstractions;
+using ModCore.Services.Shard.Modules.Timers.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +24,7 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
         private readonly ILogger _logger;
         private readonly DiscordRest _rest;
         private readonly CacheService _cache;
+        private readonly DiscordXaml _xaml;
 
         private SemaphoreSlim _semaphore;
         private DatabaseTimer _timer;
@@ -28,7 +32,7 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
 
         private int shardId;
 
-        public TimerService(ILogger<TimerService> logger, DatabaseContext dbContext, DiscordRest rest, CacheService cache)
+        public TimerService(ILogger<TimerService> logger, DatabaseContext dbContext, DiscordRest rest, CacheService cache, DiscordXaml xaml)
         {
             _databaseContext = dbContext;
             _logger = logger;
@@ -37,6 +41,7 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
             _rest = rest;
             _cache = cache;
             _cancellation = new CancellationTokenSource();
+            _xaml = xaml;
         }
 
         public async ValueTask StartAsync(int shardId)
@@ -71,6 +76,10 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
                     _cancellation = new CancellationTokenSource();
 
                     var delay = nextTimer.TriggersAt.Subtract(DateTimeOffset.UtcNow);
+                    if(delay.Milliseconds < 0)
+                    {
+                        delay = TimeSpan.FromMilliseconds(1);
+                    }
                     if (delay.TotalMilliseconds > int.MaxValue)
                     {
                         // Time until this timer hits exceeds the total milliseconds max.
@@ -104,7 +113,14 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
                 {
                     await DispatchAsync(timer, false);
                 }
-                catch (Exception) { }
+                catch (Exception ex) 
+                { 
+                    if(_semaphore.CurrentCount == 0)
+                    {
+                        _semaphore.Release();
+                    }
+                    _logger.LogError(ex, "Error while dispatching timer {0} with type {1}!", timer.TimerId, timer.Type);
+                }
             }
         }
 
@@ -144,26 +160,11 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
             if (reminderData != null)
             {
                 // TODO add snooze button
-                var now = DateTimeOffset.UtcNow;
+                var components = await _xaml.CompileXamlAsync("ModCore.Services.Shard.Modules.Timers.Views.ReminderView.xaml", new ReminderViewModel(reminderData));
                 var msg = await _rest.CreateMessageAsync(reminderData.ChannelId, new CreateMessage()
                 {
-                    Content = $"<@{reminderData.UserId}>",
-                    Embeds = new Embed[1]
-                    {
-                        new Embed()
-                        {
-                            Title = "⏰ Reminder",
-                            Description = $"You set a reminder <t:{reminderData.CreatedAt.ToUnixTimeSeconds()}:R> to be reminded <t:{now.ToUnixTimeSeconds()}:R>",
-                            Fields = new List<EmbedField>
-                            {
-                                new()
-                                {
-                                    Name = "✏️ Reminder Text",
-                                    Value = reminderData.Text
-                                }
-                            }
-                        }
-                    },
+                    Flags = MessageFlags.ComponentsV2,
+                    Components = components.ToArray(),
                     AllowedMentions = new AllowedMention() { Parse = new[] { "users" } },
                 });
             }

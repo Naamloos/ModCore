@@ -10,11 +10,11 @@ namespace ModCore.Common.Database.Timers
     public record UnbanTimerData : ITimerData
     {
         [JsonPropertyName("user_id")]
-        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)]
         public ulong UserId { get; set; }
 
         [JsonPropertyName("display_name")]
-        [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
+        [JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)]
         public string DisplayName { get; set; } = "";
     }
 }

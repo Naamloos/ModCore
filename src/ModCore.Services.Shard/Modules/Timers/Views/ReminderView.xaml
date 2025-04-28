@@ -1,0 +1,13 @@
+﻿<DiscordView
+    xmlns="clr-namespace:ModCore.Common.Xaml;assembly=ModCore.Common.Xaml"
+    xmlns:Discord="clr-namespace:ModCore.Common.Discord.Entities.Components;assembly=ModCore.Common.Discord.Entities"
+	xmlns:x="clr-namespace:System;assembly=mscorlib"
+>
+	<Discord:Container AccentColor="{Binding AccentColor}">
+		<Discord:Container.Components>
+			<Discord:TextDisplay Content="{Binding PingMessage}"/>
+			<Discord:TextDisplay Content="{Binding Message}"/>
+			<Discord:TextDisplay Content="-# Thank you for using ModCore 💖"/>
+		</Discord:Container.Components>
+	</Discord:Container>
+</DiscordView>

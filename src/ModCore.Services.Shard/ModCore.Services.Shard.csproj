@@ -11,6 +11,9 @@
     <EmbeddedResource Include="Modules\About\Views\AboutView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </EmbeddedResource>
+    <EmbeddedResource Include="Modules\Timers\Views\ReminderView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
