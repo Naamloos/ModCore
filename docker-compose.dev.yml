@@ -1,0 +1,106 @@
+services:
+  postgres:
+    restart: unless-stopped
+    image: postgres:14-alpine
+    shm_size: 256mb
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+    volumes:
+      - modcore_postgres:/var/lib/postgresql/data
+    environment:
+      - 'POSTGRES_HOST_AUTH_METHOD=trust'
+    env_file:
+      - .env
+  
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    ports:
+      - 8082:80
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=postgres@example.com
+      - PGADMIN_DEFAULT_PASSWORD=postgres
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    depends_on:
+      - postgres
+    links:
+      - postgres
+    volumes:
+      - ./pgadmin_servers.json:/pgadmin4/servers.json
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    volumes:
+      - modcore_redis:/data
+
+  redis_commander:
+    image: rediscommander/redis-commander:latest
+    restart: unless-stopped
+    ports:
+      - 8081:8081
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    depends_on:
+      - redis
+    links:
+      - redis
+
+  rest_proxy:
+    restart: unless-stopped
+    image: ghcr.io/twilight-rs/http-proxy
+    environment:
+      - DISCORD_TOKEN=. # Fixes spamming NotPresent in console
+  
+  web:
+    build: 
+      context: ./src
+      dockerfile: ./Dockerfiles/web.dockerfile
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    links:
+      - postgres
+      - rest_proxy
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - rest_proxy
+
+  jobs:
+    build:
+      context: ./src
+      dockerfile: ./Dockerfiles/jobs.dockerfile
+    restart: unless-stopped
+    links:
+      - postgres
+      - rest_proxy
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - rest_proxy
+
+  # Shards, these define websocket connections with Discord's gateway.
+  # Ensure shard_count is correct in .env!!!
+  shard_0:
+    build: 
+      context: ./src
+      dockerfile: ./Dockerfiles/shard.dockerfile
+    restart: unless-stopped
+    links:
+      - postgres
+      - rest_proxy
+    environment:
+      - current_shard=0
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - rest_proxy
+      
+volumes:
+  modcore_postgres:
+  modcore_redis:

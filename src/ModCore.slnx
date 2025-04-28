@@ -17,6 +17,7 @@
   </Folder>
   <Folder Name="/Repository/">
     <File Path="../CONTRIBUTING.md" />
+    <File Path="../docker-compose.dev.yml" />
     <File Path="../docker-compose.yml" />
     <File Path="../LICENSE" />
     <File Path="../README.md" />
