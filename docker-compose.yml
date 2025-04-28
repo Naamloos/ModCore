@@ -11,6 +11,18 @@ services:
       - 'POSTGRES_HOST_AUTH_METHOD=trust'
     env_file:
       - .env
+
+  redis:
+    image: redis:latest
+    restart: unless-stopped
+    volumes:
+      - modcore_redis:/data
+
+  rest_proxy:
+    restart: unless-stopped
+    image: ghcr.io/twilight-rs/http-proxy
+    environment:
+      - DISCORD_TOKEN=. # Fixes spamming NotPresent in console
   
   web:
     build: 
@@ -21,10 +33,12 @@ services:
       - 8080:8080
     links:
       - postgres
+      - rest_proxy
     env_file:
       - .env
     depends_on:
       - postgres
+      - rest_proxy
 
   jobs:
     build:
@@ -33,10 +47,12 @@ services:
     restart: unless-stopped
     links:
       - postgres
+      - rest_proxy
     env_file:
       - .env
     depends_on:
       - postgres
+      - rest_proxy
 
   # Shards, these define websocket connections with Discord's gateway.
   # Ensure shard_count is correct in .env!!!
@@ -47,12 +63,15 @@ services:
     restart: unless-stopped
     links:
       - postgres
+      - rest_proxy
     environment:
       - current_shard=0
     env_file:
       - .env
     depends_on:
       - postgres
+      - rest_proxy
       
 volumes:
   modcore_postgres:
+  modcore_redis:

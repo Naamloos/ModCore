@@ -17,6 +17,9 @@ namespace ModCore.Common.SettingsHelper
         [JsonPropertyName("discord_client_secret")]
         public string ClientSecret { get; set; } = "";
 
+        [JsonPropertyName("discord_rest_proxy")]
+        public string DiscordRestProxy { get; set; } = "";
+
         [JsonPropertyName("shard_count")]
         public int ShardCount { get; set; } = 1;
 

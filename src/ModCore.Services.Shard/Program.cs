@@ -75,7 +75,17 @@ namespace ModCore.Services.Shard
                     services.AddInteractionService();
                     services.AddLogging();
                     services.AddSingleton(jsonOptions);
+#if DEBUG
                     services.AddDistributedMemoryCache();
+#else
+                    services.AddDistributedRedisCache(setup =>
+                    {
+                        // get the configuration from the service collection
+                        var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+                        setup.InstanceName = "ModCore";
+                        setup.Configuration = config.GetRequiredSection("redis_connection_string").Value!;
+                    });
+#endif
                     services.AddModcoreCacheService();
                     services.AddDbContext<DatabaseContext>();
                     services.AddDiscordXaml(Assembly.GetExecutingAssembly());

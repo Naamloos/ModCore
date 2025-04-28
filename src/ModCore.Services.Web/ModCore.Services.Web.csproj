@@ -9,6 +9,8 @@
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Discord" Version="9.0.0" />
     <PackageReference Include="AspNetCore.InertiaCore" Version="0.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Garnet" Version="1.0.63" />
   </ItemGroup>
 
   <ItemGroup>

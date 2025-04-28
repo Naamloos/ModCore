@@ -32,6 +32,7 @@ namespace ModCore.Common.Discord.Rest
             if(config != null && string.IsNullOrEmpty(Configuration.Token))
             {
                 Configuration.Token = config.GetRequiredSection("discord_token").Value!;
+                Configuration.RestProxy = config.GetRequiredSection("discord_rest_proxy").Value!;
             }
 
             RatelimitedRest = new RateLimitedRest(Configuration, JsonSerializerOptions);

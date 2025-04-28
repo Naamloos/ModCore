@@ -14,6 +14,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json;
 using ModCore.Common.Cache;
 using ModCore.Common.Utils;
+using Tsavorite.core;
 
 namespace ModCore.Common.Web
 {
@@ -61,7 +62,18 @@ namespace ModCore.Common.Web
             builder.Services.AddModcoreCacheService();
 
             builder.Services.AddSingleton(jsonOptions);
+
+#if DEBUG
             builder.Services.AddDistributedMemoryCache();
+#else
+            builder.Services.AddDistributedRedisCache(setup =>
+            {
+                // get the configuration from the service collection
+                var config = builder.Configuration.GetValue<string>("redis_connection_string");
+                setup.InstanceName = "ModCore";
+                setup.Configuration = config;
+            });
+#endif
 
             builder.Services.AddAuthentication(options =>
             {

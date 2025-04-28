@@ -59,6 +59,24 @@ namespace ModCore.Services.Jobs
                     //services.AddDistributedMemoryCache();
                     //services.AddModcoreCacheService();
 
+                    services.AddDiscordRest(config => { });
+                    services.AddLogging();
+                    services.AddSingleton(jsonOptions);
+                    services.AddModcoreCacheService();
+                    services.AddDbContext<DatabaseContext>();
+
+#if DEBUG
+                    services.AddDistributedMemoryCache();
+#else
+                    services.AddDistributedRedisCache(setup =>
+                    {
+                        // get the configuration from the service collection
+                        var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+                        setup.InstanceName = "ModCore";
+                        setup.Configuration = config.GetRequiredSection("redis_connection_string").Value!;
+                    });
+#endif
+
                     services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));
                 })
                 .Build();

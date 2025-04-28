@@ -7,6 +7,8 @@ namespace ModCore.Common.Discord.Rest
     public class RateLimitedRest
     {
         const short API_VERSION = 10;
+        const string API_BASE = "https://discord.com";
+        const string API_BASE_PATH = "/api/v{0}/";
 
         private HttpClient httpClient;
         private DiscordRestConfiguration configuration;
@@ -14,11 +16,19 @@ namespace ModCore.Common.Discord.Rest
 
         private ConcurrentDictionary<string, RateLimitBucket> buckets;
 
+        private bool proxyEnabled = false;
+
         public RateLimitedRest(DiscordRestConfiguration config, JsonSerializerOptions jsonSerializerOptions)
         {
             this.jsonSerializerOptions = jsonSerializerOptions;
             buckets = new ConcurrentDictionary<string, RateLimitBucket>();
             configuration = config;
+
+            proxyEnabled = !string.IsNullOrEmpty(config.RestProxy);
+
+            string baseAddress = (proxyEnabled ? config.RestProxy : API_BASE) + string.Format(API_BASE_PATH, API_VERSION); 
+
+            Console.WriteLine($"BaseAddress: {baseAddress}");
 
             httpClient = new HttpClient()
             {
@@ -32,16 +42,19 @@ namespace ModCore.Common.Discord.Rest
 
         public async ValueTask<HttpResponseMessage> RequestAsync(HttpMethod method, string route, string url, object? body = null)
         {
-            RateLimitBucket bucket;
+            RateLimitBucket? bucket = null;
 
-            // TODO (de)serialize from distributed cache
-            if (!buckets.TryGetValue(route, out bucket))
+            if (!proxyEnabled)
             {
-                bucket = new RateLimitBucket();
-                buckets.TryAdd(route, bucket);
-            }
+                // TODO (de)serialize from distributed cache
+                if (!buckets.TryGetValue(route, out bucket))
+                {
+                    bucket = new RateLimitBucket();
+                    buckets.TryAdd(route, bucket);
+                }
 
-            await bucket.WaitAsync();
+                await bucket.WaitAsync();
+            }
 
             var request = new HttpRequestMessage(method, url);
             if (body != null)
@@ -51,7 +64,7 @@ namespace ModCore.Common.Discord.Rest
 
             var response = await httpClient.SendAsync(request);
 
-            if (response.Headers.Contains("X-Ratelimit-Remaining"))
+            if (bucket is not null && response.Headers.Contains("X-Ratelimit-Remaining"))
             {
                 var remaining = response.Headers.GetValues("X-RateLimit-Remaining");
                 var reset_after = response.Headers.GetValues("X-RateLimit-Reset-After");

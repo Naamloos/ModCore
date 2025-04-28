@@ -22,3 +22,4 @@ Need help with ModCore? Either use the `/contact` command or join the ModCore Di
 [![ModCore Chat](https://discord.com/api/guilds/709152601978961990/embed.png?style=banner2)](https://discord.gg/MRUP5dd)
 
 ## Database Migration for development
+When a database migration was found and the bot was correctly configured for development, it will migrate itself automatically.
