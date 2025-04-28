@@ -12,10 +12,10 @@ using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.InteractionFramework;
 using ModCore.Common.Utils;
-using ModCore.Services.Shard.Services;
+using ModCore.Services.Shard.Modules.Timers.Services;
 using System.Reflection;
 
-namespace ModCore.Services.Shard.EventHandlers
+namespace ModCore.Services.Shard.Modules.Startup.Events
 {
     /// <summary>
     /// This event handler handles anything that should be ran around startup.
@@ -31,8 +31,8 @@ namespace ModCore.Services.Shard.EventHandlers
         private readonly TimerService _timerService;
         private bool initialized = false;
 
-        public StartupEvents(ILogger<StartupEvents> logger, DiscordRest rest, 
-            InteractionService interactions, TransientService<DatabaseContext> database, 
+        public StartupEvents(ILogger<StartupEvents> logger, DiscordRest rest,
+            InteractionService interactions, TransientService<DatabaseContext> database,
             TimerService timerService)
         {
             _logger = logger;
@@ -85,7 +85,7 @@ namespace ModCore.Services.Shard.EventHandlers
             if (!initialized)
             {
                 _interactions.Start(Gateway);
-                await _timerService.StartAsync(data.Shard.HasValue? data.Shard.Value[0] : 0);
+                await _timerService.StartAsync(data.Shard.HasValue ? data.Shard.Value[0] : 0);
                 initialized = true;
             }
         }

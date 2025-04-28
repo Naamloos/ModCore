@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -34,6 +33,16 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Common.SettingsHelper", "ModCore.Common.SettingsHelper\ModCore.Common.SettingsHelper.csproj", "{B5AE3E70-9F04-4803-8F45-A7563CFDE23A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModCore.Common.Xaml", "ModCore.Common.Xaml\ModCore.Common.Xaml.csproj", "{134EC3B8-5C96-456E-BDE7-0696D7F38186}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Repository", "Repository", "{B604235B-F4E8-4B86-9D09-217095FB635B}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dockerfiles", "Dockerfiles", "{A1B2C3D4-E5F6-7890-1234-56789ABCDEF0}"
+	ProjectSection(SolutionItems) = preProject
+		./Dockerfiles/** = ./Dockerfiles/**
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,6 +120,7 @@ Global
 		{29629521-6EA7-447A-9630-DCBFA978C0CA} = {13222A28-2536-425B-B054-0DB5CD45AE53}
 		{B5AE3E70-9F04-4803-8F45-A7563CFDE23A} = {41BA1590-3611-42E3-AA71-53260FD0CBC5}
 		{134EC3B8-5C96-456E-BDE7-0696D7F38186} = {41BA1590-3611-42E3-AA71-53260FD0CBC5}
+		{A1B2C3D4-E5F6-7890-1234-56789ABCDEF0} = {09EBF130-3F44-4893-A11C-C265A10DC043}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {09EBF130-3F44-4893-A11C-C265A10DC043}

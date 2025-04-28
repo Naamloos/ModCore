@@ -6,7 +6,7 @@ using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.InteractionFramework;
 using ModCore.Common.InteractionFramework.Attributes;
-using ModCore.Services.Shard.Services;
+using ModCore.Services.Shard.Modules.Timers.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;

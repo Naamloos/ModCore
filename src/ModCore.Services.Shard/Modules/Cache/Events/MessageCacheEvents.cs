@@ -8,7 +8,7 @@ using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.Utils;
 
-namespace ModCore.Services.Shard.EventHandlers
+namespace ModCore.Services.Shard.Modules.Cache.Events
 {
     public class MessageCacheEvents : ISubscriber<MessageCreate>, ISubscriber<MessageUpdate>, ISubscriber<MessageDelete>, ISubscriber<MessageBulkDelete>
     {

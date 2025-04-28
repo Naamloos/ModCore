@@ -16,7 +16,7 @@ using ModCore.Common.Database.Helpers;
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
 
-namespace ModCore.Services.Shard.Commands
+namespace ModCore.Services.Shard.Modules.Moderation
 {
     public class ModerationCommands : BaseCommandHandler
     {
@@ -34,12 +34,12 @@ namespace ModCore.Services.Shard.Commands
         [SlashCommand("ban", "Bans a user", permissions: Permissions.BanMembers)]
         public async ValueTask BanAsync(
             SlashCommandContext context,
-            [Option("user", "User to ban", ApplicationCommandOptionType.User)] Snowflake userToBan, 
-            [Option("reason", "Reason to ban user", ApplicationCommandOptionType.String)] Optional<string> reason, 
+            [Option("user", "User to ban", ApplicationCommandOptionType.User)] Snowflake userToBan,
+            [Option("reason", "Reason to ban user", ApplicationCommandOptionType.String)] Optional<string> reason,
             [Option("notify", "Whether to notify said user", ApplicationCommandOptionType.Boolean)] Optional<bool> notify)
         {
             var fetchGuild = await _cache.GetFromCacheOrRest(context.EventData.GuildId, (rest, id) => rest.GetGuildAsync(id));
-            if(!fetchGuild.Success)
+            if (!fetchGuild.Success)
             {
                 // failure! tell user.
                 await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, InteractionResponseType.ChannelMessageWithSource,
@@ -56,7 +56,7 @@ namespace ModCore.Services.Shard.Commands
             var givenReason = reason.HasValue ? reason.Value.Replace("`", "'") : "No reason given.";
 
             var sentDM = false;
-            if(dmChannel.Success)
+            if (dmChannel.Success)
             {
                 var dm = await context.RestClient.CreateMessageAsync(dmChannel.Value.Id, new CreateMessage()
                 {
@@ -94,10 +94,10 @@ namespace ModCore.Services.Shard.Commands
         }
 
         [SlashCommand("hackban", "HackBans a user, by their ID.", permissions: Permissions.BanMembers)]
-        public async ValueTask HackBanAsync(SlashCommandContext context, 
-            [Option("user_id", "ID of the user to hackban", ApplicationCommandOptionType.String)]string id)
+        public async ValueTask HackBanAsync(SlashCommandContext context,
+            [Option("user_id", "ID of the user to hackban", ApplicationCommandOptionType.String)] string id)
         {
-            if(!ulong.TryParse(id, out var userId))
+            if (!ulong.TryParse(id, out var userId))
             {
                 await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, InteractionResponseType.ChannelMessageWithSource,
                     new InteractionMessageResponse()

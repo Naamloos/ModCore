@@ -17,8 +17,9 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using ModCore.Common.Utils;
 using System.Diagnostics;
 using ModCore.Common.Database;
+using ModCore.Services.Shard.Modules.Eval.Entities;
 
-namespace ModCore.Services.Shard.EventHandlers
+namespace ModCore.Services.Shard.Modules.Eval.Events
 {
     public class SimpleEvalEvent : ISubscriber<MessageCreate>
     {
@@ -31,38 +32,38 @@ namespace ModCore.Services.Shard.EventHandlers
         private User _modCore;
         private Application _app;
 
-        public SimpleEvalEvent(ILogger<SimpleEvalEvent> logger, DiscordRest api, Gateway gateway, TransientService<DatabaseContext> database) 
+        public SimpleEvalEvent(ILogger<SimpleEvalEvent> logger, DiscordRest api, Gateway gateway, TransientService<DatabaseContext> database)
         {
-            this._logger = logger;
-            this._api = api;
-            this._gateway = gateway;
-            this._database = database;
+            _logger = logger;
+            _api = api;
+            _gateway = gateway;
+            _database = database;
         }
 
         private Regex codeRegex = new Regex(@"```c?s?((.|\n)*?)```", RegexOptions.Compiled);
         public async ValueTask HandleEvent(MessageCreate data)
         {
-            if(_modCore == default)
+            if (_modCore == default)
             {
                 var getUser = await _api.GetCurrentUserAsync();
-                if(!getUser.Success)
+                if (!getUser.Success)
                 {
                     return;
                 }
                 _modCore = getUser.Value!;
             }
 
-            if(_app == default)
+            if (_app == default)
             {
                 var getApp = await _api.GetApplicationAsync(_gateway.Application.Id);
-                if(!getApp.Success)
+                if (!getApp.Success)
                 {
                     return;
                 }
                 _app = getApp.Value!;
             }
 
-            if(data.Mentions.Any(x => x.Id == _modCore.Id) && _app.Owner.Value?.Id == data.Author.Id)
+            if (data.Mentions.Any(x => x.Id == _modCore.Id) && _app.Owner.Value?.Id == data.Author.Id)
             {
                 var initialMessage = await _api.CreateMessageAsync(data.ChannelId, new CreateMessage()
                 {
@@ -76,7 +77,7 @@ namespace ModCore.Services.Shard.EventHandlers
                     }
                 });
 
-                if(!initialMessage.Success)
+                if (!initialMessage.Success)
                 {
                     return;
                 }
@@ -107,29 +108,29 @@ namespace ModCore.Services.Shard.EventHandlers
             var resultEmbed = new Embed()
                 .WithTitle("Evaluation Results");
 
-            var variables = new EvalVariables(_gateway, _api, context, _database);
+            var variables = new EvalModel(_gateway, _api, context, _database);
             var options = ScriptOptions.Default
-                .WithImports("System", 
-                    "System.Collections.Generic", 
-                    "System.Linq", 
-                    "System.Text", 
-                    "System.Threading.Tasks", 
-                    "ModCore.Common.Discord.Gateway", 
-                    "ModCore.Common.Discord.Rest", 
+                .WithImports("System",
+                    "System.Collections.Generic",
+                    "System.Linq",
+                    "System.Text",
+                    "System.Threading.Tasks",
+                    "ModCore.Common.Discord.Gateway",
+                    "ModCore.Common.Discord.Rest",
                     "ModCore.Common.Discord.Entities",
                     "Microsoft.EntityFrameworkCore")
                 .WithReferences(AppDomain.CurrentDomain.GetAssemblies().Where(xa => !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location)));
 
             try
             {
-                var script = CSharpScript.Create(inputCode, options, typeof(EvalVariables));
+                var script = CSharpScript.Create(inputCode, options, typeof(EvalModel));
                 script.Compile();
                 var results = await script.RunAsync(variables);
 
                 resultEmbed.WithDescription($"✅ Evaluation successful.");
                 resultEmbed.WithColor(ColorConverter.FromHex("#00b506"));
 
-                if(string.IsNullOrEmpty(results?.ReturnValue?.ToString()))
+                if (string.IsNullOrEmpty(results?.ReturnValue?.ToString()))
                 {
                     resultEmbed.WithField("Return value", "Empty");
                 }
@@ -139,7 +140,7 @@ namespace ModCore.Services.Shard.EventHandlers
                     resultEmbed.WithField("Return Value", results.ReturnValue.ToString());
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 resultEmbed.WithColor(ColorConverter.FromHex("#910101"));
                 resultEmbed.WithDescription($"⚠️ Exception thrown: `{ex.Message}`");
@@ -152,22 +153,6 @@ namespace ModCore.Services.Shard.EventHandlers
             resultEmbed.WithFooter($"Evaluation time: {stopwatch.Elapsed.ToString()}");
 
             return resultEmbed;
-        }
-
-        public class EvalVariables
-        {
-            public Gateway Gateway { get; set; }
-            public DiscordRest Rest { get; set; }
-            public MessageCreate Context { get; set; }
-            public DatabaseContext Database { get; set; }
-
-            public EvalVariables(Gateway gateway, DiscordRest rest, MessageCreate context, TransientService<DatabaseContext> database)
-            {
-                this.Gateway = gateway;
-                this.Rest = rest;
-                this.Context = context;
-                this.Database = database.GetTransient();
-            }
         }
     }
 }

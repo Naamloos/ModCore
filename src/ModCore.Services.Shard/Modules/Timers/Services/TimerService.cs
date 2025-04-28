@@ -6,15 +6,16 @@ using ModCore.Common.Database.Timers;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Rest;
+using ModCore.Services.Shard.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModCore.Services.Shard.Services
+namespace ModCore.Services.Shard.Modules.Timers.Services
 {
-    public class TimerService
+    public class TimerService : IShardService
     {
         private readonly DatabaseContext _databaseContext;
         private readonly ILogger _logger;

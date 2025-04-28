@@ -12,13 +12,13 @@ using System.Text.Json;
 using ModCore.Common.Discord.Entities.Serializer;
 using System.Text.Json.Serialization;
 using ModCore.Common.Cache;
-using ModCore.Services.Shard.EventHandlers;
 using ModCore.Common.Database;
 using ModCore.Common.Utils;
 using ModCore.Common.SettingsHelper;
 using System.Reflection;
-using ModCore.Services.Shard.Services;
 using ModCore.Common.Xaml;
+using ModCore.Services.Shard.Modules.Timers.Services;
+using ModCore.Services.Shard.Abstractions;
 
 namespace ModCore.Services.Shard
 {
@@ -81,8 +81,18 @@ namespace ModCore.Services.Shard
                     // Helper for scoped and transient services
                     services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));
 
-                    // Shard-specific services
-                    services.AddSingleton<TimerService>();
+
+                    var types = Assembly.GetExecutingAssembly().GetTypes();
+                    foreach(var type in types)
+                    {
+                        if(!type.IsAbstract 
+                            && type.IsClass 
+                            && type.IsPublic 
+                            && type.GetInterfaces().Contains(typeof(IShardService)))
+                        {
+                            services.AddSingleton(type);
+                        }
+                    }
                 })
                 .Build();
 
