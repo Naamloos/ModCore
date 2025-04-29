@@ -40,8 +40,5 @@ namespace ModCore.Common.SettingsHelper
 
         [JsonPropertyName("postgres_port")]
         public int PostgresPort { get; set; } = 5432;
-
-        [JsonPropertyName("sentry_dsn")]
-        public string SentryDsn { get; set; } = "";
     }
 }

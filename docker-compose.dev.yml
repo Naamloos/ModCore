@@ -89,8 +89,6 @@ services:
     build: 
       context: ./src
       dockerfile: ./Dockerfiles/shard.dockerfile
-      args:
-        - SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
     restart: unless-stopped
     links:
       - postgres

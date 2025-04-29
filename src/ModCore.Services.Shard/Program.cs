@@ -21,7 +21,6 @@ using ModCore.Services.Shard.Modules.Timers.Services;
 using ModCore.Services.Shard.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Serilog.Core;
-using Sentry.Extensions.Logging;
 
 namespace ModCore.Services.Shard
 {
@@ -40,6 +39,13 @@ namespace ModCore.Services.Shard
             var jsonOptions = JsonSerializerOptionsFactory.GetOptions();
 
             using var host = Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(options =>
+                {
+                    options
+                        .ClearProviders()
+                        .AddSerilog(logger)
+                        .SetMinimumLevel(LogLevel.Debug);
+                })
                 .ConfigureAppConfiguration(config =>
                 {
                     config
@@ -100,28 +106,15 @@ namespace ModCore.Services.Shard
                         }
                     }
                 })
-                .ConfigureLogging(options =>
-                {
-                    using var provider = options.Services.BuildServiceProvider();
-                    using var scope = provider.CreateScope();
-                    var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                    options
-                        .ClearProviders()
-                        .AddSerilog(logger)
-                        .SetMinimumLevel(LogLevel.Debug);
-#if !DEBUG
-                    options.AddSentry(config.GetRequiredSection("sentry_shard_dsn").Value!);
-#endif
-                })
                 .Build();
 
 
-            await AdditionalConfiguration(host);
+            await ApplyMigrations(host);
 
             host.Run();
         }
 
-        private static async Task AdditionalConfiguration(IHost host)
+        private static async Task ApplyMigrations(IHost host)
         {
             using (var scope = host.Services.CreateScope())
             {
@@ -142,8 +135,6 @@ namespace ModCore.Services.Shard
                 else
                 {
                     logger.LogInformation("No pending database migrations.");
-
-                    logger.LogError(new IndexOutOfRangeException(), "Sentry Test");
                 }
             }
         }
