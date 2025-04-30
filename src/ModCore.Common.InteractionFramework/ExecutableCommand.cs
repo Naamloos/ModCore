@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using ModCore.Common.Discord.Entities;
 using ModCore.Common.InteractionFramework.Attributes;
 using System;
 using System.Collections.Generic;
@@ -42,10 +43,19 @@ namespace ModCore.Common.InteractionFramework
 
             foreach (var param in _parameters)
             {
-                var option = context.OptionValues.FirstOrDefault(x => x.Name.ToLowerInvariant() == param.Key);
+                var option = context.OptionValues?.FirstOrDefault(x => x.Name.ToLowerInvariant() == param.Key) ?? null;
                 if (option is null || !option.Value.HasValue)
                 {
-                    parameters.Add(null!);
+                    if (param.Value.ParameterType.IsGenericType && param.Value.ParameterType.GetGenericTypeDefinition() == typeof(Optional<>))
+                    {
+                        var optionalType = param.Value.ParameterType.GetGenericArguments()[0];
+                        var noneValue = Activator.CreateInstance(typeof(Optional<>).MakeGenericType(optionalType));
+                        parameters.Add(noneValue!);
+                    }
+                    else
+                    {
+                        parameters.Add(null!);
+                    }
                 }
                 else
                 {

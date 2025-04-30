@@ -1,0 +1,9 @@
+{
+  "about": {
+    "welcome": "# Welcome to ModCore v3",
+    "main_developer": "**Main Developer**\n[Naamloos](https://github.com/Naamloos)",
+    "contribute": "**Want to contribute?**\nContributions are always welcome at our [GitHub repo]({repo}).",
+    "donate": "**Donate?**\nCurrently, ModCore is hosted off my (Naamloos's) own money. Donations are always welcome over at [Ko-Fi]({kofi})!",
+    "previous_contribs": "**Special thanks to all of these wonderful v2 contributors:**\n{contribs}"
+  }
+}

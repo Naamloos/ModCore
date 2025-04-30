@@ -5,6 +5,7 @@
     <Project Path="ModCore.Common.Discord.Entities/ModCore.Common.Discord.Entities.csproj" />
     <Project Path="ModCore.Common.Discord.Gateway/ModCore.Common.Discord.Gateway.csproj" />
     <Project Path="ModCore.Common.Discord.Rest/ModCore.Common.Discord.Rest.csproj" />
+    <Project Path="ModCore.Common.I18n/ModCore.Common.Language.csproj" Id="6c4bcb04-415a-4df5-aaae-c68b9208e2ed" />
     <Project Path="ModCore.Common.InteractionFramework/ModCore.Common.InteractionFramework.csproj" />
     <Project Path="ModCore.Common.SettingsHelper/ModCore.Common.SettingsHelper.csproj" />
     <Project Path="ModCore.Common.Utils/ModCore.Common.Utils.csproj" />

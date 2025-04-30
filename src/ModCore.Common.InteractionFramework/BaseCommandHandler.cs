@@ -271,7 +271,7 @@ namespace ModCore.Common.InteractionFramework
                     Name = attr.Name.ToLowerInvariant(),
                     Description = attr.Description,
                     Type = attr.Type,
-                    Required = param.ParameterType.IsAssignableTo(typeof(Optional<>)) ? Optional<bool>.None : true
+                    Required = param.ParameterType.IsGenericType && param.ParameterType.GetGenericTypeDefinition() == typeof(Optional<>) ? false : true
                 });
             }
             return options;

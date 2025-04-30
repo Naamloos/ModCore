@@ -1,6 +1,7 @@
 ﻿using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Components;
 using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.Language;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,17 +14,35 @@ namespace ModCore.Services.Shard.Modules.About.ViewModels
     {
         public int AccentColor { get; init; } = 0x089FDF;
         public UnfurledMediaItem AvatarMedia { get; init; }
-        public string PreviousContributors { get; init; } = "";
+
+        public string Welcome { get; init; }
+        public string MainDeveloper { get; init; }
+        public string Contribute { get; init; }
+        public string Donate { get; init; }
+        public string PreviousContributors { get; init; }
         public string Version { get; init; } = "-# ModCore v3-Alpha";
 
-        public AboutViewModel(User modCoreSelf)
+        public AboutViewModel(User modCoreSelf, I18n i18n, string language)
         {
             AvatarMedia = new UnfurledMediaItem()
             {
                 Url = $"https://cdn.discordapp.com/avatars/{modCoreSelf.Id}/{modCoreSelf.AvatarHash}.png"
             };
-            PreviousContributors = "**Special thanks to all of these wonderful v2 contributors:**\n"
-                + string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})"));
+
+            Welcome = i18n.t("about.welcome", language);
+            MainDeveloper = i18n.t("about.main_developer", language);
+            Contribute = i18n.t("about.contribute", language, new (){
+                { "repo", "https://github.com/Naamloos/ModCore" }
+            });
+            Donate = i18n.t("about.donate", language, new()
+            {
+                { "kofi", "https://ko-fi.com/naamloos" }
+            });
+
+            PreviousContributors = i18n.t("about.previous_contribs", language, new() 
+            {
+                { "contribs", string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})")) }
+            });
         }
 
         private static Dictionary<string, string> previousContribList = new()

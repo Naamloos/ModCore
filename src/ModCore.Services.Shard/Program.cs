@@ -21,6 +21,7 @@ using ModCore.Services.Shard.Modules.Timers.Services;
 using ModCore.Services.Shard.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Serilog.Core;
+using ModCore.Common.Language;
 
 namespace ModCore.Services.Shard
 {
@@ -89,6 +90,7 @@ namespace ModCore.Services.Shard
                     services.AddModcoreCacheService();
                     services.AddDbContext<DatabaseContext>();
                     services.AddDiscordXaml(Assembly.GetExecutingAssembly());
+                    services.AddSingleton<I18n>();
 
                     // Helper for scoped and transient services
                     services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));

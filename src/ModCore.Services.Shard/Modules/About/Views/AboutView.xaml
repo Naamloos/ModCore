@@ -10,21 +10,9 @@
 		<Discord:Container.Components>
 			<Discord:Section>
 				<Discord:Section.Components>
-					<Discord:TextDisplay>
-						<Discord:TextDisplay.Content>
-							# Welcome to ModCore v3
-						</Discord:TextDisplay.Content>
-					</Discord:TextDisplay>
-					<Discord:TextDisplay>
-						<Discord:TextDisplay.Content xml:space="preserve">
-							**Main Developer**&#x0a;[Naamloos](https://github.com/Naamloos)
-						</Discord:TextDisplay.Content>
-					</Discord:TextDisplay>
-					<Discord:TextDisplay>
-						<Discord:TextDisplay.Content xml:space="preserve">
-							**Want to contribute?**&#x0a;Contributions are always welcome at our [GitHub repo](https://github.com/Naamloos/ModCore).
-						</Discord:TextDisplay.Content>
-					</Discord:TextDisplay>
+					<Discord:TextDisplay Content="{Binding Welcome}"/>
+					<Discord:TextDisplay Content="{Binding MainDeveloper}"/>
+					<Discord:TextDisplay Content="{Binding Contribute}"/>
 				</Discord:Section.Components>
 				<Discord:Section.Accessory>
 					<Discord:Thumbnail
@@ -32,11 +20,7 @@
 					/>
 				</Discord:Section.Accessory>
 			</Discord:Section>
-			<Discord:TextDisplay>
-				<Discord:TextDisplay.Content xml:space="preserve">
-					**Donate?**&#x0a;Currently, ModCore is hosted off my (Naamloos's) own money. Donations are always welcome over at [Ko-Fi](https://ko-fi.com/Naamloos)!
-				</Discord:TextDisplay.Content>
-			</Discord:TextDisplay>
+			<Discord:TextDisplay Content="{Binding Donate}"/>
 			<Discord:TextDisplay Content="{Binding PreviousContributors}" />
 			<Discord:TextDisplay Content="{Binding Version}" />
 		</Discord:Container.Components>

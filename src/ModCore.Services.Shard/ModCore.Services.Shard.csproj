@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -35,6 +35,7 @@
     <ProjectReference Include="..\ModCore.Common.Database\ModCore.Common.Database.csproj" />
     <ProjectReference Include="..\ModCore.Common.Discord.Gateway\ModCore.Common.Discord.Gateway.csproj" />
     <ProjectReference Include="..\ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj" />
+    <ProjectReference Include="..\ModCore.Common.I18n\ModCore.Common.Language.csproj" />
     <ProjectReference Include="..\ModCore.Common.InteractionFramework\ModCore.Common.InteractionFramework.csproj" />
     <ProjectReference Include="..\ModCore.Common.SettingsHelper\ModCore.Common.SettingsHelper.csproj" />
     <ProjectReference Include="..\ModCore.Common.Xaml\ModCore.Common.Xaml.csproj" />
