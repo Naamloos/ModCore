@@ -2,6 +2,12 @@ import DashboardLayout from "@/Layouts/DashboardLayout";
 import { DiscordGuild } from "@/Types/DiscordTypes/DiscordGuild";
 import { PagePropsWith } from "@/Types/PageProps";
 import { Button } from "@/Components/ui/button";
+
+import { Switch } from "@/Components/ui/switch";
+import { useState } from "react";
+import { router, useForm } from "@inertiajs/react";
+import { ModCoreGuild } from "@/Types/DatabaseTypes/ModCoreGuild";
+
 import {
   Card,
   CardContent,
@@ -9,30 +15,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/Components/ui/card";
-import { Switch } from "@/Components/ui/switch";
-import { useState } from "react";
-import DiscordChannelPicker from "@/Components/Forms/DiscordChannelPicker";
-import { router, useForm } from "@inertiajs/react";
-import ModCoreLevelSettings from "@/Types/DatabaseTypes/ModCoreLevelSettings";
 
-interface ConfigureLevelingProps {
+interface ConfigureProfileStatesProps {
   server: DiscordGuild;
-  settings: ModCoreLevelSettings;
+  databaseServer: ModCoreGuild;
 }
 
 export default function Configure({
   server,
-  settings,
-}: PagePropsWith<ConfigureLevelingProps>) {
-  const [enabled, setEnabled] = useState(settings.enabled);
-  const [messagesEnabled, setMessagesEnabled] = useState(
-    settings.messages_enabled,
+  databaseServer,
+}: PagePropsWith<ConfigureProfileStatesProps>) {
+  const [persistUserRoles, setPersistUserRoles] = useState(
+    databaseServer.persist_user_roles,
   );
-  const [redirectMessages, setRedirectMessages] = useState(
-    settings.redirect_messages,
+  const [persistUserOverrides, setPersistUserOverrides] = useState(
+    databaseServer.persist_user_overrides,
   );
-  const [channelId, setChannelId] = useState<string | undefined>(
-    settings.message_channel_id.toString(),
+  const [persistUserNicknames, setPersistUserNicknames] = useState(
+    databaseServer.persist_user_nicknames,
   );
 
   let icon = server?.icon ? server.icon : null;
@@ -47,18 +47,16 @@ export default function Configure({
     e.preventDefault();
     // Handle form submission here
     console.log({
-      enabled,
-      messagesEnabled,
-      redirectMessages,
-      channelId,
+      persistUserRoles,
+      persistUserOverrides,
+      persistUserNicknames,
     });
   };
 
   const { data } = useForm({
-    enabled,
-    messagesEnabled,
-    redirectMessages,
-    channelId,
+    persistUserRoles,
+    persistUserOverrides,
+    persistUserNicknames,
   });
 
   return (
@@ -78,93 +76,84 @@ export default function Configure({
             alt="Server Icon"
           />
           <h1 className="text-3xl font-extrabold tracking-tight text-white ml-4">
-            {server.name}: Leveling Configuration
+            {server.name}: Profile States Configuration
           </h1>
         </div>
         <Card className="w-full bg-gray-900 p-6 rounded-lg shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl">Leveling Configuration</CardTitle>
+            <CardTitle className="text-2xl">
+              Profile States Configuration
+            </CardTitle>
             <CardDescription>
-              Configure the leveling settings for this server. Enable or disable
-              leveling features and customize how level-up messages are
-              displayed.
+              Configure how user profiles are persisted when users leave and
+              rejoin the server. Enable or disable the persistence of roles,
+              overrides, and nicknames.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-8" onSubmit={handleSubmit}>
               <div className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                  <label htmlFor="enabled" className="text-base text-white">
-                    Enable Leveling
+                  <label
+                    htmlFor="persistUserRoles"
+                    className="text-base text-white"
+                  >
+                    Persist User Roles
                   </label>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Enable or disable the leveling feature.
+                    When enabled, user roles will be remembered and reassigned
+                    if they leave and rejoin.
                   </p>
                 </div>
                 <Switch
-                  id="enabled"
-                  checked={enabled}
-                  onCheckedChange={setEnabled}
+                  id="persistUserRoles"
+                  checked={persistUserRoles}
+                  onCheckedChange={setPersistUserRoles}
                 />
               </div>
 
               <div className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
                   <label
-                    htmlFor="messagesEnabled"
+                    htmlFor="persistUserOverrides"
                     className="text-base text-white"
                   >
-                    Enable Leveling Messages
+                    Persist User Overrides
                   </label>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Enable or disable level up messages.
+                    When enabled, user permission overrides will be remembered
+                    and reapplied if they leave and rejoin.
                   </p>
                 </div>
                 <Switch
-                  id="messagesEnabled"
-                  checked={messagesEnabled}
-                  onCheckedChange={setMessagesEnabled}
+                  id="persistUserOverrides"
+                  checked={persistUserOverrides}
+                  onCheckedChange={setPersistUserOverrides}
                 />
               </div>
 
               <div className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
                   <label
-                    htmlFor="redirectMessages"
+                    htmlFor="persistUserNicknames"
                     className="text-base text-white"
                   >
-                    Redirect Messages
+                    Persist User Nicknames
                   </label>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Redirect level up messages to a specific channel.
+                    When enabled, user nicknames will be remembered and
+                    reapplied if they leave and rejoin.
                   </p>
                 </div>
                 <Switch
-                  id="redirectMessages"
-                  checked={redirectMessages}
-                  onCheckedChange={setRedirectMessages}
+                  id="persistUserNicknames"
+                  checked={persistUserNicknames}
+                  onCheckedChange={setPersistUserNicknames}
                 />
-              </div>
-
-              <div className="rounded-lg border p-4">
-                <div className="space-y-2">
-                  <label htmlFor="channelId" className="text-base text-white">
-                    Message Redirect Channel
-                  </label>
-                  <DiscordChannelPicker
-                    label=""
-                    placeholder="Select a channel..."
-                    value={data.channelId}
-                    onUpdate={setChannelId}
-                  />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    The channel where level up messages will be sent.
-                  </p>
-                </div>
               </div>
 
               <Button type="submit" className="w-full sm:w-auto">
-                Submit
+                Save Changes
               </Button>
             </form>
           </CardContent>

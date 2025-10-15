@@ -15,6 +15,9 @@ import { DiscordRole } from "@/Types/DiscordTypes/DiscordRole";
 import { PagePropsWith } from "@/Types/PageProps";
 import { useState } from "react";
 import { Button } from "@/Components/ui/button";
+import { Label } from "@/Components/ui/label";
+import { Separator } from "@/Components/ui/separator";
+import { X } from "lucide-react";
 import { router } from "@inertiajs/react";
 
 interface ConfigureAutoRoleProps {
@@ -31,14 +34,16 @@ export default function Configure({
 }: PagePropsWith<ConfigureAutoRoleProps>) {
   const [enabledRoles, setEnabledRoles] = useState<string[]>([]);
   const [isEnabled, setIsEnabled] = useState(enabled);
+  const [currentRoleId, setCurrentRoleId] = useState<string>("");
 
   const handleToggle = (newEnabled: boolean) => {
     setIsEnabled(newEnabled);
   };
 
-  const handleAddRole = (role: string) => {
-    if (!enabledRoles.includes(role)) {
-      setEnabledRoles([...enabledRoles, role]);
+  const handleAddRole = () => {
+    if (currentRoleId && !enabledRoles.includes(currentRoleId)) {
+      setEnabledRoles([...enabledRoles, currentRoleId]);
+      setCurrentRoleId("");
     }
   };
 
@@ -86,6 +91,7 @@ export default function Configure({
             <form
               action={`/dashboard/servers/${server.id}/auto-role`}
               method="POST"
+              className="space-y-6"
             >
               <input type="hidden" name="_method" value="PUT" />
               <input
@@ -93,56 +99,91 @@ export default function Configure({
                 name="enabled"
                 value={isEnabled ? "true" : "false"}
               />
-              <div className="flex items-center justify-between space-x-2">
-                <label htmlFor="enabled">Enable Auto Role</label>
+
+              <div className="flex items-center justify-between space-x-2 py-2">
+                <Label htmlFor="enabled" className="font-medium">
+                  Enable Auto Role
+                </Label>
                 <Switch
                   id="enabled"
                   checked={isEnabled}
                   onCheckedChange={handleToggle}
                 />
               </div>
-              <div className="mt-4 space-y-4">
-                <DiscordRolePicker
-                  label="Add Role"
-                  placeholder="Select a role..."
-                  value=""
-                  onUpdate={handleAddRole}
-                  required
-                />
 
-                <div>
-                  <label className="block mb-2 text-sm font-medium">
-                    Automatically Granted Roles
-                  </label>
-                  <div className="flex flex-col mt-2">
-                    {enabledRoles.map((role) => {
-                      const name =
-                        roles.find((r) => r.id === role)?.name ??
-                        "Unknown Role";
-                      return (
-                        <div
-                          key={role}
-                          className="bg-gray-800 p-2 rounded-lg mb-2 flex items-center justify-between"
-                        >
-                          <span className="text-white">
-                            {name} ({role})
-                          </span>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => handleRemoveRole(role)}
-                          >
-                            ✕
-                          </Button>
-                        </div>
-                      );
-                    })}
+              <Separator className="my-4" />
+
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="role-picker">Add Role</Label>
+                  <div className="flex gap-2 justify-center items-center">
+                    <div className="flex-1">
+                      <DiscordRolePicker
+                        label=""
+                        placeholder="Select a role to add"
+                        value={currentRoleId}
+                        onUpdate={setCurrentRoleId}
+                        required={false}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={handleAddRole}
+                      disabled={!currentRoleId}
+                      className="mt-2"
+                    >
+                      Add Role
+                    </Button>
                   </div>
                 </div>
+
+                <div className="space-y-2 mt-4">
+                  <Label className="font-medium">
+                    Automatically Granted Roles
+                  </Label>
+
+                  {enabledRoles.length > 0 ? (
+                    <div className="space-y-2 border rounded-md p-4">
+                      {enabledRoles.map((role) => {
+                        const roleObj = roles.find((r) => r.id === role);
+                        return (
+                          <div
+                            key={role}
+                            className="flex items-center justify-between p-3 bg-gray-800 rounded-md"
+                          >
+                            <span className="font-medium">
+                              {roleObj?.name || "Unknown Role"}
+                            </span>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveRole(role)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <X size={16} />
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center p-4 border border-dashed rounded-md">
+                      <p className="text-sm text-gray-500">
+                        No roles added yet. Add at least one role to enable
+                        auto-role functionality.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <CardFooter className="justify-end">
-                <Button type="submit">Save Changes</Button>
+
+              <CardFooter className="px-0 pt-4">
+                <div className="flex justify-end w-full">
+                  <Button type="submit" className="ml-auto">
+                    Save Changes
+                  </Button>
+                </div>
               </CardFooter>
             </form>
           </CardContent>

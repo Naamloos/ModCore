@@ -1,4 +1,4 @@
-import { Head, router } from "@inertiajs/react";
+import { Head } from "@inertiajs/react";
 import HomeLayout from "@/Layouts/HomeLayout.js";
 import { IconBrandGithub } from "@tabler/icons-react";
 import { PagePropsWith } from "@/Types/PageProps";

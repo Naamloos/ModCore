@@ -1,7 +1,7 @@
 import ModCoreRoleMenuRole from "./ModCoreRoleMenuRole";
 
 export default interface ModCoreRoleMenu {
-  id: string;
+  id: number;
   guild_id: string;
   name: string;
   creator_id: string;

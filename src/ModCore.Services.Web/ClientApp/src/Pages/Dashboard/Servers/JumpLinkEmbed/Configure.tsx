@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/Components/ui/card";
+import { Switch } from "@/Components/ui/switch";
 import { useState } from "react";
 import { router, useForm } from "@inertiajs/react";
 import { ModCoreGuild } from "../../../../Types/DatabaseTypes/ModCoreGuild";
@@ -22,7 +23,15 @@ export default function Configure({
   server,
   databaseServer,
 }: PagePropsWith<ConfigureLevelingProps>) {
-  const [state, setState] = useState(databaseServer.embed_message_links_state);
+  const [disabled, setDisabled] = useState(
+    databaseServer.embed_message_links_state === 0,
+  );
+  const [prefixed, setPrefixed] = useState(
+    databaseServer.embed_message_links_state === 1,
+  );
+  const [always, setAlways] = useState(
+    databaseServer.embed_message_links_state === 2,
+  );
 
   let icon = server?.icon ? server.icon : null;
   if (icon) {
@@ -34,15 +43,49 @@ export default function Configure({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    let state = 0;
+    if (always) state = 2;
+    else if (prefixed) state = 1;
+
     // Handle form submission here
-    console.log({
-      state,
-    });
+    console.log({ state });
   };
 
-  useForm({
-    state,
+  const { data } = useForm({
+    state: databaseServer.embed_message_links_state,
   });
+
+  // Ensure only one option is selected at a time
+  const handleDisabledChange = (checked: boolean) => {
+    if (checked) {
+      setDisabled(true);
+      setPrefixed(false);
+      setAlways(false);
+    } else if (!prefixed && !always) {
+      setDisabled(true);
+    }
+  };
+
+  const handlePrefixedChange = (checked: boolean) => {
+    if (checked) {
+      setDisabled(false);
+      setPrefixed(true);
+      setAlways(false);
+    } else if (!disabled && !always) {
+      setDisabled(true);
+    }
+  };
+
+  const handleAlwaysChange = (checked: boolean) => {
+    if (checked) {
+      setDisabled(false);
+      setPrefixed(false);
+      setAlways(true);
+    } else if (!disabled && !prefixed) {
+      setDisabled(true);
+    }
+  };
 
   return (
     <>
@@ -74,34 +117,58 @@ export default function Configure({
               <br />
               This setting controls if, and how jump links are embedded in
               messages.
-              <br />
-              <br />
-              <strong>Disabled</strong>: No jump link previews will be shown.
-              <br />
-              <strong>Prefixed</strong>: Jump link previews will be shown, but
-              only if the link starts with an exclamation mark.
-              <br />
-              <strong>Always</strong>: Jump link previews will be shown,
-              regardless of the message content.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form className="space-y-8" onSubmit={handleSubmit}>
-              <div>
-                <h3 className="text-lg font-medium">Embed Message Links</h3>
-                <p className="text-sm text-muted-foreground">
-                  Choose when to embed message links.
-                </p>
-                <select
-                  id="embed-message-links"
-                  className="w-full p-2 border rounded-md bg-gray-800 text-white"
-                  value={state}
-                  onChange={(e) => setState(parseInt(e.target.value))}
-                >
-                  <option value={0}>Disabled</option>
-                  <option value={1}>Prefixed</option>
-                  <option value={2}>Always</option>
-                </select>
+              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <label htmlFor="disabled" className="text-base text-white">
+                    Disabled
+                  </label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    No jump link previews will be shown.
+                  </p>
+                </div>
+                <Switch
+                  id="disabled"
+                  checked={disabled}
+                  onCheckedChange={handleDisabledChange}
+                />
+              </div>
+
+              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <label htmlFor="prefixed" className="text-base text-white">
+                    Prefixed
+                  </label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Jump link previews will be shown, but only if the link
+                    starts with an exclamation mark.
+                  </p>
+                </div>
+                <Switch
+                  id="prefixed"
+                  checked={prefixed}
+                  onCheckedChange={handlePrefixedChange}
+                />
+              </div>
+
+              <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <label htmlFor="always" className="text-base text-white">
+                    Always
+                  </label>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Jump link previews will be shown, regardless of the message
+                    content.
+                  </p>
+                </div>
+                <Switch
+                  id="always"
+                  checked={always}
+                  onCheckedChange={handleAlwaysChange}
+                />
               </div>
 
               <Button type="submit">Submit</Button>

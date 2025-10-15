@@ -49,14 +49,16 @@ const modules = (id: string) => [
   {
     name: "Ban Appeal",
     description: "Allow members to appeal their bans.",
-    link: `/dashboard/todo`,
+    link: `/dashboard/servers/${id}/banappeal`,
     icon: <IconHammer size={48} color="#8B4513" />, // SaddleBrown
+    done: true,
   },
   {
     name: "Infractions",
     description: "Track and manage member infractions.",
-    link: `/dashboard/todo`,
+    link: `/dashboard/servers/${id}/infractions`,
     icon: <IconMoodAngry size={48} color="#FF4500" />, // OrangeRed
+    done: true,
   },
   {
     name: "Levels",
@@ -75,8 +77,9 @@ const modules = (id: string) => [
   {
     name: "Profile States",
     description: "Manage member profile states.",
-    link: `/dashboard/todo`,
+    link: `/dashboard/servers/${id}/profilestates`,
     icon: <IconMoon size={48} color="#4682B4" />, // SteelBlue
+    done: true,
   },
   {
     name: "Role Menus",

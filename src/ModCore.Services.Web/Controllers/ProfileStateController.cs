@@ -18,14 +18,14 @@ using ModCore.Common.Utils;
 
 namespace ModCore.Services.Web.Controllers
 {
-    [Route("dashboard/servers/{server_id}/rolemenus")]
+    [Route("dashboard/servers/{server_id}/profilestates")]
     [RouteMiddleware(typeof(RequireAuthentication))]
     [ApiController]
-    public class RoleMenuController : ControllerBase
+    public class ProfileStateController : ControllerBase
     {
         [RouteMiddleware(typeof(RequireAuthentication))]
         [HttpGet]
-        public async Task<IActionResult> RoleMenuSettings([FromRoute] ulong server_id, [FromServices] DatabaseContext database)
+        public async Task<IActionResult> ServerTagsSettings([FromRoute] ulong server_id, [FromServices] DatabaseContext database)
         {
             // User permissions gate
             var gateResponse = await this.GateAsync(new ServerPermissionGate(server_id, Permissions.Administrator));
@@ -44,13 +44,11 @@ namespace ModCore.Services.Web.Controllers
 
             var channels = await this.GetGuildChannelsAsync(server_id);
 
-            return Inertia.Render("Dashboard/Servers/RoleMenus/Configure", new
+            return Inertia.Render("Dashboard/Servers/ProfileStates/Configure", new
             {
                 Server = userServer != default ? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions) : null,
                 DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions),
                 Channels = JsonSerializer.SerializeToDocument(channels, options: serializerOptions),
-                Menus = JsonSerializer.SerializeToDocument(dbServer.RoleMenus.ToList(), options: serializerOptions),
-                Roles = JsonSerializer.SerializeToDocument(await this.GetGuildRolesAsync(server_id), options: serializerOptions)
             });
         }
 
