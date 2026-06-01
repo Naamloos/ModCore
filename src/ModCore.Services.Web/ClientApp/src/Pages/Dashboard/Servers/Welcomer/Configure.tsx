@@ -113,23 +113,22 @@ export default function Configure({
         )}
         {server && (
           <div className="pb-20">
-            {/* Back to Overview link */}
-            <Button
-              variant={"outline"}
-              onClick={() => router.visit(`/dashboard/servers/${server.id}`)}
-              className="mb-4"
-            >
-              Back to Overview
-            </Button>
             <div className="md:flex items-center mb-4">
               <img
                 src={icon}
-                className="inline-block h-16 w-16 rounded-full"
+                className="inline-block h-16 w-16 rounded-full mr-4"
                 alt="User Avatar"
               />
-              <h1 className="text-3xl font-extrabold tracking-tight text-white ml-4">
+              <h1 className="text-3xl font-extrabold tracking-tight text-white py-2">
                 {server.name}: Welcome Message
               </h1>
+              <Button
+                variant="outline"
+                onClick={() => router.visit(`/dashboard/servers/${server.id}`)}
+                className="ml-auto self-center"
+              >
+                Back to Overview
+              </Button>
             </div>
 
             {/* Update the flex layout structure */}

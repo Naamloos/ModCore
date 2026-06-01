@@ -8,13 +8,10 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Entities.Components
 {
-    public class Container : Component
+    public class Container : ComponentWithChildren
     {
         [JsonPropertyName("type")]
         public override ComponentType Type { get; set; } = ComponentType.Container;
-
-        [JsonPropertyName("components")]
-        public List<Component> Components { get; set; } = new List<Component>();
 
         [JsonPropertyName("accent_color")]
         public Optional<int?> AccentColor { get; set; } = Optional<int?>.None;

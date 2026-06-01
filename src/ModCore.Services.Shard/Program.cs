@@ -1,27 +1,30 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ModCore.Common.Cache;
+using ModCore.Common.Database;
+using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Gateway.EventData.Outgoing;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.InteractionFramework;
-using Serilog;
-using Serilog.Sinks.SystemConsole.Themes;
-using System.Text.Json;
-using ModCore.Common.Discord.Entities.Serializer;
-using System.Text.Json.Serialization;
-using ModCore.Common.Cache;
-using ModCore.Common.Database;
-using ModCore.Common.Utils;
-using ModCore.Common.SettingsHelper;
-using System.Reflection;
-using ModCore.Common.Xaml;
-using ModCore.Services.Shard.Modules.Timers.Services;
-using ModCore.Services.Shard.Abstractions;
-using Microsoft.EntityFrameworkCore;
-using Serilog.Core;
 using ModCore.Common.Language;
+using ModCore.Common.SettingsHelper;
+using ModCore.Common.Utils;
+using ModCore.Common.Views;
+using ModCore.Common.Xaml;
+using ModCore.Services.Shard.Abstractions;
+using ModCore.Services.Shard.Modules.Timers.Services;
+using Serilog;
+using Serilog.Core;
+using Serilog.Sinks.SystemConsole.Themes;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ModCore.Services.Shard
 {
@@ -95,6 +98,20 @@ namespace ModCore.Services.Shard
                     // Helper for scoped and transient services
                     services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));
 
+                    var diagnosticListener = new System.Diagnostics.DiagnosticListener("ModCoreRazor");
+                    services.AddSingleton(diagnosticListener);
+                    services.AddSingleton<System.Diagnostics.DiagnosticSource>(diagnosticListener);
+                    services.AddSingleton<IWebHostEnvironment>(new FakeWebHostEnv
+                    {
+                        ApplicationName = Assembly.GetExecutingAssembly().GetName().Name!,
+                        EnvironmentName = "Development",
+                        WebRootPath = Path.GetTempPath(),
+                        ContentRootPath = AppContext.BaseDirectory
+                    });
+
+                    services.AddMvc(); // includes RazorViewEngine, etc.
+
+                    services.AddSingleton<RazorComponentRenderer>();
 
                     var types = Assembly.GetExecutingAssembly().GetTypes();
                     foreach(var type in types)
@@ -140,5 +157,15 @@ namespace ModCore.Services.Shard
                 }
             }
         }
+    }
+
+    public class FakeWebHostEnv : IWebHostEnvironment
+    {
+        public string EnvironmentName { get; set; } = "";
+        public string ApplicationName { get; set; } = "";
+        public string WebRootPath { get; set; } = "";
+        public IFileProvider WebRootFileProvider { get; set; } = new NullFileProvider();
+        public string ContentRootPath { get; set; } = "";
+        public IFileProvider ContentRootFileProvider { get; set; } = new NullFileProvider();
     }
 }

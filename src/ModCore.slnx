@@ -9,6 +9,7 @@
     <Project Path="ModCore.Common.InteractionFramework/ModCore.Common.InteractionFramework.csproj" />
     <Project Path="ModCore.Common.SettingsHelper/ModCore.Common.SettingsHelper.csproj" />
     <Project Path="ModCore.Common.Utils/ModCore.Common.Utils.csproj" />
+    <Project Path="ModCore.Common.Views/ModCore.Common.Views.csproj" Id="14d9660f-d4a9-4151-8775-b9263267df64" />
     <Project Path="ModCore.Common.Xaml/ModCore.Common.Xaml.csproj" />
   </Folder>
   <Folder Name="/Dockerfiles/">

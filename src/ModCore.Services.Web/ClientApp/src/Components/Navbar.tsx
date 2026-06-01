@@ -1,6 +1,6 @@
 import { User } from "@/Types/User";
 import { router, usePage } from "@inertiajs/react";
-import { IconLogout, IconMenu } from "@tabler/icons-react";
+import { IconMenu } from "@tabler/icons-react";
 // @ts-expect-error This works.
 import LogoImage from "@/Assets/logo.png";
 
@@ -34,19 +34,8 @@ export default function Navbar({
             className="h-10 w-10 inline-block"
             alt="Application Icon"
           />
-          <h1 className="text-xl">ModCore Dashboard</h1>
         </div>
         <div className="flex items-center gap-4">
-          <button
-            className="w-12 h-12 mt-3 rounded-xl mb-3 hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
-            onClick={() => {
-              // Add your logout logic here
-              window.location.href = "/logout";
-            }}
-            type="button"
-          >
-            <IconLogout size={24} />
-          </button>
           <button
             className="w-12 h-12 mt-3 rounded-xl mb-3 hover:bg-gray-800 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
             onClick={() => {

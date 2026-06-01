@@ -12,15 +12,16 @@ export default function ModuleCard({
 }: {
   link: string;
   name: string;
-  icon: JSX.Element;
+  icon: (args: any) => JSX.Element;
   description: string;
   done: boolean;
 }) {
   const { toast } = useToast();
+  const Icon = icon;
 
   return (
     <>
-      <Tilt rotationFactor={10} isRevese>
+      <Tilt rotationFactor={2}>
         <div
           className={`bg-gray-900 p-5 h-32 flex flex-col justify-center cursor-pointer hover:bg-gray-700 hover:animate-pulse rounded-xl border bg-card text-card-foreground shadow ${!done ? "opacity-50 cursor-not-allowed" : ""}`}
           onClick={() => {
@@ -36,7 +37,9 @@ export default function ModuleCard({
           }}
         >
           <h4 className="text-lg font-bold text-white inline-flex items-center py-1">
-            <span className="pr-2">{icon}</span>
+            <span className="pr-2">
+              <Icon color={"#FFFFFF"} size={32} />
+            </span>
             {name}
           </h4>
           <p className="text-sm text-gray-400">{description}</p>

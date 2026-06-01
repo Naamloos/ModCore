@@ -1,0 +1,17 @@
+﻿@model ModCore.Services.Shard.Views.AboutViewModel;
+
+<container color="@Model.AccentColor">
+    <section>
+        <section-accessory>
+            <thumbnail Url="@Model.AvatarMedia"/>
+        </section-accessory>
+        <text>@Model.t.t("about.welcome")</text>
+        <text>@Model.t.t("about.main_developer")</text>
+        <text>@Model.t.t("about.contribute")</text>
+    </section>
+    <text>@Model.t.t("about.donate")</text>
+    <text>@Model.t.t("about.previous_contribs")</text>
+    <text>-# ModCore v3-Alpha</text>
+</container>
+
+<!-- This is a comment wow -->
