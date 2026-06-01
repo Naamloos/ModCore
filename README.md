@@ -7,7 +7,7 @@
   </p>
 
 # Rewrite
-This current branch tracks progress of the ModCore rewrite. For more information about this rewrite, read the following Notion article: [ModCore: Next](https://naamloos.notion.site/ModCore-Next-cbc2f6f3f9ad481880911bbd5c12c410)
+This current branch tracks progress of the ModCore rewrite.
 
 ---------------
 
