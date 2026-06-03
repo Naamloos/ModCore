@@ -38,33 +38,11 @@ namespace ModCore.Common.Database
         public virtual DbSet<DatabaseTimer> Timers { get; set; }
         public virtual DbSet<DatabaseLevelSettings> LevelSettings { get; set; }
 
-        private string _connectionString;
-        private string _encryptionKey = string.Empty;
+        private readonly IConfiguration? _config;
 
         public DatabaseContext(IConfiguration config)
         {
-            var cStringBuilder = new NpgsqlConnectionStringBuilder()
-            {
-                Database = config.GetRequiredSection("postgres_database").Value!,
-                Username = config.GetRequiredSection("postgres_username").Value!,
-                Password = config.GetRequiredSection("postgres_password").Value!,
-                Port = int.Parse(config.GetRequiredSection("postgres_port").Value!),
-                Host = config.GetRequiredSection("postgres_host").Value!,
-                IncludeErrorDetail = true
-            };
-
-            this._connectionString = cStringBuilder.ToString();
-            this._encryptionKey = config.GetRequiredSection("master_key").Value!;
-        }
-
-        public DatabaseContext(string cstring, string encryptionKey)
-        {
-            this._connectionString = cstring;
-            this._encryptionKey = encryptionKey;
-        }
-
-        internal DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
-        {
+            this._config = config;
         }
 
         public async Task TouchGuild(ulong guildId)
@@ -90,8 +68,30 @@ namespace ModCore.Common.Database
             optionsBuilder.EnableSensitiveDataLogging();
 #endif
 
-            optionsBuilder.UseNpgsql(this._connectionString);
-            optionsBuilder.AddInterceptors(new EncryptionInterceptor(this._encryptionKey), new DecryptionInterceptor(this._encryptionKey));
+            if (_config != null)
+            {
+                var cStringBuilder = new NpgsqlConnectionStringBuilder()
+                {
+                    Database = _config.GetRequiredSection("postgres_database").Value!,
+                    Username = _config.GetRequiredSection("postgres_username").Value!,
+                    Password = _config.GetRequiredSection("postgres_password").Value!,
+                    Port = int.Parse(_config.GetRequiredSection("postgres_port").Value!),
+                    Host = _config.GetRequiredSection("postgres_host").Value!,
+                    IncludeErrorDetail = true
+                };
+
+                var encryptionKey = _config.GetRequiredSection("master_key").Value!;
+
+                if (!optionsBuilder.IsConfigured)
+                {
+                    optionsBuilder.UseNpgsql(cStringBuilder.ToString());
+                }
+
+                optionsBuilder.AddInterceptors(
+                    new EncryptionInterceptor(encryptionKey),
+                    new DecryptionInterceptor(encryptionKey)
+                );
+            }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

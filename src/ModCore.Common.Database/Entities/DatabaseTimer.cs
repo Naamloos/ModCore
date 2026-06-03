@@ -39,8 +39,9 @@ namespace ModCore.Common.Database.Entities
 
         [JsonPropertyName("data")]
         [Column("data", TypeName = "jsonb")]
-        [EncryptedColumn(nameof(TimerId))]
-        public string? Data { get; set; }
+        [EncryptedColumn(nameof(GuildId), nameof(ShardId))] 
+        // The context IDs need to be stable, and not generated, for encryption to not falsely scream "TAMPERING!"
+        public string Data { get; set; } = "";
 
         public T GetData<T>() where T : class, ITimerData 
             => JsonSerializer.Deserialize<T>(Data!)!;

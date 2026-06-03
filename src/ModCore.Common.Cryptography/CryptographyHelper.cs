@@ -11,7 +11,7 @@ namespace ModCore.Common.Cryptography
         public CryptographyType Type { get; set; }
 
         [JsonPropertyName("d")]
-        public string Data { get; set; } // Data (Base64 payload)
+        public string Data { get; set; } = "";
     }
 
     public enum CryptographyType
@@ -46,10 +46,16 @@ namespace ModCore.Common.Cryptography
 
         private static string EncryptAESGCM_HKDF(string plainText, string contextId, string base64Key)
         {
-            if (string.IsNullOrEmpty(plainText) || string.IsNullOrEmpty(base64Key)) return plainText;
+            if (plainText == null || string.IsNullOrEmpty(base64Key)) return plainText!;
 
             byte[] masterKey = Convert.FromBase64String(base64Key);
-            byte[] derivedKey = HKDF.DeriveKey(HashAlgorithmName.SHA256, masterKey, 32, Encoding.UTF8.GetBytes(contextId));
+            if (masterKey.Length != 32)
+            {
+                throw new InvalidOperationException("Encryption master key must be 32 bytes.");
+            }
+            byte[] salt = Encoding.UTF8.GetBytes("modcore:aesgcm-hkdf");
+            byte[] info = Encoding.UTF8.GetBytes($"context:{contextId}");
+            byte[] derivedKey = HKDF.DeriveKey(HashAlgorithmName.SHA256, masterKey, 32, salt, info);
 
             byte[] nonce = new byte[12];
             RandomNumberGenerator.Fill(nonce);
@@ -57,9 +63,10 @@ namespace ModCore.Common.Cryptography
             byte[] plainBytes = Encoding.UTF8.GetBytes(plainText);
             byte[] cipherBytes = new byte[plainBytes.Length];
             byte[] tag = new byte[16];
+            byte[] aad = Encoding.UTF8.GetBytes($"modcore:{contextId}");
 
             using var aesGcm = new AesGcm(derivedKey, tag.Length);
-            aesGcm.Encrypt(nonce, plainBytes, cipherBytes, tag);
+            aesGcm.Encrypt(nonce, plainBytes, cipherBytes, tag, aad);
 
             byte[] result = new byte[nonce.Length + tag.Length + cipherBytes.Length];
             Buffer.BlockCopy(nonce, 0, result, 0, nonce.Length);
@@ -131,20 +138,27 @@ namespace ModCore.Common.Cryptography
             byte[] nonce = new byte[12];
             byte[] tag = new byte[16];
             byte[] cipherBytes = new byte[rawData.Length - 28];
+            byte[] aad = Encoding.UTF8.GetBytes($"modcore:{contextId}");
 
             Buffer.BlockCopy(rawData, 0, nonce, 0, 12);
             Buffer.BlockCopy(rawData, 12, tag, 0, 16);
             Buffer.BlockCopy(rawData, 28, cipherBytes, 0, cipherBytes.Length);
 
             byte[] masterKey = Convert.FromBase64String(base64Key);
-            byte[] derivedKey = HKDF.DeriveKey(HashAlgorithmName.SHA256, masterKey, 32, Encoding.UTF8.GetBytes(contextId));
+            if (masterKey.Length != 32)
+            {
+                throw new InvalidOperationException("Encryption master key must be 32 bytes.");
+            }
+            byte[] salt = Encoding.UTF8.GetBytes("modcore:aesgcm-hkdf");
+            byte[] info = Encoding.UTF8.GetBytes($"context:{contextId}");
+            byte[] derivedKey = HKDF.DeriveKey(HashAlgorithmName.SHA256, masterKey, 32, salt, info);
 
             using var aesGcm = new AesGcm(derivedKey, tag.Length);
             byte[] plainBytes = new byte[cipherBytes.Length];
 
             try
             {
-                aesGcm.Decrypt(nonce, cipherBytes, tag, plainBytes);
+                aesGcm.Decrypt(nonce, cipherBytes, tag, plainBytes, aad);
                 return Encoding.UTF8.GetString(plainBytes);
             }
             catch (CryptographicException)

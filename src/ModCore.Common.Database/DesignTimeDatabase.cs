@@ -1,16 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using Npgsql;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace ModCore.Common.Database
 {
@@ -19,23 +12,25 @@ namespace ModCore.Common.Database
         public DatabaseContext CreateDbContext(string[] args)
         {
             var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var settingsPath = Path.Combine(directory!, "settings.json"); // This is your ModCore debug's settings.json, throw it in build dir!
+            var settingsPath = Path.Combine(directory!, "settings.json");
 
             var obj = JsonSerializer.Deserialize<JsonObject>(File.ReadAllText(settingsPath))!;
 
-            var cStringBuilder = new NpgsqlConnectionStringBuilder()
+            var configValues = new Dictionary<string, string?>
             {
-                Database = obj["postgres_database"]!.GetValue<string>(),
-                Username = obj["postgres_username"]!.GetValue<string>(),
-                Password = obj["postgres_password"]!.GetValue<string>(),
-                Port = obj["postgres_port"]!.GetValue<int>(),
-                Host = obj["postgres_host"]!.GetValue<string>()
+                ["postgres_database"] = obj["postgres_database"]!.GetValue<string>(),
+                ["postgres_username"] = obj["postgres_username"]!.GetValue<string>(),
+                ["postgres_password"] = obj["postgres_password"]!.GetValue<string>(),
+                ["postgres_port"] = obj["postgres_port"]!.GetValue<int>().ToString(),
+                ["postgres_host"] = obj["postgres_host"]!.GetValue<string>(),
+                ["master_key"] = obj["master_key"]!.GetValue<string>()
             };
 
-            var options = new DbContextOptionsBuilder<DatabaseContext>()
-                .UseNpgsql(cStringBuilder.ToString());
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(configValues)
+                .Build();
 
-            return new DatabaseContext(cStringBuilder.ToString(), obj["master_key"]!.GetValue<string>());
+            return new DatabaseContext(config);
         }
     }
 }
