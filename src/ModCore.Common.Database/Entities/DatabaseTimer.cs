@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Database.Timers;
+﻿using ModCore.Common.Database.Attributes;
+using ModCore.Common.Database.Timers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -38,6 +39,7 @@ namespace ModCore.Common.Database.Entities
 
         [JsonPropertyName("data")]
         [Column("data", TypeName = "jsonb")]
+        [EncryptedColumn(nameof(TimerId))]
         public string? Data { get; set; }
 
         public T GetData<T>() where T : class, ITimerData 

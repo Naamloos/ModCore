@@ -79,6 +79,7 @@ namespace ModCore.Services.Shard
                     services.AddInteractionService();
                     services.AddLogging();
                     services.AddSingleton(jsonOptions);
+                    services.AddMemoryCache();
 #if DEBUG
                     services.AddDistributedMemoryCache();
 #else

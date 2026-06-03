@@ -7,6 +7,7 @@ using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Messages;
+using ModCore.Common.Discord.Rest;
 using ModCore.Common.InteractionFramework;
 using ModCore.Common.InteractionFramework.Attributes;
 using ModCore.Common.Utils;
@@ -24,20 +25,38 @@ namespace ModCore.Services.Shard.Modules.Infractions
         private readonly ILogger _logger;
         private readonly CacheService _cache;
         private readonly DatabaseContext _database;
+        private readonly DiscordRest _rest;
 
-        public InfractionCommands(ILogger<ModerationCommands> logger, CacheService cache, DatabaseContext database)
+        public InfractionCommands(ILogger<ModerationCommands> logger, CacheService cache, DatabaseContext database, DiscordRest rest)
         {
             _logger = logger;
             _cache = cache;
             _database = database;
+            _rest = rest;
         }
 
         [SlashCommand("infractions", "Lists user infractions", permissions: Permissions.BanMembers)]
         public async ValueTask ListInfractionsAsync(SlashCommandContext context,
             [Option("user", "ID of the user to list infractions for", ApplicationCommandOptionType.User)] Snowflake user_id)
         {
-            var fetchedUser = await _cache.GetFromCacheOrRest(user_id, (rest, id) => rest.GetUserAsync(id));
-            if (!fetchedUser.Success)
+            User? user = null;
+
+            var cacheResult = _cache.TryGet<User, ulong>(user_id.Value);
+            if (cacheResult.Success)
+            {
+                user = cacheResult.Value;
+            }
+            else
+            {
+                var apiResult = await this._rest.GetUserAsync(user_id);
+                if (apiResult.Success)
+                {
+                    user = apiResult.Value;
+                    await _cache.UpdateAsync(user.Id, user);
+                }
+            }
+
+            if (user == null)
             {
                 await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token,
                     InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()
@@ -66,8 +85,8 @@ namespace ModCore.Services.Shard.Modules.Infractions
             {
                 Author = new EmbedAuthor()
                 {
-                    Name = "🚫 Infractions for " + fetchedUser.Value!.Username,
-                    IconUrl = fetchedUser.Value.AvatarUrl
+                    Name = "🚫 Infractions for " + user.Username,
+                    IconUrl = user.AvatarUrl
                 },
                 Color = ColorConverter.FromHex("#FF0000"),
                 Fields = infractions.Select(x => new EmbedField()
@@ -90,8 +109,24 @@ namespace ModCore.Services.Shard.Modules.Infractions
             [Option("user", "ID of the user to list infractions for", ApplicationCommandOptionType.User)] Snowflake user_id,
             [Option("warning", "Optional text content of this warning", ApplicationCommandOptionType.String)] Optional<string> content)
         {
-            var fetchedUser = await _cache.GetFromCacheOrRest(user_id, (rest, id) => rest.GetUserAsync(id));
-            if (!fetchedUser.Success)
+            User? user = null;
+
+            var cacheResult = _cache.TryGet<User, ulong>(user_id.Value);
+            if (cacheResult.Success)
+            {
+                user = cacheResult.Value;
+            }
+            else
+            {
+                var apiResult = await this._rest.GetUserAsync(user_id);
+                if (apiResult.Success)
+                {
+                    user = apiResult.Value;
+                    await _cache.UpdateAsync(user.Id, user);
+                }
+            }
+
+            if (user == null)
             {
                 await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token,
                     InteractionResponseType.ChannelMessageWithSource, new InteractionMessageResponse()

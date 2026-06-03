@@ -7,6 +7,7 @@ using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Serializer;
+using ModCore.Common.Discord.Rest;
 using ModCore.Common.Utils;
 using ModCore.Services.Web.Attributes;
 using ModCore.Services.Web.Services;
@@ -35,16 +36,35 @@ namespace ModCore.Services.Web.Middleware
 
             var cacheService = context.RequestServices.GetRequiredService<CacheService>();
             var configService = context.RequestServices.GetRequiredService<IConfiguration>();
+            var discordRest = context.RequestServices.GetRequiredService<DiscordRest>();
             ulong applicationId = ulong.Parse(configService["discord_client_id"]);
-            var app = await cacheService.GetFromCacheOrRest(applicationId, (rest, id) =>
+
+            Application? app = null;
+
+            var cacheResponse = cacheService.TryGet<Application, ulong>(applicationId);
+            if(cacheResponse.Success)
             {
-                return rest.GetApplicationAsync(id);
-            });
+                app = cacheResponse.Value;
+            }
+            else
+            {
+                var restResponse = await discordRest.GetApplicationAsync(applicationId);
+                if(restResponse.Success)
+                {
+                    app = restResponse.Value;
+                    await cacheService.UpdateAsync(applicationId, app);
+                }
+            }
+
+            if(app == null)
+            {
+                throw new Exception("Failed to retrieve application information");
+            }
 
             // workaround for Optional<T> serialization
-            var serializedApp = JsonSerializer.SerializeToDocument(app.Value, options: JsonSerializerOptionsFactory.GetOptions());
+            var serializedApp = JsonSerializer.SerializeToDocument(app, options: JsonSerializerOptionsFactory.GetOptions());
 
-            Inertia.Share("application", app.Success ? serializedApp : null);
+            Inertia.Share("application", serializedApp);
 
             if(context.User.Identity.IsAuthenticated)
             {
@@ -58,7 +78,7 @@ namespace ModCore.Services.Web.Middleware
                 {
                     var restGuilds = await userRest.GetCurrentUserGuilds();
                     guilds = restGuilds.Value;
-                    cacheService.Update("userGuilds:" + userId, guilds);
+                    await cacheService.UpdateAsync("userGuilds:" + userId, guilds);
                 }
 
                 var serverIds = guilds.Select(x => x.Id.Value).ToArray();

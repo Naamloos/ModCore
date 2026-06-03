@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using ModCore.Common.Database.Entities;
+using ModCore.Common.Database.Interceptors;
 using Npgsql;
 using static Microsoft.EntityFrameworkCore.NpgsqlModelBuilderExtensions;
 
@@ -38,6 +39,7 @@ namespace ModCore.Common.Database
         public virtual DbSet<DatabaseLevelSettings> LevelSettings { get; set; }
 
         private string _connectionString;
+        private string _encryptionKey = string.Empty;
 
         public DatabaseContext(IConfiguration config)
         {
@@ -52,11 +54,13 @@ namespace ModCore.Common.Database
             };
 
             this._connectionString = cStringBuilder.ToString();
+            this._encryptionKey = config.GetRequiredSection("master_key").Value!;
         }
 
-        public DatabaseContext(string cstring)
+        public DatabaseContext(string cstring, string encryptionKey)
         {
             this._connectionString = cstring;
+            this._encryptionKey = encryptionKey;
         }
 
         internal DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
@@ -82,11 +86,12 @@ namespace ModCore.Common.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            #if DEBUG
+#if DEBUG
             optionsBuilder.EnableSensitiveDataLogging();
-            #endif
+#endif
 
             optionsBuilder.UseNpgsql(this._connectionString);
+            optionsBuilder.AddInterceptors(new EncryptionInterceptor(this._encryptionKey), new DecryptionInterceptor(this._encryptionKey));
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -104,7 +109,7 @@ namespace ModCore.Common.Database
                 .HasForeignKey(x => x.GuildId);
             modelBuilder.Entity<DatabaseLevelData>()
                 .HasOne(x => x.User)
-                .WithMany(x =>x.LevelData)
+                .WithMany(x => x.LevelData)
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
@@ -138,7 +143,7 @@ namespace ModCore.Common.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DatabaseTag>()
-                .HasKey(x => new {x.Id});
+                .HasKey(x => new { x.Id });
             modelBuilder.Entity<DatabaseTag>()
                 .Property(x => x.Id)
                 .UseIdentityAlwaysColumn();
@@ -214,13 +219,13 @@ namespace ModCore.Common.Database
                 .Property(x => x.Id)
                 .UseIdentityAlwaysColumn();
             modelBuilder.Entity<DatabaseInfraction>()
-                .HasOne(x =>x.Guild)
+                .HasOne(x => x.Guild)
                 .WithMany(x => x.Infractions)
                 .HasForeignKey(x => x.GuildId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DatabaseBanAppeal>()
-                .HasKey(x => new{ x.UserId, x.GuildId });
+                .HasKey(x => new { x.UserId, x.GuildId });
             modelBuilder.Entity<DatabaseBanAppeal>()
                 .HasOne(x => x.User)
                 .WithMany(x => x.BanAppeals)
@@ -260,7 +265,7 @@ namespace ModCore.Common.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DatabaseRoleMenuRole>()
-                .HasKey(x => new {x.RoleId, x.MenuId});
+                .HasKey(x => new { x.RoleId, x.MenuId });
             modelBuilder.Entity<DatabaseRoleMenuRole>()
                 .HasOne(x => x.Menu)
                 .WithMany(x => x.Roles)

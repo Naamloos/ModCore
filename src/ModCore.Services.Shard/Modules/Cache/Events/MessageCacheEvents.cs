@@ -21,26 +21,24 @@ namespace ModCore.Services.Shard.Modules.Cache.Events
 
         public Gateway Gateway { get; set; }
 
-        public ValueTask HandleEvent(MessageCreate data)
-            => UpdateMessage(data, data.GuildId.HasValue ? data.GuildId.Value : 0, data.ChannelId, data.Id, MessageChangeType.Initial);
+        public async ValueTask HandleEvent(MessageCreate data)
+            => await UpdateMessage(data, data.GuildId.HasValue ? data.GuildId.Value : 0, data.ChannelId, data.Id, MessageChangeType.Initial);
 
-        public ValueTask HandleEvent(MessageUpdate data)
-            => UpdateMessage(data, data.GuildId.HasValue ? data.GuildId.Value : 0, data.ChannelId, data.Id, MessageChangeType.Update);
+        public async ValueTask HandleEvent(MessageUpdate data)
+            => await UpdateMessage(data, data.GuildId.HasValue ? data.GuildId.Value : 0, data.ChannelId, data.Id, MessageChangeType.Update);
 
-        public ValueTask HandleEvent(MessageDelete data)
-            => UpdateMessage(null, data.GuildId.HasValue ? data.GuildId.Value : 0, data.ChannelId, data.Id, MessageChangeType.Delete);
+        public async ValueTask HandleEvent(MessageDelete data)
+            => await UpdateMessage(null, data.GuildId.HasValue ? data.GuildId.Value : 0, data.ChannelId, data.Id, MessageChangeType.Delete);
 
-        public ValueTask HandleEvent(MessageBulkDelete data)
+        public async ValueTask HandleEvent(MessageBulkDelete data)
         {
             foreach (var id in data.Ids)
-                UpdateMessage(null, data.GuildId.HasValue ? data.GuildId.Value : 0, data.ChannelId, id, MessageChangeType.Delete);
-            return ValueTask.CompletedTask;
+                await UpdateMessage(null, data.GuildId.HasValue ? data.GuildId.Value : 0, data.ChannelId, id, MessageChangeType.Delete);
         }
 
-        public ValueTask UpdateMessage(Message? message, Snowflake guildId, Snowflake channelId, Snowflake messageId, MessageChangeType changeType)
+        public async ValueTask UpdateMessage(Message? message, Snowflake guildId, Snowflake channelId, Snowflake messageId, MessageChangeType changeType)
         {
-            _cache.UpdateCachedMessage(guildId, channelId, messageId, message, changeType, out var _);
-            return ValueTask.CompletedTask;
+            await _cache.UpdateCachedMessage(guildId, channelId, messageId, message, changeType);
         }
     }
 }

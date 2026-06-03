@@ -63,18 +63,6 @@ namespace ModCore.Common.Web
 
             builder.Services.AddSingleton(jsonOptions);
 
-#if DEBUG
-            builder.Services.AddDistributedMemoryCache();
-#else
-            builder.Services.AddDistributedRedisCache(setup =>
-            {
-                // get the configuration from the service collection
-                var config = builder.Configuration.GetValue<string>("redis_connection_string");
-                setup.InstanceName = "ModCore";
-                setup.Configuration = config;
-            });
-#endif
-
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;

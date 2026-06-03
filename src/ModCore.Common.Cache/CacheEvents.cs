@@ -34,30 +34,30 @@ namespace ModCore.Common.Cache
         public async ValueTask HandleEvent(GuildCreate data)
         {
             _logger.LogInformation("Updated guild cache for {guildname} via GUILD_CREATE", data.Name);
-            _cache.Update<Guild, ulong>(data.Id, data);
+            _cache.UpdateAsync<Guild, ulong>(data.Id, data);
         }
 
         public async ValueTask HandleEvent(GuildUpdate data)
         {
             _logger.LogInformation("Updated guild cache for {guildname} via GUILD_UPDATE", data.Name);
-            _cache.Update<Guild, ulong>(data.Id, data);
+            _cache.UpdateAsync<Guild, ulong>(data.Id, data);
         }
 
         // The following 4 methods keep a local message history cache, which is essentially very useful for moderators trying to snipe multiple edits.
         // This cache expires after 24 hours, but I might lower that amount if cache fills up too quick.
         public async ValueTask HandleEvent(MessageCreate data)
         {
-            _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data, MessageChangeType.Initial, out _);
+            await _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data, MessageChangeType.Initial);
         }
 
         public async ValueTask HandleEvent(MessageUpdate data)
         {
-            _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data, MessageChangeType.Update, out _);
+            await _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, data, MessageChangeType.Update);
         }
 
         public async ValueTask HandleEvent(MessageDelete data)
         {
-            _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, null, MessageChangeType.Delete, out _); 
+            await _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, data.Id, null, MessageChangeType.Delete); 
             // Why do I even have an out variable here
         }
 
@@ -65,7 +65,7 @@ namespace ModCore.Common.Cache
         {
             foreach(var id in data.Ids)
             {
-                _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, id, null, MessageChangeType.BulkDelete, out _);
+                await _cache.UpdateCachedMessage(data.GuildId, data.ChannelId, id, null, MessageChangeType.BulkDelete);
             }
         }
     }

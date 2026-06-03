@@ -38,7 +38,7 @@ namespace ModCore.Services.Web
             {
                 var restGuilds = await userRestClient.GetCurrentUserGuilds(withCounts: true);
                 servers = restGuilds.Value;
-                cacheService.Update("userGuilds:" + userId, servers);
+                cacheService.UpdateAsync("userGuilds:" + userId, servers);
             }
 
             return servers.ToList();
@@ -53,36 +53,73 @@ namespace ModCore.Services.Web
         {
             var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
             var restClient = controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
-            var channels = await cacheService.GetFromCacheOrRest($"channels:{server_id}", async (rest, id) =>
-            {
-                return await rest.GetGuildChannelsAsync(server_id);
-            });
+            List<Channel>? channels = null;
 
-            return channels.Success ? channels.Value : new List<Channel>();
+            var cacheResponse = cacheService.TryGet<List<Channel>, string>($"guild_channels:{server_id}");
+            if(cacheResponse.Success)
+            {
+                channels = cacheResponse.Value;
+            }
+            else
+            {
+                var restResponse = await restClient.GetGuildChannelsAsync(server_id);
+                if (restResponse.Success)
+                {
+                    channels = restResponse.Value;
+                    await cacheService.UpdateAsync($"guild_channels:{server_id}", channels);
+                }
+            }
+
+            return channels ?? new List<Channel>();
         }
 
         public static async Task<List<Emoji>> GetGuildEmojisAsync(this ControllerBase controller, ulong server_id)
         {
             var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
             var restClient = controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
-            var emojis = await cacheService.GetFromCacheOrRest($"emojis:{server_id}", async (rest, id) =>
-            {
-                return await rest.GetGuildEmojisAsync(server_id);
-            });
 
-            return emojis.Success ? emojis.Value : new List<Emoji>();
+            List<Emoji>? emojis = null;
+
+            var cacheResponse = cacheService.TryGet<List<Emoji>, string>($"emojis:{server_id}");
+            if (cacheResponse.Success)
+            {
+                emojis = cacheResponse.Value;
+            }
+            else
+            {
+                var restResponse = await restClient.GetGuildEmojisAsync(server_id);
+                if (restResponse.Success)
+                {
+                    emojis = restResponse.Value;
+                    await cacheService.UpdateAsync($"emojis:{server_id}", emojis);
+                }
+            }
+
+            return emojis ?? new List<Emoji>();
         }
 
         public static async Task<Role[]> GetGuildRolesAsync(this ControllerBase controller, ulong server_id)
         {
             var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
             var restClient = controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
-            var guild = await cacheService.GetFromCacheOrRest(server_id, async (rest, id) =>
-            {
-                return await rest.GetGuildAsync(server_id, true);
-            });
 
-            return guild.Success ? guild.Value.Roles : new Role[0];
+            List<Role>? roles = null;
+
+            var cacheResponse = cacheService.TryGet<List<Role>, string>($"roles:{server_id}");
+            if (cacheResponse.Success)
+            {
+                roles = cacheResponse.Value;
+            }
+            else { 
+                var restResponse = await restClient.GetGuildRolesAsync(server_id);
+                if (restResponse.Success)
+                {
+                    roles = restResponse.Value;
+                    await cacheService.UpdateAsync($"roles:{server_id}", roles);
+                }
+            }
+
+            return roles.ToArray() ?? new Role[0];
         }
     }
 }

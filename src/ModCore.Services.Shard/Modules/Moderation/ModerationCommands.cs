@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using ModCore.Common.Database.Helpers;
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
+using ModCore.Common.Discord.Rest;
 
 namespace ModCore.Services.Shard.Modules.Moderation
 {
@@ -23,12 +24,14 @@ namespace ModCore.Services.Shard.Modules.Moderation
         private readonly ILogger _logger;
         private readonly CacheService _cache;
         private readonly DatabaseContext _database;
+        private readonly DiscordRest _rest;
 
-        public ModerationCommands(ILogger<ModerationCommands> logger, CacheService cache, DatabaseContext database)
+        public ModerationCommands(ILogger<ModerationCommands> logger, CacheService cache, DatabaseContext database, DiscordRest rest)
         {
             _logger = logger;
             _cache = cache;
             _database = database;
+            _rest = rest;
         }
 
         [SlashCommand("ban", "Bans a user", permissions: Permissions.BanMembers)]
@@ -38,8 +41,24 @@ namespace ModCore.Services.Shard.Modules.Moderation
             [Option("reason", "Reason to ban user", ApplicationCommandOptionType.String)] Optional<string> reason,
             [Option("notify", "Whether to notify said user", ApplicationCommandOptionType.Boolean)] Optional<bool> notify)
         {
-            var fetchGuild = await _cache.GetFromCacheOrRest(context.EventData.GuildId, (rest, id) => rest.GetGuildAsync(id));
-            if (!fetchGuild.Success)
+            Guild? guild = null;
+
+            var cacheResult = _cache.TryGet<Guild, Snowflake>(context.EventData.GuildId);
+            if(cacheResult.Success)
+            {
+                guild = cacheResult.Value;
+            }
+            else
+            {
+                var restResult = await _rest.GetGuildAsync(context.EventData.GuildId);
+                if(restResult.Success)
+                {
+                    guild = restResult.Value;
+                    await _cache.UpdateAsync(guild.Id, guild);
+                }
+            }
+
+            if (guild == null)
             {
                 // failure! tell user.
                 await context.RestClient.CreateInteractionResponseAsync(context.EventData.Id, context.EventData.Token, InteractionResponseType.ChannelMessageWithSource,
@@ -60,7 +79,7 @@ namespace ModCore.Services.Shard.Modules.Moderation
             {
                 var dm = await context.RestClient.CreateMessageAsync(dmChannel.Value.Id, new CreateMessage()
                 {
-                    Content = $"You were banned from {fetchGuild.Value.Name}.\nReason:\n```\n{givenReason}\n```" +
+                    Content = $"You were banned from {guild.Name}.\nReason:\n```\n{givenReason}\n```" +
                         $"This server does **not** have appeals enabled."
                 });
                 sentDM = dm.Success;

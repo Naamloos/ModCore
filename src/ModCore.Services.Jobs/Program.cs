@@ -65,6 +65,7 @@ namespace ModCore.Services.Jobs
                     services.AddModcoreCacheService();
                     services.AddDbContext<DatabaseContext>();
 
+                    services.AddMemoryCache();
 #if DEBUG
                     services.AddDistributedMemoryCache();
 #else

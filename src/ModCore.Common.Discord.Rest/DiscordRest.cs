@@ -162,6 +162,13 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<List<Emoji>>(HttpMethod.Get, url, route);
         }
 
+        public ValueTask<RestResponse<List<Role>>> GetGuildRolesAsync(Snowflake guildId)
+        {
+            string route = $"guilds/{guildId}/roles";
+            string url = $"guilds/{guildId}/roles";
+            return makeRequestAsync<List<Role>>(HttpMethod.Get, url, route);
+        }
+
         private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null, bool retry = false)
         {
             HttpResponseMessage response = await RatelimitedRest.RequestAsync(method, route, url, body);

@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
+using ModCore.Common.Cache.Events;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Messages;
@@ -7,123 +10,142 @@ using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.Utils;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Cache
 {
     public class CacheService
     {
-        private IDistributedCache _cache;
+        const int L1_EXPIRATION = 15;
+        const int L2_EXPIRATION = 60;
+
+        private IDistributedCache _l2;
+        private IMemoryCache _l1;
         private JsonSerializerOptions _serializerOptions;
-        private DiscordRest DiscordRest { get; set; }
+        private IPubSubService _pubSub { get; set; }
+        private ILogger<CacheService> _logger { get; set; }
 
-        public CacheService(IDistributedCache cache, DiscordRest restClient)
+        public CacheService(IMemoryCache l1, IDistributedCache l2, IPubSubService pubSub, ILogger<CacheService> logger)
         {
-            this._cache = cache;
+            this._l1 = l1;
+            this._l2 = l2;
             this._serializerOptions = JsonSerializerOptionsFactory.GetOptions();
-            this.DiscordRest = restClient;
+            this._pubSub = pubSub;
+            this._logger = logger;
         }
 
-        public async ValueTask<CacheResponse<T>> GetFromCacheOrRest<T, TKey>(TKey Id, Func<DiscordRest, TKey, ValueTask<RestResponse<T>>> fallback)
-        {
-            var cache = TryGet<T, TKey>(Id);
-            if (cache.Success)
-            {
-                return cache;
-            }
-
-            T returnValue = default(T);
-            var success = false;
-
-            try
-            {
-                var fallbackResponse = await fallback(DiscordRest, Id);
-                if (fallbackResponse.Success)
-                {
-                    returnValue = fallbackResponse.Value!;
-                    Update<T, TKey>(Id, returnValue);
-                    success = true;
-                }
-            }
-            catch (Exception)
-            {
-                success = false;
-            }
-
-            return new CacheResponse<T>(success, returnValue);
-        }
-
+        /// <summary>
+        /// Tries to get an item from cache. Checks L1 (in-memory) first, then L2 (distributed cache). If found in L2, promotes to L1 for faster access next time.
+        /// </summary>
+        /// <typeparam name="T">Type of the item to retrieve.</typeparam>
+        /// <typeparam name="TKey">Type of the item's ID</typeparam>
+        /// <param name="Id">The actual ID of the item to retrieve</param>
+        /// <returns>A Cache response that contains item, whether cache was succesful and what cache layer was hit to get this item. The item will be null when success is false.</returns>
         public CacheResponse<T> TryGet<T, TKey>(TKey Id)
         {
             var cacheKey = getCacheKey<T, TKey>(Id);
 
             var item = default(T);
             var success = false;
+            string? resultString = null;
+            var layer = CacheLayer.None;
 
-            var cachedJson = _cache.GetString(cacheKey);
-            if (!string.IsNullOrEmpty(cachedJson))
+            // Stage 1: L1 Cache (memory cache)
+            if (!_l1.TryGetValue<string>(cacheKey, out resultString))
+            {
+                resultString = _l2.GetString(cacheKey);
+
+                if (resultString != null)
+                {
+                    // found in layer 2
+                    layer = CacheLayer.L2;
+                    // Item found in layer 2, populate layer 1 for faster access
+                    _l1.Set(cacheKey, resultString, new MemoryCacheEntryOptions()
+                    {
+                        SlidingExpiration = TimeSpan.FromMinutes(L1_EXPIRATION)
+                    });
+                }
+            }
+            else
+            {
+                // found in layer 1
+                layer = CacheLayer.L1;
+            }
+
+            if (!string.IsNullOrEmpty(resultString))
             {
                 try
                 {
-                    item = JsonSerializer.Deserialize<T>(cachedJson, _serializerOptions);
+                    item = JsonSerializer.Deserialize<T>(resultString, _serializerOptions);
                     success = true;
                 }
                 catch (Exception)
                 {
                     success = false;
+                    layer = CacheLayer.None;
+                    item = default;
                 }
             }
 
-            return new CacheResponse<T>(success, item);
+            this._logger.LogDebug($"Cache {(success ? "hit" : "miss")} - {typeof(T).Name} with key {cacheKey} on {typeof(CacheLayer).GetEnumName(layer)}");
+
+            return new CacheResponse<T>(success, item, layer);
         }
 
-        public void Update<T, TKey>(TKey Id, T newItem)
+        public async Task UpdateAsync<T, TKey>(TKey Id, T newItem)
         {
             var cacheKey = getCacheKey<T, TKey>(Id);
+            var oldItem = this.TryGet<T, TKey>(Id);
 
-            var cachedJson = _cache.GetString(cacheKey);
-            if (string.IsNullOrEmpty(cachedJson))
+            if(!oldItem.Success)
             {
-                // regular objects should just linger in cache I think. Might be sensible to have a sliding expiration at some point.
-                _cache.SetString(cacheKey, JsonSerializer.Serialize<T>(newItem, _serializerOptions));
+                await this.storeInCache(cacheKey, JsonSerializer.Serialize(newItem, _serializerOptions));
+                this._logger.LogDebug($"Cache update - {typeof(T).Name} with key {cacheKey} (new entity)");
                 return;
             }
 
-            var cachedItem = JsonSerializer.Deserialize<T>(cachedJson)!;
-            var newCacheItem = mergeObjects<T>(cachedItem, newItem);
+            var updatedItem = this.mergeObjects(oldItem.Value!, newItem);
+            var serializedUpdatedItem = JsonSerializer.Serialize(updatedItem, _serializerOptions);
+            this._logger.LogDebug($"Cache update - {typeof(T).Name} with key {cacheKey} (merged)");
 
-            _cache.SetString(cacheKey, JsonSerializer.Serialize<T>(newCacheItem, _serializerOptions));
+            await this.storeInCache(cacheKey, serializedUpdatedItem);
+        }
+
+        private async Task storeInCache(string key, string json)
+        {
+            _l1.Set<string>(key, json, new MemoryCacheEntryOptions()
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(L1_EXPIRATION)
+            });
+            _l2.SetString(key, json, new DistributedCacheEntryOptions
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(L2_EXPIRATION)
+            });
+
+            await this._pubSub.PublishAsync<InvalidateCacheKey>("cache", new InvalidateCacheKey(key));
+        }
+
+        public void InvalidateL1(string key)
+        {
+            _l1.Remove(key);
+
+            this._logger.LogDebug($"L1 invalidation: {key}");
         }
 
         public CacheResponse<MessageHistory> GetMessageFromCache(Snowflake guildId, Snowflake channelId, Snowflake messageId)
         {
-            var history = default(MessageHistory);
-            var success = false;
-
-            var cacheKey = getMessageCacheKey(guildId, channelId, messageId);
-            var cachedJson = _cache.GetString(cacheKey);
-            if (!string.IsNullOrEmpty(cachedJson))
-            {
-                try
-                {
-                    history = JsonSerializer.Deserialize<MessageHistory>(cachedJson, _serializerOptions);
-                    success = true;
-                }
-                catch (Exception)
-                {
-                    success = false;
-                }
-            }
-
-            return new CacheResponse<MessageHistory>(success, history);
+            return this.TryGet<MessageHistory, string>($"{guildId}_{channelId}_{messageId}");
         }
 
-        public void UpdateCachedMessage(Snowflake guildId, Snowflake channelId, Snowflake messageId, Message? message,
-            MessageChangeType changeType, out MessageHistory? history)
+        public async Task<MessageHistory?> UpdateCachedMessage(Snowflake guildId, Snowflake channelId, Snowflake messageId, Message? message,
+            MessageChangeType changeType)
         {
-            var cacheKey = getMessageCacheKey(guildId, channelId, messageId);
-            var cachedJson = _cache.GetString(cacheKey);
+            MessageHistory? history = null;
+
+            var messageHistoryId = $"{guildId}_{channelId}_{messageId}";
 
             var newChange = new MessageState()
             {
@@ -132,7 +154,9 @@ namespace ModCore.Common.Cache
                 State = message != default ? message : Optional<Message>.None,
             };
 
-            if (string.IsNullOrEmpty(cachedJson))
+            var oldItem = this.TryGet<MessageHistory, string>(messageHistoryId);
+
+            if (!oldItem.Success)
             {
                 history = new MessageHistory()
                 {
@@ -140,20 +164,16 @@ namespace ModCore.Common.Cache
                     History = new() { newChange }
                 };
 
-                _cache.SetString(cacheKey, JsonSerializer.Serialize(history, _serializerOptions), new DistributedCacheEntryOptions()
-                {
-                    SlidingExpiration = TimeSpan.FromHours(24) // TODO decide whether there's a more sensible value
-                });
+                await this.UpdateAsync<MessageHistory, string>(messageHistoryId, history);
 
-                history = history;
-                return;
+                return history;
             }
 
-            history = JsonSerializer.Deserialize<MessageHistory>(cachedJson, _serializerOptions);
+            history = oldItem.Value!;
             history.History.Add(newChange);
+            await this.UpdateAsync<MessageHistory, string>(messageHistoryId, history);
 
-            _cache.SetString(cacheKey, JsonSerializer.Serialize(history, _serializerOptions));
-            _cache.Refresh(cacheKey);
+            return history;
         }
 
         private string getCacheKey<T, TKey>(TKey Id)
@@ -162,39 +182,50 @@ namespace ModCore.Common.Cache
             return $"{typeName}:{Id!.ToString()!.Replace(":", "\\:")}"; // Escape colons in Id
         }
 
-        private string getMessageCacheKey(Snowflake guildId, Snowflake channelId, Snowflake messageId)
+        /// <summary>
+        /// Merges a partial update into an existing object.
+        /// </summary>
+        private T mergeObjects<T>(T existing, T update)
         {
-            return $"message_cache:{guildId.ToString().Replace(":", "\\:")}" +
-                $":{channelId.ToString().Replace(":", "\\:")}" +
-                $":{messageId.ToString().Replace(":", "\\:")}"; // Escape colons in all parts
-        }
+            var existingNode = JsonSerializer.SerializeToNode(existing, _serializerOptions);
+            var updateNode = JsonSerializer.SerializeToNode(update, _serializerOptions);
 
-        private T mergeObjects<T>(T oldValue, T newValue)
-        {
-            var type = typeof(T);
-            var newCacheItem = (T)Activator.CreateInstance(type)!;
-
-            foreach (var property in type.GetProperties())
+            if (existingNode is JsonObject existingObj && updateNode is JsonObject updateObj)
             {
-                object oldPropertyValue = property.GetValue(oldValue)!;
-                object newPropertyValue = property.GetValue(newValue)!;
-
-                if (property.PropertyType.IsInstanceOfType(typeof(Optional<>)))
-                {
-                    // if no value is present in new, we keep old.
-                    var prop = property.GetValue(newValue);
-                    var hasValue = (bool)prop!.GetType().GetMethod("HasValue")!.Invoke(prop, null)!;
-                    if (!hasValue)
-                    {
-                        property.SetValue(oldPropertyValue, null);
-                        continue; // Keep the old value.
-                    }
-                }
-
-                property.SetValue(newCacheItem, newPropertyValue);
+                mergeNodes(existingObj, updateObj);
+                return existingObj.Deserialize<T>(_serializerOptions)!;
             }
 
-            return newCacheItem;
+            return update;
+        }
+
+        /// <summary>
+        /// Recursively merges updateNode into existingNode.
+        /// </summary>
+        private void mergeNodes(JsonObject existing, JsonObject update)
+        {
+            foreach (var property in update)
+            {
+                var key = property.Key;
+                var newValue = property.Value;
+
+                // 1. Skip nulls or "empty" optional markers if your API defines them as such
+                if (newValue == null) continue;
+
+                // 2. If property exists in both as an Object, recurse
+                if (existing.TryGetPropertyValue(key, out var existingValue) &&
+                    existingValue is JsonObject existingChild &&
+                    newValue is JsonObject updateChild)
+                {
+                    mergeNodes(existingChild, updateChild);
+                }
+                else
+                {
+                    // 3. Otherwise, overwrite the existing property with the update
+                    // We use DeepClone to ensure no shared references between cache and new data
+                    existing[key] = newValue.DeepClone();
+                }
+            }
         }
     }
 }

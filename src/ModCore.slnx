@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Common/">
     <Project Path="ModCore.Common.Cache/ModCore.Common.Cache.csproj" />
+    <Project Path="ModCore.Common.Cryptography/ModCore.Common.Cryptography.csproj" Id="cccfa178-9b1d-4e44-a03f-9fecfe48256d" />
     <Project Path="ModCore.Common.Database/ModCore.Common.Database.csproj" />
     <Project Path="ModCore.Common.Discord.Entities/ModCore.Common.Discord.Entities.csproj" />
     <Project Path="ModCore.Common.Discord.Gateway/ModCore.Common.Discord.Gateway.csproj" />
@@ -31,5 +32,6 @@
   </Folder>
   <Folder Name="/Tools/">
     <Project Path="ModCore.Tools.DatabaseMigrator/ModCore.Tools.DatabaseMigrator.csproj" />
+    <Project Path="ModCore.Tools.Keygen/ModCore.Tools.Keygen.csproj" Id="22a7d469-6d78-4532-9c06-8fb0ae363024" />
   </Folder>
 </Solution>
