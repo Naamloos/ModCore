@@ -89,6 +89,13 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<ApplicationCommand[]>(HttpMethod.Get, url, route);
         }
 
+        public ValueTask<RestResponse<object>> DeleteGlobalApplicationCommandAsync(Snowflake applicationId, Snowflake commandId)
+        {
+            string route = "applications/:application_id/commands/:command_id";
+            string url = $"applications/{applicationId}/commands/{commandId}";
+            return makeRequestAsync<object>(HttpMethod.Delete, url, route);
+        }
+
         public ValueTask<RestResponse<object>> CreateInteractionResponseAsync(Snowflake interactionId, string interationToken,
             InteractionResponseType type, InteractionResponseData data)
         {

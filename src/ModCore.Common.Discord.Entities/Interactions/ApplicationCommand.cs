@@ -44,5 +44,11 @@ namespace ModCore.Common.Discord.Entities.Interactions
 
         [JsonPropertyName("version")]
         public Snowflake Version { get; set; }
+
+        /// <summary>
+        /// The type of handler this application command uses. Probably 1, since that is app handler. 2 is for discord_launch_activity
+        /// </summary>
+        [JsonPropertyName("handler")]
+        public Optional<int> Handler { get; set; }
     }
 }

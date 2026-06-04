@@ -26,6 +26,11 @@
     <File Path="../README.md" />
   </Folder>
   <Folder Name="/Services/">
+    <Project Path="ModCore.Services.Dashboard/modcore.services.dashboard.client/modcore.services.dashboard.client.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+    <Project Path="ModCore.Services.Dashboard/ModCore.Services.Dashboard.Server/ModCore.Services.Dashboard.Server.csproj" Id="5c798299-aaae-4b5c-9754-d4038210623b" />
     <Project Path="ModCore.Services.Jobs/ModCore.Services.Jobs.csproj" />
     <Project Path="ModCore.Services.Shard/ModCore.Services.Shard.csproj" />
     <Project Path="ModCore.Services.Web/ModCore.Services.Web.csproj" />

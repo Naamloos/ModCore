@@ -57,15 +57,19 @@ namespace ModCore.Common.InteractionFramework
             options.AddRange(subCommands.Item2);
             options.AddRange(subGroups.Item2);
 
+            // check if handler has the LaunchCommandOverride attribute, this command is the override for the launch command.
+            var launchCommandAttribute = this.GetType().GetCustomAttribute<LaunchCommandOverrideAttribute>();
+
             var command = new ApplicationCommand()
             {
                 Name = attr.Name,
                 Description = attr.Description,
                 NSFW = attr.Nsfw,
                 CanBeUsedInDM = attr.DmPermission,
-                Type = ApplicationCommandType.ChatInput,
+                Type = launchCommandAttribute != null? ApplicationCommandType.ActivityEntryPoint : ApplicationCommandType.ChatInput,
                 Options = options,
                 DefaultMemberPermissions = attr.Permissions == Permissions.None? Optional<Permissions>.None : attr.Permissions,
+                Handler = launchCommandAttribute != null? 1 : Optional<int>.None
             };
 
             foreach (var subCommand in subCommands.Item1)
@@ -118,6 +122,8 @@ namespace ModCore.Common.InteractionFramework
             {
                 var attr = method.GetCustomAttribute<SlashCommandAttribute>()!;
 
+                var launchCommandAttribute = method.GetCustomAttribute<LaunchCommandOverrideAttribute>();
+
                 appCommands.Add(new ApplicationCommand()
                 {
                     Name = attr.Name,
@@ -126,6 +132,8 @@ namespace ModCore.Common.InteractionFramework
                     CanBeUsedInDM = attr.DmPermission,
                     Options = loadOptions(method),
                     DefaultMemberPermissions = attr.Permissions == Permissions.None ? Optional<Permissions>.None : attr.Permissions,
+                    Type = launchCommandAttribute != null ? ApplicationCommandType.ActivityEntryPoint : ApplicationCommandType.ChatInput,
+                    Handler = launchCommandAttribute != null ? 1 : Optional<int>.None
                 });
 
                 executables.Add(attr.Name, method);

@@ -15,6 +15,7 @@ namespace ModCore.Common.Discord.Entities.Enums
         UpdateMessage = 7,
         ApplicationCommandAutocompleteResult = 8,
         Modal = 9,
-        PremiumRequired = 10
+        PremiumRequired = 10,
+        LaunchActivity = 12,
     }
 }

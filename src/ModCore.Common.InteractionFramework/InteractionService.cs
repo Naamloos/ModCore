@@ -5,6 +5,7 @@ using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Rest;
+using System.ComponentModel.Design;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -61,6 +62,21 @@ namespace ModCore.Common.InteractionFramework
 
         public async ValueTask PublishCommands(Snowflake appId)
         {
+            // This part is purely to ensure that Discord's default "Launch Activity" command isn't there.
+            // We keep pure control over how to launch the config activity this way.
+            var commands = await Rest.GetGlobalApplicationCommandsAsync(appId);
+            if(commands.Success)
+            {
+                foreach(var command in commands.Value)
+                {
+                    if(command.Name.ToLower() == "launch" && command.Handler == 2)
+                    {
+                        // This is a discord_launch_activity command, delete it.
+                        await Rest.DeleteGlobalApplicationCommandAsync(appId, command.Id);
+                        break; // Only one command of this type can exist, so we can break after finding it.
+                    }
+                }
+            }
             await Rest.BulkOverwriteGlobalApplicationCommandsAsync(appId, [.. Commands]);
         }
 

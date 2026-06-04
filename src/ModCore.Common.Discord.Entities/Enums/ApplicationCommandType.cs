@@ -11,6 +11,7 @@ namespace ModCore.Common.Discord.Entities.Enums
     {
         ChatInput = 1,
         User = 2,
-        Message = 3
+        Message = 3,
+        ActivityEntryPoint = 4
     }
 }

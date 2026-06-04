@@ -1,0 +1,6 @@
+@ModCore.Services.Dashboard.Server_HostAddress = http://localhost:5162
+
+GET {{ModCore.Services.Dashboard.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
