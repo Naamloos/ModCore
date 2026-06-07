@@ -6,11 +6,11 @@
   "tailwind": {
     "config": "",
     "css": "src/index.css",
-    "baseColor": "stone",
+    "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
   },
-  "iconLibrary": "remixicon",
+  "iconLibrary": "lucide",
   "rtl": false,
   "aliases": {
     "components": "@/components",
@@ -19,7 +19,7 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "menuColor": "default",
+  "menuColor": "default-translucent",
   "menuAccent": "subtle",
   "registries": {}
 }

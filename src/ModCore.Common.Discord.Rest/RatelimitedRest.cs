@@ -26,7 +26,7 @@ namespace ModCore.Common.Discord.Rest
 
             proxyEnabled = !string.IsNullOrEmpty(config.RestProxy);
 
-            string baseAddress = (proxyEnabled ? config.RestProxy : API_BASE) + string.Format(API_BASE_PATH, API_VERSION); 
+            string baseAddress = (proxyEnabled ? config.RestProxy : API_BASE) + string.Format(API_BASE_PATH, API_VERSION);
 
             Console.WriteLine($"BaseAddress: {baseAddress}");
 
@@ -40,7 +40,7 @@ namespace ModCore.Common.Discord.Rest
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("ModCore3 (https://github.com/Naamloos/ModCore)");
         }
 
-        public async ValueTask<HttpResponseMessage> RequestAsync(HttpMethod method, string route, string url, object? body = null)
+        public async ValueTask<HttpResponseMessage> RequestAsync(HttpMethod method, string route, string url, object? body = null, bool asForm = false)
         {
             RateLimitBucket? bucket = null;
 
@@ -59,7 +59,31 @@ namespace ModCore.Common.Discord.Rest
             var request = new HttpRequestMessage(method, url);
             if (body != null)
             {
-                request.Content = JsonContent.Create(body, options: jsonSerializerOptions);
+                if (!asForm)
+                {
+                    request.Content = JsonContent.Create(body, options: jsonSerializerOptions);
+                }
+                else
+                {
+                    IEnumerable<KeyValuePair<string, string>> formValues;
+
+                    if (body is IEnumerable<KeyValuePair<string, string>> keyValuePairs)
+                    {
+                        formValues = keyValuePairs;
+                    }
+                    else
+                    {
+                        formValues = body
+                            .GetType()
+                            .GetProperties()
+                            .Select(prop => new KeyValuePair<string, string>(
+                                prop.Name,
+                                prop.GetValue(body)?.ToString() ?? string.Empty
+                            ));
+                    }
+
+                    request.Content = new FormUrlEncodedContent(formValues);
+                }
             }
 
             var response = await httpClient.SendAsync(request);

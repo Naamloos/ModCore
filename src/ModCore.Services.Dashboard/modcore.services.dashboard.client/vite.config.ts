@@ -27,7 +27,7 @@ export default defineConfig({
         },
         port: parseInt(env.DEV_SERVER_PORT || '53552'),
         allowedHosts: [
-            'earthquake-theoretical-commitments-systems.trycloudflare.com'
+            'modcoredev.nudes.zip'
         ]
     }
 });

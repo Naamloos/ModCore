@@ -11,6 +11,7 @@ namespace ModCore.Common.SettingsHelper
 
             if (!File.Exists("settings.json"))
             {
+                // This is a legacy fallback, MSBuild should ensure the settings file exists and gets copied from the repository directory to output.
                 File.Create("settings.json").Close();
                 File.WriteAllText("settings.json", JsonSerializer.Serialize(new Settings(), jsonOptions));
             }
@@ -20,7 +21,12 @@ namespace ModCore.Common.SettingsHelper
             var settings = JsonSerializer.Deserialize<Settings>(contents, jsonOptions);
             File.WriteAllText("settings.json", JsonSerializer.Serialize(settings, jsonOptions));
 
-            return settings;
+            return settings!;
+        }
+
+        public static string GetPathToSettings()
+        {
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.json");
         }
     }
 }

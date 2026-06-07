@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.3864779">
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.3982316">
   <PropertyGroup>
     <StartupCommand>npm run dev</StartupCommand>
     <JavaScriptTestRoot>src\</JavaScriptTestRoot>
@@ -9,6 +9,7 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="src\NewFolder\" />
+    <None Remove="src\NewFolder\**" />
+    <TypeScriptConfiguration Remove="src\NewFolder\**" />
   </ItemGroup>
 </Project>

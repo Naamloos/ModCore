@@ -7,6 +7,7 @@ using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Messages;
+using ModCore.Common.Discord.Entities.Responses;
 using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Utils;
 using System.Text.Json;
@@ -29,7 +30,7 @@ namespace ModCore.Common.Discord.Rest
 
             var config = services?.GetService<IConfiguration>();
 
-            if(config != null && string.IsNullOrEmpty(Configuration.Token))
+            if (config != null && string.IsNullOrEmpty(Configuration.Token))
             {
                 Configuration.Token = config.GetRequiredSection("discord_token").Value!;
                 Configuration.RestProxy = config.GetRequiredSection("discord_rest_proxy").Value!;
@@ -135,7 +136,7 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<List<CurrentUserGuild>>(HttpMethod.Get, url, route);
         }
 
-        public ValueTask<RestResponse<object>> CreateGuildBanAsync(Snowflake guildId, Snowflake userId, 
+        public ValueTask<RestResponse<object>> CreateGuildBanAsync(Snowflake guildId, Snowflake userId,
             int? delete_message_days = null, int? delete_message_seconds = null)
         {
             string route = $"guilds/{guildId}/bans/:user_id";
@@ -143,8 +144,8 @@ namespace ModCore.Common.Discord.Rest
 
             return makeRequestAsync<object>(HttpMethod.Put, url, route, new CreateGuildBan()
             {
-                DeleteMessageDays = delete_message_days == null? Optional<int>.None : delete_message_days.Value,
-                DeleteMessageSeconds = delete_message_seconds == null? Optional<int>.None : delete_message_seconds.Value
+                DeleteMessageDays = delete_message_days == null ? Optional<int>.None : delete_message_days.Value,
+                DeleteMessageSeconds = delete_message_seconds == null ? Optional<int>.None : delete_message_seconds.Value
             });
         }
 
@@ -176,9 +177,34 @@ namespace ModCore.Common.Discord.Rest
             return makeRequestAsync<List<Role>>(HttpMethod.Get, url, route);
         }
 
-        private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null, bool retry = false)
+        public ValueTask<RestResponse<OAuth2TokenResponse>> AuthenticateOAuth2Token(
+            string clientId,
+            string clientSecret,
+            string code)
         {
-            HttpResponseMessage response = await RatelimitedRest.RequestAsync(method, route, url, body);
+            const string route = "oauth2/token";
+            const string url = "https://discord.com/api/oauth2/token";
+
+            var body = new Dictionary<string, string>
+            {
+                { "client_id", clientId },
+                { "client_secret", clientSecret },
+                { "grant_type", "authorization_code" },
+                { "code", code },
+            };
+
+            return makeRequestAsync<OAuth2TokenResponse>(
+                HttpMethod.Post,
+                url,
+                route,
+                body,
+                asForm: true
+            );
+        }
+
+        private async ValueTask<RestResponse<T>> makeRequestAsync<T>(HttpMethod method, string url, string route, object? body = null, bool retry = false, bool asForm = false)
+        {
+            HttpResponseMessage response = await RatelimitedRest.RequestAsync(method, route, url, body, asForm);
             T? deserializedResponse = default(T);
             if (response.IsSuccessStatusCode)
             {
@@ -190,7 +216,7 @@ namespace ModCore.Common.Discord.Rest
             }
             else
             {
-                if(response.StatusCode == System.Net.HttpStatusCode.TooManyRequests && !retry)
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests && !retry)
                 {
                     // rate limited so....
                     _logger?.LogWarning("Rate limit hit! Retrying request.");
@@ -198,7 +224,7 @@ namespace ModCore.Common.Discord.Rest
                     return await makeRequestAsync<T>(method, url, route, body, true);
                 }
                 _logger?.LogError(await response.Content.ReadAsStringAsync());
-                if(response.RequestMessage?.Content != null)
+                if (response.RequestMessage?.Content != null)
                     _logger?.LogError(await response.RequestMessage.Content.ReadAsStringAsync());
             }
 

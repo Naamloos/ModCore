@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
 using ModCore.Common.Database.Timers;
@@ -22,7 +23,7 @@ namespace ModCore.Tools.DatabaseMigrator
         private DatabaseContext _newDatabase;
         private ClassicDatabaseContext _oldDatabase;
 
-        public Migrator(string oldDB, string newDB, string username, string pass, string host, int port)
+        public Migrator(string oldDB, string newDB, string username, string pass, string host, int port, string masterKey)
         {
             var oldCStringBuilder = new NpgsqlConnectionStringBuilder()
             {
@@ -33,17 +34,22 @@ namespace ModCore.Tools.DatabaseMigrator
                 Host = host,
                 IncludeErrorDetail = true
             };
-            var newCStringBuilder = new NpgsqlConnectionStringBuilder()
+
+            var configValues = new Dictionary<string, string?>
             {
-                Database = newDB,
-                Username = username,
-                Password = pass,
-                Port = port,
-                Host = host,
-                IncludeErrorDetail = true
+                ["postgres_database"] = newDB,
+                ["postgres_username"] = username,
+                ["postgres_password"] = pass,
+                ["postgres_port"] = port.ToString(),
+                ["postgres_host"] = host,
+                ["master_key"] = masterKey
             };
 
-            _newDatabase = new DatabaseContext(newCStringBuilder.ToString());
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(configValues)
+                .Build();
+
+            _newDatabase = new DatabaseContext(config);
             _oldDatabase = new ClassicDatabaseContext(oldCStringBuilder.ToString());
         }
 

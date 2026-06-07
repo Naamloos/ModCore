@@ -21,6 +21,8 @@
             var oldDB = Console.ReadLine();
             MigratorConsole.Write("New DB name: ");
             var newDB = Console.ReadLine();
+            MigratorConsole.Write("Encryption key for new DB: ");
+            var masterKey = Console.ReadLine();
             MigratorConsole.Write("Getting ready to migrate from v2 DB ", ConsoleColor.Red);
             MigratorConsole.Write($"{oldDB}", ConsoleColor.Green);
             MigratorConsole.Write(" to v3 DB ", ConsoleColor.Red);
@@ -29,7 +31,7 @@
             var agree = (MigratorConsole.ReadLine() ?? "n").Trim().ToLower() == "y";
             if(agree)
             {
-                var migrator = new Migrator(oldDB, newDB, username, password, host, port);
+                var migrator = new Migrator(oldDB, newDB, username, password, host, port, masterKey);
                 migrator.StartMigration();
             }
             else

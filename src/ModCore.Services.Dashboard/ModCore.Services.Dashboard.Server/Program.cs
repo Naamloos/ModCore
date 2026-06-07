@@ -1,3 +1,4 @@
+using ModCore.Common.Discord.Rest;
 using ModCore.Common.SettingsHelper;
 
 namespace ModCore.Services.Dashboard.Server
@@ -15,6 +16,8 @@ namespace ModCore.Services.Dashboard.Server
             builder.Services.AddControllers();
 
             builder.Services.AddHttpClient();
+
+            builder.Services.AddDiscordRest(config => { });
 
             builder.Configuration.AddJsonFile("settings.json");
             builder.Configuration.AddEnvironmentVariables();

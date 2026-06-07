@@ -1,0 +1,23 @@
+<Project>
+  <PropertyGroup>
+    <SharedSettingsFile>$(MSBuildThisFileDirectory)../settings.json</SharedSettingsFile>
+    <SharedSettingsSampleFile>$(MSBuildThisFileDirectory)../settings.example.json</SharedSettingsSampleFile>
+  </PropertyGroup>
+
+  <Target Name="CreateSharedSettingsFile"
+          BeforeTargets="AssignTargetPaths">
+    <Copy SourceFiles="$(SharedSettingsSampleFile)"
+          DestinationFiles="$(SharedSettingsFile)"
+          Condition="!Exists('$(SharedSettingsFile)') And Exists('$(SharedSettingsSampleFile)')" />
+
+    <Error Text="Missing settings.json and settings.example.json in solution root."
+           Condition="!Exists('$(SharedSettingsFile)') And !Exists('$(SharedSettingsSampleFile)')" />
+
+    <ItemGroup>
+      <ContentWithTargetPath Include="$(SharedSettingsFile)"
+                             TargetPath="settings.json"
+                             CopyToOutputDirectory="PreserveNewest"
+                             Condition="Exists('$(SharedSettingsFile)')" />
+    </ItemGroup>
+  </Target>
+</Project>

@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj" />
     <ProjectReference Include="..\..\ModCore.Common.SettingsHelper\ModCore.Common.SettingsHelper.csproj" />
     <ProjectReference Include="..\modcore.services.dashboard.client\modcore.services.dashboard.client.esproj">
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

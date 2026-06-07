@@ -136,26 +136,24 @@ namespace ModCore.Services.Shard
 
         private static async Task ApplyMigrations(IHost host)
         {
-            using (var scope = host.Services.CreateScope())
-            {
-                var database = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            using var scope = host.Services.CreateScope();
+            var database = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-                var pendingMigrations = await database.Database.GetPendingMigrationsAsync();
-                if (pendingMigrations.Any())
+            var pendingMigrations = await database.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
+            {
+                logger.LogInformation("Applied pending database migrations: {migrations}", string.Join(", ", pendingMigrations));
+                foreach (var migration in pendingMigrations)
                 {
-                    logger.LogInformation("Applied pending database migrations: {0}", string.Join(", ", pendingMigrations));
-                    foreach (var migration in pendingMigrations)
-                    {
-                        logger.LogInformation("Pending migration: {0}", migration);
-                        await database.Database.MigrateAsync(migration);
-                        await database.SaveChangesAsync();
-                    }
+                    logger.LogInformation("Pending migration: {migration}", migration);
+                    await database.Database.MigrateAsync(migration);
+                    await database.SaveChangesAsync();
                 }
-                else
-                {
-                    logger.LogInformation("No pending database migrations.");
-                }
+            }
+            else
+            {
+                logger.LogInformation("No pending database migrations.");
             }
         }
     }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ModCore.Common.Discord.Rest;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,12 +12,14 @@ namespace ModCore.Services.Dashboard.Server.Controllers
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
+        private readonly DiscordRest _rest;
 
         // Inject IHttpClientFactory to safely make external API requests to Discord
-        public ApiController(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+        public ApiController(IHttpClientFactory httpClientFactory, IConfiguration configuration, DiscordRest rest)
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
+            _rest = rest;
         }
 
         [HttpGet]
@@ -33,35 +36,16 @@ namespace ModCore.Services.Dashboard.Server.Controllers
                 return BadRequest(new { error = "Authorization code is required." });
             }
 
-            var client = _httpClientFactory.CreateClient();
-
-            var dict = new Dictionary<string, string>
+            var clientId = _configuration.GetValue<string>("discord_client_id")!;
+            var clientSecret = _configuration.GetValue<string>("discord_client_secret")!;
+            
+            var oauthResponse = await _rest.AuthenticateOAuth2Token(clientId, clientSecret, request.Code);
+            if(oauthResponse.Success)
             {
-                { "client_id", _configuration.GetValue<string>("discord_client_id")! },
-                { "client_secret", _configuration.GetValue<string>("discord_client_secret")! },
-                { "grant_type", "authorization_code" },
-                { "code", request.Code }
-            };
-
-            var content = new FormUrlEncodedContent(dict);
-
-            try
-            {
-                var response = await client.PostAsync("https://discord.com/api/oauth2/token", content);
-                var responseString = await response.Content.ReadAsStringAsync();
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    return StatusCode((int)response.StatusCode, responseString);
-                }
-
-                // FIX: Return the raw Discord JSON string directly with the correct content type header
-                return Content(responseString, "application/json");
+                return Content(oauthResponse.RawBody, "application/json");
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { error = ex.Message });
-            }
+
+            return StatusCode((int)oauthResponse.HttpResponse.StatusCode, oauthResponse.HttpResponse.Content);
         }
     }
 
