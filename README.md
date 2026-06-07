@@ -7,11 +7,11 @@
   </p>
 
 # Rewrite
-This current branch tracks progress of the ModCore rewrite.
+This current branch tracks progress of the ModCore rewrite (v3). For the currently running version of ModCore, check the [`master`](https://github.com/Naamloos/ModCore/tree/master) branch
 
 ---------------
 
-ModCore is A powerful moderating bot written on top of the DSharpPlus library. ModCore is your assistant for server moderation and management through a wide range of hand-crafted features to make your life as a moderator or administrator a breeze! 
+ModCore is A powerful moderating bot written originally on top of the DSharpPlus library, but now built fully from scratch. ModCore is your assistant for server moderation and management through a wide range of hand-crafted features to make your life as a moderator or administrator a breeze! 
 
 [Invite ModCore now!](https://discord.com/api/oauth2/authorize?client_id=359828546719449109&permissions=8&scope=bot%20applications.commands) 
   
