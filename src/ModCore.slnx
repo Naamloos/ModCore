@@ -9,6 +9,7 @@
     <Project Path="ModCore.Common.Discord.Rest/ModCore.Common.Discord.Rest.csproj" />
     <Project Path="ModCore.Common.I18n/ModCore.Common.Language.csproj" Id="6c4bcb04-415a-4df5-aaae-c68b9208e2ed" />
     <Project Path="ModCore.Common.InteractionFramework/ModCore.Common.InteractionFramework.csproj" />
+    <Project Path="ModCore.Common.PubSub/ModCore.Common.PubSub.csproj" Id="90034e70-1b90-4771-ad40-9cc7de00214e" />
     <Project Path="ModCore.Common.Utils/ModCore.Common.Utils.csproj" />
     <Project Path="ModCore.Common.Views/ModCore.Common.Views.csproj" Id="14d9660f-d4a9-4151-8775-b9263267df64" />
     <Project Path="ModCore.Common.Xaml/ModCore.Common.Xaml.csproj" />
