@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <SharedSettingsFile>$(MSBuildThisFileDirectory)../.env</SharedSettingsFile>
-    <SharedSettingsSampleFile>$(MSBuildThisFileDirectory)../example.env</SharedSettingsSampleFile>
+    <SharedSettingsSampleFile>$(MSBuildThisFileDirectory)../.env.example</SharedSettingsSampleFile>
   </PropertyGroup>
 
   <Target Name="CreateSharedSettingsFile"
@@ -12,7 +12,7 @@
           DestinationFiles="$(SharedSettingsFile)"
           Condition="!Exists('$(SharedSettingsFile)') And Exists('$(SharedSettingsSampleFile)')" />
 
-    <Error Text="Missing .env and example.env in solution root."
+    <Error Text="Missing .env and .env.example in solution root."
            Condition="!Exists('$(SharedSettingsFile)') And !Exists('$(SharedSettingsSampleFile)')" />
 
     <ItemGroup>

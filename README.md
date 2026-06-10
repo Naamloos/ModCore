@@ -23,3 +23,8 @@ Need help with ModCore? Either use the `/contact` command or join the ModCore Di
 
 ## Database Migration for development
 When a database migration was found and the bot was correctly configured for development, it will migrate itself automatically.
+
+## License
+As of the v3 rewrite, ModCore is licensed under the AGPL license as stated in [the license file](./LICENSE).
+
+[An additional permission is granted for the DSharpPlus project.](./DSharpPlus-Exception.md)
