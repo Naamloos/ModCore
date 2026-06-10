@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ModCore.Common.Configuration;
 using ModCore.Common.Discord.Rest;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -36,8 +37,8 @@ namespace ModCore.Services.Dashboard.Server.Controllers
                 return BadRequest(new { error = "Authorization code is required." });
             }
 
-            var clientId = _configuration.GetValue<string>("discord_client_id")!;
-            var clientSecret = _configuration.GetValue<string>("discord_client_secret")!;
+            var clientId = _configuration.GetValue<string>(ConfigurationHelper.GetConfigKeyString(ConfigKey.ClientId))!;
+            var clientSecret = _configuration.GetValue<string>(ConfigurationHelper.GetConfigKeyString(ConfigKey.ClientSecret))!;
             
             var oauthResponse = await _rest.AuthenticateOAuth2Token(clientId, clientSecret, request.Code);
             if(oauthResponse.Success)

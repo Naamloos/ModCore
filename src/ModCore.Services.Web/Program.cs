@@ -1,6 +1,5 @@
 using InertiaCore;
 using InertiaCore.Extensions;
-using ModCore.Common.SettingsHelper;
 using ModCore.Services.Web.Middleware;
 using System.Diagnostics;
 using ModCore.Common.Discord.Rest;
@@ -15,6 +14,7 @@ using System.Text.Json;
 using ModCore.Common.Cache;
 using ModCore.Common.Utils;
 using Tsavorite.core;
+using ModCore.Common.Configuration;
 
 namespace ModCore.Common.Web
 {
@@ -26,9 +26,15 @@ namespace ModCore.Common.Web
 
             // Add services to the container.
 
-            var settings = SettingsHelper.SettingsHelper.EnsureSettingsExist();
+            #if DEBUG
+            if(!ConfigurationHelper.CreateEnvFileIfNotExists())
+            {
+                Console.WriteLine("Created a new env file as it was not found yet. Please fill it out and restart the application.");
+                return;
+            }
+            builder.Configuration.AddEnvFile(ConfigurationHelper.GetDefaultEnvPath());
+            #endif
 
-            builder.Configuration.AddJsonFile("settings.json");
             builder.Configuration.AddEnvironmentVariables();
 
             var jsonOptions = JsonSerializerOptionsFactory.GetOptions();

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using ModCore.Common.Configuration;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Serializer;
@@ -73,9 +74,9 @@ namespace ModCore.Common.Discord.Gateway
 
             // fetch configuration data from host services.
             var hostConfig = services.GetRequiredService<IConfiguration>();
-            token = hostConfig.GetRequiredSection("discord_token").Value;
-            shard_id = int.Parse(hostConfig.GetRequiredSection("current_shard").Value);
-            shard_count = int.Parse(hostConfig.GetRequiredSection("shard_count").Value);
+            token = hostConfig.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.DiscordToken)).Value;
+            shard_id = int.Parse(hostConfig.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.CurrentShard)).Value);
+            shard_count = int.Parse(hostConfig.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.ShardCount)).Value);
 
             // Preparing base websocket uri
             var uribuilder = new UriBuilder(this.configuration.GatewayUrl);

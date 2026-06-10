@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using ModCore.Common.Configuration;
 using ModCore.Common.Database.Entities;
 using ModCore.Common.Database.Interceptors;
 using Npgsql;
@@ -72,15 +73,15 @@ namespace ModCore.Common.Database
             {
                 var cStringBuilder = new NpgsqlConnectionStringBuilder()
                 {
-                    Database = _config.GetRequiredSection("postgres_database").Value!,
-                    Username = _config.GetRequiredSection("postgres_username").Value!,
-                    Password = _config.GetRequiredSection("postgres_password").Value!,
-                    Port = int.Parse(_config.GetRequiredSection("postgres_port").Value!),
-                    Host = _config.GetRequiredSection("postgres_host").Value!,
+                    Database = _config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.PostgresDatabase)).Value!,
+                    Username = _config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.PostgresUsername)).Value!,
+                    Password = _config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.PostgresPassword)).Value!,
+                    Port = int.Parse(_config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.PostgresPort)).Value!),
+                    Host = _config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.PostgresHost)).Value!,
                     IncludeErrorDetail = true
                 };
 
-                var encryptionKey = _config.GetRequiredSection("master_key").Value!;
+                var encryptionKey = _config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.MasterKey)).Value!;
 
                 if (!optionsBuilder.IsConfigured)
                 {

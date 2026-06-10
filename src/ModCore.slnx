@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Common/">
     <Project Path="ModCore.Common.Cache/ModCore.Common.Cache.csproj" />
+    <Project Path="ModCore.Common.Configuration/ModCore.Common.Configuration.csproj" Id="812ae8ea-d165-4f13-9bb8-c071f02ab84c" />
     <Project Path="ModCore.Common.Cryptography/ModCore.Common.Cryptography.csproj" Id="cccfa178-9b1d-4e44-a03f-9fecfe48256d" />
     <Project Path="ModCore.Common.Database/ModCore.Common.Database.csproj" />
     <Project Path="ModCore.Common.Discord.Entities/ModCore.Common.Discord.Entities.csproj" />
@@ -8,7 +9,6 @@
     <Project Path="ModCore.Common.Discord.Rest/ModCore.Common.Discord.Rest.csproj" />
     <Project Path="ModCore.Common.I18n/ModCore.Common.Language.csproj" Id="6c4bcb04-415a-4df5-aaae-c68b9208e2ed" />
     <Project Path="ModCore.Common.InteractionFramework/ModCore.Common.InteractionFramework.csproj" />
-    <Project Path="ModCore.Common.SettingsHelper/ModCore.Common.SettingsHelper.csproj" />
     <Project Path="ModCore.Common.Utils/ModCore.Common.Utils.csproj" />
     <Project Path="ModCore.Common.Views/ModCore.Common.Views.csproj" Id="14d9660f-d4a9-4151-8775-b9263267df64" />
     <Project Path="ModCore.Common.Xaml/ModCore.Common.Xaml.csproj" />

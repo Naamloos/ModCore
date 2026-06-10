@@ -1,5 +1,5 @@
+using ModCore.Common.Configuration;
 using ModCore.Common.Discord.Rest;
-using ModCore.Common.SettingsHelper;
 
 namespace ModCore.Services.Dashboard.Server
 {
@@ -7,7 +7,13 @@ namespace ModCore.Services.Dashboard.Server
     {
         public static void Main(string[] args)
         {
-            SettingsHelper.EnsureSettingsExist();
+            #if DEBUG
+            if (!ConfigurationHelper.CreateEnvFileIfNotExists())
+            {
+                Console.WriteLine("Created a new env file as it was not found yet. Please fill it out and restart the application.");
+                return;
+            }
+            #endif
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +25,9 @@ namespace ModCore.Services.Dashboard.Server
 
             builder.Services.AddDiscordRest(config => { });
 
-            builder.Configuration.AddJsonFile("settings.json");
+            #if DEBUG
+            builder.Configuration.AddEnvFile(ConfigurationHelper.GetDefaultEnvPath());
+            #endif
             builder.Configuration.AddEnvironmentVariables();
 
             var app = builder.Build();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ModCore.Common.Configuration;
 using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Channels;
 using ModCore.Common.Discord.Entities.Enums;
@@ -32,8 +33,8 @@ namespace ModCore.Common.Discord.Rest
 
             if (config != null && string.IsNullOrEmpty(Configuration.Token))
             {
-                Configuration.Token = config.GetRequiredSection("discord_token").Value!;
-                Configuration.RestProxy = config.GetRequiredSection("discord_rest_proxy").Value!;
+                Configuration.Token = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.DiscordToken)).Value!;
+                Configuration.RestProxy = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.DiscordRestProxy)).Value!;
             }
 
             RatelimitedRest = new RateLimitedRest(Configuration, JsonSerializerOptions);

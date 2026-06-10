@@ -19,9 +19,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ModCore.Common.Cache\ModCore.Common.Cache.csproj" />
+    <ProjectReference Include="..\ModCore.Common.Configuration\ModCore.Common.Configuration.csproj" />
     <ProjectReference Include="..\ModCore.Common.Database\ModCore.Common.Database.csproj" />
     <ProjectReference Include="..\ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj" />
-    <ProjectReference Include="..\ModCore.Common.SettingsHelper\ModCore.Common.SettingsHelper.csproj" />
   </ItemGroup>
 
 </Project>

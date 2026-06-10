@@ -6,6 +6,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModCore.Common.Cache;
+using ModCore.Common.Configuration;
 using ModCore.Common.Database;
 using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Gateway;
@@ -13,7 +14,6 @@ using ModCore.Common.Discord.Gateway.EventData.Outgoing;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.InteractionFramework;
 using ModCore.Common.Language;
-using ModCore.Common.SettingsHelper;
 using ModCore.Common.Utils;
 using ModCore.Common.Views;
 using ModCore.Common.Xaml;
@@ -38,7 +38,13 @@ namespace ModCore.Services.Shard
                 .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
 
-            SettingsHelper.EnsureSettingsExist();
+            #if DEBUG
+            if(!ConfigurationHelper.CreateEnvFileIfNotExists())
+            {
+                Console.WriteLine("Created a new env file as it was not found yet. Please fill it out and restart the application.");
+                return;
+            }
+            #endif
 
             var jsonOptions = JsonSerializerOptionsFactory.GetOptions();
 
@@ -54,7 +60,7 @@ namespace ModCore.Services.Shard
                 {
                     config
                         #if DEBUG
-                        .AddJsonFile("settings.json") // Only add json config when debugging
+                        .AddEnvFile(ConfigurationHelper.GetDefaultEnvPath())
                         #endif
                         .AddEnvironmentVariables()
                         .Build();
@@ -88,7 +94,7 @@ namespace ModCore.Services.Shard
                         // get the configuration from the service collection
                         var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
                         setup.InstanceName = "ModCore";
-                        setup.Configuration = config.GetRequiredSection("redis_connection_string").Value!;
+                        setup.Configuration = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
                     });
 #endif
                     services.AddModcoreCacheService();
@@ -128,6 +134,7 @@ namespace ModCore.Services.Shard
                 })
                 .Build();
 
+            var config = host.Services.GetService<IConfiguration>();
 
             await ApplyMigrations(host);
 

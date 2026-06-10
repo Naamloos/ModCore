@@ -1,17 +1,18 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ModCore.Common.Database;
-using ModCore.Common.Discord.Rest;
-using Microsoft.Extensions.Configuration;
-using System.Text.Json;
-using ModCore.Common.Discord.Entities.Serializer;
-using System.Text.Json.Serialization;
-using Serilog;
-using Serilog.Sinks.SystemConsole.Themes;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModCore.Common.Cache;
+using ModCore.Common.Configuration;
+using ModCore.Common.Database;
+using ModCore.Common.Discord.Entities.Serializer;
+using ModCore.Common.Discord.Rest;
 using ModCore.Common.Utils;
 using Quartz;
+using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ModCore.Services.Jobs
 {
@@ -74,7 +75,7 @@ namespace ModCore.Services.Jobs
                         // get the configuration from the service collection
                         var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
                         setup.InstanceName = "ModCore";
-                        setup.Configuration = config.GetRequiredSection("redis_connection_string").Value!;
+                        setup.Configuration = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
                     });
 #endif
 

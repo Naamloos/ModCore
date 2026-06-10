@@ -1,21 +1,23 @@
 <Project>
   <PropertyGroup>
-    <SharedSettingsFile>$(MSBuildThisFileDirectory)../settings.json</SharedSettingsFile>
-    <SharedSettingsSampleFile>$(MSBuildThisFileDirectory)../settings.example.json</SharedSettingsSampleFile>
+    <SharedSettingsFile>$(MSBuildThisFileDirectory)../.env</SharedSettingsFile>
+    <SharedSettingsSampleFile>$(MSBuildThisFileDirectory)../example.env</SharedSettingsSampleFile>
   </PropertyGroup>
 
   <Target Name="CreateSharedSettingsFile"
-          BeforeTargets="AssignTargetPaths">
+          BeforeTargets="AssignTargetPaths"
+          Condition="'$(Configuration)' == 'Debug'">
+
     <Copy SourceFiles="$(SharedSettingsSampleFile)"
           DestinationFiles="$(SharedSettingsFile)"
           Condition="!Exists('$(SharedSettingsFile)') And Exists('$(SharedSettingsSampleFile)')" />
 
-    <Error Text="Missing settings.json and settings.example.json in solution root."
+    <Error Text="Missing .env and example.env in solution root."
            Condition="!Exists('$(SharedSettingsFile)') And !Exists('$(SharedSettingsSampleFile)')" />
 
     <ItemGroup>
       <ContentWithTargetPath Include="$(SharedSettingsFile)"
-                             TargetPath="settings.json"
+                             TargetPath=".env"
                              CopyToOutputDirectory="PreserveNewest"
                              Condition="Exists('$(SharedSettingsFile)')" />
     </ItemGroup>

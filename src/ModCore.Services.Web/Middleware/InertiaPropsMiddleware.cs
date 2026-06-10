@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Http.Features;
 using ModCore.Common.Cache;
+using ModCore.Common.Configuration;
 using ModCore.Common.Database;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
@@ -37,7 +38,7 @@ namespace ModCore.Services.Web.Middleware
             var cacheService = context.RequestServices.GetRequiredService<CacheService>();
             var configService = context.RequestServices.GetRequiredService<IConfiguration>();
             var discordRest = context.RequestServices.GetRequiredService<DiscordRest>();
-            ulong applicationId = ulong.Parse(configService["discord_client_id"]);
+            ulong applicationId = ulong.Parse(configService[ConfigurationHelper.GetConfigKeyString(ConfigKey.ClientId)]);
 
             Application? app = null;
 

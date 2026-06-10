@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ModCore.Common.Configuration;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,7 @@ namespace ModCore.Common.Cache
             services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
-                var connectionString = config.GetRequiredSection("redis_connection_string").Value!;
+                var connectionString = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
                 return ConnectionMultiplexer.Connect(connectionString);
             });
 
@@ -32,7 +33,7 @@ namespace ModCore.Common.Cache
                 // get the configuration from the service collection
                 var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
                 setup.InstanceName = "ModCore";
-                setup.Configuration = config.GetRequiredSection("redis_connection_string").Value!;
+                setup.Configuration = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
             });
 #endif
             services.AddSingleton<CacheService>();
