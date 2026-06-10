@@ -19,10 +19,12 @@ services:
       - modcore_redis:/data
 
   rest_proxy:
+    build: 
+      context: ./src
+      dockerfile: ./Dockerfiles/rest_proxy.dockerfile
     restart: unless-stopped
-    image: ghcr.io/twilight-rs/http-proxy
-    environment:
-      - DISCORD_TOKEN=. # Fixes spamming NotPresent in console
+    expose:
+      - "8085"
   
   web:
     build: 

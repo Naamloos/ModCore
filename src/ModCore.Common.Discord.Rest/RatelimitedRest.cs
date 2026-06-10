@@ -8,7 +8,6 @@ namespace ModCore.Common.Discord.Rest
     {
         const short API_VERSION = 10;
         const string API_BASE = "https://discord.com";
-        const string API_BASE_PATH = "/api/v{0}/";
 
         private HttpClient httpClient;
         private DiscordRestConfiguration configuration;
@@ -17,6 +16,7 @@ namespace ModCore.Common.Discord.Rest
         private ConcurrentDictionary<string, RateLimitBucket> buckets;
 
         private bool proxyEnabled = false;
+        private string baseAddress = "https://discord.com/";
 
         public RateLimitedRest(DiscordRestConfiguration config, JsonSerializerOptions jsonSerializerOptions)
         {
@@ -26,18 +26,19 @@ namespace ModCore.Common.Discord.Rest
 
             proxyEnabled = !string.IsNullOrEmpty(config.RestProxy);
 
-            string baseAddress = (proxyEnabled ? config.RestProxy : API_BASE) + string.Format(API_BASE_PATH, API_VERSION);
+            string baseAddress = (proxyEnabled ? config.RestProxy : API_BASE);
 
             Console.WriteLine($"BaseAddress: {baseAddress}");
 
             httpClient = new HttpClient()
             {
-                BaseAddress = new Uri($"https://discord.com/api/v{API_VERSION}/")
+                BaseAddress = new Uri($"{baseAddress}/api/v{API_VERSION}/"),
+                Timeout = TimeSpan.FromSeconds(60) // Proxy might also hit a rate limit.
             };
 
             // DON'T use this httpclient elsewhere, like sentry or some shit. Just sayin.
             httpClient.DefaultRequestHeaders.Add("Authorization", $"{configuration.AuthType} {configuration.Token}");
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("ModCore3 (https://github.com/Naamloos/ModCore)");
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("ModCore/3.0 (https://github.com/Naamloos/ModCore)");
         }
 
         public async ValueTask<HttpResponseMessage> RequestAsync(HttpMethod method, string route, string url, object? body = null, bool asForm = false)
@@ -54,6 +55,12 @@ namespace ModCore.Common.Discord.Rest
                 }
 
                 await bucket.WaitAsync();
+            }
+
+            var qualifiedUrl = url;
+            if(url.Contains("https://discord.com/api"))
+            {
+                qualifiedUrl = url.Replace("https://discord.com/api", $"{this.baseAddress}/api");
             }
 
             var request = new HttpRequestMessage(method, url);

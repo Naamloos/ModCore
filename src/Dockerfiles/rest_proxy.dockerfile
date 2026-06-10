@@ -1,0 +1,18 @@
+# BUILD
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+WORKDIR /src
+
+COPY ../ ./
+
+RUN dotnet restore ./ModCore.Services.DiscordProxy
+RUN dotnet publish ./ModCore.Services.DiscordProxy -c Release -o out
+
+# RUNNER IMAGE
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine
+WORKDIR /app
+
+COPY --from=build /src/out .
+
+EXPOSE 8085
+
+ENTRYPOINT ["dotnet", "/app/ModCore.Services.DiscordProxy.dll"]

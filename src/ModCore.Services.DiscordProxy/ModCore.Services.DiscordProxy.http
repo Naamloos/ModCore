@@ -1,0 +1,6 @@
+@ModCore.Services.DiscordProxy_HostAddress = http://localhost:5017
+
+GET {{ModCore.Services.DiscordProxy_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
