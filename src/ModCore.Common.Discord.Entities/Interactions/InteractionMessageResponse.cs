@@ -19,7 +19,7 @@ namespace ModCore.Common.Discord.Entities.Interactions
         public Optional<string> Nonce { get; set; }
 
         [JsonPropertyName("tts")]
-        public Optional<bool> IsTTs { get; set; }
+        public Optional<bool> IsTTS { get; set; }
 
         [JsonPropertyName("embeds")]
         public Optional<Embed[]> Embeds { get; set; }
