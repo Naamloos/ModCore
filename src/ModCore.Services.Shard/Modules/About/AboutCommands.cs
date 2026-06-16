@@ -26,13 +26,11 @@ namespace ModCore.Services.Shard.Modules.About
     public class AboutCommands : BaseCommandHandler
     {
         private readonly ILogger _logger;
-        private readonly I18n _i18n;
         private readonly CacheService _cache;
 
-        public AboutCommands(ILogger<AboutCommands> logger, I18n i18n, CacheService cache)
+        public AboutCommands(ILogger<AboutCommands> logger, CacheService cache)
         {
             _logger = logger;
-            _i18n = i18n;
             _cache = cache;
         }
 
@@ -60,38 +58,38 @@ namespace ModCore.Services.Shard.Modules.About
                 await _cache.UpdateAsync<User, string>("@me", modcoreSelf);
             }
 
-            var message = new MessageBuilder()
-                .AddContainer(container =>
-                {
-                    container.AddSection(section =>
-                    {
-                        section.AddText(this._i18n.t("about.welcome"));
-                        section.AddText(this._i18n.t("about.main_developer"));
-                        section.AddText(this._i18n.t("about.contribute"));
-                    }, new Thumbnail()
-                    {
-                        Media = new UnfurledMediaItem()
-                        {
-                            Url = $"https://cdn.discordapp.com/avatars/{modcoreSelf!.Id}/{modcoreSelf!.AvatarHash}.png"
-                        }
-                    })
-                    .AddText(this._i18n.t("about.donate"))
-                    .AddText(this._i18n.t("about.previous_contribs", data: new()
-                        {
-                            { "contribs", string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})")) }
-                        }))
-                    .AddText("-# ModCore v3 ALPHA")
-                    .WithAccentColor(0x5865F2);
-                })
-                .WithFlags(MessageFlags.ComponentsV2 | MessageFlags.Ephemeral)
-                .BuildInteractionResponse();
+            //var message = new MessageBuilder()
+            //    .AddContainer(container =>
+            //    {
+            //        container.AddSection(section =>
+            //        {
+            //            section.AddText(this._i18n.t("about.welcome"));
+            //            section.AddText(this._i18n.t("about.main_developer"));
+            //            section.AddText(this._i18n.t("about.contribute"));
+            //        }, new Thumbnail()
+            //        {
+            //            Media = new UnfurledMediaItem()
+            //            {
+            //                Url = $"https://cdn.discordapp.com/avatars/{modcoreSelf!.Id}/{modcoreSelf!.AvatarHash}.png"
+            //            }
+            //        })
+            //        .AddText(this._i18n.t("about.donate"))
+            //        .AddText(this._i18n.t("about.previous_contribs", data: new()
+            //            {
+            //                { "contribs", string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})")) }
+            //            }))
+            //        .AddText("-# ModCore v3 ALPHA")
+            //        .WithAccentColor(0x5865F2);
+            //    })
+            //    .WithFlags(MessageFlags.ComponentsV2 | MessageFlags.Ephemeral)
+            //    .BuildInteractionResponse();
 
-            await context.RestClient.CreateInteractionResponseAsync(
-                data.Id,
-                data.Token,
-                InteractionResponseType.ChannelMessageWithSource,
-                message
-            );
+            //await context.RestClient.CreateInteractionResponseAsync(
+            //    data.Id,
+            //    data.Token,
+            //    InteractionResponseType.ChannelMessageWithSource,
+            //    message
+            //);
         }
 
         private static Dictionary<string, string> previousContribList = new()

@@ -7,13 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Languages\en.json" />
-    <None Remove="Languages\nl.json" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="10.0.9" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Languages\en.json" />
-    <EmbeddedResource Include="Languages\nl.json" />
+    <Compile Update="Resources\SharedResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SharedResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\SharedResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SharedResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

@@ -1,9 +1,0 @@
-{
-  "about": {
-    "welcome": "# Welcome bij ModCore v3",
-    "main_developer": "**Hoofdontwikkelaar**\n[Naamloos](https://github.com/Naamloos)",
-    "contribute": "**Wil je bijdragen?**\nBijdrages zijn altijd welkom bij onze [GitHub repo]({repo}).",
-    "donate": "**Doneren?**\nMomenteel wordt ModCore gehost van mijn (Naamloos) eigen geld. Donaties zijn altijd welkom bij mijn [Ko-Fi]({kofi})!",
-    "previous_contribs": "**Extra dank aan al deze geweldige v2 bijdragers:**\n{contribs}"
-  }
-}

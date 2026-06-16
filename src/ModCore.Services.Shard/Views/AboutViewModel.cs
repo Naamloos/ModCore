@@ -10,7 +10,6 @@ namespace ModCore.Services.Shard.Views
     public class AboutViewModel
     {
         public string AccentColor { get; set; } = "#5865F2";
-        public required I18n t { get; set; }
         public required string AvatarMedia { get; set; }
     }
 }

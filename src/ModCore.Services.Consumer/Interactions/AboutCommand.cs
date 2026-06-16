@@ -18,12 +18,12 @@ namespace ModCore.Services.Consumer.Interactions
 
         private DiscordRest _rest;
         private CacheService _cache;
-        private I18n _i18n;
+        private IModCoreLocalizerFactory _localizerFactory;
 
-        public AboutCommand(DiscordRest rest, CacheService cache, I18n i18n) {
+        public AboutCommand(DiscordRest rest, CacheService cache, IModCoreLocalizerFactory localizerFactory) {
             _rest = rest;
             _cache = cache;
-            _i18n = i18n;
+            _localizerFactory = localizerFactory;
         }
 
         [ApplicationCommandHandler]
@@ -47,14 +47,17 @@ namespace ModCore.Services.Consumer.Interactions
                 await _cache.UpdateAsync<User, string>("@me", modcoreSelf);
             }
 
+            var t = _localizerFactory.Get(interaction.Locale.Value);
+            var contribList = string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})"));
+
             var message = new MessageBuilder()
                 .AddContainer(container =>
                 {
                     container.AddSection(section =>
                     {
-                        section.AddText(this._i18n.t("about.welcome"));
-                        section.AddText(this._i18n.t("about.main_developer"));
-                        section.AddText(this._i18n.t("about.contribute"));
+                        section.AddText(t["aboutWelcome"]);
+                        section.AddText(t["aboutMainDeveloper"]);
+                        section.AddText(t["aboutContribute"]);
                     }, new Thumbnail()
                     {
                         Media = new UnfurledMediaItem()
@@ -62,11 +65,8 @@ namespace ModCore.Services.Consumer.Interactions
                             Url = $"https://cdn.discordapp.com/avatars/{modcoreSelf!.Id}/{modcoreSelf!.AvatarHash}.png"
                         }
                     })
-                    .AddText(this._i18n.t("about.donate"))
-                    .AddText(this._i18n.t("about.previous_contribs", data: new()
-                        {
-                            { "contribs", string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})")) }
-                        }))
+                    .AddText(t["aboutDonate"])
+                    .AddText(t["aboutPreviousContribs", new() { { "contribs", contribList } }])
                     .AddText("-# ModCore v3 ALPHA")
                     .WithAccentColor(0x5865F2);
                 })

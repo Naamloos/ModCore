@@ -77,7 +77,7 @@ namespace ModCore.Services.Consumer
                         services.AddSingleton(handlerType);
                     }
 
-                    services.AddSingleton<I18n>();
+                    services.AddModCoreLocalization();
 
                     // Commands
                     services.AddScoped<IApplicationCommand, AboutCommand>();

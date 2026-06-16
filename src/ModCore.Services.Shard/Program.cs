@@ -96,7 +96,6 @@ namespace ModCore.Services.Shard
                     services.AddModcoreCacheService();
                     services.AddDbContext<DatabaseContext>();
                     services.AddDiscordXaml(Assembly.GetExecutingAssembly());
-                    services.AddSingleton<I18n>();
 
                     // Helper for scoped and transient services
                     services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));
