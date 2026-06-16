@@ -5,6 +5,7 @@ using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Utils;
 using ModCore.Common.Discord.Rest;
+using ModCore.Services.Consumer.Interactions.Framework;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

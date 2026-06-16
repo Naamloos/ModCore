@@ -136,4 +136,34 @@ Momenteel wordt ModCore gehost van mijn (Naamloos) eigen geld. Donaties zijn alt
   <data name="aboutWelcome" xml:space="preserve">
     <value># Welkom bij ModCore v3</value>
   </data>
+  <data name="banFailure" xml:space="preserve">
+    <value>Het is niet gelukt om {user} te verbannen, er ging iets fout.</value>
+  </data>
+  <data name="banFailureDmAlreadySent" xml:space="preserve">
+    <value>Het is niet gelukt om {user} te verbannen, maar de gebruiker is al geinformeerd...</value>
+  </data>
+  <data name="banNotifyMessage" xml:space="preserve">
+    <value>Je bent verbannen van {guild}.
+
+Reden:
+```
+{reason}
+```
+
+Deze server heeft appeals **niet** ingeschakeld.</value>
+  </data>
+  <data name="banSuccess" xml:space="preserve">
+    <value>Gebruiker {user} is met succes verbannen. DM verstuurd: {sentDM|t:yes|t:no}
+
+Reden:
+```
+{reason}
+```</value>
+  </data>
+  <data name="yes" xml:space="preserve">
+    <value>Ja</value>
+  </data>
+  <data name="no" xml:space="preserve">
+    <value>Nee</value>
+  </data>
 </root>

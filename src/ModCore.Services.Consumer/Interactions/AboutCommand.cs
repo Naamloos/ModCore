@@ -7,6 +7,7 @@ using ModCore.Common.Discord.Entities.Interactions;
 using ModCore.Common.Discord.Entities.Utils;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.Language;
+using ModCore.Services.Consumer.Interactions.Framework;
 
 namespace ModCore.Services.Consumer.Interactions
 {
@@ -20,7 +21,8 @@ namespace ModCore.Services.Consumer.Interactions
         private CacheService _cache;
         private IModCoreLocalizerFactory _localizerFactory;
 
-        public AboutCommand(DiscordRest rest, CacheService cache, IModCoreLocalizerFactory localizerFactory) {
+        public AboutCommand(DiscordRest rest, CacheService cache, IModCoreLocalizerFactory localizerFactory)
+        {
             _rest = rest;
             _cache = cache;
             _localizerFactory = localizerFactory;
@@ -48,7 +50,7 @@ namespace ModCore.Services.Consumer.Interactions
             }
 
             var t = _localizerFactory.Get(interaction.Locale.Value);
-            var contribList = string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})"));
+            var contribs = string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})"));
 
             var message = new MessageBuilder()
                 .AddContainer(container =>
@@ -66,7 +68,7 @@ namespace ModCore.Services.Consumer.Interactions
                         }
                     })
                     .AddText(t["aboutDonate"])
-                    .AddText(t["aboutPreviousContribs", new() { { "contribs", contribList } }])
+                    .AddText(t["aboutPreviousContribs", new { contribs }])
                     .AddText("-# ModCore v3 ALPHA")
                     .WithAccentColor(0x5865F2);
                 })

@@ -108,5 +108,71 @@ namespace ModCore.Common.Language.Resources {
                 return ResourceManager.GetString("aboutWelcome", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed banning {user}, something went wrong..
+        /// </summary>
+        public static string banFailure {
+            get {
+                return ResourceManager.GetString("banFailure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed banning {user}, but the user was already notified....
+        /// </summary>
+        public static string banFailureDmAlreadySent {
+            get {
+                return ResourceManager.GetString("banFailureDmAlreadySent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You were banned from {guild}.
+        ///
+        ///Reason:
+        ///```
+        ///{reason}
+        ///```
+        ///
+        ///This server does **not** have appeals enabled..
+        /// </summary>
+        public static string banNotifyMessage {
+            get {
+                return ResourceManager.GetString("banNotifyMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Succesfully banned member {user}. Sent DM: {sentDM|t:yes|t:no}.
+        ///
+        ///Reason:
+        ///```
+        ///{reason}
+        ///```.
+        /// </summary>
+        public static string banSuccess {
+            get {
+                return ResourceManager.GetString("banSuccess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        public static string no {
+            get {
+                return ResourceManager.GetString("no", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        public static string yes {
+            get {
+                return ResourceManager.GetString("yes", resourceCulture);
+            }
+        }
     }
 }

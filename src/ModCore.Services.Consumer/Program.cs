@@ -10,7 +10,7 @@ using ModCore.Common.Language;
 using ModCore.Common.PubSub;
 using ModCore.Common.Utils;
 using ModCore.Services.Consumer.Handlers;
-using ModCore.Services.Consumer.Interactions;
+using ModCore.Services.Consumer.Interactions.Framework;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using System.Reflection;
@@ -79,9 +79,26 @@ namespace ModCore.Services.Consumer
 
                     services.AddModCoreLocalization();
 
-                    // Commands
-                    services.AddScoped<IApplicationCommand, AboutCommand>();
-                    services.AddScoped<IApplicationCommand, TestArgumentsCommand>();
+                    var assembly = Assembly.GetExecutingAssembly();
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        if (type.IsInterface || type.IsAbstract)
+                        {
+                            continue;
+                        }
+
+                        if (typeof(BaseApplicationCommand).IsAssignableFrom(type))
+                        {
+                            services.AddScoped(typeof(IApplicationCommand), type);
+                            continue;
+                        }
+
+                        if (typeof(BaseApplicationSubcommand).IsAssignableFrom(type))
+                        {
+                            services.AddScoped(typeof(IApplicationSubcommand), type);
+                        }
+                    }
+
 
                     // Consumer service!
                     services.AddHostedService<ConsumerHostedService>();

@@ -136,4 +136,34 @@ Currently, ModCore is hosted off my (Naamloos's) own money. Donations are always
   <data name="aboutWelcome" xml:space="preserve">
     <value># Welcome to ModCore v3</value>
   </data>
+  <data name="banFailure" xml:space="preserve">
+    <value>Failed banning {user}, something went wrong.</value>
+  </data>
+  <data name="banFailureDmAlreadySent" xml:space="preserve">
+    <value>Failed banning {user}, but the user was already notified...</value>
+  </data>
+  <data name="banNotifyMessage" xml:space="preserve">
+    <value>You were banned from {guild}.
+
+Reason:
+```
+{reason}
+```
+
+This server does **not** have appeals enabled.</value>
+  </data>
+  <data name="banSuccess" xml:space="preserve">
+    <value>Succesfully banned member {user}. Sent DM: {sentDM|t:yes|t:no}.
+
+Reason:
+```
+{reason}
+```</value>
+  </data>
+  <data name="yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="no" xml:space="preserve">
+    <value>No</value>
+  </data>
 </root>

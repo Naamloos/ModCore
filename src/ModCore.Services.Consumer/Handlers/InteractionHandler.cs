@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using ModCore.Common.PubSub.Payloads;
-using ModCore.Services.Consumer.Interactions;
+using ModCore.Services.Consumer.Interactions.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;

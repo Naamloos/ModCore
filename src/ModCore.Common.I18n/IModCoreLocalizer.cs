@@ -8,7 +8,7 @@ namespace ModCore.Common.Language
     {
         string Locale { get; }
         string this[string key] { get; }
-        string this[string key, Dictionary<string, object> values] { get; }
-        string Translate(string key, Dictionary<string, object>? values = null);
+        string this[string key, object? values] { get; }
+        string Translate(string key, object? values = null);
     }
 }
