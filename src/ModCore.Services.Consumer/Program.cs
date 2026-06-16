@@ -5,26 +5,35 @@ using Microsoft.Extensions.Logging;
 using ModCore.Common.Cache;
 using ModCore.Common.Configuration;
 using ModCore.Common.Database;
-using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Rest;
+using ModCore.Common.Language;
+using ModCore.Common.PubSub;
 using ModCore.Common.Utils;
-using Quartz;
+using ModCore.Services.Consumer.Handlers;
+using ModCore.Services.Consumer.Interactions;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Reflection;
 
-namespace ModCore.Services.Jobs
+namespace ModCore.Services.Consumer
 {
     internal class Program
     {
-        static async Task Main(string[] args)
+        static void Main(string[] args)
         {
             var logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .MinimumLevel.Debug()
                 .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
+
+            #if DEBUG
+            if(!ConfigurationHelper.CreateEnvFileIfNotExists())
+            {
+                Console.WriteLine("Created a new env file as it was not found yet. Please fill it out and restart the application.");
+                return;
+            }
+            #endif
 
             var jsonOptions = JsonSerializerOptionsFactory.GetOptions();
 
@@ -40,35 +49,20 @@ namespace ModCore.Services.Jobs
                 {
                     config
                         #if DEBUG
-                        //.AddJsonFile("settings.json") // Only add json config when debugging
+                        .AddEnvFile(ConfigurationHelper.GetDefaultEnvPath())
                         #endif
                         .AddEnvironmentVariables()
                         .Build();
                 })
                 .ConfigureServices(services =>
                 {
-                    services.AddQuartz();
-                    services.AddQuartzHostedService(opt =>
-                    {
-                        opt.WaitForJobsToComplete = true;
-                        opt.AwaitApplicationStarted = true;
-                    });
-
-                    //services.AddDiscordRest(x => { });
-
-                    //services.AddDbContext<DatabaseContext>();
-                    //services.AddDistributedMemoryCache();
-                    //services.AddModcoreCacheService();
-
                     services.AddDiscordRest(config => { });
                     services.AddLogging();
                     services.AddSingleton(jsonOptions);
                     services.AddModcoreCacheService();
                     services.AddDbContext<DatabaseContext>();
-
-                    services.AddMemoryCache();
-
-                    services.AddDistributedRedisCache(setup =>
+                    services.AddModCorePubSub();
+                    services.AddStackExchangeRedisCache(setup =>
                     {
                         // get the configuration from the service collection
                         var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
@@ -76,17 +70,25 @@ namespace ModCore.Services.Jobs
                         setup.Configuration = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
                     });
 
-                    services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));
+                    // Register every handler as a service
+                    var handlerTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(BaseHandler)));
+                    foreach(var handlerType in handlerTypes)
+                    {
+                        services.AddSingleton(handlerType);
+                    }
+
+                    services.AddSingleton<I18n>();
+
+                    // Commands
+                    services.AddScoped<IApplicationCommand, AboutCommand>();
+                    services.AddScoped<IApplicationCommand, TestArgumentsCommand>();
+
+                    // Consumer service!
+                    services.AddHostedService<ConsumerHostedService>();
                 })
                 .Build();
 
-            var schedulerFactory = host.Services.GetRequiredService<ISchedulerFactory>();
-            var scheduler = await schedulerFactory.GetScheduler();
-
-            var mcoreJobBuilder = new ModCoreJobBuilder(scheduler);
-            mcoreJobBuilder.BuildAndScheduleJobs();
-
-            await host.RunAsync();
+            host.Run();
         }
     }
 }

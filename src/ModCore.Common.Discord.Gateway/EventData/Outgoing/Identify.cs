@@ -49,7 +49,7 @@ namespace ModCore.Common.Discord.Gateway.EventData.Outgoing
         public string Name { get; set; } = "ModCore.Common.Discord";
 
         [JsonPropertyName("type")]
-        public int Type { get; set; } = 0;
+        public ActivityType Type { get; set; } = ActivityType.Playing;
         // TODO implement the rest https://discord.com/developers/docs/topics/gateway-events#activity-object
 
         [JsonPropertyName("state")]
@@ -58,6 +58,16 @@ namespace ModCore.Common.Discord.Gateway.EventData.Outgoing
 
         [JsonPropertyName("emoji")]
         public Optional<ActivityEmoji?> Emoji { get; set; }
+    }
+
+    public enum ActivityType
+    {
+        Playing = 0,
+        Streaming = 1,
+        Listening = 2,
+        Watching = 3,
+        Custom = 4,
+        Competing = 5
     }
 
     public record ActivityEmoji

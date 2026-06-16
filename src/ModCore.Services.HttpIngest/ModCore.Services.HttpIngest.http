@@ -1,0 +1,6 @@
+@ModCore.Services.HttpIngest_HostAddress = http://localhost:5007
+
+GET {{ModCore.Services.HttpIngest_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -77,7 +77,7 @@ namespace ModCore.Services.Shard
                         config.Activity = new Activity()
                         {
                             State = $"BETA. Not ready for general use.", // TODO move this out 
-                            Type = 4
+                            Type = ActivityType.Custom
                         };
                     });
                     // These are the REAL™️ PISSCATSHARP
@@ -86,9 +86,6 @@ namespace ModCore.Services.Shard
                     services.AddLogging();
                     services.AddSingleton(jsonOptions);
                     services.AddMemoryCache();
-#if DEBUG
-                    services.AddDistributedMemoryCache();
-#else
                     services.AddDistributedRedisCache(setup =>
                     {
                         // get the configuration from the service collection
@@ -96,7 +93,6 @@ namespace ModCore.Services.Shard
                         setup.InstanceName = "ModCore";
                         setup.Configuration = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
                     });
-#endif
                     services.AddModcoreCacheService();
                     services.AddDbContext<DatabaseContext>();
                     services.AddDiscordXaml(Assembly.GetExecutingAssembly());

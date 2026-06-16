@@ -28,12 +28,15 @@
     <File Path="../README.md" />
   </Folder>
   <Folder Name="/Services/">
+    <Project Path="ModCore.Services.Consumer/ModCore.Services.Consumer.csproj" Id="4ef05ca0-f59f-4c85-922b-ea5a17944cb9" />
     <Project Path="ModCore.Services.Dashboard/modcore.services.dashboard.client/modcore.services.dashboard.client.esproj">
       <Build />
       <Deploy />
     </Project>
     <Project Path="ModCore.Services.Dashboard/ModCore.Services.Dashboard.Server/ModCore.Services.Dashboard.Server.csproj" Id="5c798299-aaae-4b5c-9754-d4038210623b" />
     <Project Path="ModCore.Services.DiscordProxy/ModCore.Services.DiscordProxy.csproj" Id="dc53bbcc-c4a7-47c7-aa4c-f62178f7d9db" />
+    <Project Path="ModCore.Services.GatewayIngest/ModCore.Services.GatewayIngest.csproj" Id="245e11a6-fa8a-4f7f-8a3e-3562efc2305b" />
+    <Project Path="ModCore.Services.HttpIngest/ModCore.Services.HttpIngest.csproj" Id="fa1b1be2-9e16-48af-9004-724a50ae47d2" />
     <Project Path="ModCore.Services.Jobs/ModCore.Services.Jobs.csproj" />
     <Project Path="ModCore.Services.Shard/ModCore.Services.Shard.csproj" />
     <Project Path="ModCore.Services.Web/ModCore.Services.Web.csproj" />

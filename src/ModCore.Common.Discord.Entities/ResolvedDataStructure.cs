@@ -8,18 +8,21 @@ namespace ModCore.Common.Discord.Entities
     public record ResolvedDataStructure
     {
         [JsonPropertyName("users")]
-        public Optional<Dictionary<string, User>> Users { get; set; }
+        public Optional<Dictionary<Snowflake, User>> Users { get; set; }
 
         [JsonPropertyName("members")]
-        public Optional<Dictionary<string, Member>> Members { get; set; }
+        public Optional<Dictionary<Snowflake, Member>> Members { get; set; }
 
         [JsonPropertyName("channels")]
-        public Optional<Dictionary<string, Channel>> Channel { get; set; }
+        public Optional<Dictionary<Snowflake, Channel>> Channels { get; set; }
 
         [JsonPropertyName("messages")]
-        public Optional<Dictionary<string, Message>> Messages { get; set; }
+        public Optional<Dictionary<Snowflake, Message>> Messages { get; set; }
 
         [JsonPropertyName("attachments")]
-        public Optional<Dictionary<string, Attachment>> Attachments { get; set; }
+        public Optional<Dictionary<Snowflake, Attachment>> Attachments { get; set; }
+
+        [JsonPropertyName("roles")]
+        public Optional<Dictionary<Snowflake, Role>> Roles { get; set; }
     }
 }

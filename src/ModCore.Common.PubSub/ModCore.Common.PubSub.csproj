@@ -7,7 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StackExchange.Redis" Version="2.13.17" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
+    <PackageReference Include="StackExchange.Redis" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ModCore.Common.Configuration\ModCore.Common.Configuration.csproj" />
+    <ProjectReference Include="..\ModCore.Common.Discord.Entities\ModCore.Common.Discord.Entities.csproj" />
   </ItemGroup>
 
 </Project>

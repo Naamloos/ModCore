@@ -1,6 +1,6 @@
-﻿namespace ModCore.Common.PubSub
+﻿namespace ModCore.Common.PubSub.Implementation
 {
-    public interface IRedisPubSub
+    public interface IPubSub
     {
         Task PublishAsync<T>(
             string channel,

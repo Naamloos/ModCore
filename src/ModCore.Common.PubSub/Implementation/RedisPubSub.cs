@@ -1,10 +1,11 @@
-﻿using System.Text.Json;
+﻿using System.Runtime.InteropServices;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
-namespace ModCore.Common.PubSub
+namespace ModCore.Common.PubSub.Implementation
 {
-    public sealed class RedisPubSub : IRedisPubSub
+    public sealed class RedisPubSub : IPubSub
     {
         private readonly IConnectionMultiplexer _redis;
         private readonly ILogger<RedisPubSub> _logger;
@@ -12,12 +13,12 @@ namespace ModCore.Common.PubSub
 
         public RedisPubSub(
             IConnectionMultiplexer redis,
-            ILogger<RedisPubSub> logger)
+            ILogger<RedisPubSub> logger, JsonSerializerOptions? options = null)
         {
             _redis = redis;
             _logger = logger;
 
-            _jsonOptions = new JsonSerializerOptions
+            _jsonOptions = options ?? new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Common.Configuration;
 using StackExchange.Redis;
@@ -14,42 +15,87 @@ namespace ModCore.Common.Cache
     {
         public static IServiceCollection AddModcoreCacheService(this IServiceCollection services)
         {
-            // L1
             services.AddMemoryCache();
-#if DEBUG
-            // L2 (debug)
-            services.AddDistributedMemoryCache();
-#else
-            // L2 (release)
+
             services.AddSingleton<IConnectionMultiplexer>(sp =>
             {
                 var config = sp.GetRequiredService<IConfiguration>();
-                var connectionString = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
-                return ConnectionMultiplexer.Connect(connectionString);
+                var redisConfig = GetRedisConfiguration(config);
+
+                return ConnectionMultiplexer.Connect(redisConfig);
             });
 
-            services.AddDistributedRedisCache(setup =>
+            services.AddStackExchangeRedisCache(options =>
             {
-                // get the configuration from the service collection
-                var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
-                setup.InstanceName = "ModCore";
-                setup.Configuration = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
+                options.InstanceName = "ModCore:";
+                options.ConfigurationOptions = null;
             });
-#endif
+
+            services.AddOptions<RedisCacheOptions>()
+                .Configure<IConfiguration>((options, config) =>
+                {
+                    options.InstanceName = "ModCore:";
+                    options.ConfigurationOptions = GetRedisConfiguration(config);
+                });
+
             services.AddSingleton<CacheService>();
-            services.AddSingleton<IPubSubService, PubSubService>(services =>
+
+            services.AddSingleton<IPubSubService, PubSubService>(sp =>
             {
-                var pubsub = new PubSubService(services.GetService<IConnectionMultiplexer>(), services);
+                var pubsub = new PubSubService(
+                    sp.GetRequiredService<IConnectionMultiplexer>(),
+                    sp);
 
                 pubsub.SubscribeAsync<string>("cache_invalidation", (message, serviceProvider) =>
                 {
                     var cacheService = serviceProvider.GetRequiredService<CacheService>();
                     cacheService.InvalidateL1(message);
-                }).GetAwaiter().GetResult(); // whatever
+                }).GetAwaiter().GetResult();
 
                 return pubsub;
             });
+
             return services;
+        }
+
+        private static ConfigurationOptions GetRedisConfiguration(IConfiguration config)
+        {
+            var value = config
+                .GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString))
+                .Value;
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidOperationException("Redis connection string is missing.");
+            }
+
+            if (value.StartsWith("redis://", StringComparison.OrdinalIgnoreCase))
+            {
+                var uri = new Uri(value);
+
+                var options = new ConfigurationOptions
+                {
+                    AbortOnConnectFail = false
+                };
+
+                options.EndPoints.Add(uri.Host, uri.Port);
+
+                if (!string.IsNullOrWhiteSpace(uri.UserInfo))
+                {
+                    // Supports redis://:password@localhost:6379
+                    var parts = uri.UserInfo.Split(':', 2);
+                    if (parts.Length == 2)
+                    {
+                        options.Password = Uri.UnescapeDataString(parts[1]);
+                    }
+                }
+
+                return options;
+            }
+
+            var parsed = ConfigurationOptions.Parse(value);
+            parsed.AbortOnConnectFail = false;
+            return parsed;
         }
     }
 }

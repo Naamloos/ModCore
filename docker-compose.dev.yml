@@ -3,6 +3,8 @@ services:
     restart: unless-stopped
     image: postgres:14-alpine
     shm_size: 256mb
+    ports:
+      - 5444:5432
     healthcheck:
       test: ['CMD', 'pg_isready', '-U', 'postgres']
     volumes:
@@ -32,6 +34,8 @@ services:
   redis:
     image: redis:latest
     restart: unless-stopped
+    ports:
+      - 6379:6379
     volumes:
       - modcore_redis:/data
 
@@ -46,60 +50,6 @@ services:
       - redis
     links:
       - redis
-
-  rest_proxy:
-    restart: unless-stopped
-    image: ghcr.io/twilight-rs/http-proxy
-    environment:
-      - DISCORD_TOKEN=. # Fixes spamming NotPresent in console
-  
-  web:
-    build: 
-      context: ./src
-      dockerfile: ./Dockerfiles/web.dockerfile
-    restart: unless-stopped
-    ports:
-      - 8080:8080
-    links:
-      - postgres
-      - rest_proxy
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-      - rest_proxy
-
-  jobs:
-    build:
-      context: ./src
-      dockerfile: ./Dockerfiles/jobs.dockerfile
-    restart: unless-stopped
-    links:
-      - postgres
-      - rest_proxy
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-      - rest_proxy
-
-  # Shards, these define websocket connections with Discord's gateway.
-  # Ensure shard_count is correct in .env!!!
-  shard_0:
-    build: 
-      context: ./src
-      dockerfile: ./Dockerfiles/shard.dockerfile
-    restart: unless-stopped
-    links:
-      - postgres
-      - rest_proxy
-    environment:
-      - current_shard=0
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-      - rest_proxy
       
 volumes:
   modcore_postgres:

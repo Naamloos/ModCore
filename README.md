@@ -24,6 +24,11 @@ Need help with ModCore? Either use the `/contact` command or join the ModCore Di
 ## Database Migration for development
 When a database migration was found and the bot was correctly configured for development, it will migrate itself automatically.
 
+## Development
+1. Copy `.env.example` to `.env` and fill out details
+2. `docker compose -f docker-compose.dev.yml up -d`
+3. Run from Visual Studio or VSCode
+
 ## License
 As of the v3 rewrite, ModCore is licensed under the AGPL license as stated in [the license file](./LICENSE).
 
