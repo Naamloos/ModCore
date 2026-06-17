@@ -30,7 +30,7 @@ namespace ModCore.Common.Discord.Entities.Interactions
         public Optional<List<ApplicationCommandOption>> Options { get; set; }
 
         [JsonPropertyName("channel_types")]
-        public Optional<List<ChannelType>> ChannelTypes { get; set; }
+        public Optional<ChannelType[]> ChannelTypes { get; set; }
 
         [JsonPropertyName("min_value")]
         public Optional<double> MinValue { get; set; }

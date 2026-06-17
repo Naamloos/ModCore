@@ -15,6 +15,15 @@ using System.Text;
 
 namespace ModCore.Services.Consumer.Interactions
 {
+    public enum TestEnum
+    {
+        [Name("Option One")]
+        OptionOne,
+        [Name("Option Two")]
+        OptionTwo,
+        [Name("Option Three")]
+        OptionThree
+    }
     public class TestArgumentsCommand : BaseApplicationCommand
     {
         public override string Name => "this_is_a_test";
@@ -37,6 +46,8 @@ namespace ModCore.Services.Consumer.Interactions
             [Description("Decimal to mention")] double targetdecimal,
             [Description("Text to mention")] string targettext,
             [Description("swag")] Attachment swag,
+            [Description("enum")] TestEnum testEnum,
+            [Description("a mentionable")] Mentionable mentionable,
             [Description("Optional text to mention")] string optionaltext = ""
         )
         {
@@ -54,6 +65,8 @@ namespace ModCore.Services.Consumer.Interactions
                         container.AddText($"Number input: {targetinteger}");
                         container.AddText($"Decimal input: {targetdecimal}");
                         container.AddText($"Text input: {targettext}");
+                        container.AddText($"Enum input: {Enum.GetName(testEnum)}");
+                        container.AddText($"Mentionable input: {mentionable.Mention()}");
                         container.AddText($"Optional input: {(optionaltext.Length > 0 ? optionaltext : "NONE PROVIDED")}");
 
                         container.AddSection(section =>

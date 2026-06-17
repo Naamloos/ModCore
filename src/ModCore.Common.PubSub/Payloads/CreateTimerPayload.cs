@@ -13,6 +13,6 @@ namespace ModCore.Common.PubSub.Payloads
     public record CreateTimerPayload : IPubSubPayload
     {
         [JsonPropertyName("timer_id")]
-        public int TimerId { get; init; }
+        public long TimerId { get; init; }
     }
 }

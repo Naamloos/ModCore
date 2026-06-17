@@ -23,6 +23,7 @@
     <ProjectReference Include="..\ModCore.Common.Cache\ModCore.Common.Cache.csproj" />
     <ProjectReference Include="..\ModCore.Common.Database\ModCore.Common.Database.csproj" />
     <ProjectReference Include="..\ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj" />
+    <ProjectReference Include="..\ModCore.Common.PubSub\ModCore.Common.PubSub.csproj" />
   </ItemGroup>
 
 </Project>

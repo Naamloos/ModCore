@@ -7,6 +7,7 @@ using ModCore.Common.Configuration;
 using ModCore.Common.Database;
 using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Rest;
+using ModCore.Common.PubSub;
 using ModCore.Common.Utils;
 using Quartz;
 using Serilog;
@@ -41,6 +42,7 @@ namespace ModCore.Services.Jobs
                     config
                         #if DEBUG
                         //.AddJsonFile("settings.json") // Only add json config when debugging
+                        .AddEnvFile(ConfigurationHelper.GetDefaultEnvPath())
                         #endif
                         .AddEnvironmentVariables()
                         .Build();
@@ -63,18 +65,13 @@ namespace ModCore.Services.Jobs
                     services.AddDiscordRest(config => { });
                     services.AddLogging();
                     services.AddSingleton(jsonOptions);
-                    services.AddModcoreCacheService();
                     services.AddDbContext<DatabaseContext>();
 
-                    services.AddMemoryCache();
+                    services.AddModcoreCacheService();
+                    services.AddModCorePubSub();
 
-                    services.AddDistributedRedisCache(setup =>
-                    {
-                        // get the configuration from the service collection
-                        var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
-                        setup.InstanceName = "ModCore";
-                        setup.Configuration = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
-                    });
+                    services.AddSingleton<TimerScheduler>();
+                    services.AddHostedService<TimerSchedulerHost>();
 
                     services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));
                 })

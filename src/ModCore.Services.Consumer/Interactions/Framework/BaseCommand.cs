@@ -33,13 +33,36 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                 var name = ToDiscordOptionName(parameter.GetCustomAttribute<NameAttribute>()?.Name ?? parameter.Name!);
                 var description = parameter.GetCustomAttribute<DescriptionAttribute>()?.Description
                     ?? "No description provided";
+                var type = ToDiscordOptionType(parameter.ParameterType);
+                var underlyingType = Nullable.GetUnderlyingType(parameter.ParameterType) ?? parameter.ParameterType;
+                int? minimum = parameter.GetCustomAttribute<MinAttribute>()?.Min;
+                int? maximum = parameter.GetCustomAttribute<MaxAttribute>()?.Max;
+                ChannelType[]? channelTypes = parameter.GetCustomAttribute<AllowedChannelTypesAttribute>()?.AllowedTypes;
 
                 var option = new ApplicationCommandOption
                 {
                     Name = name,
                     Description = description,
-                    Type = ToDiscordOptionType(parameter.ParameterType),
-                    Required = !(parameter.HasDefaultValue || parameter.IsOptional)
+                    Type = type,
+                    Required = !(parameter.HasDefaultValue || parameter.IsOptional),
+                    Choices = underlyingType.IsEnum
+                        ? BuildEnumChoices(underlyingType)
+                        : Optional.None,
+                    MinValue = minimum != null && (type == ApplicationCommandOptionType.Integer || type == ApplicationCommandOptionType.Number)
+                        ? minimum.Value
+                        : Optional.None,
+                    MaxValue = maximum != null && (type == ApplicationCommandOptionType.Integer || type == ApplicationCommandOptionType.Number)
+                        ? maximum.Value
+                        : Optional.None,
+                    MaxLength = maximum != null && type == ApplicationCommandOptionType.String
+                        ? maximum.Value
+                        : Optional.None,
+                    MinLength = minimum != null && type == ApplicationCommandOptionType.String
+                        ? minimum.Value
+                        : Optional.None,
+                    ChannelTypes = channelTypes != null && type == ApplicationCommandOptionType.Channel
+                        ? channelTypes
+                        : Optional.None
                 };
 
                 options.Add(option);
@@ -152,15 +175,26 @@ namespace ModCore.Services.Consumer.Interactions.Framework
         {
             var result = new StringBuilder();
 
-            foreach (var c in name)
+            for (var i = 0; i < name.Length; i++)
             {
+                var c = name[i];
+
                 if (char.IsLetterOrDigit(c))
                 {
+                    if (ShouldInsertSeparatorBefore(name, i, result))
+                    {
+                        result.Append('_');
+                    }
+
                     result.Append(char.ToLowerInvariant(c));
                 }
                 else if (c == '_' || c == '-')
                 {
-                    result.Append(c);
+                    AppendSeparator(result, c);
+                }
+                else
+                {
+                    AppendSeparator(result, '_');
                 }
             }
 
@@ -177,12 +211,76 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                 final = final[..32].Trim('_', '-');
             }
 
+            if (string.IsNullOrWhiteSpace(final))
+            {
+                throw new InvalidOperationException(
+                    $"Parameter name '{name}' cannot be converted to a valid Discord option name.");
+            }
+
             return final;
+        }
+
+        private static bool ShouldInsertSeparatorBefore(
+            string name,
+            int index,
+            StringBuilder result)
+        {
+            var c = name[index];
+
+            if (!char.IsUpper(c) || result.Length == 0)
+            {
+                return false;
+            }
+
+            var previousResult = result[result.Length - 1];
+
+            if (previousResult == '_' || previousResult == '-')
+            {
+                return false;
+            }
+
+            var previous = name[index - 1];
+
+            if (previous == '_' || previous == '-')
+            {
+                return false;
+            }
+
+            if (char.IsLower(previous) || char.IsDigit(previous))
+            {
+                return true;
+            }
+
+            return char.IsUpper(previous) &&
+                index + 1 < name.Length &&
+                char.IsLower(name[index + 1]);
+        }
+
+        private static void AppendSeparator(StringBuilder result, char separator)
+        {
+            if (result.Length == 0)
+            {
+                return;
+            }
+
+            var previous = result[result.Length - 1];
+
+            if (previous == '_' || previous == '-')
+            {
+                return;
+            }
+
+            result.Append(separator);
         }
 
         private static ApplicationCommandOptionType ToDiscordOptionType(Type parameterType)
         {
             var underlyingType = Nullable.GetUnderlyingType(parameterType) ?? parameterType;
+
+            if (underlyingType.IsEnum)
+            {
+                return ApplicationCommandOptionType.String;
+            }
 
             if (underlyingType == typeof(string))
             {
@@ -219,6 +317,11 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                 return ApplicationCommandOptionType.Role;
             }
 
+            if (underlyingType == typeof(Mentionable))
+            {
+                return ApplicationCommandOptionType.Mentionable;
+            }
+
             if (underlyingType == typeof(Attachment))
             {
                 return ApplicationCommandOptionType.Attachment;
@@ -226,6 +329,32 @@ namespace ModCore.Services.Consumer.Interactions.Framework
 
             throw new NotImplementedException(
                 $"Parameter type '{parameterType.FullName}' is not implemented.");
+        }
+
+        private static List<ApplicationCommandOptionChoice> BuildEnumChoices(Type enumType)
+        {
+            return Enum.GetValues(enumType)
+                .Cast<object>()
+                .Select(value =>
+                {
+                    var enumName = Enum.GetName(enumType, value);
+
+                    if (enumName is null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Could not get enum name for value '{value}' in enum '{enumType.FullName}'.");
+                    }
+
+                    var field = enumType.GetField(enumName);
+                    var name = field?.GetCustomAttribute<NameAttribute>()?.Name ?? enumName;
+
+                    return new ApplicationCommandOptionChoice
+                    {
+                        Name = name,
+                        Value = enumName
+                    };
+                })
+                .ToList();
         }
 
         private static IEnumerable<ApplicationCommandInteractionDataOption> FlattenOptions(
@@ -260,6 +389,19 @@ namespace ModCore.Services.Consumer.Interactions.Framework
 
             var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
             JsonNode rawValue = option.Value.Value;
+
+            if (underlyingType.IsEnum)
+            {
+                var value = DeserializeOptionValue<string>(rawValue, jsonSerializerOptions);
+
+                if (Enum.TryParse(underlyingType, value, true, out var enumValue))
+                {
+                    return enumValue;
+                }
+
+                throw new InvalidOperationException(
+                    $"Cannot convert option '{option.Name}' to {targetType.FullName}.");
+            }
 
             if (underlyingType == typeof(string))
             {
@@ -325,6 +467,13 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             if (underlyingType == typeof(Role))
             {
                 return ResolveRole(
+                    interaction,
+                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions));
+            }
+
+            if (underlyingType == typeof(Mentionable))
+            {
+                return ResolveMentionable(
                     interaction,
                     DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions));
             }
@@ -407,6 +556,32 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             }
 
             throw new InvalidOperationException($"Could not resolve role '{id}'.");
+        }
+
+        private static Mentionable ResolveMentionable(Interaction interaction, Snowflake id)
+        {
+            var resolved = GetResolvedData(interaction);
+
+            if (resolved.Users.HasValue &&
+                resolved.Users.Value.TryGetValue(id, out var user))
+            {
+                Member? member = null;
+
+                if (resolved.Members.HasValue)
+                {
+                    resolved.Members.Value.TryGetValue(id, out member);
+                }
+
+                return Mentionable.FromUser(id, user, member);
+            }
+
+            if (resolved.Roles.HasValue &&
+                resolved.Roles.Value.TryGetValue(id, out var role))
+            {
+                return Mentionable.FromRole(id, role);
+            }
+
+            throw new InvalidOperationException($"Could not resolve mentionable '{id}'.");
         }
 
         private static Attachment ResolveAttachment(Interaction interaction, Snowflake id)
