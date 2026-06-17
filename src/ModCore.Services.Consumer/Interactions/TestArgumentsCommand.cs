@@ -1,8 +1,10 @@
 ﻿using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Channels;
+using ModCore.Common.Discord.Entities.Components;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Entities.Utils;
 using ModCore.Common.Discord.Rest;
 using ModCore.Services.Consumer.Interactions.Framework;
@@ -34,9 +36,11 @@ namespace ModCore.Services.Consumer.Interactions
             [Description("Integer to mention")] int targetinteger,
             [Description("Decimal to mention")] double targetdecimal,
             [Description("Text to mention")] string targettext,
+            [Description("swag")] Attachment swag,
             [Description("Optional text to mention")] string optionaltext = ""
         )
         {
+            var swagIsImage = swag.ContentType.HasValue && swag.ContentType.Value.StartsWith("image/");
             await _rest.CreateInteractionResponseAsync(
                 interaction.Id, 
                 interaction.Token, 
@@ -50,7 +54,23 @@ namespace ModCore.Services.Consumer.Interactions
                         container.AddText($"Number input: {targetinteger}");
                         container.AddText($"Decimal input: {targetdecimal}");
                         container.AddText($"Text input: {targettext}");
-                        container.AddText($"Optional input: {(optionaltext.Length > 0? optionaltext : "NONE PROVIDED")}");
+                        container.AddText($"Optional input: {(optionaltext.Length > 0 ? optionaltext : "NONE PROVIDED")}");
+
+                        container.AddSection(section =>
+                        {
+                            section.AddText("Swag attachment");
+                        }, swagIsImage? new Thumbnail()
+                        {
+                            Media = new UnfurledMediaItem()
+                            {
+                                Url = swag.Url
+                            }
+                        } : new Button()
+                        {
+                            Style = ButtonStyle.Link,
+                            Label = "View Swag",
+                            Url = swag.Url,
+                        });
                     })
                     .WithFlags(MessageFlags.Ephemeral)
                     .BuildInteractionResponse());
