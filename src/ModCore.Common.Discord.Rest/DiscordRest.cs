@@ -110,6 +110,14 @@ namespace ModCore.Common.Discord.Rest
             });
         }
 
+        public ValueTask<RestResponse<object>> EditOriginalInteractionResponseAsync(Snowflake applicationId, string interactionToken, CreateMessage createMessage)
+        {
+            string route = $"webhooks/{applicationId}/{interactionToken}/messages/@original";
+            string url = $"webhooks/{applicationId}/{interactionToken}/messages/@original";
+
+            return makeRequestAsync<object>(HttpMethod.Patch, url, route, createMessage);
+        }
+
         public ValueTask<RestResponse<Channel>> CreateDMChannelAsync(Snowflake recipientId)
         {
             string route = "users/@me/channels";

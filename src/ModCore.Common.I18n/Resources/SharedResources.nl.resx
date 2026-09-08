@@ -166,4 +166,16 @@ Reden:
   <data name="no" xml:space="preserve">
     <value>Nee</value>
   </data>
+  <data name="coinFlipStart" xml:space="preserve">
+    <value>Oké! Ik gooi een muntje voor je op...</value>
+  </data>
+  <data name="coinFlipFinish" xml:space="preserve">
+    <value>🤔 Hmm... Het lijkt er op dat het geland is op {result|t:heads|t:tails}!</value>
+  </data>
+  <data name="heads" xml:space="preserve">
+    <value>kop</value>
+  </data>
+  <data name="tails" xml:space="preserve">
+    <value>munt</value>
+  </data>
 </root>

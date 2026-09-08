@@ -406,6 +406,9 @@ namespace ModCore.Common.Discord.Gateway
                 case "INTERACTION_CREATE":
                     DispatchEventToSubscribers(gatewayEvent.GetDataAs<InteractionCreate>(jsonSerializerOptions));
                     break;
+                case "GUILD_AUDIT_LOG_ENTRY_CREATE":
+                    DispatchEventToSubscribers(gatewayEvent.GetDataAs<GuildAuditLogEntryCreate>(jsonSerializerOptions));
+                    break;
             }
         }
 

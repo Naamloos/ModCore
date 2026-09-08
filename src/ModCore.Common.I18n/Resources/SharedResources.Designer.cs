@@ -158,11 +158,47 @@ namespace ModCore.Common.Language.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 🤔 Hmm... Looks like it landed on {result|t:heads|t:tails}!.
+        /// </summary>
+        public static string coinFlipFinish {
+            get {
+                return ResourceManager.GetString("coinFlipFinish", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alright! flipping a coin for you....
+        /// </summary>
+        public static string coinFlipStart {
+            get {
+                return ResourceManager.GetString("coinFlipStart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to heads.
+        /// </summary>
+        public static string heads {
+            get {
+                return ResourceManager.GetString("heads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No.
         /// </summary>
         public static string no {
             get {
                 return ResourceManager.GetString("no", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to tails.
+        /// </summary>
+        public static string tails {
+            get {
+                return ResourceManager.GetString("tails", resourceCulture);
             }
         }
         

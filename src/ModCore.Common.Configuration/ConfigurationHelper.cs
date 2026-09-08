@@ -99,6 +99,12 @@ namespace ModCore.Common.Configuration
         ClientSecret,
 
         /// <summary>
+        /// Discord API Application ID
+        /// </summary>
+        [Description("Discord API Application ID")]
+        ApplicationId,
+
+        /// <summary>
         /// URL of the proxy to use for Discord REST API requests. If empty, requests will be sent directly to Discord.
         /// </summary>
         [Description("URL of the proxy to use for Discord REST API requests. If empty, requests will be sent directly to Discord.")]

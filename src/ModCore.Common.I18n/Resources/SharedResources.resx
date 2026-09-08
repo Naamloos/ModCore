@@ -166,4 +166,16 @@ Reason:
   <data name="no" xml:space="preserve">
     <value>No</value>
   </data>
+  <data name="coinFlipStart" xml:space="preserve">
+    <value>Alright! flipping a coin for you...</value>
+  </data>
+  <data name="coinFlipFinish" xml:space="preserve">
+    <value>🤔 Hmm... Looks like it landed on {result|t:heads|t:tails}!</value>
+  </data>
+  <data name="heads" xml:space="preserve">
+    <value>heads</value>
+  </data>
+  <data name="tails" xml:space="preserve">
+    <value>tails</value>
+  </data>
 </root>
