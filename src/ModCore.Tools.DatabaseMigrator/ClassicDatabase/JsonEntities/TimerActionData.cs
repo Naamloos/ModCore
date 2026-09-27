@@ -1,10 +1,10 @@
-﻿using ModCore.Common.Database.Entities;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Common.Database.Entities;
+using Newtonsoft.Json;
 
 namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities
 {
@@ -63,10 +63,13 @@ namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities
         Unknown = 0, // Action type that is not known
         Reminder = 1, // Reminders
         Unban = 2, // Temp ban unban action
+
         [Obsolete("Timeouts are now a built-in Discord feature.")]
         Unmute = 3, // Temp mute unmute action
+
         [Obsolete("Nobody used this.")]
         Pin = 4, // Timed pin action
+
         [Obsolete("Nobody used this.")]
         Unpin = 5, // Temporary pin unpin action
     }

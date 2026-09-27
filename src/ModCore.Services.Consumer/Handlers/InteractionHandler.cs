@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using ModCore.Common.PubSub.Payloads;
-using ModCore.Services.Consumer.Interactions.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using ModCore.Common.PubSub.Payloads;
+using ModCore.Services.Consumer.Interactions.Framework;
 
 namespace ModCore.Services.Consumer.Handlers
 {
@@ -11,13 +11,23 @@ namespace ModCore.Services.Consumer.Handlers
     {
         private readonly ILogger _logger;
 
-        public InteractionHandler(ILogger<InteractionHandler> logger, IEnumerable<IApplicationCommand> commands) {
+        public InteractionHandler(
+            ILogger<InteractionHandler> logger,
+            IEnumerable<IApplicationCommand> commands
+        )
+        {
             _logger = logger;
         }
-        
-        public override async Task HandleAsync(InteractionCreatePayload payload, CancellationToken cancellationToken)
+
+        public override async Task HandleAsync(
+            InteractionCreatePayload payload,
+            CancellationToken cancellationToken
+        )
         {
-            _logger.LogInformation("Handling interaction create payload for shard {ShardId}", payload.ShardId);
+            _logger.LogInformation(
+                "Handling interaction create payload for shard {ShardId}",
+                payload.ShardId
+            );
         }
     }
 }

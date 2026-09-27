@@ -2,9 +2,6 @@
 {
     public class PropsBuilder
     {
-        public PropsBuilder(HttpContext context) 
-        { 
-        
-        }
+        public PropsBuilder(HttpContext context) { }
     }
 }

@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
-using ModCore.Common.Discord.Entities.Enums;
+using System.Text.Json.Serialization;
 using ModCore.Common.Discord.Entities.Channels;
+using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Messages;
 
@@ -55,5 +55,17 @@ namespace ModCore.Common.Discord.Entities.Interactions
 
         [JsonPropertyName("entitlements")]
         public Entitlement[] Entitlements { get; set; }
+
+        [JsonPropertyName("guild")]
+        public Optional<Guild> Guild { get; set; }
+
+        [JsonPropertyName("authorizing_integration_owners")]
+        public Dictionary<string, Snowflake> AuthorizingIntegrationOwners { get; set; }
+
+        [JsonPropertyName("context")]
+        public Optional<int> Context { get; set; }
+
+        [JsonPropertyName("attachment_size_limit")]
+        public int AttachmentSizeLimit { get; set; }
     }
 }

@@ -1,10 +1,11 @@
-﻿using ModCore.Common.Discord.Entities.Channels;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Channels;
 using ModCore.Common.Discord.Entities.Components;
 using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
 using ModCore.Common.Discord.Entities.Interactions;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Serializer;
 
 namespace ModCore.Common.Discord.Entities.Messages
 {
@@ -52,8 +53,9 @@ namespace ModCore.Common.Discord.Entities.Messages
         [JsonPropertyName("reactions")]
         public Optional<Reaction[]> Reactions { get; set; }
 
-        [JsonPropertyName("nonce")] // can be a string or int, I hope that doesn't break this
-        public Optional<string> Nonce { get; set; } // no ur a nonce
+        [JsonPropertyName("nonce")]
+        [JsonConverter(typeof(NonceJsonSerializer))]
+        public Optional<string> Nonce { get; set; }
 
         [JsonPropertyName("pinned")]
         public bool Pinned { get; set; }
@@ -107,6 +109,23 @@ namespace ModCore.Common.Discord.Entities.Messages
         public Optional<ResolvedDataStructure> Resolved { get; set; }
 
         private const string JUMP_LINK_FORMAT = "https://discord.com/channels/{0}/{1}/{2}";
-        public string GetJumpLink(Snowflake GuildId) => string.Format(JUMP_LINK_FORMAT, GuildId, ChannelId, Id);
+
+        public string GetJumpLink(Snowflake GuildId) =>
+            string.Format(JUMP_LINK_FORMAT, GuildId, ChannelId, Id);
+
+        [JsonPropertyName("message_snapshots")]
+        public Optional<MessageSnapshot[]> MessageSnapshots { get; set; }
+
+        [JsonPropertyName("interaction_metadata")]
+        public Optional<ApplicationCommandInteractionMetadata> InteractionMetadata { get; set; }
+
+        [JsonPropertyName("poll")]
+        public Optional<Poll> Poll { get; set; }
+
+        [JsonPropertyName("call")]
+        public Optional<MessageCall> Call { get; set; }
+
+        [JsonPropertyName("shared_client_theme")]
+        public Optional<SharedClientTheme> SharedClientTheme { get; set; }
     }
 }

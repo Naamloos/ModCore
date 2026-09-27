@@ -1,5 +1,5 @@
-﻿using ModCore.Common.Discord.Entities.Serializer;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Serializer;
 
 namespace ModCore.Common.Discord.Entities
 {
@@ -8,7 +8,8 @@ namespace ModCore.Common.Discord.Entities
     {
         const ulong DISCORD_EPOCH = 1420070400000;
 
-        public DateTimeOffset Timestamp => DateTimeOffset.FromUnixTimeMilliseconds((long)((snowflake >> 22) + DISCORD_EPOCH));
+        public DateTimeOffset Timestamp =>
+            DateTimeOffset.FromUnixTimeMilliseconds((long)((snowflake >> 22) + DISCORD_EPOCH));
         public ulong Value => snowflake;
 
         private ulong snowflake = 0;
@@ -23,10 +24,25 @@ namespace ModCore.Common.Discord.Entities
             snowflake = ((ulong)Timestamp.ToUnixTimeMilliseconds() - DISCORD_EPOCH) << 22;
         }
 
-        public static implicit operator ulong(Snowflake snowflake) { return snowflake.snowflake; }
-        public static implicit operator Snowflake(ulong value) { return new Snowflake(value); }
-        public static implicit operator Snowflake(DateTimeOffset timestamp) { return new Snowflake(timestamp); }
-        public static implicit operator DateTimeOffset(Snowflake snowflake) { return snowflake.Timestamp; }
+        public static implicit operator ulong(Snowflake snowflake)
+        {
+            return snowflake.snowflake;
+        }
+
+        public static implicit operator Snowflake(ulong value)
+        {
+            return new Snowflake(value);
+        }
+
+        public static implicit operator Snowflake(DateTimeOffset timestamp)
+        {
+            return new Snowflake(timestamp);
+        }
+
+        public static implicit operator DateTimeOffset(Snowflake snowflake)
+        {
+            return snowflake.Timestamp;
+        }
 
         public override string ToString()
         {

@@ -6,7 +6,5 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Database.Timers
 {
-    public interface ITimerData
-    {
-    }
+    public interface ITimerData { }
 }

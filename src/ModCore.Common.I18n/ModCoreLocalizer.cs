@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Localization;
-using ModCore.Common.Language.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Microsoft.Extensions.Localization;
+using ModCore.Common.Language.Resources;
 
 namespace ModCore.Common.Language
 {
@@ -112,18 +112,17 @@ namespace ModCore.Common.Language
 
                     if (placeholderEnd != -1)
                     {
-                        var expression = value.Substring(
-                            index + 1,
-                            placeholderEnd - index - 1
-                        );
+                        var expression = value.Substring(index + 1, placeholderEnd - index - 1);
 
-                        result.Append(ResolveExpression(
-                            expression,
-                            values,
-                            resolvingKeys,
-                            depth + 1,
-                            fallback: value.Substring(index, placeholderEnd - index + 1)
-                        ));
+                        result.Append(
+                            ResolveExpression(
+                                expression,
+                                values,
+                                resolvingKeys,
+                                depth + 1,
+                                fallback: value.Substring(index, placeholderEnd - index + 1)
+                            )
+                        );
 
                         index = placeholderEnd;
                         continue;
@@ -170,13 +169,7 @@ namespace ModCore.Common.Language
                 );
             }
 
-            return ResolveToken(
-                expression,
-                values,
-                resolvingKeys,
-                depth + 1,
-                fallback
-            );
+            return ResolveToken(expression, values, resolvingKeys, depth + 1, fallback);
         }
 
         private string ResolveBooleanFormat(
@@ -225,12 +218,7 @@ namespace ModCore.Common.Language
             {
                 var inlineTemplate = token.Substring(1, token.Length - 2);
 
-                return ResolveText(
-                    inlineTemplate,
-                    values,
-                    resolvingKeys,
-                    depth + 1
-                );
+                return ResolveText(inlineTemplate, values, resolvingKeys, depth + 1);
             }
 
             if (token.StartsWith("t:", StringComparison.OrdinalIgnoreCase))
@@ -240,32 +228,18 @@ namespace ModCore.Common.Language
                 if (string.IsNullOrEmpty(translationKey))
                     return fallback;
 
-                return TranslateKey(
-                    translationKey,
-                    values,
-                    resolvingKeys,
-                    depth + 1
-                );
+                return TranslateKey(translationKey, values, resolvingKeys, depth + 1);
             }
 
             if (values is not null && values.TryGetValue(token, out var value))
             {
-                var replacement = Convert.ToString(value, CultureInfo.CurrentCulture) ?? string.Empty;
+                var replacement =
+                    Convert.ToString(value, CultureInfo.CurrentCulture) ?? string.Empty;
 
-                return ResolveText(
-                    replacement,
-                    values,
-                    resolvingKeys,
-                    depth + 1
-                );
+                return ResolveText(replacement, values, resolvingKeys, depth + 1);
             }
 
-            return ResolveText(
-                token,
-                values,
-                resolvingKeys,
-                depth + 1
-            );
+            return ResolveText(token, values, resolvingKeys, depth + 1);
         }
 
         private static int FindPlaceholderEnd(string value, int startIndex)
@@ -380,8 +354,7 @@ namespace ModCore.Common.Language
             if (IsSimpleValue(type))
                 return null;
 
-            return type
-                .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            return type.GetProperties(BindingFlags.Instance | BindingFlags.Public)
                 .Where(property => property.GetIndexParameters().Length == 0)
                 .ToDictionary(
                     property => property.Name,
@@ -435,7 +408,7 @@ namespace ModCore.Common.Language
                     "en-GB" => CultureInfo.InvariantCulture,
                     "en-US" => CultureInfo.InvariantCulture,
 
-                    _ => CultureInfo.InvariantCulture
+                    _ => CultureInfo.InvariantCulture,
                 };
             }
             catch (CultureNotFoundException)

@@ -4,7 +4,5 @@ using System.Text;
 
 namespace ModCore.Common.PubSub.Payloads
 {
-    public interface IPubSubPayload
-    {
-    }
+    public interface IPubSubPayload { }
 }

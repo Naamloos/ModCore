@@ -1,12 +1,12 @@
-﻿using ModCore.Common.Discord.Entities;
-using ModCore.Common.Discord.Entities.Components;
-using ModCore.Common.Discord.Entities.Interactions;
-using ModCore.Common.Language;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Components;
+using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.Language;
 
 namespace ModCore.Services.Shard.Modules.About.ViewModels
 {
@@ -26,7 +26,8 @@ namespace ModCore.Services.Shard.Modules.About.ViewModels
         {
             AvatarMedia = new UnfurledMediaItem()
             {
-                Url = $"https://cdn.discordapp.com/avatars/{modCoreSelf.Id}/{modCoreSelf.AvatarHash}.png"
+                Url =
+                    $"https://cdn.discordapp.com/avatars/{modCoreSelf.Id}/{modCoreSelf.AvatarHash}.png",
             };
 
             //Welcome = i18n.t("about.welcome", language);
@@ -39,7 +40,7 @@ namespace ModCore.Services.Shard.Modules.About.ViewModels
             //    { "kofi", "https://ko-fi.com/naamloos" }
             //});
 
-            //PreviousContributors = i18n.t("about.previous_contribs", language, new() 
+            //PreviousContributors = i18n.t("about.previous_contribs", language, new()
             //{
             //    { "contribs", string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})")) }
             //});
@@ -56,7 +57,7 @@ namespace ModCore.Services.Shard.Modules.About.ViewModels
             { "Drake103", "https://github.com/Drake103" },
             { "Izumemori", "https://github.com/Izumemori" },
             { "OoLunar", "https://github.com/OoLunar" },
-            { "InFTord", "https://github.com/InFTord" }
+            { "InFTord", "https://github.com/InFTord" },
         };
     }
 }

@@ -15,29 +15,41 @@ namespace ModCore.Common.Utils
             LongDate,
             ShortDateTime,
             LongDateTime,
-            RelativeTime
+            RelativeTime,
         }
 
-        public static string Timestamp(TimeSpan timeSpan, TimestampFormat format = TimestampFormat.Default)
+        public static string Timestamp(
+            TimeSpan timeSpan,
+            TimestampFormat format = TimestampFormat.Default
+        )
         {
             return Timestamp(DateTime.UtcNow.Add(timeSpan), format);
         }
 
-        public static string Timestamp(long unixTimeSeconds, TimestampFormat format = TimestampFormat.Default)
+        public static string Timestamp(
+            long unixTimeSeconds,
+            TimestampFormat format = TimestampFormat.Default
+        )
         {
             return Timestamp(DateTimeOffset.FromUnixTimeSeconds(unixTimeSeconds).DateTime, format);
         }
 
-        public static string Timestamp(DateTimeOffset dateTimeOffset, TimestampFormat format = TimestampFormat.Default)
+        public static string Timestamp(
+            DateTimeOffset dateTimeOffset,
+            TimestampFormat format = TimestampFormat.Default
+        )
         {
             return Timestamp(dateTimeOffset.DateTime, format);
         }
 
-        public static string Timestamp(DateTime dateTime, TimestampFormat format = TimestampFormat.Default)
+        public static string Timestamp(
+            DateTime dateTime,
+            TimestampFormat format = TimestampFormat.Default
+        )
         {
             string suffix = "";
 
-            switch(format)
+            switch (format)
             {
                 case TimestampFormat.ShortTime:
                     suffix = ":t";

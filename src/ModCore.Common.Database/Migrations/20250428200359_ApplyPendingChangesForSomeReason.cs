@@ -10,9 +10,7 @@ namespace ModCore.Common.Database.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "logging_channel_id",
-                table: "mcore_guild");
+            migrationBuilder.DropColumn(name: "logging_channel_id", table: "mcore_guild");
         }
 
         /// <inheritdoc />
@@ -22,7 +20,8 @@ namespace ModCore.Common.Database.Migrations
                 name: "logging_channel_id",
                 table: "mcore_guild",
                 type: "numeric(20,0)",
-                nullable: true);
+                nullable: true
+            );
         }
     }
 }

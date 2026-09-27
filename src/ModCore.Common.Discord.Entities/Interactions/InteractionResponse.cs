@@ -1,10 +1,10 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities.Interactions
 {

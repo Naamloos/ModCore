@@ -1,9 +1,9 @@
-﻿using ModCore.Common.Discord.Entities.Components;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities.Components;
 
 namespace ModCore.Common.Views
 {

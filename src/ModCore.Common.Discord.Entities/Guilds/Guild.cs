@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Nodes;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using ModCore.Common.Discord.Entities.Enums;
 
@@ -6,11 +6,15 @@ namespace ModCore.Common.Discord.Entities.Guilds
 {
     public record CurrentUserGuild : Guild
     {
-        [JsonPropertyName("owner")]
-        public bool IsOwner { get; set; }
+        [JsonIgnore]
+        public bool IsOwner
+        {
+            get => Owner.Value;
+            set => Owner = value;
+        }
 
         [JsonPropertyName("permissions")]
-        public Permissions Permissions { get; set; }
+        public new Permissions Permissions { get; set; }
     }
 
     public record Guild
@@ -131,5 +135,20 @@ namespace ModCore.Common.Discord.Entities.Guilds
 
         [JsonPropertyName("safety_alerts_channel_id")]
         public Snowflake? SafetyAlertsChannelId { get; set; }
+
+        [JsonPropertyName("owner")]
+        public Optional<bool> Owner { get; set; }
+
+        [JsonPropertyName("permissions")]
+        public Optional<string> Permissions { get; set; }
+
+        [JsonPropertyName("region")]
+        public Optional<string?> Region { get; set; }
+
+        [JsonPropertyName("max_presences")]
+        public Optional<int?> MaxPresences { get; set; }
+
+        [JsonPropertyName("incidents_data")]
+        public IncidentsData? IncidentsData { get; set; }
     }
 }

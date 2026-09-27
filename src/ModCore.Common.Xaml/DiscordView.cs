@@ -8,13 +8,9 @@ namespace ModCore.Common.Xaml
     {
         internal List<Component> Components { get; set; } = new List<Component>();
 
-        public void Connect(int connectionId, object target)
-        {
-        }
+        public void Connect(int connectionId, object target) { }
 
-        public void InitializeComponent()
-        {
-        }
+        public void InitializeComponent() { }
 
         internal IReadOnlyList<Component> GetComponents()
         {

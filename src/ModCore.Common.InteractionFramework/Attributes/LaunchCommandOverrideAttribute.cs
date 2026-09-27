@@ -6,7 +6,5 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.InteractionFramework.Attributes
 {
-    public class LaunchCommandOverrideAttribute : Attribute
-    {
-    }
+    public class LaunchCommandOverrideAttribute : Attribute { }
 }

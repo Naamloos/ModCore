@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -12,8 +14,6 @@ using ModCore.Common.Utils;
 using Quartz;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ModCore.Services.Jobs
 {
@@ -32,18 +32,15 @@ namespace ModCore.Services.Jobs
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(options =>
                 {
-                    options
-                        .ClearProviders()
-                        .AddSerilog(logger)
-                        .SetMinimumLevel(LogLevel.Debug);
+                    options.ClearProviders().AddSerilog(logger).SetMinimumLevel(LogLevel.Debug);
                 })
                 .ConfigureAppConfiguration(config =>
                 {
                     config
-                        #if DEBUG
+#if DEBUG
                         //.AddJsonFile("settings.json") // Only add json config when debugging
                         .AddEnvFile(ConfigurationHelper.GetDefaultEnvPath())
-                        #endif
+#endif
                         .AddEnvironmentVariables()
                         .Build();
                 })

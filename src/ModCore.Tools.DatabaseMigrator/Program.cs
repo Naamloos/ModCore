@@ -4,10 +4,13 @@
     {
         static void Main(string[] args)
         {
-            MigratorConsole.WriteLine("Welcome, to the ModCore database migrator tool!" +
-                "\nThis tool will assist you in migrating data from a v2 ModCore database to a v3 ModCore database." +
-                "\nWhy write all this text when I'm the only user?" +
-                "\nL Bozo Cope\n", ConsoleColor.Magenta);
+            MigratorConsole.WriteLine(
+                "Welcome, to the ModCore database migrator tool!"
+                    + "\nThis tool will assist you in migrating data from a v2 ModCore database to a v3 ModCore database."
+                    + "\nWhy write all this text when I'm the only user?"
+                    + "\nL Bozo Cope\n",
+                ConsoleColor.Magenta
+            );
 
             MigratorConsole.Write("DB Host: ");
             var host = Console.ReadLine();
@@ -29,9 +32,17 @@
             MigratorConsole.Write($"{newDB}", ConsoleColor.Green);
             MigratorConsole.Write(". Are you sure you want to proceed? (y/N): ", ConsoleColor.Red);
             var agree = (MigratorConsole.ReadLine() ?? "n").Trim().ToLower() == "y";
-            if(agree)
+            if (agree)
             {
-                var migrator = new Migrator(oldDB, newDB, username, password, host, port, masterKey);
+                var migrator = new Migrator(
+                    oldDB,
+                    newDB,
+                    username,
+                    password,
+                    host,
+                    port,
+                    masterKey
+                );
                 migrator.StartMigration();
             }
             else

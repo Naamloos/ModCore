@@ -52,8 +52,11 @@ namespace ModCore.Common.Database.Entities
 
         [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
+
         [JsonPropertyName("history")]
-        public virtual ICollection<DatabaseTagHistory> History { get; set; } = new HashSet<DatabaseTagHistory>();
+        public virtual ICollection<DatabaseTagHistory> History { get; set; } =
+            new HashSet<DatabaseTagHistory>();
+
         [JsonIgnore]
         public virtual DatabaseUser Author { get; set; }
     }

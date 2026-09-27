@@ -1,6 +1,6 @@
-﻿using ModCore.Common.Discord.Entities;
+﻿using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Messages;
-using System.Text.Json.Serialization;
 
 namespace ModCore.Services.Web.RequestBodies
 {

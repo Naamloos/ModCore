@@ -1,4 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using ModCore.Common.Cache;
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
@@ -10,11 +15,6 @@ using ModCore.Common.Discord.Rest;
 using ModCore.Common.Xaml;
 using ModCore.Services.Shard.Abstractions;
 using ModCore.Services.Shard.Modules.Timers.ViewModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ModCore.Services.Shard.Modules.Timers.Services
 {
@@ -32,7 +32,13 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
 
         private int shardId;
 
-        public TimerService(ILogger<TimerService> logger, DatabaseContext dbContext, DiscordRest rest, CacheService cache, DiscordXaml xaml)
+        public TimerService(
+            ILogger<TimerService> logger,
+            DatabaseContext dbContext,
+            DiscordRest rest,
+            CacheService cache,
+            DiscordXaml xaml
+        )
         {
             _databaseContext = dbContext;
             _logger = logger;
@@ -64,7 +70,10 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
                 }
 
                 // Fetch upcoming timer
-                var nextTimer = _databaseContext.Timers.Where(x => x.ShardId == shardId).OrderBy(x => x.TriggersAt).FirstOrDefault();
+                var nextTimer = _databaseContext
+                    .Timers.Where(x => x.ShardId == shardId)
+                    .OrderBy(x => x.TriggersAt)
+                    .FirstOrDefault();
 
                 if (nextTimer != default)
                 {
@@ -76,7 +85,7 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
                     _cancellation = new CancellationTokenSource();
 
                     var delay = nextTimer.TriggersAt.Subtract(DateTimeOffset.UtcNow);
-                    if(delay.Milliseconds < 0)
+                    if (delay.Milliseconds < 0)
                     {
                         delay = TimeSpan.FromMilliseconds(1);
                     }
@@ -84,15 +93,26 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
                     {
                         // Time until this timer hits exceeds the total milliseconds max.
                         _timer = null;
-                        _ = Task.Delay(TimeSpan.FromMilliseconds(int.MaxValue - 1000), _cancellation.Token)
-                            .ContinueWith((t, o) => ScheduleNext(), _cancellation.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
+                        _ = Task.Delay(
+                                TimeSpan.FromMilliseconds(int.MaxValue - 1000),
+                                _cancellation.Token
+                            )
+                            .ContinueWith(
+                                (t, o) => ScheduleNext(),
+                                _cancellation.Token,
+                                TaskContinuationOptions.OnlyOnRanToCompletion
+                            );
                     }
                     else
                     {
                         // Set a delayed task for next timer
                         _timer = nextTimer;
                         _ = Task.Delay(delay, _cancellation.Token)
-                            .ContinueWith((t, o) => DispatchAsync(_timer, true), _cancellation.Token, TaskContinuationOptions.OnlyOnRanToCompletion);
+                            .ContinueWith(
+                                (t, o) => DispatchAsync(_timer, true),
+                                _cancellation.Token,
+                                TaskContinuationOptions.OnlyOnRanToCompletion
+                            );
                     }
                 }
             }
@@ -105,7 +125,9 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
         private async ValueTask DispatchExpiredTimersAsync()
         {
             var now = DateTimeOffset.UtcNow;
-            var expiredTimers = _databaseContext.Timers.Where(x => x.TriggersAt < now && x.ShardId == shardId).ToList();
+            var expiredTimers = _databaseContext
+                .Timers.Where(x => x.TriggersAt < now && x.ShardId == shardId)
+                .ToList();
 
             foreach (var timer in expiredTimers)
             {
@@ -113,13 +135,18 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
                 {
                     await DispatchAsync(timer, false);
                 }
-                catch (Exception ex) 
-                { 
-                    if(_semaphore.CurrentCount == 0)
+                catch (Exception ex)
+                {
+                    if (_semaphore.CurrentCount == 0)
                     {
                         _semaphore.Release();
                     }
-                    _logger.LogError(ex, "Error while dispatching timer {0} with type {1}!", timer.TimerId, timer.Type);
+                    _logger.LogError(
+                        ex,
+                        "Error while dispatching timer {0} with type {1}!",
+                        timer.TimerId,
+                        timer.Type
+                    );
                 }
             }
         }
@@ -139,7 +166,7 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
                     case TimerTypes.Reminder:
                         await DispatchReminderAsync(timer);
                         break;
-                        // TODO implement other timers
+                    // TODO implement other timers
                 }
 
                 _databaseContext.Timers.Remove(timer);
@@ -160,13 +187,19 @@ namespace ModCore.Services.Shard.Modules.Timers.Services
             if (reminderData != null)
             {
                 // TODO add snooze button
-                var components = await _xaml.CompileXamlAsync("ModCore.Services.Shard.Modules.Timers.Views.ReminderView.xaml", new ReminderViewModel(reminderData));
-                var msg = await _rest.CreateMessageAsync(reminderData.ChannelId, new CreateMessage()
-                {
-                    Flags = MessageFlags.ComponentsV2,
-                    Components = components.ToArray(),
-                    AllowedMentions = new AllowedMention() { Parse = new[] { "users" } },
-                });
+                var components = await _xaml.CompileXamlAsync(
+                    "ModCore.Services.Shard.Modules.Timers.Views.ReminderView.xaml",
+                    new ReminderViewModel(reminderData)
+                );
+                var msg = await _rest.CreateMessageAsync(
+                    reminderData.ChannelId,
+                    new CreateMessage()
+                    {
+                        Flags = MessageFlags.ComponentsV2,
+                        Components = components.ToArray(),
+                        AllowedMentions = new AllowedMention() { Parse = new[] { "users" } },
+                    }
+                );
             }
         }
     }

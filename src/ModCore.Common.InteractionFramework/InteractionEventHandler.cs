@@ -1,13 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
-using ModCore.Common.Discord.Gateway;
-using ModCore.Common.Discord.Gateway.EventData.Incoming;
-using ModCore.Common.Discord.Gateway.Events;
-using ModCore.Common.Discord.Rest;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using ModCore.Common.Discord.Gateway;
+using ModCore.Common.Discord.Gateway.EventData.Incoming;
+using ModCore.Common.Discord.Gateway.Events;
+using ModCore.Common.Discord.Rest;
 
 namespace ModCore.Common.InteractionFramework
 {
@@ -21,6 +21,7 @@ namespace ModCore.Common.InteractionFramework
             _interactions = interactions;
         }
 
-        public ValueTask HandleEvent(InteractionCreate data) => _interactions.HandleInteractionAsync(Gateway, data);
+        public ValueTask HandleEvent(InteractionCreate data) =>
+            _interactions.HandleInteractionAsync(Gateway, data);
     }
 }

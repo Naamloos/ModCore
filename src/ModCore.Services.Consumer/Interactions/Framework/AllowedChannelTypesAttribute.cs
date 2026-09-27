@@ -1,7 +1,7 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Services.Consumer.Interactions.Framework
 {

@@ -12,27 +12,46 @@ namespace ModCore.Services.Web
 {
     public static class Extensions
     {
-        public static Task<ValidatorResult<T>> ValidateAsync<T>(this ControllerBase controller, T value)
+        public static Task<ValidatorResult<T>> ValidateAsync<T>(
+            this ControllerBase controller,
+            T value
+        )
         {
             // find validator with reflection
-            var validator = typeof(IValidator<>).Assembly.DefinedTypes.Where(t => t.ImplementedInterfaces.Contains(typeof(IValidator<T>)))
+            var validator = typeof(IValidator<>)
+                .Assembly.DefinedTypes.Where(t =>
+                    t.ImplementedInterfaces.Contains(typeof(IValidator<T>))
+                )
                 .FirstOrDefault();
             if (validator == null)
             {
-                throw new InvalidOperationException($"No validator found for type {typeof(T).Name}");
+                throw new InvalidOperationException(
+                    $"No validator found for type {typeof(T).Name}"
+                );
             }
             var validatorInstance = (IValidator<T>)Activator.CreateInstance(validator)!;
             return validatorInstance.ValidateAsync(controller.HttpContext, value);
         }
 
-        public static async Task<List<CurrentUserGuild>> GetCurrentUserGuilds(this ControllerBase controller)
+        public static async Task<List<CurrentUserGuild>> GetCurrentUserGuilds(
+            this ControllerBase controller
+        )
         {
-            var userId = ulong.Parse(controller.HttpContext.User.Claims.FirstOrDefault(x => x.Type == "urn:discord:id")?.Value);
+            var userId = ulong.Parse(
+                controller
+                    .HttpContext.User.Claims.FirstOrDefault(x => x.Type == "urn:discord:id")
+                    ?.Value
+            );
 
-            var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
-            var userRestClient = await controller.HttpContext.RequestServices.GetRequiredService<UserDiscordRest>().GetDiscordRestAsync();
+            var cacheService =
+                controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
+            var userRestClient = await controller
+                .HttpContext.RequestServices.GetRequiredService<UserDiscordRest>()
+                .GetDiscordRestAsync();
 
-            var cacheGuilds = cacheService.TryGet<List<CurrentUserGuild>, string>("userGuilds:" + userId);
+            var cacheGuilds = cacheService.TryGet<List<CurrentUserGuild>, string>(
+                "userGuilds:" + userId
+            );
             var servers = cacheGuilds.Value;
             if (!cacheGuilds.Success)
             {
@@ -44,19 +63,29 @@ namespace ModCore.Services.Web
             return servers.ToList();
         }
 
-        public static async Task<IActionResult?> GateAsync(this ControllerBase controller, IGate gate)
+        public static async Task<IActionResult?> GateAsync(
+            this ControllerBase controller,
+            IGate gate
+        )
         {
             return await gate.CheckAsync(controller.HttpContext);
         }
 
-        public static async Task<List<Channel>> GetGuildChannelsAsync(this ControllerBase controller, ulong server_id)
+        public static async Task<List<Channel>> GetGuildChannelsAsync(
+            this ControllerBase controller,
+            ulong server_id
+        )
         {
-            var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
-            var restClient = controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
+            var cacheService =
+                controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
+            var restClient =
+                controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
             List<Channel>? channels = null;
 
-            var cacheResponse = cacheService.TryGet<List<Channel>, string>($"guild_channels:{server_id}");
-            if(cacheResponse.Success)
+            var cacheResponse = cacheService.TryGet<List<Channel>, string>(
+                $"guild_channels:{server_id}"
+            );
+            if (cacheResponse.Success)
             {
                 channels = cacheResponse.Value;
             }
@@ -73,10 +102,15 @@ namespace ModCore.Services.Web
             return channels ?? new List<Channel>();
         }
 
-        public static async Task<List<Emoji>> GetGuildEmojisAsync(this ControllerBase controller, ulong server_id)
+        public static async Task<List<Emoji>> GetGuildEmojisAsync(
+            this ControllerBase controller,
+            ulong server_id
+        )
         {
-            var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
-            var restClient = controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
+            var cacheService =
+                controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
+            var restClient =
+                controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
 
             List<Emoji>? emojis = null;
 
@@ -98,10 +132,15 @@ namespace ModCore.Services.Web
             return emojis ?? new List<Emoji>();
         }
 
-        public static async Task<Role[]> GetGuildRolesAsync(this ControllerBase controller, ulong server_id)
+        public static async Task<Role[]> GetGuildRolesAsync(
+            this ControllerBase controller,
+            ulong server_id
+        )
         {
-            var cacheService = controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
-            var restClient = controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
+            var cacheService =
+                controller.HttpContext.RequestServices.GetRequiredService<CacheService>();
+            var restClient =
+                controller.HttpContext.RequestServices.GetRequiredService<DiscordRest>();
 
             List<Role>? roles = null;
 
@@ -110,7 +149,8 @@ namespace ModCore.Services.Web
             {
                 roles = cacheResponse.Value;
             }
-            else { 
+            else
+            {
                 var restResponse = await restClient.GetGuildRolesAsync(server_id);
                 if (restResponse.Success)
                 {

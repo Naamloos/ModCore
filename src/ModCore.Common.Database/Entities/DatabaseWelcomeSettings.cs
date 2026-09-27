@@ -1,7 +1,4 @@
-﻿using ModCore.Common.Database.Timers;
-using ModCore.Common.Discord.Entities.Messages;
-using ModCore.Common.Discord.Entities.Serializer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,8 +7,11 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using ModCore.Common.Database.Timers;
+using ModCore.Common.Discord.Entities.Messages;
+using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Utils;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ModCore.Common.Database.Entities
 {
@@ -40,10 +40,18 @@ namespace ModCore.Common.Database.Entities
         [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
 
-        public T GetData<T>() where T : CreateMessage
-            => JsonSerializer.Deserialize<T>(WelcomeMessageJson, options: JsonSerializerOptionsFactory.GetOptions())!;
+        public T GetData<T>()
+            where T : CreateMessage =>
+            JsonSerializer.Deserialize<T>(
+                WelcomeMessageJson,
+                options: JsonSerializerOptionsFactory.GetOptions()
+            )!;
 
-        public void SetData<T>(T data) where T : CreateMessage
-            => WelcomeMessageJson = JsonSerializer.Serialize(data, options: JsonSerializerOptionsFactory.GetOptions());
+        public void SetData<T>(T data)
+            where T : CreateMessage =>
+            WelcomeMessageJson = JsonSerializer.Serialize(
+                data,
+                options: JsonSerializerOptionsFactory.GetOptions()
+            );
     }
 }

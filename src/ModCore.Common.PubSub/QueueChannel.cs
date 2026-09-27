@@ -8,6 +8,6 @@ namespace ModCore.Common.PubSub
     {
         InvalidateCache,
         CreateTimer,
-        InteractionCreate
+        InteractionCreate,
     }
 }

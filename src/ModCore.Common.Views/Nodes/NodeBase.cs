@@ -1,20 +1,29 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Razor.TagHelpers;
-using ModCore.Common.Discord.Entities.Components;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Razor.TagHelpers;
+using ModCore.Common.Discord.Entities.Components;
 
 namespace ModCore.Common.Views.Nodes
 {
-    public abstract class NodeBase<T> : TagHelper where T : Component
+    public abstract class NodeBase<T> : TagHelper
+        where T : Component
     {
-        [ViewContext] public ViewContext ViewContext { get; set; } = default!;
+        [ViewContext]
+        public ViewContext ViewContext { get; set; } = default!;
 
-        public virtual Task<T> ProcessContentAndProps(T component, TagHelperContext context, TagHelperOutput output) { return Task.FromResult(component); }
+        public virtual Task<T> ProcessContentAndProps(
+            T component,
+            TagHelperContext context,
+            TagHelperOutput output
+        )
+        {
+            return Task.FromResult(component);
+        }
 
         public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
         {

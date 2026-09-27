@@ -6,6 +6,6 @@
         DidRejoin = 1 << 0,
         CompletedOnboarding = 1 << 1,
         BypassesVerification = 1 << 2,
-        StartedOnboarding = 1 << 3
+        StartedOnboarding = 1 << 3,
     }
 }

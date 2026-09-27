@@ -29,7 +29,7 @@ namespace ModCore.Common.Database.Entities
         [JsonPropertyName("responsible_moderator_id")]
         [Column("responsible_moderator_id")]
         [JsonNumberHandling(JsonNumberHandling.WriteAsString)]
-        public ulong ResponsibleModerator {  get; set; }
+        public ulong ResponsibleModerator { get; set; }
 
         [JsonPropertyName("reason")]
         [Column("reason")]
@@ -53,13 +53,13 @@ namespace ModCore.Common.Database.Entities
         Ban = 1,
         Kick = 2,
         Mute = 3,
-        TempBan=4,
-        SoftBan=5,
-        HackBan=6,
-        MassBan=7,
-        Isolate=8,
-        Appealed=9,
-        AppealDenied=10,
-        VoiceBan=11
+        TempBan = 4,
+        SoftBan = 5,
+        HackBan = 6,
+        MassBan = 7,
+        Isolate = 8,
+        Appealed = 9,
+        AppealDenied = 10,
+        VoiceBan = 11,
     }
 }

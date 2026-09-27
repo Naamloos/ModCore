@@ -15,15 +15,14 @@ namespace ModCore.Common.Database.Migrations
                 table: "mcore_welcomer",
                 type: "boolean",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: false
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "enabled",
-                table: "mcore_welcomer");
+            migrationBuilder.DropColumn(name: "enabled", table: "mcore_welcomer");
         }
     }
 }

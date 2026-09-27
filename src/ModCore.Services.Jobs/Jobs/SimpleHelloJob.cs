@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
-using ModCore.Services.Jobs.Attributes;
-using Quartz;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using ModCore.Services.Jobs.Attributes;
+using Quartz;
 
 namespace ModCore.Services.Jobs.Jobs
 {
@@ -15,10 +15,11 @@ namespace ModCore.Services.Jobs.Jobs
     {
         private readonly ILogger _logger;
 
-        public SimpleHelloJob(ILogger<SimpleHelloJob> logger) 
+        public SimpleHelloJob(ILogger<SimpleHelloJob> logger)
         {
             _logger = logger;
         }
+
         public override async Task Execute(IJobExecutionContext context)
         {
             _logger.LogInformation("Hello!");

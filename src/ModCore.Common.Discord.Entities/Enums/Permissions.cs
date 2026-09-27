@@ -1,10 +1,10 @@
-﻿using ModCore.Common.Discord.Entities.Serializer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities.Serializer;
 
 namespace ModCore.Common.Discord.Entities.Enums
 {
@@ -61,6 +61,11 @@ namespace ModCore.Common.Discord.Entities.Enums
         CreateEvents = 0x0000100000000000,
         UseExternalSounds = 0x0000200000000000,
         SendVoiceMessages = 0x0000400000000000,
+        SetVoiceChannelStatus = 1L << 48,
+        SendPolls = 1L << 49,
+        UseExternalApps = 1L << 50,
+        PinMessages = 1L << 51,
+        BypassSlowmode = 1L << 52,
         All = long.MaxValue,
     }
 }

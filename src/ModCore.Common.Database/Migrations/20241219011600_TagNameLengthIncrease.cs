@@ -18,7 +18,8 @@ namespace ModCore.Common.Database.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "character varying(35)",
-                oldMaxLength: 35);
+                oldMaxLength: 35
+            );
         }
 
         /// <inheritdoc />
@@ -32,7 +33,8 @@ namespace ModCore.Common.Database.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "character varying(100)",
-                oldMaxLength: 100);
+                oldMaxLength: 100
+            );
         }
     }
 }

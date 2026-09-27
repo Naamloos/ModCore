@@ -1,6 +1,4 @@
-﻿using ModCore.Common.Database.Attributes;
-using ModCore.Common.Database.Timers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -8,6 +6,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ModCore.Common.Database.Attributes;
+using ModCore.Common.Database.Timers;
 
 namespace ModCore.Common.Database.Entities
 {
@@ -39,14 +39,14 @@ namespace ModCore.Common.Database.Entities
 
         [JsonPropertyName("data")]
         [Column("data", TypeName = "jsonb")]
-        [EncryptedColumn(nameof(GuildId), nameof(ShardId))] 
+        [EncryptedColumn(nameof(GuildId), nameof(ShardId))]
         // The context IDs need to be stable, and not generated, for encryption to not falsely scream "TAMPERING!"
         public string Data { get; set; } = "";
 
-        public T GetData<T>() where T : class, ITimerData 
-            => JsonSerializer.Deserialize<T>(Data!)!;
+        public T GetData<T>()
+            where T : class, ITimerData => JsonSerializer.Deserialize<T>(Data!)!;
 
-        public void SetData<T>(T data) where T : class, ITimerData 
-            => Data = JsonSerializer.Serialize(data);
+        public void SetData<T>(T data)
+            where T : class, ITimerData => Data = JsonSerializer.Serialize(data);
     }
 }

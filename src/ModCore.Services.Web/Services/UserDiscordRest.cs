@@ -18,7 +18,7 @@ namespace ModCore.Services.Web.Services
         /// <returns></returns>
         public async Task<DiscordRest?> GetDiscordRestAsync()
         {
-            if(!_httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated == true)
+            if (!_httpContextAccessor.HttpContext?.User?.Identity?.IsAuthenticated == true)
             {
                 return null;
             }

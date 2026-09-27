@@ -74,6 +74,6 @@ namespace ModCore.Common.Discord.Entities.Enums
         HomeSettingsCreate = 190,
         HomeSettingsUpdate = 191,
         VoiceChannelStatusCreate = 192,
-        VoiceChannelStatusDelete = 193
+        VoiceChannelStatusDelete = 193,
     }
 }

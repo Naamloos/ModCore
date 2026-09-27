@@ -16,7 +16,6 @@ namespace ModCore.Services.HttpIngest
 
             app.UseAuthorization();
 
-
             app.MapControllers();
 
             app.Run();

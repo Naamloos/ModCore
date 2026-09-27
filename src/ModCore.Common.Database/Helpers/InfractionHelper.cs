@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ModCore.Common.Database.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ModCore.Common.Database.Entities;
 
 namespace ModCore.Common.Database.Helpers
 {
@@ -20,25 +20,33 @@ namespace ModCore.Common.Database.Helpers
             this.database = database;
             this.userId = user_id;
             this.guildId = guild_id;
-            this.infractions = database.Infractions.Where(x => x.UserId == user_id && x.GuildId == guild_id);
+            this.infractions = database.Infractions.Where(x =>
+                x.UserId == user_id && x.GuildId == guild_id
+            );
         }
 
-        public async Task<DatabaseInfraction> CreateInfractionAsync(InfractionType type, 
-            ulong responsible_moderator, string reason = null, bool notified = false)
+        public async Task<DatabaseInfraction> CreateInfractionAsync(
+            InfractionType type,
+            ulong responsible_moderator,
+            string reason = null,
+            bool notified = false
+        )
         {
             // ensure data for this guild exists
             await database.TouchGuild(guildId);
 
-            var infraction = await database.Infractions.AddAsync(new DatabaseInfraction()
-            {
-                GuildId = guildId,
-                UserId = userId,
-                Type = type,
-                Reason = reason,
-                ResponsibleModerator = responsible_moderator,
-                UserNotified = notified,
-                Id = 0
-            });
+            var infraction = await database.Infractions.AddAsync(
+                new DatabaseInfraction()
+                {
+                    GuildId = guildId,
+                    UserId = userId,
+                    Type = type,
+                    Reason = reason,
+                    ResponsibleModerator = responsible_moderator,
+                    UserNotified = notified,
+                    Id = 0,
+                }
+            );
 
             database.SaveChanges();
 

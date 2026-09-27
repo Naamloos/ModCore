@@ -1,12 +1,12 @@
-﻿using ModCore.Common.Discord.Entities.Interactions;
-using ModCore.Common.Discord.Gateway;
-using ModCore.Common.Discord.Gateway.EventData.Incoming;
-using ModCore.Common.Discord.Rest;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.Discord.Gateway;
+using ModCore.Common.Discord.Gateway.EventData.Incoming;
+using ModCore.Common.Discord.Rest;
 
 namespace ModCore.Common.InteractionFramework
 {
@@ -18,8 +18,13 @@ namespace ModCore.Common.InteractionFramework
         public List<ApplicationCommandInteractionDataOption> OptionValues { get; private set; }
         public IServiceProvider ServiceProvider { get; private set; }
 
-        internal SlashCommandContext(InteractionCreate eventData, DiscordRest restClient, Gateway gatewayClient, 
-            List<ApplicationCommandInteractionDataOption> optionValues, IServiceProvider serviceProvider) 
+        internal SlashCommandContext(
+            InteractionCreate eventData,
+            DiscordRest restClient,
+            Gateway gatewayClient,
+            List<ApplicationCommandInteractionDataOption> optionValues,
+            IServiceProvider serviceProvider
+        )
         {
             this.EventData = eventData;
             this.RestClient = restClient;

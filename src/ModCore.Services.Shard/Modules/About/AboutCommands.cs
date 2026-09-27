@@ -1,4 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using ModCore.Common.Cache;
 using ModCore.Common.Database;
 using ModCore.Common.Discord.Entities;
@@ -14,12 +20,6 @@ using ModCore.Common.Utils;
 using ModCore.Common.Views;
 using ModCore.Common.Xaml;
 using ModCore.Services.Shard.Views;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace ModCore.Services.Shard.Modules.About
 {
@@ -103,7 +103,7 @@ namespace ModCore.Services.Shard.Modules.About
             { "Drake103", "https://github.com/Drake103" },
             { "Izumemori", "https://github.com/Izumemori" },
             { "OoLunar", "https://github.com/OoLunar" },
-            { "InFTord", "https://github.com/InFTord" }
+            { "InFTord", "https://github.com/InFTord" },
         };
     }
 }

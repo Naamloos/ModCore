@@ -19,9 +19,9 @@ namespace ModCore.Common.Database.Timers
         Unban = 1,
 
         /// <summary>
-        /// Triggered when the data retention period for a guild expires, 
+        /// Triggered when the data retention period for a guild expires,
         /// meaning guild data gets deleted.
         /// </summary>
-        GuildDataDeletion = 2
+        GuildDataDeletion = 2,
     }
 }

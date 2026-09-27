@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Primitives;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using Chronic;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 
 /*
  
@@ -77,7 +77,11 @@ namespace ModCore.Services.Consumer.Interactions.Remind
         /// <c>true</c> to continue parsing execution or <c>false</c> to escape control flow. The returned value of
         /// <c>time</c> is stored and used for the next token, or for the return value if control flow is escaped.</returns>
         /// <exception cref="Exception"></exception>
-        private static (bool cont, ulong time) _parseToken(StringTokenizer tokenizer, string input, ulong time)
+        private static (bool cont, ulong time) _parseToken(
+            StringTokenizer tokenizer,
+            string input,
+            ulong time
+        )
         {
             // filler words
             if (DateLexer.IsFillerWord(input))
@@ -103,7 +107,9 @@ namespace ModCore.Services.Consumer.Interactions.Remind
 
                 // get the amount of ms that corresponds to the unit of time s2
                 if (!Enum.TryParse<Unit>(s2.Trim(), true, out var tk))
-                    throw new Exception($"Unknown amount of time '{i}' of '{s2}'. If you think this is an unaccounted-for scenario, notify the dev!");
+                    throw new Exception(
+                        $"Unknown amount of time '{i}' of '{s2}'. If you think this is an unaccounted-for scenario, notify the dev!"
+                    );
 
                 // return N * MsValue
                 return (Continue, time + ((ulong)tk * i));
@@ -121,11 +127,14 @@ namespace ModCore.Services.Consumer.Interactions.Remind
             if (DateLexer.IsFinishingWord(input))
                 return (Break, time);
 
-            DebugWriteLine("####\n" +
-                           $"Unrecognized token: {input}\n" +
-                           $"In text: {tokenizer.String}\n" +
-                           $"At pos:  {new string('-', Math.Max(0, (tokenizer.Index == -1 ? tokenizer.String.Length : tokenizer.Index) - tokenizer.Current.Length))}^ (semi-accurate)\n" + // this is bad
-                           "####");
+            DebugWriteLine(
+                "####\n"
+                    + $"Unrecognized token: {input}\n"
+                    + $"In text: {tokenizer.String}\n"
+                    + $"At pos:  {new string('-', Math.Max(0, (tokenizer.Index == -1 ? tokenizer.String.Length : tokenizer.Index) - tokenizer.Current.Length))}^ (semi-accurate)\n"
+                    + // this is bad
+                    "####"
+            );
 
             // what to do with invalid tokens? break? continue? i guess break
             return (Break, time);
@@ -149,7 +158,9 @@ namespace ModCore.Services.Consumer.Interactions.Remind
 
                 // get the amount of ms that corresponds to the unit of time unit
                 if (!Enum.TryParse<Unit>(unit.Trim(), true, out var tk))
-                    throw new Exception($"Unknown amount of time '{i}' of '{unit}'. If you think this is an unaccounted-for scenario, notify the dev!");
+                    throw new Exception(
+                        $"Unknown amount of time '{i}' of '{unit}'. If you think this is an unaccounted-for scenario, notify the dev!"
+                    );
 
                 // add N * MsValue
                 time += (ulong)tk * i;
@@ -168,10 +179,7 @@ namespace ModCore.Services.Consumer.Interactions.Remind
         /// <returns>True if succeeded, false otherwise</returns>
         private static bool TryParseChronic(string dataToParse, out double time, out string text)
         {
-            var parser = new Parser(new Chronic.Options
-            {
-                Clock = () => DateTime.Now,
-            });
+            var parser = new Parser(new Chronic.Options { Clock = () => DateTime.Now });
 
             try
             {
@@ -353,7 +361,7 @@ namespace ModCore.Services.Consumer.Interactions.Remind
             Quarter = 3 * Month, // 3 months
             Semester = 6 * Month, // 6 months
             Year = 12 * Month,
-            Kilonazi = 740741 * Day, // 740741 days 
+            Kilonazi = 740741 * Day, // 740741 days
             Astrosecond = 498 * Millisecond, //0.498 seconds
             Breem = 498 * Second, //8.3 minutes
             Cyberweek = 7 * Day, //7 days
@@ -399,8 +407,9 @@ namespace ModCore.Services.Consumer.Interactions.Remind
             Stellarcycles = Stellarcycle,
             Vorns = Vorn,
             Decivorns = Decivorn,
-            Exapis = Exapi
+            Exapis = Exapi,
         }
+
         // ReSharper restore UnusedMember.Local
 
         [Conditional("DEBUG")]
@@ -425,13 +434,15 @@ namespace ModCore.Services.Consumer.Interactions.Remind
         // ReSharper disable ConvertToAutoPropertyWhenPossible
         internal string String => _string;
         internal int Index => _index;
+
         // ReSharper enable ConvertToAutoPropertyWhenPossible
 
         private string _current;
         private readonly string _string;
         private int _index;
 
-        private static readonly char[] WhiteSpaceChars = Enumerable.Range(char.MinValue, char.MaxValue)
+        private static readonly char[] WhiteSpaceChars = Enumerable
+            .Range(char.MinValue, char.MaxValue)
             .Select(e => (char)e)
             .Where(c => c == 32 || c >= 9 && c <= 13 || (c == 160 || c == 133))
             .ToArray();
@@ -449,25 +460,30 @@ namespace ModCore.Services.Consumer.Interactions.Remind
 
         public bool MoveNext()
         {
-            if (_index == -1) return false;
+            if (_index == -1)
+                return false;
 
             while (char.IsWhiteSpace(_string[_index]))
             {
                 _index++;
-                if (_index >= _string.Length) return false;
+                if (_index >= _string.Length)
+                    return false;
             }
             int newIndex;
             // support quoted text
             if (_string[_index] == '"')
             {
-                _index++;//remove initial quote
+                _index++; //remove initial quote
                 newIndex = _string.IndexOf('"', _index + 1);
             }
             else
             {
                 newIndex = _string.IndexOfAny(WhiteSpaceChars, _index);
             }
-            _current = _string.Substring(_index, (newIndex == -1 ? _string.Length : newIndex) - _index);//substring(startIndex,length)
+            _current = _string.Substring(
+                _index,
+                (newIndex == -1 ? _string.Length : newIndex) - _index
+            ); //substring(startIndex,length)
             // remove closing quote
             if (newIndex != -1 && newIndex < _string.Length && _string[newIndex] == '"')
             {
@@ -506,10 +522,7 @@ namespace ModCore.Services.Consumer.Interactions.Remind
         public StringTokenizer Clone()
         {
             return _index == -1
-                ? new StringTokenizer(null)
-                {
-                    _index = -1
-                }
+                ? new StringTokenizer(null) { _index = -1 }
                 : new StringTokenizer(_string.Substring(_index));
         }
 

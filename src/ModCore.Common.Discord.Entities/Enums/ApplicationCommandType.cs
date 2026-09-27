@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.Discord.Entities.Enums
 {
-
     public enum ApplicationCommandType : int
     {
         ChatInput = 1,
         User = 2,
         Message = 3,
-        ActivityEntryPoint = 4
+        ActivityEntryPoint = 4,
     }
 }

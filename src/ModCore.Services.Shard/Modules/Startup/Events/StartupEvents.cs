@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
@@ -13,7 +14,6 @@ using ModCore.Common.Discord.Rest;
 using ModCore.Common.InteractionFramework;
 using ModCore.Common.Utils;
 using ModCore.Services.Shard.Modules.Timers.Services;
-using System.Reflection;
 
 namespace ModCore.Services.Shard.Modules.Startup.Events
 {
@@ -31,9 +31,13 @@ namespace ModCore.Services.Shard.Modules.Startup.Events
         private readonly TimerService _timerService;
         private bool initialized = false;
 
-        public StartupEvents(ILogger<StartupEvents> logger, DiscordRest rest,
-            InteractionService interactions, TransientService<DatabaseContext> database,
-            TimerService timerService)
+        public StartupEvents(
+            ILogger<StartupEvents> logger,
+            DiscordRest rest,
+            InteractionService interactions,
+            TransientService<DatabaseContext> database,
+            TimerService timerService
+        )
         {
             _logger = logger;
             _rest = rest;
@@ -49,13 +53,20 @@ namespace ModCore.Services.Shard.Modules.Startup.Events
 
         public async ValueTask HandleEvent(Ready data)
         {
-            _logger.LogInformation("Ready from event handler! User is {0} with ID {1}.",
-                data.User.Username, data.User.Id);
+            _logger.LogInformation(
+                "Ready from event handler! User is {0} with ID {1}.",
+                data.User.Username,
+                data.User.Id
+            );
             var application = await _rest.GetApplicationAsync(data.Application.Id);
 
             if (application.Success)
             {
-                _logger.LogInformation("Application is registered under ID {0}. Owner username is {1}.", data.Application.Id, application.Value!.Owner!.Value.Username);
+                _logger.LogInformation(
+                    "Application is registered under ID {0}. Owner username is {1}.",
+                    data.Application.Id,
+                    application.Value!.Owner!.Value.Username
+                );
                 if (!initialized)
                 {
                     _interactions.RegisterCommands(Assembly.GetExecutingAssembly());
@@ -81,16 +92,17 @@ namespace ModCore.Services.Shard.Modules.Startup.Events
 
         public async ValueTask HandleEvent(GuildCreate data)
         {
-            _logger.LogInformation("Guild {0} has {1} members! Sent from event handler.", data.Name, data.MemberCount);
+            _logger.LogInformation(
+                "Guild {0} has {1} members! Sent from event handler.",
+                data.Name,
+                data.MemberCount
+            );
 
             var database = _database.GetTransient();
             ulong guildId = data.Id;
             if (!database.Guilds.Any(x => x.GuildId == guildId))
             {
-                database.Guilds.Add(new DatabaseGuild()
-                {
-                    GuildId = guildId
-                });
+                database.Guilds.Add(new DatabaseGuild() { GuildId = guildId });
             }
 
             await database.SaveChangesAsync();

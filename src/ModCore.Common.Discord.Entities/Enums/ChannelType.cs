@@ -20,6 +20,6 @@ namespace ModCore.Common.Discord.Entities.Enums
         GuildStageVoice = 13,
         GuildDirectory = 14,
         GuildForum = 15,
-        GuildMedia = 16
+        GuildMedia = 16,
     }
 }

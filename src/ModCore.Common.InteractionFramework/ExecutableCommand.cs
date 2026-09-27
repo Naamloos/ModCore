@@ -1,17 +1,17 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using ModCore.Common.Discord.Entities;
-using ModCore.Common.InteractionFramework.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using ModCore.Common.Discord.Entities;
+using ModCore.Common.InteractionFramework.Attributes;
 
 namespace ModCore.Common.InteractionFramework
 {
-    public class ExecutableCommand 
+    public class ExecutableCommand
     {
         private BaseCommandHandler _handler;
         private MethodInfo _command;
@@ -24,13 +24,15 @@ namespace ModCore.Common.InteractionFramework
             this._handler = handler;
             this._parameters = new Dictionary<string, ParameterInfo>();
 
-            foreach(var param in command.GetParameters().Skip(1))
+            foreach (var param in command.GetParameters().Skip(1))
             {
                 var optionAttribute = param.GetCustomAttribute<OptionAttribute>();
-                if(optionAttribute is null)
+                if (optionAttribute is null)
                 {
-                    throw new InvalidOperationException("All parameters must have an OptionAttribute! " +
-                        $"Missing: {param.Name} in method {_command.Name} for handler {_handler.GetType().Name}");
+                    throw new InvalidOperationException(
+                        "All parameters must have an OptionAttribute! "
+                            + $"Missing: {param.Name} in method {_command.Name} for handler {_handler.GetType().Name}"
+                    );
                 }
 
                 _parameters.Add(optionAttribute.Name, param);
@@ -43,13 +45,23 @@ namespace ModCore.Common.InteractionFramework
 
             foreach (var param in _parameters)
             {
-                var option = context.OptionValues?.FirstOrDefault(x => x.Name.ToLowerInvariant() == param.Key) ?? null;
+                var option =
+                    context.OptionValues?.FirstOrDefault(x =>
+                        x.Name.ToLowerInvariant() == param.Key
+                    )
+                    ?? null;
                 if (option is null || !option.Value.HasValue)
                 {
-                    if (param.Value.ParameterType.IsGenericType && param.Value.ParameterType.GetGenericTypeDefinition() == typeof(Optional<>))
+                    if (
+                        param.Value.ParameterType.IsGenericType
+                        && param.Value.ParameterType.GetGenericTypeDefinition()
+                            == typeof(Optional<>)
+                    )
                     {
                         var optionalType = param.Value.ParameterType.GetGenericArguments()[0];
-                        var noneValue = Activator.CreateInstance(typeof(Optional<>).MakeGenericType(optionalType));
+                        var noneValue = Activator.CreateInstance(
+                            typeof(Optional<>).MakeGenericType(optionalType)
+                        );
                         parameters.Add(noneValue!);
                     }
                     else
@@ -59,7 +71,13 @@ namespace ModCore.Common.InteractionFramework
                 }
                 else
                 {
-                    parameters.Add(JsonSerializer.Deserialize(option.Value.Value, param.Value.ParameterType, options: context.ServiceProvider.GetService<JsonSerializerOptions>())!);
+                    parameters.Add(
+                        JsonSerializer.Deserialize(
+                            option.Value.Value,
+                            param.Value.ParameterType,
+                            options: context.ServiceProvider.GetService<JsonSerializerOptions>()
+                        )!
+                    );
                 }
             }
 

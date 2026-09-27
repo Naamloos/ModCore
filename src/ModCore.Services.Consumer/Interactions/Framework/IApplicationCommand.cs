@@ -1,8 +1,8 @@
-﻿using ModCore.Common.Discord.Entities.Interactions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using ModCore.Common.Discord.Entities.Interactions;
 
 namespace ModCore.Services.Consumer.Interactions.Framework
 {
@@ -12,8 +12,6 @@ namespace ModCore.Services.Consumer.Interactions.Framework
 
         ApplicationCommand BuildAsCommand();
 
-        Task InvokeAsync(
-            Interaction interaction,
-            JsonSerializerOptions jsonSerializerOptions);
+        Task InvokeAsync(Interaction interaction, JsonSerializerOptions jsonSerializerOptions);
     }
 }

@@ -11,6 +11,6 @@ namespace ModCore.Common.Discord.Entities.Enums
         Png = 1,
         Apng = 2,
         Lottie = 3,
-        Gif = 4
+        Gif = 4,
     }
 }

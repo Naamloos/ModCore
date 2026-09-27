@@ -1,9 +1,9 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using ModCore.Common.Discord.Entities.Interactions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Interactions;
 
 namespace ModCore.Services.Consumer.Interactions.Framework
 {
@@ -26,13 +26,14 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                 Name = Name,
                 Description = Description,
                 Type = ApplicationCommandOptionType.Subcommand,
-                Options = BuildParameterOptions()
+                Options = BuildParameterOptions(),
             };
         }
 
         public Task InvokeAsync(
             Interaction interaction,
-            JsonSerializerOptions jsonSerializerOptions)
+            JsonSerializerOptions jsonSerializerOptions
+        )
         {
             return InvokeHandlerAsync(this, interaction, jsonSerializerOptions);
         }

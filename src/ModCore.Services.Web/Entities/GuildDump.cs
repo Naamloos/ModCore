@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore;
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
-using System.Text.Json.Serialization;
 
 namespace ModCore.Services.Web.Entities
 {
@@ -47,14 +47,10 @@ namespace ModCore.Services.Web.Entities
 
         public static GuildDump Create(ulong id, DatabaseContext database)
         {
-            var dump = new GuildDump
-            {
-                DumpedAt = DateTimeOffset.UtcNow,
-                GuildId = id
-            };
+            var dump = new GuildDump { DumpedAt = DateTimeOffset.UtcNow, GuildId = id };
 
-            var dbGuild = database.Guilds
-                .Include(x => x.Starboards)
+            var dbGuild = database
+                .Guilds.Include(x => x.Starboards)
                 .Include(x => x.AutoRoles)
                 .Include(x => x.RoleMenus)
                     .ThenInclude(x => x.Roles)
@@ -64,10 +60,12 @@ namespace ModCore.Services.Web.Entities
                 .FirstOrDefault(x => x.GuildId == id);
 
             // Dumping data from DB
-            if (dbGuild != null) 
+            if (dbGuild != null)
             {
                 dump.Config = dbGuild;
-                dump.StarboardItems = database.StarboardItems.Where(x => x.Starboard.GuildId == id).ToArray();
+                dump.StarboardItems = database
+                    .StarboardItems.Where(x => x.Starboard.GuildId == id)
+                    .ToArray();
                 dump.LevelData = database.LevelData.Where(x => x.GuildId == id).ToArray();
                 dump.Tags = database.Tags.Where(x => x.GuildId == id).ToArray();
                 dump.RoleStates = database.RoleStates.Where(x => x.GuildId == id).ToArray();

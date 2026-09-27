@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Entities.Messages
 {
@@ -78,26 +78,20 @@ namespace ModCore.Common.Discord.Entities.Messages
             this.Footer = new EmbedFooter()
             {
                 IconUrl = iconUrl == null ? Optional<string>.None : iconUrl,
-                Text = text
+                Text = text,
             };
             return this;
         }
 
         public Embed WithImage(string imageUrl)
         {
-            this.Image = new EmbedImage()
-            {
-                Url = imageUrl
-            };
+            this.Image = new EmbedImage() { Url = imageUrl };
             return this;
         }
 
         public Embed WithThumbnail(string thumbnailUrl)
         {
-            this.Thumbnail = new EmbedThumbnail()
-            {
-                Url = thumbnailUrl
-            };
+            this.Thumbnail = new EmbedThumbnail() { Url = thumbnailUrl };
             return this;
         }
 
@@ -107,7 +101,7 @@ namespace ModCore.Common.Discord.Entities.Messages
             {
                 IconUrl = iconUrl == null ? Optional<string>.None : iconUrl,
                 Url = url == null ? Optional<string>.None : Url,
-                Name = name
+                Name = name,
             };
             return this;
         }
@@ -119,12 +113,14 @@ namespace ModCore.Common.Discord.Entities.Messages
                 this.Fields = new List<EmbedField>();
             }
 
-            Fields.Value.Add(new()
-            {
-                Name = title,
-                Value = content,
-                Inline = inline
-            });
+            Fields.Value.Add(
+                new()
+                {
+                    Name = title,
+                    Value = content,
+                    Inline = inline,
+                }
+            );
 
             return this;
         }
@@ -134,5 +130,8 @@ namespace ModCore.Common.Discord.Entities.Messages
             this.Fields = Optional<List<EmbedField>>.None;
             return this;
         }
+
+        [JsonPropertyName("flags")]
+        public Optional<long> Flags { get; set; }
     }
 }

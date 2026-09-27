@@ -4,22 +4,29 @@
     <SharedSettingsSampleFile>$(MSBuildThisFileDirectory)../.env.example</SharedSettingsSampleFile>
   </PropertyGroup>
 
-  <Target Name="CreateSharedSettingsFile"
-          BeforeTargets="AssignTargetPaths"
-          Condition="'$(Configuration)' == 'Debug'">
+  <Target
+    Name="CreateSharedSettingsFile"
+    BeforeTargets="AssignTargetPaths"
+    Condition="'$(Configuration)' == 'Debug'"
+  >
+    <Copy
+      SourceFiles="$(SharedSettingsSampleFile)"
+      DestinationFiles="$(SharedSettingsFile)"
+      Condition="!Exists('$(SharedSettingsFile)') And Exists('$(SharedSettingsSampleFile)')"
+    />
 
-    <Copy SourceFiles="$(SharedSettingsSampleFile)"
-          DestinationFiles="$(SharedSettingsFile)"
-          Condition="!Exists('$(SharedSettingsFile)') And Exists('$(SharedSettingsSampleFile)')" />
-
-    <Error Text="Missing .env and .env.example in solution root."
-           Condition="!Exists('$(SharedSettingsFile)') And !Exists('$(SharedSettingsSampleFile)')" />
+    <Error
+      Text="Missing .env and .env.example in solution root."
+      Condition="!Exists('$(SharedSettingsFile)') And !Exists('$(SharedSettingsSampleFile)')"
+    />
 
     <ItemGroup>
-      <ContentWithTargetPath Include="$(SharedSettingsFile)"
-                             TargetPath=".env"
-                             CopyToOutputDirectory="PreserveNewest"
-                             Condition="Exists('$(SharedSettingsFile)')" />
+      <ContentWithTargetPath
+        Include="$(SharedSettingsFile)"
+        TargetPath=".env"
+        CopyToOutputDirectory="PreserveNewest"
+        Condition="Exists('$(SharedSettingsFile)')"
+      />
     </ItemGroup>
   </Target>
 </Project>

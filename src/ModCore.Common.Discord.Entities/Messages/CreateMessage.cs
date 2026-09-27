@@ -1,12 +1,13 @@
-﻿using ModCore.Common.Discord.Entities.Components;
-using ModCore.Common.Discord.Entities.Enums;
-using ModCore.Common.Discord.Entities.Messages;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities.Components;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Messages;
+using ModCore.Common.Discord.Entities.Serializer;
 
 namespace ModCore.Common.Discord.Entities.Messages
 {
@@ -37,6 +38,7 @@ namespace ModCore.Common.Discord.Entities.Messages
         public Optional<Snowflake[]> StickerIds { get; set; }
 
         [JsonPropertyName("attachments")]
+        [JsonConverter(typeof(SingleAttachmentJsonSerializer))]
         public Optional<Attachment> Attachments { get; set; }
 
         [JsonPropertyName("flags")]

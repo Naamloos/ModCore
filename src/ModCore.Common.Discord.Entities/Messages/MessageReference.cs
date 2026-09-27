@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Entities.Messages
 {
@@ -15,5 +15,8 @@ namespace ModCore.Common.Discord.Entities.Messages
 
         [JsonPropertyName("fail_if_not_exists")]
         public Optional<bool> FailIfNotExists { get; set; }
+
+        [JsonPropertyName("type")]
+        public Optional<int> Type { get; set; }
     }
 }

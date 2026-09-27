@@ -1,8 +1,8 @@
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using ModCore.Common.Discord.Entities.Components;
-using System.Threading.Tasks;
 
 namespace ModCore.Common.Views.Nodes
 {
@@ -11,15 +11,26 @@ namespace ModCore.Common.Views.Nodes
     {
         public string? Color { get; set; }
 
-        public async override Task<Container> ProcessContentAndProps(Container component, TagHelperContext context, TagHelperOutput output)
+        public override async Task<Container> ProcessContentAndProps(
+            Container component,
+            TagHelperContext context,
+            TagHelperOutput output
+        )
         {
-            if(Color != null)
+            if (Color != null)
             {
-                if(Color.StartsWith("#"))
+                if (Color.StartsWith("#"))
                 {
                     Color = Color[1..];
                 }
-                if(int.TryParse(Color, System.Globalization.NumberStyles.HexNumber, null, out int colorInt))
+                if (
+                    int.TryParse(
+                        Color,
+                        System.Globalization.NumberStyles.HexNumber,
+                        null,
+                        out int colorInt
+                    )
+                )
                 {
                     component.AccentColor = colorInt;
                 }

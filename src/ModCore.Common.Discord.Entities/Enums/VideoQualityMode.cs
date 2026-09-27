@@ -9,6 +9,6 @@ namespace ModCore.Common.Discord.Entities.Enums
     public enum VideoQualityMode
     {
         Auto = 1,
-        Full = 2
+        Full = 2,
     }
 }

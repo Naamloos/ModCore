@@ -1,10 +1,10 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using ModCore.Common.Discord.Entities.Interactions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Interactions;
 
 namespace ModCore.Common.InteractionFramework.Attributes
 {
@@ -21,8 +21,8 @@ namespace ModCore.Common.InteractionFramework.Attributes
         public int? MaxLength { get; set; }
         public bool AutoComplete { get; set; }
 
-        public OptionAttribute(string name, string description, ApplicationCommandOptionType type) 
-        { 
+        public OptionAttribute(string name, string description, ApplicationCommandOptionType type)
+        {
             Name = name;
             Description = description;
             Type = type;

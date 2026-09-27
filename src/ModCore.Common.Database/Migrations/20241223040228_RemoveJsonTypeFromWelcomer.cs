@@ -17,7 +17,8 @@ namespace ModCore.Common.Database.Migrations
                 maxLength: 100000,
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "jsonb");
+                oldType: "jsonb"
+            );
         }
 
         /// <inheritdoc />
@@ -30,7 +31,8 @@ namespace ModCore.Common.Database.Migrations
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "character varying(100000)",
-                oldMaxLength: 100000);
+                oldMaxLength: 100000
+            );
         }
     }
 }

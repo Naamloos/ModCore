@@ -1,6 +1,6 @@
-﻿using ModCore.Common.Discord.Entities.Components;
+﻿using System.Reflection;
+using ModCore.Common.Discord.Entities.Components;
 using Portable.Xaml;
-using System.Reflection;
 
 namespace ModCore.Common.Xaml
 {
@@ -13,7 +13,10 @@ namespace ModCore.Common.Xaml
             parentAssembly = assembly;
         }
 
-        public async ValueTask<IReadOnlyList<Component>> CompileXamlAsync(string resourceName, object? bindingContext)
+        public async ValueTask<IReadOnlyList<Component>> CompileXamlAsync(
+            string resourceName,
+            object? bindingContext
+        )
         {
             await Task.Yield();
 

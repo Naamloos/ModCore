@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using ModCore.Common.Cryptography;
 using ModCore.Common.Database.Attributes;
-using System.Reflection;
 
 namespace ModCore.Common.Database.Interceptors
 {
@@ -20,7 +20,8 @@ namespace ModCore.Common.Database.Interceptors
 
         public override InterceptionResult<int> SavingChanges(
             DbContextEventData eventData,
-            InterceptionResult<int> result)
+            InterceptionResult<int> result
+        )
         {
             EncryptChangedValues(eventData.Context);
             return base.SavingChanges(eventData, result);
@@ -29,15 +30,14 @@ namespace ModCore.Common.Database.Interceptors
         public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
             DbContextEventData eventData,
             InterceptionResult<int> result,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default
+        )
         {
             EncryptChangedValues(eventData.Context);
             return base.SavingChangesAsync(eventData, result, cancellationToken);
         }
 
-        public override int SavedChanges(
-            SaveChangesCompletedEventData eventData,
-            int result)
+        public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
         {
             RestorePlaintextValues();
             return base.SavedChanges(eventData, result);
@@ -46,7 +46,8 @@ namespace ModCore.Common.Database.Interceptors
         public override ValueTask<int> SavedChangesAsync(
             SaveChangesCompletedEventData eventData,
             int result,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default
+        )
         {
             RestorePlaintextValues();
             return base.SavedChangesAsync(eventData, result, cancellationToken);
@@ -60,7 +61,8 @@ namespace ModCore.Common.Database.Interceptors
 
         public override Task SaveChangesFailedAsync(
             DbContextErrorEventData eventData,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default
+        )
         {
             RestorePlaintextValues();
             return base.SaveChangesFailedAsync(eventData, cancellationToken);
@@ -68,7 +70,8 @@ namespace ModCore.Common.Database.Interceptors
 
         private void EncryptChangedValues(DbContext? context)
         {
-            if (context == null) return;
+            if (context == null)
+                return;
 
             _restoreValues.Clear();
 
@@ -81,7 +84,11 @@ namespace ModCore.Common.Database.Interceptors
 
                 var entityType = entry.Entity.GetType();
 
-                foreach (var property in entityType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                foreach (
+                    var property in entityType.GetProperties(
+                        BindingFlags.Public | BindingFlags.Instance
+                    )
+                )
                 {
                     var encryptAttr = property.GetCustomAttribute<EncryptedColumnAttribute>();
                     if (encryptAttr == null || property.PropertyType != typeof(string))
@@ -111,15 +118,15 @@ namespace ModCore.Common.Database.Interceptors
                         continue;
                     }
 
-                    var encrypted = CryptographyHelper.Encrypt(plainText, combinedContext, _base64Key);
+                    var encrypted = CryptographyHelper.Encrypt(
+                        plainText,
+                        combinedContext,
+                        _base64Key
+                    );
 
                     property.SetValue(entry.Entity, encrypted);
 
-                    _restoreValues.Add(new RestoreValue(
-                        entry,
-                        property.Name,
-                        plainText
-                    ));
+                    _restoreValues.Add(new RestoreValue(entry, property.Name, plainText));
                 }
             }
         }
@@ -138,7 +145,11 @@ namespace ModCore.Common.Database.Interceptors
             _restoreValues.Clear();
         }
 
-        private static string BuildCombinedContext(object entity, Type entityType, string[] propertyNames)
+        private static string BuildCombinedContext(
+            object entity,
+            Type entityType,
+            string[] propertyNames
+        )
         {
             if (propertyNames == null || propertyNames.Length == 0)
             {

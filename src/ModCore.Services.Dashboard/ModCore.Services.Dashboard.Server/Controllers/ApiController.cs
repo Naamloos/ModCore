@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using ModCore.Common.Configuration;
-using ModCore.Common.Discord.Rest;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using ModCore.Common.Configuration;
+using ModCore.Common.Discord.Rest;
 
 namespace ModCore.Services.Dashboard.Server.Controllers
 {
@@ -16,7 +16,11 @@ namespace ModCore.Services.Dashboard.Server.Controllers
         private readonly DiscordRest _rest;
 
         // Inject IHttpClientFactory to safely make external API requests to Discord
-        public ApiController(IHttpClientFactory httpClientFactory, IConfiguration configuration, DiscordRest rest)
+        public ApiController(
+            IHttpClientFactory httpClientFactory,
+            IConfiguration configuration,
+            DiscordRest rest
+        )
         {
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
@@ -37,16 +41,27 @@ namespace ModCore.Services.Dashboard.Server.Controllers
                 return BadRequest(new { error = "Authorization code is required." });
             }
 
-            var clientId = _configuration.GetValue<string>(ConfigurationHelper.GetConfigKeyString(ConfigKey.ClientId))!;
-            var clientSecret = _configuration.GetValue<string>(ConfigurationHelper.GetConfigKeyString(ConfigKey.ClientSecret))!;
-            
-            var oauthResponse = await _rest.AuthenticateOAuth2Token(clientId, clientSecret, request.Code);
-            if(oauthResponse.Success)
+            var clientId = _configuration.GetValue<string>(
+                ConfigurationHelper.GetConfigKeyString(ConfigKey.ClientId)
+            )!;
+            var clientSecret = _configuration.GetValue<string>(
+                ConfigurationHelper.GetConfigKeyString(ConfigKey.ClientSecret)
+            )!;
+
+            var oauthResponse = await _rest.AuthenticateOAuth2Token(
+                clientId,
+                clientSecret,
+                request.Code
+            );
+            if (oauthResponse.Success)
             {
                 return Content(oauthResponse.RawBody, "application/json");
             }
 
-            return StatusCode((int)oauthResponse.HttpResponse.StatusCode, oauthResponse.HttpResponse.Content);
+            return StatusCode(
+                (int)oauthResponse.HttpResponse.StatusCode,
+                oauthResponse.HttpResponse.Content
+            );
         }
     }
 

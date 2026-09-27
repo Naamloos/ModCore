@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Reflection;
+using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -9,8 +11,6 @@ using ModCore.Common.PubSub;
 using ModCore.Common.PubSub.Payloads;
 using ModCore.Services.Consumer.Handlers;
 using ModCore.Services.Consumer.Interactions.Framework;
-using System.Reflection;
-using System.Text.Json;
 
 namespace ModCore.Services.Consumer;
 
@@ -33,7 +33,8 @@ public class ConsumerHostedService : IHostedService
         IEnumerable<IApplicationSubcommand> subcommands,
         DiscordRest rest,
         IConfiguration configuration,
-        JsonSerializerOptions jsonSerializerOptions)
+        JsonSerializerOptions jsonSerializerOptions
+    )
     {
         _pubsub = pubsub;
         _logger = logger;
@@ -43,7 +44,8 @@ public class ConsumerHostedService : IHostedService
         _configuration = configuration;
         _jsonSerializerOptions = jsonSerializerOptions;
 
-        var handlerTypes = Assembly.GetExecutingAssembly()
+        var handlerTypes = Assembly
+            .GetExecutingAssembly()
             .GetTypes()
             .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(BaseHandler)));
 
@@ -75,8 +77,10 @@ public class ConsumerHostedService : IHostedService
         {
             foreach (var command in existingCommands.Value)
             {
-                if (command.Name.Equals("launch", StringComparison.OrdinalIgnoreCase) &&
-                    command.Handler == 2)
+                if (
+                    command.Name.Equals("launch", StringComparison.OrdinalIgnoreCase)
+                    && command.Handler == 2
+                )
                 {
                     await _rest.DeleteGlobalApplicationCommandAsync(appId, command.Id);
                     break;
@@ -86,57 +90,64 @@ public class ConsumerHostedService : IHostedService
 
         await _rest.BulkOverwriteGlobalApplicationCommandsAsync(appId, commands);
 
-        await _pubsub.SubscribeAsync<InteractionCreatePayload>(async (payload, cancellationToken) =>
-        {
-            if (!payload.Interaction.Data.HasValue)
+        await _pubsub.SubscribeAsync<InteractionCreatePayload>(
+            async (payload, cancellationToken) =>
             {
-                return;
-            }
-
-            var commandName = payload.Interaction.Data.Value.Name;
-            var route = GetSubcommandRoute(payload.Interaction);
-
-            if (route.SubcommandName is not null)
-            {
-                var subcommand = _subcommands.FirstOrDefault(x =>
-                    x.ParentName.Equals(commandName, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(x.GroupName, route.GroupName, StringComparison.OrdinalIgnoreCase) &&
-                    x.Name.Equals(route.SubcommandName, StringComparison.OrdinalIgnoreCase));
-
-                if (subcommand is not null)
+                if (!payload.Interaction.Data.HasValue)
                 {
-                    await subcommand.InvokeAsync(
-                        payload.Interaction,
-                        _jsonSerializerOptions);
+                    return;
+                }
+
+                var commandName = payload.Interaction.Data.Value.Name;
+                var route = GetSubcommandRoute(payload.Interaction);
+
+                if (route.SubcommandName is not null)
+                {
+                    var subcommand = _subcommands.FirstOrDefault(x =>
+                        x.ParentName.Equals(commandName, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(
+                            x.GroupName,
+                            route.GroupName,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                        && x.Name.Equals(route.SubcommandName, StringComparison.OrdinalIgnoreCase)
+                    );
+
+                    if (subcommand is not null)
+                    {
+                        await subcommand.InvokeAsync(payload.Interaction, _jsonSerializerOptions);
+
+                        return;
+                    }
+
+                    _logger.LogWarning(
+                        "No subcommand handler found for command '{CommandName}', group '{GroupName}', subcommand '{SubcommandName}'.",
+                        commandName,
+                        route.GroupName,
+                        route.SubcommandName
+                    );
+
+                    return;
+                }
+
+                var command = _commands.FirstOrDefault(x =>
+                    x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase)
+                );
+
+                if (command is not null)
+                {
+                    await command.InvokeAsync(payload.Interaction, _jsonSerializerOptions);
 
                     return;
                 }
 
                 _logger.LogWarning(
-                    "No subcommand handler found for command '{CommandName}', group '{GroupName}', subcommand '{SubcommandName}'.",
-                    commandName,
-                    route.GroupName,
-                    route.SubcommandName);
-
-                return;
-            }
-
-            var command = _commands.FirstOrDefault(x =>
-                x.Name.Equals(commandName, StringComparison.OrdinalIgnoreCase));
-
-            if (command is not null)
-            {
-                await command.InvokeAsync(
-                    payload.Interaction,
-                    _jsonSerializerOptions);
-
-                return;
-            }
-
-            _logger.LogWarning(
-                "No command handler found for command '{CommandName}'.",
-                commandName);
-        }, cancellationToken);
+                    "No command handler found for command '{CommandName}'.",
+                    commandName
+                );
+            },
+            cancellationToken
+        );
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
@@ -148,10 +159,7 @@ public class ConsumerHostedService : IHostedService
     {
         var subcommandsByParent = _subcommands
             .GroupBy(x => x.ParentName, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
-                x => x.Key,
-                x => x.ToArray(),
-                StringComparer.OrdinalIgnoreCase);
+            .ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.OrdinalIgnoreCase);
 
         var result = new List<ApplicationCommand>();
 
@@ -171,7 +179,8 @@ public class ConsumerHostedService : IHostedService
     }
 
     private static List<ApplicationCommandOption> BuildSubcommandOptions(
-        IEnumerable<IApplicationSubcommand> subcommands)
+        IEnumerable<IApplicationSubcommand> subcommands
+    )
     {
         var result = new List<ApplicationCommandOption>();
 
@@ -193,26 +202,28 @@ public class ConsumerHostedService : IHostedService
         {
             var first = group.First();
 
-            result.Add(new ApplicationCommandOption
-            {
-                Name = group.Key,
-                Description = first.GroupDescription ?? $"{group.Key} commands",
-                Type = ApplicationCommandOptionType.SubcommandGroup,
-                Options = group
-                    .OrderBy(x => x.Name)
-                    .Select(x => x.BuildAsSubcommand())
-                    .ToList()
-            });
+            result.Add(
+                new ApplicationCommandOption
+                {
+                    Name = group.Key,
+                    Description = first.GroupDescription ?? $"{group.Key} commands",
+                    Type = ApplicationCommandOptionType.SubcommandGroup,
+                    Options = group
+                        .OrderBy(x => x.Name)
+                        .Select(x => x.BuildAsSubcommand())
+                        .ToList(),
+                }
+            );
         }
 
         return result;
     }
 
     private static (string? GroupName, string? SubcommandName) GetSubcommandRoute(
-        Interaction interaction)
+        Interaction interaction
+    )
     {
-        if (!interaction.Data.HasValue ||
-            !interaction.Data.Value.Options.HasValue)
+        if (!interaction.Data.HasValue || !interaction.Data.Value.Options.HasValue)
         {
             return (null, null);
         }
@@ -231,9 +242,7 @@ public class ConsumerHostedService : IHostedService
 
         if (first.Type == ApplicationCommandOptionType.SubcommandGroup)
         {
-            var child = first.Options.HasValue
-                ? first.Options.Value.FirstOrDefault()
-                : null;
+            var child = first.Options.HasValue ? first.Options.Value.FirstOrDefault() : null;
 
             return (first.Name, child?.Name);
         }
@@ -247,8 +256,10 @@ public class ConsumerHostedService : IHostedService
 
         while (current is not null)
         {
-            if (current.IsGenericType &&
-                current.GetGenericTypeDefinition() == typeof(BaseHandler<>))
+            if (
+                current.IsGenericType
+                && current.GetGenericTypeDefinition() == typeof(BaseHandler<>)
+            )
             {
                 return current.GetGenericArguments()[0];
             }

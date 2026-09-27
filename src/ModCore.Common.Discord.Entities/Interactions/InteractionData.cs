@@ -1,5 +1,6 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Components;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities.Interactions
 {
@@ -25,5 +26,17 @@ namespace ModCore.Common.Discord.Entities.Interactions
 
         [JsonPropertyName("target_id")]
         public Optional<Snowflake> TargetId { get; set; }
+
+        [JsonPropertyName("custom_id")]
+        public Optional<string> CustomId { get; set; }
+
+        [JsonPropertyName("component_type")]
+        public Optional<ComponentType> ComponentType { get; set; }
+
+        [JsonPropertyName("values")]
+        public Optional<string[]> Values { get; set; }
+
+        [JsonPropertyName("components")]
+        public Optional<Component[]> Components { get; set; }
     }
 }

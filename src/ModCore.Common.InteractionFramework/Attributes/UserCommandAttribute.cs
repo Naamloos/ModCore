@@ -6,7 +6,5 @@ using System.Threading.Tasks;
 
 namespace ModCore.Common.InteractionFramework.Attributes
 {
-    public class UserCommandAttribute : Attribute
-    {
-    }
+    public class UserCommandAttribute : Attribute { }
 }

@@ -7,13 +7,15 @@ namespace ModCore.Services.Dashboard.Server
     {
         public static void Main(string[] args)
         {
-            #if DEBUG
+#if DEBUG
             if (!ConfigurationHelper.CreateEnvFileIfNotExists())
             {
-                Console.WriteLine("Created a new env file as it was not found yet. Please fill it out and restart the application.");
+                Console.WriteLine(
+                    "Created a new env file as it was not found yet. Please fill it out and restart the application."
+                );
                 return;
             }
-            #endif
+#endif
 
             var builder = WebApplication.CreateBuilder(args);
 
@@ -25,9 +27,9 @@ namespace ModCore.Services.Dashboard.Server
 
             builder.Services.AddDiscordRest(config => { });
 
-            #if DEBUG
+#if DEBUG
             builder.Configuration.AddEnvFile(ConfigurationHelper.GetDefaultEnvPath());
-            #endif
+#endif
             builder.Configuration.AddEnvironmentVariables();
 
             var app = builder.Build();
@@ -38,7 +40,6 @@ namespace ModCore.Services.Dashboard.Server
             // Configure the HTTP request pipeline.
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

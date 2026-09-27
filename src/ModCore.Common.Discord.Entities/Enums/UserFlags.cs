@@ -23,6 +23,6 @@ namespace ModCore.Common.Discord.Entities.Enums
         VerifiedDeveloper = 1 << 17,
         CertifiedModerator = 1 << 18,
         BotOnlyUsesHttpInteractions = 1 << 19,
-        ActiveDeveloper = 1 << 22
+        ActiveDeveloper = 1 << 22,
     }
 }

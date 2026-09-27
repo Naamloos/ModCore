@@ -43,8 +43,10 @@ namespace ModCore.Common.Database.Entities
 
         [JsonIgnore]
         public virtual DatabaseStarboard Starboard { get; set; }
+
         [JsonIgnore]
         public virtual DatabaseUser Author { get; set; }
+
         [JsonIgnore]
         public virtual DatabaseUser Stargazer { get; set; }
     }

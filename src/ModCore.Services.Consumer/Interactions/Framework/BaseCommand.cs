@@ -1,16 +1,16 @@
-﻿using ModCore.Common.Discord.Entities;
-using ModCore.Common.Discord.Entities.Channels;
-using ModCore.Common.Discord.Entities.Enums;
-using ModCore.Common.Discord.Entities.Guilds;
-using ModCore.Common.Discord.Entities.Interactions;
-using ModCore.Common.Discord.Entities.Messages;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Channels;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Guilds;
+using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.Discord.Entities.Messages;
 
 namespace ModCore.Services.Consumer.Interactions.Framework
 {
@@ -30,14 +30,20 @@ namespace ModCore.Services.Consumer.Interactions.Framework
 
             foreach (var parameter in parameters)
             {
-                var name = ToDiscordOptionName(parameter.GetCustomAttribute<NameAttribute>()?.Name ?? parameter.Name!);
-                var description = parameter.GetCustomAttribute<DescriptionAttribute>()?.Description
+                var name = ToDiscordOptionName(
+                    parameter.GetCustomAttribute<NameAttribute>()?.Name ?? parameter.Name!
+                );
+                var description =
+                    parameter.GetCustomAttribute<DescriptionAttribute>()?.Description
                     ?? "No description provided";
                 var type = ToDiscordOptionType(parameter.ParameterType);
-                var underlyingType = Nullable.GetUnderlyingType(parameter.ParameterType) ?? parameter.ParameterType;
+                var underlyingType =
+                    Nullable.GetUnderlyingType(parameter.ParameterType) ?? parameter.ParameterType;
                 int? minimum = parameter.GetCustomAttribute<MinAttribute>()?.Min;
                 int? maximum = parameter.GetCustomAttribute<MaxAttribute>()?.Max;
-                ChannelType[]? channelTypes = parameter.GetCustomAttribute<AllowedChannelTypesAttribute>()?.AllowedTypes;
+                ChannelType[]? channelTypes = parameter
+                    .GetCustomAttribute<AllowedChannelTypesAttribute>()
+                    ?.AllowedTypes;
 
                 var option = new ApplicationCommandOption
                 {
@@ -48,21 +54,34 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                     Choices = underlyingType.IsEnum
                         ? BuildEnumChoices(underlyingType)
                         : Optional.None,
-                    MinValue = minimum != null && (type == ApplicationCommandOptionType.Integer || type == ApplicationCommandOptionType.Number)
-                        ? minimum.Value
-                        : Optional.None,
-                    MaxValue = maximum != null && (type == ApplicationCommandOptionType.Integer || type == ApplicationCommandOptionType.Number)
-                        ? maximum.Value
-                        : Optional.None,
-                    MaxLength = maximum != null && type == ApplicationCommandOptionType.String
-                        ? maximum.Value
-                        : Optional.None,
-                    MinLength = minimum != null && type == ApplicationCommandOptionType.String
-                        ? minimum.Value
-                        : Optional.None,
-                    ChannelTypes = channelTypes != null && type == ApplicationCommandOptionType.Channel
-                        ? channelTypes
-                        : Optional.None
+                    MinValue =
+                        minimum != null
+                        && (
+                            type == ApplicationCommandOptionType.Integer
+                            || type == ApplicationCommandOptionType.Number
+                        )
+                            ? minimum.Value
+                            : Optional.None,
+                    MaxValue =
+                        maximum != null
+                        && (
+                            type == ApplicationCommandOptionType.Integer
+                            || type == ApplicationCommandOptionType.Number
+                        )
+                            ? maximum.Value
+                            : Optional.None,
+                    MaxLength =
+                        maximum != null && type == ApplicationCommandOptionType.String
+                            ? maximum.Value
+                            : Optional.None,
+                    MinLength =
+                        minimum != null && type == ApplicationCommandOptionType.String
+                            ? minimum.Value
+                            : Optional.None,
+                    ChannelTypes =
+                        channelTypes != null && type == ApplicationCommandOptionType.Channel
+                            ? channelTypes
+                            : Optional.None,
                 };
 
                 options.Add(option);
@@ -74,14 +93,16 @@ namespace ModCore.Services.Consumer.Interactions.Framework
         protected async Task InvokeHandlerAsync(
             object instance,
             Interaction interaction,
-            JsonSerializerOptions jsonSerializerOptions)
+            JsonSerializerOptions jsonSerializerOptions
+        )
         {
             var handler = TryFindHandler();
 
             if (handler is null)
             {
                 throw new InvalidOperationException(
-                    $"Command '{GetType().FullName}' does not have a handler.");
+                    $"Command '{GetType().FullName}' does not have a handler."
+                );
             }
 
             var handlerParameters = handler.GetParameters();
@@ -89,7 +110,8 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             if (!interaction.Data.HasValue)
             {
                 throw new InvalidOperationException(
-                    $"Interaction does not contain command data for handler '{handler.Name}'.");
+                    $"Interaction does not contain command data for handler '{handler.Name}'."
+                );
             }
 
             var interactionData = interaction.Data.Value;
@@ -99,7 +121,8 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                     .Where(x => x.Value.HasValue)
                     .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase)
                 : new Dictionary<string, ApplicationCommandInteractionDataOption>(
-                    StringComparer.OrdinalIgnoreCase);
+                    StringComparer.OrdinalIgnoreCase
+                );
 
             object?[] parameters = new object?[handlerParameters.Length];
             parameters[0] = interaction;
@@ -107,7 +130,9 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             for (var i = 1; i < handlerParameters.Length; i++)
             {
                 var parameter = handlerParameters[i];
-                var optionName = ToDiscordOptionName(parameter.GetCustomAttribute<NameAttribute>()?.Name ?? parameter.Name!);
+                var optionName = ToDiscordOptionName(
+                    parameter.GetCustomAttribute<NameAttribute>()?.Name ?? parameter.Name!
+                );
 
                 if (!interactionOptions.TryGetValue(optionName, out var option))
                 {
@@ -118,14 +143,16 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                     }
 
                     throw new InvalidOperationException(
-                        $"Missing required option '{optionName}' for command '{interactionData.Name}'.");
+                        $"Missing required option '{optionName}' for command '{interactionData.Name}'."
+                    );
                 }
 
                 parameters[i] = ConvertOptionValue(
                     interaction,
                     option,
                     parameter.ParameterType,
-                    jsonSerializerOptions);
+                    jsonSerializerOptions
+                );
             }
 
             var result = handler.Invoke(instance, parameters);
@@ -151,7 +178,8 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             if (handlers.Length != 1)
             {
                 throw new ArgumentException(
-                    $"Exactly one method must be marked with {nameof(ApplicationCommandHandlerAttribute)} in {GetType().FullName}.");
+                    $"Exactly one method must be marked with {nameof(ApplicationCommandHandlerAttribute)} in {GetType().FullName}."
+                );
             }
 
             var handler = handlers[0];
@@ -160,7 +188,8 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             if (parameters.Length < 1 || parameters[0].ParameterType != typeof(Interaction))
             {
                 throw new ArgumentException(
-                    $"The method marked with {nameof(ApplicationCommandHandlerAttribute)} must have Interaction as its first parameter.");
+                    $"The method marked with {nameof(ApplicationCommandHandlerAttribute)} must have Interaction as its first parameter."
+                );
             }
 
             return handler;
@@ -203,7 +232,8 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             if (string.IsNullOrWhiteSpace(final))
             {
                 throw new InvalidOperationException(
-                    $"Parameter name '{name}' cannot be converted to a valid Discord option name.");
+                    $"Parameter name '{name}' cannot be converted to a valid Discord option name."
+                );
             }
 
             if (final.Length > 32)
@@ -214,7 +244,8 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             if (string.IsNullOrWhiteSpace(final))
             {
                 throw new InvalidOperationException(
-                    $"Parameter name '{name}' cannot be converted to a valid Discord option name.");
+                    $"Parameter name '{name}' cannot be converted to a valid Discord option name."
+                );
             }
 
             return final;
@@ -223,7 +254,8 @@ namespace ModCore.Services.Consumer.Interactions.Framework
         private static bool ShouldInsertSeparatorBefore(
             string name,
             int index,
-            StringBuilder result)
+            StringBuilder result
+        )
         {
             var c = name[index];
 
@@ -251,9 +283,9 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                 return true;
             }
 
-            return char.IsUpper(previous) &&
-                index + 1 < name.Length &&
-                char.IsLower(name[index + 1]);
+            return char.IsUpper(previous)
+                && index + 1 < name.Length
+                && char.IsLower(name[index + 1]);
         }
 
         private static void AppendSeparator(StringBuilder result, char separator)
@@ -297,7 +329,11 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                 return ApplicationCommandOptionType.Boolean;
             }
 
-            if (underlyingType == typeof(double) || underlyingType == typeof(float) || underlyingType == typeof(decimal))
+            if (
+                underlyingType == typeof(double)
+                || underlyingType == typeof(float)
+                || underlyingType == typeof(decimal)
+            )
             {
                 return ApplicationCommandOptionType.Number;
             }
@@ -328,7 +364,8 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             }
 
             throw new NotImplementedException(
-                $"Parameter type '{parameterType.FullName}' is not implemented.");
+                $"Parameter type '{parameterType.FullName}' is not implemented."
+            );
         }
 
         private static List<ApplicationCommandOptionChoice> BuildEnumChoices(Type enumType)
@@ -342,23 +379,21 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                     if (enumName is null)
                     {
                         throw new InvalidOperationException(
-                            $"Could not get enum name for value '{value}' in enum '{enumType.FullName}'.");
+                            $"Could not get enum name for value '{value}' in enum '{enumType.FullName}'."
+                        );
                     }
 
                     var field = enumType.GetField(enumName);
                     var name = field?.GetCustomAttribute<NameAttribute>()?.Name ?? enumName;
 
-                    return new ApplicationCommandOptionChoice
-                    {
-                        Name = name,
-                        Value = enumName
-                    };
+                    return new ApplicationCommandOptionChoice { Name = name, Value = enumName };
                 })
                 .ToList();
         }
 
         private static IEnumerable<ApplicationCommandInteractionDataOption> FlattenOptions(
-            IEnumerable<ApplicationCommandInteractionDataOption> options)
+            IEnumerable<ApplicationCommandInteractionDataOption> options
+        )
         {
             foreach (var option in options)
             {
@@ -380,7 +415,8 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             Interaction interaction,
             ApplicationCommandInteractionDataOption option,
             Type targetType,
-            JsonSerializerOptions jsonSerializerOptions)
+            JsonSerializerOptions jsonSerializerOptions
+        )
         {
             if (!option.Value.HasValue)
             {
@@ -400,7 +436,8 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                 }
 
                 throw new InvalidOperationException(
-                    $"Cannot convert option '{option.Name}' to {targetType.FullName}.");
+                    $"Cannot convert option '{option.Name}' to {targetType.FullName}."
+                );
             }
 
             if (underlyingType == typeof(string))
@@ -447,46 +484,53 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             {
                 return ResolveUser(
                     interaction,
-                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions));
+                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions)
+                );
             }
 
             if (underlyingType == typeof(Member))
             {
                 return ResolveMember(
                     interaction,
-                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions));
+                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions)
+                );
             }
 
             if (underlyingType == typeof(Channel))
             {
                 return ResolveChannel(
                     interaction,
-                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions));
+                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions)
+                );
             }
 
             if (underlyingType == typeof(Role))
             {
                 return ResolveRole(
                     interaction,
-                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions));
+                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions)
+                );
             }
 
             if (underlyingType == typeof(Mentionable))
             {
                 return ResolveMentionable(
                     interaction,
-                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions));
+                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions)
+                );
             }
 
             if (underlyingType == typeof(Attachment))
             {
                 return ResolveAttachment(
                     interaction,
-                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions));
+                    DeserializeOptionValue<Snowflake>(rawValue, jsonSerializerOptions)
+                );
             }
 
             throw new NotImplementedException(
-                $"Cannot convert option '{option.Name}' to {targetType.FullName}.");
+                $"Cannot convert option '{option.Name}' to {targetType.FullName}."
+            );
         }
 
         private static ResolvedDataStructure GetResolvedData(Interaction interaction)
@@ -510,8 +554,7 @@ namespace ModCore.Services.Consumer.Interactions.Framework
         {
             var resolved = GetResolvedData(interaction);
 
-            if (resolved.Users.HasValue &&
-                resolved.Users.Value.TryGetValue(id, out var user))
+            if (resolved.Users.HasValue && resolved.Users.Value.TryGetValue(id, out var user))
             {
                 return user;
             }
@@ -523,8 +566,7 @@ namespace ModCore.Services.Consumer.Interactions.Framework
         {
             var resolved = GetResolvedData(interaction);
 
-            if (resolved.Members.HasValue &&
-                resolved.Members.Value.TryGetValue(id, out var member))
+            if (resolved.Members.HasValue && resolved.Members.Value.TryGetValue(id, out var member))
             {
                 return member;
             }
@@ -536,8 +578,10 @@ namespace ModCore.Services.Consumer.Interactions.Framework
         {
             var resolved = GetResolvedData(interaction);
 
-            if (resolved.Channels.HasValue &&
-                resolved.Channels.Value.TryGetValue(id, out var channel))
+            if (
+                resolved.Channels.HasValue
+                && resolved.Channels.Value.TryGetValue(id, out var channel)
+            )
             {
                 return channel;
             }
@@ -549,8 +593,7 @@ namespace ModCore.Services.Consumer.Interactions.Framework
         {
             var resolved = GetResolvedData(interaction);
 
-            if (resolved.Roles.HasValue &&
-                resolved.Roles.Value.TryGetValue(id, out var role))
+            if (resolved.Roles.HasValue && resolved.Roles.Value.TryGetValue(id, out var role))
             {
                 return role;
             }
@@ -562,8 +605,7 @@ namespace ModCore.Services.Consumer.Interactions.Framework
         {
             var resolved = GetResolvedData(interaction);
 
-            if (resolved.Users.HasValue &&
-                resolved.Users.Value.TryGetValue(id, out var user))
+            if (resolved.Users.HasValue && resolved.Users.Value.TryGetValue(id, out var user))
             {
                 Member? member = null;
 
@@ -575,8 +617,7 @@ namespace ModCore.Services.Consumer.Interactions.Framework
                 return Mentionable.FromUser(id, user, member);
             }
 
-            if (resolved.Roles.HasValue &&
-                resolved.Roles.Value.TryGetValue(id, out var role))
+            if (resolved.Roles.HasValue && resolved.Roles.Value.TryGetValue(id, out var role))
             {
                 return Mentionable.FromRole(id, role);
             }
@@ -588,8 +629,10 @@ namespace ModCore.Services.Consumer.Interactions.Framework
         {
             var resolved = GetResolvedData(interaction);
 
-            if (resolved.Attachments.HasValue &&
-                resolved.Attachments.Value.TryGetValue(id, out var attachment))
+            if (
+                resolved.Attachments.HasValue
+                && resolved.Attachments.Value.TryGetValue(id, out var attachment)
+            )
             {
                 return attachment;
             }
@@ -599,14 +642,16 @@ namespace ModCore.Services.Consumer.Interactions.Framework
 
         private static T DeserializeOptionValue<T>(
             JsonNode rawValue,
-            JsonSerializerOptions jsonSerializerOptions)
+            JsonSerializerOptions jsonSerializerOptions
+        )
         {
             var value = rawValue.Deserialize<T>(jsonSerializerOptions);
 
             if (value is null)
             {
                 throw new InvalidOperationException(
-                    $"Could not deserialize option value to {typeof(T).FullName}.");
+                    $"Could not deserialize option value to {typeof(T).FullName}."
+                );
             }
 
             return value;

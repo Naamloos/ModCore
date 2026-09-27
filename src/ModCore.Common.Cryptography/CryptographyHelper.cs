@@ -17,7 +17,7 @@ namespace ModCore.Common.Cryptography
     public enum CryptographyType
     {
         None = 0,
-        AESGCM_HKDF = 1
+        AESGCM_HKDF = 1,
     }
 
     public static class CryptographyHelper
@@ -34,19 +34,22 @@ namespace ModCore.Common.Cryptography
             // in that case, we will fallback to returning JSON-wrapped plaintext with an explicit "None" type to maintain structural consistency in the database.
             if (string.IsNullOrEmpty(base64Key))
             {
-                return JsonSerializer.Serialize(new CryptoEnvelope
-                {
-                    Type = CryptographyType.None,
-                    Data = plainText
-                });
+                return JsonSerializer.Serialize(
+                    new CryptoEnvelope { Type = CryptographyType.None, Data = plainText }
+                );
             }
-            
+
             return EncryptAESGCM_HKDF(plainText, contextId, base64Key);
         }
 
-        private static string EncryptAESGCM_HKDF(string plainText, string contextId, string base64Key)
+        private static string EncryptAESGCM_HKDF(
+            string plainText,
+            string contextId,
+            string base64Key
+        )
         {
-            if (plainText == null || string.IsNullOrEmpty(base64Key)) return plainText!;
+            if (plainText == null || string.IsNullOrEmpty(base64Key))
+                return plainText!;
 
             byte[] masterKey = Convert.FromBase64String(base64Key);
             if (masterKey.Length != 32)
@@ -77,14 +80,14 @@ namespace ModCore.Common.Cryptography
             var envelope = new CryptoEnvelope
             {
                 Type = CryptographyType.AESGCM_HKDF,
-                Data = Convert.ToBase64String(result)
+                Data = Convert.ToBase64String(result),
             };
 
             return JsonSerializer.Serialize(envelope);
         }
 
         /// <summary>
-        /// Returns the decrypted plaintext if the input is a valid encrypted envelope, or returns the original string if it's not in the expected format (e.g., legacy plaintext). 
+        /// Returns the decrypted plaintext if the input is a valid encrypted envelope, or returns the original string if it's not in the expected format (e.g., legacy plaintext).
         /// Throws an exception if tampering is detected or if decryption fails due to invalid context/key.
         /// </summary>
         /// <param name="databaseValue">Input encrypted envelope string (JSON)</param>
@@ -93,7 +96,8 @@ namespace ModCore.Common.Cryptography
         /// <exception cref="InvalidOperationException">Data tampering was detected</exception>
         public static string Decrypt(string databaseValue, string contextId, string base64Key)
         {
-            if (string.IsNullOrEmpty(databaseValue) || string.IsNullOrEmpty(base64Key)) return databaseValue;
+            if (string.IsNullOrEmpty(databaseValue) || string.IsNullOrEmpty(base64Key))
+                return databaseValue;
 
             CryptoEnvelope envelope;
             try
@@ -165,7 +169,9 @@ namespace ModCore.Common.Cryptography
             {
                 // If the JSON structure was valid but the AES-GCM signature fails,
                 // someone explicitly forged a bad payload or the key context is wrong.
-                throw new InvalidOperationException("Data tampering detected or invalid cryptographic context mapping.");
+                throw new InvalidOperationException(
+                    "Data tampering detected or invalid cryptographic context mapping."
+                );
             }
         }
     }

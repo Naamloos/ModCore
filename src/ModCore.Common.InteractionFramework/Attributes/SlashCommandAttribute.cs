@@ -1,9 +1,9 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.InteractionFramework.Attributes
 {
@@ -15,7 +15,13 @@ namespace ModCore.Common.InteractionFramework.Attributes
         public bool DmPermission { get; set; }
         public Permissions Permissions { get; set; }
 
-        public SlashCommandAttribute(string name, string description, Permissions permissions = Permissions.None, bool nsfw = false, bool dm_permission = false) 
+        public SlashCommandAttribute(
+            string name,
+            string description,
+            Permissions permissions = Permissions.None,
+            bool nsfw = false,
+            bool dm_permission = false
+        )
         {
             this.Name = name;
             this.Description = description;

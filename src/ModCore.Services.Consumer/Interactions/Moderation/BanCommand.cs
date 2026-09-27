@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.ComponentModel;
+using Microsoft.Extensions.Logging;
 using ModCore.Common.Cache;
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
@@ -13,7 +14,6 @@ using ModCore.Common.Discord.Rest;
 using ModCore.Common.Language;
 using ModCore.Common.Utils;
 using ModCore.Services.Consumer.Interactions.Framework;
-using System.ComponentModel;
 
 namespace ModCore.Services.Consumer.Interactions.Moderation
 {
@@ -29,7 +29,13 @@ namespace ModCore.Services.Consumer.Interactions.Moderation
         private readonly DatabaseContext _database;
         private readonly IModCoreLocalizerFactory _localizerFactory;
 
-        public BanCommand(CacheService cache, DiscordRest rest, DatabaseContext database, ILogger<BanCommand> logger, IModCoreLocalizerFactory localizerFactory)
+        public BanCommand(
+            CacheService cache,
+            DiscordRest rest,
+            DatabaseContext database,
+            ILogger<BanCommand> logger,
+            IModCoreLocalizerFactory localizerFactory
+        )
         {
             _logger = logger;
             _cache = cache;
@@ -79,7 +85,9 @@ namespace ModCore.Services.Consumer.Interactions.Moderation
                     .AddContainer(container =>
                     {
                         container.AddText(t["banFailure", new { user = target }]);
-                    }).WithFlags(MessageFlags.Ephemeral).BuildInteractionResponse();
+                    })
+                    .WithFlags(MessageFlags.Ephemeral)
+                    .BuildInteractionResponse();
                 return;
             }
 
@@ -91,8 +99,14 @@ namespace ModCore.Services.Consumer.Interactions.Moderation
                 var dmMessage = new MessageBuilder()
                     .AddContainer(container =>
                     {
-                        container.AddText(t["banNotifyMessage", new { guild = guild.Name, reason = reason.InCodeBlock() }]);
-                    }).Build();
+                        container.AddText(
+                            t[
+                                "banNotifyMessage",
+                                new { guild = guild.Name, reason = reason.InCodeBlock() }
+                            ]
+                        );
+                    })
+                    .Build();
                 var dm = await _rest.CreateMessageAsync(dmChannel.Value.Id, dmMessage);
                 sentDM = dm.Success;
             }
@@ -102,25 +116,59 @@ namespace ModCore.Services.Consumer.Interactions.Moderation
 
             if (true)
             {
-                var successResponse = new MessageBuilder().AddContainer(container =>
-                {
-                    container.AddText(t["banSuccess", new { user = target.Mention, reason = reason.InCodeBlock(), sentDM }]);
-                }).WithFlags(MessageFlags.Ephemeral).BuildInteractionResponse();
-                await _rest.CreateInteractionResponseAsync(interaction.Id, interaction.Token, InteractionResponseType.ChannelMessageWithSource,
-                    successResponse);
+                var successResponse = new MessageBuilder()
+                    .AddContainer(container =>
+                    {
+                        container.AddText(
+                            t[
+                                "banSuccess",
+                                new
+                                {
+                                    user = target.Mention,
+                                    reason = reason.InCodeBlock(),
+                                    sentDM,
+                                }
+                            ]
+                        );
+                    })
+                    .WithFlags(MessageFlags.Ephemeral)
+                    .BuildInteractionResponse();
+                await _rest.CreateInteractionResponseAsync(
+                    interaction.Id,
+                    interaction.Token,
+                    InteractionResponseType.ChannelMessageWithSource,
+                    successResponse
+                );
 
                 var infractionHelper = new InfractionHelper(_database, target.Id, guildId);
-                await infractionHelper.CreateInfractionAsync(InfractionType.Ban, target.Id, reason = reason.InCodeBlock(), sentDM);
+                await infractionHelper.CreateInfractionAsync(
+                    InfractionType.Ban,
+                    target.Id,
+                    reason = reason.InCodeBlock(),
+                    sentDM
+                );
             }
             else
             {
-                var failureAlreadyDMed = new MessageBuilder().AddContainer(container =>
-                {
-                    container.AddText(t["banFailureDmAlreadySent", new { user = target.Mention, reason = reason.InCodeBlock() }]);
-                }).WithFlags(MessageFlags.Ephemeral).BuildInteractionResponse();
+                var failureAlreadyDMed = new MessageBuilder()
+                    .AddContainer(container =>
+                    {
+                        container.AddText(
+                            t[
+                                "banFailureDmAlreadySent",
+                                new { user = target.Mention, reason = reason.InCodeBlock() }
+                            ]
+                        );
+                    })
+                    .WithFlags(MessageFlags.Ephemeral)
+                    .BuildInteractionResponse();
 
-                await _rest.CreateInteractionResponseAsync(interaction.Id, interaction.Token, InteractionResponseType.ChannelMessageWithSource,
-                    failureAlreadyDMed);
+                await _rest.CreateInteractionResponseAsync(
+                    interaction.Id,
+                    interaction.Token,
+                    InteractionResponseType.ChannelMessageWithSource,
+                    failureAlreadyDMed
+                );
             }
         }
     }

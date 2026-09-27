@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModCore.Common.Cache;
 using ModCore.Common.Database;
@@ -7,9 +10,6 @@ using ModCore.Common.PubSub.Implementation;
 using ModCore.Common.PubSub.Payloads;
 using ModCore.Services.Jobs.Jobs;
 using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ModCore.Services.Jobs
 {
@@ -18,7 +18,7 @@ namespace ModCore.Services.Jobs
         private readonly Common.PubSub.PubSubService _pubSub;
         private readonly TimerScheduler _timerScheduler;
 
-        public TimerSchedulerHost(Common.PubSub.PubSubService pubSub, TimerScheduler timerScheduler) 
+        public TimerSchedulerHost(Common.PubSub.PubSubService pubSub, TimerScheduler timerScheduler)
         {
             _pubSub = pubSub;
             _timerScheduler = timerScheduler;
@@ -26,10 +26,12 @@ namespace ModCore.Services.Jobs
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            await _pubSub.SubscribeAsync<CreateTimerPayload>(async (payload, cancellation) =>
-            {
-                await this._timerScheduler.RescheduleAsync(cancellation);
-            });
+            await _pubSub.SubscribeAsync<CreateTimerPayload>(
+                async (payload, cancellation) =>
+                {
+                    await this._timerScheduler.RescheduleAsync(cancellation);
+                }
+            );
 
             await this._timerScheduler.RescheduleAsync(cancellationToken);
         }

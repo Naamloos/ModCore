@@ -1,5 +1,4 @@
-﻿using ModCore.Common.Discord.Entities.Serializer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -8,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities.Serializer;
 
 namespace ModCore.Common.Discord.Entities
 {
@@ -16,14 +16,11 @@ namespace ModCore.Common.Discord.Entities
         public static OptionalNone None => default;
     }
 
-    public struct OptionalNone
-    {
-    }
+    public struct OptionalNone { }
 
     public struct Optional<T> : IOptional
     {
         public T? Value { get; private set; } = default;
-        [MemberNotNullWhen(true, nameof(Value))]
         public bool HasValue { get; private set; } = false;
 
         public Optional([AllowNull] T? value)
@@ -32,14 +29,21 @@ namespace ModCore.Common.Discord.Entities
             this.HasValue = true;
         }
 
-        public Optional()
-        {
-        }
+        public Optional() { }
 
         public static Optional<T> None => new Optional<T>();
+
         public static implicit operator Optional<T>(OptionalNone _) => new Optional<T>();
-        public static implicit operator Optional<T>(T? value) { return new Optional<T>(value); }
-        public static implicit operator T?(Optional<T> value) { return value.HasValue ? value.Value : default; }
+
+        public static implicit operator Optional<T>(T? value)
+        {
+            return new Optional<T>(value);
+        }
+
+        public static implicit operator T?(Optional<T> value)
+        {
+            return value.HasValue ? value.Value : default;
+        }
 
         public override string ToString()
         {

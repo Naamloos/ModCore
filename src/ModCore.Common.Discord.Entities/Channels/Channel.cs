@@ -1,5 +1,5 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities.Channels
 {
@@ -23,6 +23,7 @@ namespace ModCore.Common.Discord.Entities.Channels
 
         public Optional<string?> Topic { get; set; }
 
+        [JsonPropertyName("nsfw")]
         public Optional<bool> NotSafeForWork { get; set; }
 
         public Optional<Snowflake?> LastMessageId { get; set; }
@@ -84,5 +85,8 @@ namespace ModCore.Common.Discord.Entities.Channels
 
         private const string MENTION_FORMAT = "<#{0}>";
         public string Mention => string.Format(MENTION_FORMAT, Id);
+
+        [JsonPropertyName("app_permissions")]
+        public Optional<string> AppPermissions { get; set; }
     }
 }

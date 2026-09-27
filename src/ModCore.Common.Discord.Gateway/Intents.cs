@@ -42,10 +42,33 @@
 
         AutoModerationExecution = 1 << 21,
 
-        AllUnprivileged = Guilds | GuildBans | GuildEmojis | GuildIntegrations | GuildWebhooks | GuildInvites | GuildVoiceStates | GuildMessages |
-            GuildMessageReactions | GuildMessageTyping | DirectMessages | DirectMessageReactions | DirectMessageTyping | ScheduledGuildEvents |
-            AutoModerationEvents | AutoModerationExecution,
+        GuildMessagePolls = 1 << 24,
+        DirectMessagePolls = 1 << 25,
+        GuildModeration = GuildBans,
+        GuildExpressions = GuildEmojis,
+        MessageContent = MessageContents,
+        AutoModerationConfiguration = AutoModerationEvents,
 
-        All = AllUnprivileged | GuildMembers | GuildPresences | MessageContents
+        AllUnprivileged =
+            Guilds
+            | GuildBans
+            | GuildEmojis
+            | GuildIntegrations
+            | GuildWebhooks
+            | GuildInvites
+            | GuildVoiceStates
+            | GuildMessages
+            | GuildMessageReactions
+            | GuildMessageTyping
+            | DirectMessages
+            | DirectMessageReactions
+            | DirectMessageTyping
+            | ScheduledGuildEvents
+            | AutoModerationEvents
+            | AutoModerationExecution
+            | GuildMessagePolls
+            | DirectMessagePolls,
+
+        All = AllUnprivileged | GuildMembers | GuildPresences | MessageContents,
     }
 }

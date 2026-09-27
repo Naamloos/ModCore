@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -23,5 +22,4 @@
     <ProjectReference Include="..\ModCore.Common.Database\ModCore.Common.Database.csproj" />
     <ProjectReference Include="..\ModCore.Common.Discord.Rest\ModCore.Common.Discord.Rest.csproj" />
   </ItemGroup>
-
 </Project>

@@ -7,15 +7,23 @@
 
     public interface IValidator
     {
-        public static Task<ValidatorResult<T>> ValidateTypeAsync<T>(HttpContext httpContext, T value)
+        public static Task<ValidatorResult<T>> ValidateTypeAsync<T>(
+            HttpContext httpContext,
+            T value
+        )
         {
             // find validator with reflection
-            var validator = typeof(IValidator<>).Assembly.DefinedTypes.Where(t => t.ImplementedInterfaces.Contains(typeof(IValidator<T>)))
+            var validator = typeof(IValidator<>)
+                .Assembly.DefinedTypes.Where(t =>
+                    t.ImplementedInterfaces.Contains(typeof(IValidator<T>))
+                )
                 .FirstOrDefault();
 
             if (validator == null)
             {
-                throw new InvalidOperationException($"No validator found for type {typeof(T).Name}");
+                throw new InvalidOperationException(
+                    $"No validator found for type {typeof(T).Name}"
+                );
             }
 
             var validatorInstance = (IValidator<T>)Activator.CreateInstance(validator)!;

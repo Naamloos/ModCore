@@ -1,6 +1,6 @@
-﻿using ModCore.Common.Discord.Entities;
+﻿using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Guilds;
-using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Gateway.EventData.Outgoing
 {
@@ -15,7 +15,7 @@ namespace ModCore.Common.Discord.Gateway.EventData.Outgoing
         [JsonPropertyName("compress")]
         public bool Compress { get; set; } = false;
 
-        [JsonPropertyName("large_treshold")]
+        [JsonPropertyName("large_threshold")]
         public int LargeTreshold { get; set; } = 50;
 
         [JsonPropertyName("shard")]
@@ -50,11 +50,11 @@ namespace ModCore.Common.Discord.Gateway.EventData.Outgoing
 
         [JsonPropertyName("type")]
         public ActivityType Type { get; set; } = ActivityType.Playing;
+
         // TODO implement the rest https://discord.com/developers/docs/topics/gateway-events#activity-object
 
         [JsonPropertyName("state")]
         public Optional<string?> State { get; set; }
-
 
         [JsonPropertyName("emoji")]
         public Optional<ActivityEmoji?> Emoji { get; set; }
@@ -67,7 +67,7 @@ namespace ModCore.Common.Discord.Gateway.EventData.Outgoing
         Listening = 2,
         Watching = 3,
         Custom = 4,
-        Competing = 5
+        Competing = 5,
     }
 
     public record ActivityEmoji

@@ -38,6 +38,6 @@ namespace ModCore.Common.Discord.Entities.Enums
         StageEnd = 28,
         StageSpeaker = 29,
         StageTopic = 31,
-        GuildApplicationPremiumSubscription = 32
+        GuildApplicationPremiumSubscription = 32,
     }
 }

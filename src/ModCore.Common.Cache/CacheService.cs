@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using ModCore.Common.Cache.Events;
@@ -14,6 +14,7 @@ using System.Reflection.Emit;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Gateway.EventData.Incoming;
 
 namespace ModCore.Common.Cache
 {
@@ -147,14 +148,19 @@ namespace ModCore.Common.Cache
 
             var messageHistoryId = $"{guildId}_{channelId}_{messageId}";
 
+            var oldItem = this.TryGet<MessageHistory, string>(messageHistoryId);
+            if (message is MessageUpdate update &&
+                oldItem.Value?.History.LastOrDefault(state => state.State.HasValue)?.State.Value is { } previous)
+            {
+                message = update.ApplyTo(previous, _serializerOptions);
+            }
+
             var newChange = new MessageState()
             {
                 ChangeTimestamp = DateTime.UtcNow,
                 ChangeType = changeType,
                 State = message != default ? message : Optional<Message>.None,
             };
-
-            var oldItem = this.TryGet<MessageHistory, string>(messageHistoryId);
 
             if (!oldItem.Success)
             {

@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Hosting;
+using System.Diagnostics;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,9 +26,6 @@ using ModCore.Services.Shard.Modules.Timers.Services;
 using Serilog;
 using Serilog.Core;
 using Serilog.Sinks.SystemConsole.Themes;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ModCore.Services.Shard
 {
@@ -38,48 +39,60 @@ namespace ModCore.Services.Shard
                 .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
 
-            #if DEBUG
-            if(!ConfigurationHelper.CreateEnvFileIfNotExists())
+#if DEBUG
+            if (!ConfigurationHelper.CreateEnvFileIfNotExists())
             {
-                Console.WriteLine("Created a new env file as it was not found yet. Please fill it out and restart the application.");
+                Console.WriteLine(
+                    "Created a new env file as it was not found yet. Please fill it out and restart the application."
+                );
                 return;
             }
-            #endif
+#endif
 
             var jsonOptions = JsonSerializerOptionsFactory.GetOptions();
 
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(options =>
                 {
-                    options
-                        .ClearProviders()
-                        .AddSerilog(logger)
-                        .SetMinimumLevel(LogLevel.Debug);
+                    options.ClearProviders().AddSerilog(logger).SetMinimumLevel(LogLevel.Debug);
                 })
                 .ConfigureAppConfiguration(config =>
                 {
                     config
-                        #if DEBUG
+#if DEBUG
                         .AddEnvFile(ConfigurationHelper.GetDefaultEnvPath())
-                        #endif
+#endif
                         .AddEnvironmentVariables()
                         .Build();
                 })
                 .ConfigureServices(services =>
                 {
-                    // TODO if the rest client is added as a service, 
+                    // TODO if the rest client is added as a service,
                     // the gateway should use it to decide what it's websocket url should be.
-                    services.AddDiscordGateway(config =>
-                    {
-                        config.Intents = Intents.AllUnprivileged | Intents.MessageContents;
-                        config.SubscribeEvents(Assembly.GetExecutingAssembly());
-
-                        config.Activity = new Activity()
+                    services.AddDiscordGateway(
+                        (provider, config) =>
                         {
-                            State = $"BETA. Not ready for general use.", // TODO move this out 
-                            Type = ActivityType.Custom
-                        };
-                    });
+                            config.Intents = Intents.AllUnprivileged | Intents.MessageContents;
+                            config.WaitForIdentifyAsync = (
+                                shardId,
+                                concurrency,
+                                cancellationToken
+                            ) =>
+                                GatewayIdentifyLimiter.WaitAsync(
+                                    provider,
+                                    shardId,
+                                    concurrency,
+                                    cancellationToken
+                                );
+                            config.SubscribeEvents(Assembly.GetExecutingAssembly());
+
+                            config.Activity = new Activity()
+                            {
+                                State = $"BETA. Not ready for general use.", // TODO move this out
+                                Type = ActivityType.Custom,
+                            };
+                        }
+                    );
                     // These are the REAL™️ PISSCATSHARP
                     services.AddDiscordRest(config => { });
                     services.AddInteractionService();
@@ -89,9 +102,17 @@ namespace ModCore.Services.Shard
                     services.AddDistributedRedisCache(setup =>
                     {
                         // get the configuration from the service collection
-                        var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+                        var config = services
+                            .BuildServiceProvider()
+                            .GetRequiredService<IConfiguration>();
                         setup.InstanceName = "ModCore";
-                        setup.Configuration = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
+                        setup.Configuration = config
+                            .GetRequiredSection(
+                                ConfigurationHelper.GetConfigKeyString(
+                                    ConfigKey.RedisConnectionString
+                                )
+                            )
+                            .Value!;
                     });
                     services.AddModcoreCacheService();
                     services.AddDbContext<DatabaseContext>();
@@ -100,28 +121,32 @@ namespace ModCore.Services.Shard
                     // Helper for scoped and transient services
                     services.AddSingleton(typeof(TransientService<>), typeof(TransientService<>));
 
-                    var diagnosticListener = new System.Diagnostics.DiagnosticListener("ModCoreRazor");
+                    var diagnosticListener = new DiagnosticListener("ModCoreRazor");
                     services.AddSingleton(diagnosticListener);
-                    services.AddSingleton<System.Diagnostics.DiagnosticSource>(diagnosticListener);
-                    services.AddSingleton<IWebHostEnvironment>(new FakeWebHostEnv
-                    {
-                        ApplicationName = Assembly.GetExecutingAssembly().GetName().Name!,
-                        EnvironmentName = "Development",
-                        WebRootPath = Path.GetTempPath(),
-                        ContentRootPath = AppContext.BaseDirectory
-                    });
+                    services.AddSingleton<DiagnosticSource>(diagnosticListener);
+                    services.AddSingleton<IWebHostEnvironment>(
+                        new FakeWebHostEnv
+                        {
+                            ApplicationName = Assembly.GetExecutingAssembly().GetName().Name!,
+                            EnvironmentName = "Development",
+                            WebRootPath = Path.GetTempPath(),
+                            ContentRootPath = AppContext.BaseDirectory,
+                        }
+                    );
 
                     services.AddMvc(); // includes RazorViewEngine, etc.
 
                     services.AddSingleton<RazorComponentRenderer>();
 
                     var types = Assembly.GetExecutingAssembly().GetTypes();
-                    foreach(var type in types)
+                    foreach (var type in types)
                     {
-                        if(!type.IsAbstract 
-                            && type.IsClass 
-                            && type.IsPublic 
-                            && type.GetInterfaces().Contains(typeof(IShardService)))
+                        if (
+                            !type.IsAbstract
+                            && type.IsClass
+                            && type.IsPublic
+                            && type.GetInterfaces().Contains(typeof(IShardService))
+                        )
                         {
                             services.AddSingleton(type);
                         }
@@ -145,7 +170,10 @@ namespace ModCore.Services.Shard
             var pendingMigrations = await database.Database.GetPendingMigrationsAsync();
             if (pendingMigrations.Any())
             {
-                logger.LogInformation("Applied pending database migrations: {migrations}", string.Join(", ", pendingMigrations));
+                logger.LogInformation(
+                    "Applied pending database migrations: {migrations}",
+                    string.Join(", ", pendingMigrations)
+                );
                 foreach (var migration in pendingMigrations)
                 {
                     logger.LogInformation("Pending migration: {migration}", migration);

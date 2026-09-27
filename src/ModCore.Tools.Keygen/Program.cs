@@ -27,9 +27,15 @@ namespace ModCore.Tools.Keygen
             Console.WriteLine(base64Key);
             Console.WriteLine();
             Console.ResetColor();
-            Console.WriteLine("IMPORTANT: Store this key securely. It is required for encrypting and decrypting sensitive data in ModCore v3.");
-            Console.WriteLine("Do NEVER share this key with ANYONE. This key gives full access to all encrypted data.");
-            Console.WriteLine("Losing this key will result in permanent loss of access to all encrypted data. Make sure to back it up securely.");
+            Console.WriteLine(
+                "IMPORTANT: Store this key securely. It is required for encrypting and decrypting sensitive data in ModCore v3."
+            );
+            Console.WriteLine(
+                "Do NEVER share this key with ANYONE. This key gives full access to all encrypted data."
+            );
+            Console.WriteLine(
+                "Losing this key will result in permanent loss of access to all encrypted data. Make sure to back it up securely."
+            );
             Console.WriteLine("\nPress the any key to exit...");
             Console.ReadKey();
         }

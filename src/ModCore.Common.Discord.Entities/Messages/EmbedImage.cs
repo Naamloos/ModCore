@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Entities.Messages
 {
@@ -15,5 +15,20 @@ namespace ModCore.Common.Discord.Entities.Messages
 
         [JsonPropertyName("width")]
         public Optional<int> Width { get; set; }
+
+        [JsonPropertyName("content_type")]
+        public Optional<string> ContentType { get; set; }
+
+        [JsonPropertyName("placeholder")]
+        public Optional<string> Placeholder { get; set; }
+
+        [JsonPropertyName("placeholder_version")]
+        public Optional<int> PlaceholderVersion { get; set; }
+
+        [JsonPropertyName("description")]
+        public Optional<string> Description { get; set; }
+
+        [JsonPropertyName("flags")]
+        public Optional<long> Flags { get; set; }
     }
 }

@@ -1,5 +1,5 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities.Guilds
 {
@@ -35,11 +35,13 @@ namespace ModCore.Common.Discord.Entities.Guilds
         [JsonPropertyName("mentionable")]
         public bool Mentionable { get; set; }
 
-        // TODO FIX
-        //[JsonPropertyName("tags")]
-        //public Optional<RoleTag[]> Tags { get; set; }
+        [JsonPropertyName("tags")]
+        public Optional<RoleTag> Tags { get; set; }
 
-        //[JsonPropertyName("flags")]
-        //public RoleFlags Flags { get; set; }
+        [JsonPropertyName("flags")]
+        public RoleFlags Flags { get; set; }
+
+        [JsonPropertyName("colors")]
+        public RoleColors Colors { get; set; } = default!;
     }
 }

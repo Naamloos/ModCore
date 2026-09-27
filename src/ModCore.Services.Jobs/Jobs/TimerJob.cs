@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
@@ -9,9 +12,6 @@ using ModCore.Common.Discord.Entities.Utils;
 using ModCore.Common.Discord.Rest;
 using ModCore.Common.Utils;
 using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ModCore.Services.Jobs.Jobs
 {
@@ -29,7 +29,8 @@ namespace ModCore.Services.Jobs.Jobs
             TimerScheduler timerScheduler,
             DatabaseContext database,
             ILogger<TimerJob> logger,
-            DiscordRest rest)
+            DiscordRest rest
+        )
         {
             _timerScheduler = timerScheduler;
             _database = database;
@@ -60,17 +61,14 @@ namespace ModCore.Services.Jobs.Jobs
 
             while (true)
             {
-                var query = _database.Timers
-                    .Where(t => t.TriggersAt <= now);
+                var query = _database.Timers.Where(t => t.TriggersAt <= now);
 
                 if (lastTriggersAt is not null)
                 {
                     query = query.Where(t =>
-                        t.TriggersAt > lastTriggersAt.Value ||
-                        (
-                            t.TriggersAt == lastTriggersAt.Value &&
-                            t.TimerId > lastTimerId
-                        ));
+                        t.TriggersAt > lastTriggersAt.Value
+                        || (t.TriggersAt == lastTriggersAt.Value && t.TimerId > lastTimerId)
+                    );
                 }
 
                 var timers = await query
@@ -96,7 +94,8 @@ namespace ModCore.Services.Jobs.Jobs
                             ex,
                             "Failed to trigger timer {TimerId} of type {Type}",
                             timer.TimerId,
-                            timer.Type);
+                            timer.Type
+                        );
                     }
                     finally
                     {
@@ -122,7 +121,8 @@ namespace ModCore.Services.Jobs.Jobs
                     _logger.LogWarning(
                         "Unknown timer type {Type} for timer {TimerId}",
                         timer.Type,
-                        timer.TimerId);
+                        timer.TimerId
+                    );
 
                     break;
 
@@ -140,8 +140,9 @@ namespace ModCore.Services.Jobs.Jobs
                 .AddContainer(container =>
                 {
                     container.AddText(
-                        $"🔔 <@{data.UserId}>, you wanted to be reminded " +
-                        $"{DiscordFormatter.Timestamp(timer.TriggersAt, DiscordFormatter.TimestampFormat.RelativeTime)}:");
+                        $"🔔 <@{data.UserId}>, you wanted to be reminded "
+                            + $"{DiscordFormatter.Timestamp(timer.TriggersAt, DiscordFormatter.TimestampFormat.RelativeTime)}:"
+                    );
 
                     container.AddText($"```\n{data.Text.InCodeBlock()}\n```");
                 })

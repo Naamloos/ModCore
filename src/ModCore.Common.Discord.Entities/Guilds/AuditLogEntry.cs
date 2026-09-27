@@ -1,7 +1,7 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities.Guilds
 {

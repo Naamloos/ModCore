@@ -1,24 +1,25 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ModCore.Common.Configuration;
 using ModCore.Common.PubSub.Implementation;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ModCore.Common.PubSub
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddModCorePubSub(
-            this IServiceCollection services)
+        public static IServiceCollection AddModCorePubSub(this IServiceCollection services)
         {
             services.AddSingleton<IConnectionMultiplexer>(serviceProvider =>
             {
                 var configValue = serviceProvider
                     .GetRequiredService<IConfiguration>()
-                    .GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString))
+                    .GetRequiredSection(
+                        ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)
+                    )
                     .Value!;
 
                 // If it contains the protocol prefix, parse it properly
@@ -28,7 +29,7 @@ namespace ModCore.Common.PubSub
                     var options = new ConfigurationOptions
                     {
                         EndPoints = { { uri.Host, uri.Port } },
-                        AbortOnConnectFail = false // Highly recommended for Docker setups!
+                        AbortOnConnectFail = false, // Highly recommended for Docker setups!
                     };
                     return ConnectionMultiplexer.Connect(options);
                 }

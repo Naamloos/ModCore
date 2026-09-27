@@ -1,22 +1,22 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.Extensions.Logging;
+using ModCore.Common.Database;
+using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.Discord.Rest;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ModCore.Common.Discord.Entities;
-using ModCore.Common.Discord.Entities.Interactions;
-using System.Text.RegularExpressions;
-using ModCore.Common.Discord.Entities.Messages;
-using Microsoft.CodeAnalysis.Scripting;
-using Microsoft.CodeAnalysis.CSharp.Scripting;
 using ModCore.Common.Utils;
-using System.Diagnostics;
-using ModCore.Common.Database;
 using ModCore.Services.Shard.Modules.Eval.Entities;
 
 namespace ModCore.Services.Shard.Modules.Eval.Events
@@ -32,7 +32,12 @@ namespace ModCore.Services.Shard.Modules.Eval.Events
         private User _modCore;
         private Application _app;
 
-        public SimpleEvalEvent(ILogger<SimpleEvalEvent> logger, DiscordRest api, Gateway gateway, TransientService<DatabaseContext> database)
+        public SimpleEvalEvent(
+            ILogger<SimpleEvalEvent> logger,
+            DiscordRest api,
+            Gateway gateway,
+            TransientService<DatabaseContext> database
+        )
         {
             _logger = logger;
             _api = api;
@@ -41,6 +46,7 @@ namespace ModCore.Services.Shard.Modules.Eval.Events
         }
 
         private Regex codeRegex = new Regex(@"```c?s?((.|\n)*?)```", RegexOptions.Compiled);
+
         public async ValueTask HandleEvent(MessageCreate data)
         {
             if (_modCore == default)
@@ -63,19 +69,26 @@ namespace ModCore.Services.Shard.Modules.Eval.Events
                 _app = getApp.Value!;
             }
 
-            if (data.Mentions.Any(x => x.Id == _modCore.Id) && _app.Owner.Value?.Id == data.Author.Id)
+            if (
+                data.Mentions.Any(x => x.Id == _modCore.Id)
+                && _app.Owner.Value?.Id == data.Author.Id
+            )
             {
-                var initialMessage = await _api.CreateMessageAsync(data.ChannelId, new CreateMessage()
-                {
-                    Content = $"Evaluating code block... <t:{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}:R>",
-                    MessageReference = new MessageReference()
+                var initialMessage = await _api.CreateMessageAsync(
+                    data.ChannelId,
+                    new CreateMessage()
                     {
-                        ChannelId = data.ChannelId,
-                        FailIfNotExists = false,
-                        GuildId = data.GuildId,
-                        MessageId = data.Id
+                        Content =
+                            $"Evaluating code block... <t:{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}:R>",
+                        MessageReference = new MessageReference()
+                        {
+                            ChannelId = data.ChannelId,
+                            FailIfNotExists = false,
+                            GuildId = data.GuildId,
+                            MessageId = data.Id,
+                        },
                     }
-                });
+                );
 
                 if (!initialMessage.Success)
                 {
@@ -92,11 +105,11 @@ namespace ModCore.Services.Shard.Modules.Eval.Events
                 _logger.LogDebug(match.Groups[1].Value);
                 var resultEmbed = await executeAsync(match.Groups[1].Value, data);
 
-                await _api.ModifyMessageAsync(data.ChannelId, initialMessage.Value.Id, new CreateMessage()
-                {
-                    Content = "",
-                    Embeds = new Embed[] { resultEmbed }
-                });
+                await _api.ModifyMessageAsync(
+                    data.ChannelId,
+                    initialMessage.Value.Id,
+                    new CreateMessage() { Content = "", Embeds = new Embed[] { resultEmbed } }
+                );
             }
         }
 
@@ -105,12 +118,12 @@ namespace ModCore.Services.Shard.Modules.Eval.Events
             var stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            var resultEmbed = new Embed()
-                .WithTitle("Evaluation Results");
+            var resultEmbed = new Embed().WithTitle("Evaluation Results");
 
             var variables = new EvalModel(_gateway, _api, context, _database);
-            var options = ScriptOptions.Default
-                .WithImports("System",
+            var options = ScriptOptions
+                .Default.WithImports(
+                    "System",
                     "System.Collections.Generic",
                     "System.Linq",
                     "System.Text",
@@ -118,8 +131,13 @@ namespace ModCore.Services.Shard.Modules.Eval.Events
                     "ModCore.Common.Discord.Gateway",
                     "ModCore.Common.Discord.Rest",
                     "ModCore.Common.Discord.Entities",
-                    "Microsoft.EntityFrameworkCore")
-                .WithReferences(AppDomain.CurrentDomain.GetAssemblies().Where(xa => !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location)));
+                    "Microsoft.EntityFrameworkCore"
+                )
+                .WithReferences(
+                    AppDomain
+                        .CurrentDomain.GetAssemblies()
+                        .Where(xa => !xa.IsDynamic && !string.IsNullOrWhiteSpace(xa.Location))
+                );
 
             try
             {
@@ -136,7 +154,10 @@ namespace ModCore.Services.Shard.Modules.Eval.Events
                 }
                 else
                 {
-                    resultEmbed.WithField("Return Type", $"`{results.ReturnValue.GetType().ToString().Replace("`", "'")}`");
+                    resultEmbed.WithField(
+                        "Return Type",
+                        $"`{results.ReturnValue.GetType().ToString().Replace("`", "'")}`"
+                    );
                     resultEmbed.WithField("Return Value", results.ReturnValue.ToString());
                 }
             }

@@ -8,6 +8,6 @@ namespace ModCore.Common.Discord.Entities.Enums
 {
     public enum EntitlementType
     {
-        ApplicationSubscription = 8
+        ApplicationSubscription = 8,
     }
 }

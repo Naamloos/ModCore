@@ -11,8 +11,8 @@ namespace ModCore.Common.InteractionFramework.Attributes
         public string Name { get; set; }
         public object Value { get; set; }
 
-        public OptionChoiceAttribute(string name, string value) 
-        { 
+        public OptionChoiceAttribute(string name, string value)
+        {
             this.Name = name;
             this.Value = value;
         }

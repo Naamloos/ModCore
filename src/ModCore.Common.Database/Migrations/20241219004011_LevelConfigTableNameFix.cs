@@ -12,20 +12,18 @@ namespace ModCore.Common.Database.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_LevelSettings_mcore_guild_guild_id",
-                table: "LevelSettings");
+                table: "LevelSettings"
+            );
 
-            migrationBuilder.DropPrimaryKey(
-                name: "PK_LevelSettings",
-                table: "LevelSettings");
+            migrationBuilder.DropPrimaryKey(name: "PK_LevelSettings", table: "LevelSettings");
 
-            migrationBuilder.RenameTable(
-                name: "LevelSettings",
-                newName: "mcore_levelsettings");
+            migrationBuilder.RenameTable(name: "LevelSettings", newName: "mcore_levelsettings");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_mcore_levelsettings",
                 table: "mcore_levelsettings",
-                column: "guild_id");
+                column: "guild_id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_mcore_levelsettings_mcore_guild_guild_id",
@@ -33,7 +31,8 @@ namespace ModCore.Common.Database.Migrations
                 column: "guild_id",
                 principalTable: "mcore_guild",
                 principalColumn: "guild_id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
 
         /// <inheritdoc />
@@ -41,20 +40,21 @@ namespace ModCore.Common.Database.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_mcore_levelsettings_mcore_guild_guild_id",
-                table: "mcore_levelsettings");
+                table: "mcore_levelsettings"
+            );
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_mcore_levelsettings",
-                table: "mcore_levelsettings");
+                table: "mcore_levelsettings"
+            );
 
-            migrationBuilder.RenameTable(
-                name: "mcore_levelsettings",
-                newName: "LevelSettings");
+            migrationBuilder.RenameTable(name: "mcore_levelsettings", newName: "LevelSettings");
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_LevelSettings",
                 table: "LevelSettings",
-                column: "guild_id");
+                column: "guild_id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_LevelSettings_mcore_guild_guild_id",
@@ -62,7 +62,8 @@ namespace ModCore.Common.Database.Migrations
                 column: "guild_id",
                 principalTable: "mcore_guild",
                 principalColumn: "guild_id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
     }
 }

@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
-
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -14,7 +13,4 @@
   <ItemGroup>
     <ProjectReference Include="..\ModCore.Common.Discord.Entities\ModCore.Common.Discord.Entities.csproj" />
   </ItemGroup>
-
-
-
 </Project>

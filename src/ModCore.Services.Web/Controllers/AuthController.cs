@@ -22,8 +22,10 @@ namespace ModCore.Services.Web.Controllers
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            return SignOut(new AuthenticationProperties { RedirectUri = "/" },
-                CookieAuthenticationDefaults.AuthenticationScheme);
+            return SignOut(
+                new AuthenticationProperties { RedirectUri = "/" },
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
         }
     }
 }

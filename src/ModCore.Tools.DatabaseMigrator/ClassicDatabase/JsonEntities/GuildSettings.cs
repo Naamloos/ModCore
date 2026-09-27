@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities
 {
@@ -26,10 +26,11 @@ namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities
         /// and other suspicious sites.
         /// </summary>
         [JsonProperty("linkfilter")]
-        public GuildLinkfilterSettings Linkfilter { get; private set; } = new GuildLinkfilterSettings();
+        public GuildLinkfilterSettings Linkfilter { get; private set; } =
+            new GuildLinkfilterSettings();
 
         /// <summary>
-        /// Gets the configuration for Role State. Role State is used to persist roles and overwrites for users who 
+        /// Gets the configuration for Role State. Role State is used to persist roles and overwrites for users who
         /// leave the guild.
         /// </summary>
         [JsonProperty("role_state")]
@@ -57,25 +58,28 @@ namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities
         /// Gets the Starboard settings for this guild. Starboard lets users star messages they like.
         /// </summary>
         [JsonProperty]
-        public GuildStarboardSettings Starboard { get; private set; } = new GuildStarboardSettings();
+        public GuildStarboardSettings Starboard { get; private set; } =
+            new GuildStarboardSettings();
 
         /// <summary>
         /// Gets the list of Reaction Roles for this guild.
         /// </summary>
         [JsonProperty("reactionroles")]
-        public List<GuildReactionRole> ReactionRoles { get; private set; } = new List<GuildReactionRole>();
+        public List<GuildReactionRole> ReactionRoles { get; private set; } =
+            new List<GuildReactionRole>();
 
         /// <summary>
         /// Gets Welcomer configuration for this guild
         /// </summary>
-		[JsonProperty("welcome")]
+        [JsonProperty("welcome")]
         public WelcomeSettings Welcome { get; private set; } = new WelcomeSettings();
 
         /// <summary>
         /// Gets nickname confirmation configuration for this guild
         /// </summary>
         [JsonProperty("nicknameconfirm")]
-        public NicknameConfirmSettings NicknameConfirm { get; set; } = new NicknameConfirmSettings();
+        public NicknameConfirmSettings NicknameConfirm { get; set; } =
+            new NicknameConfirmSettings();
 
         /// <summary>
         /// Gets levels configuration for this guild
@@ -93,7 +97,7 @@ namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities
     {
         Disabled = 0,
         Prefixed = 1,
-        Always = 2
+        Always = 2,
     }
 
     public class GuildRoleMenu
@@ -333,7 +337,7 @@ namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities
         public HashSet<ulong> IgnoredRoleIds { get; private set; } = new HashSet<ulong>();
 
         /// <summary>
-        /// Gets the list of channels which are ignored by Role State. Overwrites for these channels won't be saved or 
+        /// Gets the list of channels which are ignored by Role State. Overwrites for these channels won't be saved or
         /// restored.
         /// </summary>
         [JsonProperty("ignored_channel_ids")]

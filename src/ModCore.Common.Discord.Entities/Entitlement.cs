@@ -1,4 +1,5 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
+using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities
 {
@@ -21,5 +22,8 @@ namespace ModCore.Common.Discord.Entities
         public Optional<DateTimeOffset> StartsAt { get; set; }
 
         public Optional<DateTimeOffset> EndsAt { get; set; }
+
+        [JsonPropertyName("deleted")]
+        public bool Deleted { get; set; }
     }
 }

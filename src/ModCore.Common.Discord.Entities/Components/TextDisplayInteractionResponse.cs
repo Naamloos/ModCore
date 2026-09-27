@@ -1,0 +1,13 @@
+using System.Text.Json.Serialization;
+
+namespace ModCore.Common.Discord.Entities.Components
+{
+    public class TextDisplayInteractionResponse
+    {
+        [JsonPropertyName("type")]
+        public int Type { get; set; }
+
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+    }
+}

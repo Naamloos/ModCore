@@ -2,7 +2,8 @@
 
 namespace ModCore.Common.Discord.Gateway.Events
 {
-    internal readonly struct ParallelEventRunner<T> : IRefAction<ISubscriber> where T : IPublishable
+    internal readonly struct ParallelEventRunner<T> : IRefAction<ISubscriber>
+        where T : IPublishable
     {
         private readonly Gateway Gateway;
         private readonly T Data;

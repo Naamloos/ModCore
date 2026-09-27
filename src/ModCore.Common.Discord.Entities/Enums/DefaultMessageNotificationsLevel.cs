@@ -9,6 +9,6 @@ namespace ModCore.Common.Discord.Entities.Enums
     public enum DefaultMessageNotificationsLevel
     {
         AllMessages = 0,
-        OnlyMentions = 1
+        OnlyMentions = 1,
     }
 }

@@ -1,5 +1,5 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities.Guilds
 {

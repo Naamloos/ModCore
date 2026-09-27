@@ -6,12 +6,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddHttpClient("discord", client =>
-{
-    client.BaseAddress = new Uri("https://discord.com/api/");
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("ModCore_Proxy/3.0");
-    client.Timeout = TimeSpan.FromSeconds(60); // If Discord doesn't respond within 60 seconds, something is very wrong, so we should timeout instead of hanging indefinitely.
-});
+builder.Services.AddHttpClient(
+    "discord",
+    client =>
+    {
+        client.BaseAddress = new Uri("https://discord.com/api/");
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("ModCore_Proxy/3.0");
+        client.Timeout = TimeSpan.FromSeconds(60); // If Discord doesn't respond within 60 seconds, something is very wrong, so we should timeout instead of hanging indefinitely.
+    }
+);
 
 builder.Services.AddSingleton<DiscordRateLimiter>();
 builder.Services.AddScoped<DiscordProxyService>();

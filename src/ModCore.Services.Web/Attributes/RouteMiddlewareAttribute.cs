@@ -3,9 +3,10 @@
     public class RouteMiddlewareAttribute : Attribute
     {
         public Type Middleware { get; set; }
+
         public RouteMiddlewareAttribute(Type t)
         {
-            if(!typeof(IMiddleware).IsAssignableFrom(t))
+            if (!typeof(IMiddleware).IsAssignableFrom(t))
             {
                 throw new ArgumentException("Middleware must implement IMiddleware");
             }

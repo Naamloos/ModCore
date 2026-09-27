@@ -9,6 +9,6 @@ namespace ModCore.Common.Discord.Entities.Enums
     public enum MfaLevel
     {
         None = 0,
-        Elevated = 1
+        Elevated = 1,
     }
 }

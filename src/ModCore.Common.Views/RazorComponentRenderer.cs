@@ -16,14 +16,21 @@ namespace ModCore.Common.Views
         private readonly ITempDataProvider _tempData;
         private readonly IServiceProvider _services;
 
-        public RazorComponentRenderer(IRazorViewEngine engine, ITempDataProvider tempData, IServiceProvider services)
+        public RazorComponentRenderer(
+            IRazorViewEngine engine,
+            ITempDataProvider tempData,
+            IServiceProvider services
+        )
         {
             _engine = engine;
             _tempData = tempData;
             _services = services;
         }
 
-        public async Task<IReadOnlyList<Component>> RenderAsync(string viewPath, object? model = null)
+        public async Task<IReadOnlyList<Component>> RenderAsync(
+            string viewPath,
+            object? model = null
+        )
         {
             using var sw = new StringWriter();
             var httpCtx = new DefaultHttpContext { RequestServices = _services };
@@ -33,13 +40,31 @@ namespace ModCore.Common.Views
             httpCtx.Items[nameof(RazorBuildContext)] = discordCtx;
 
             var actionCtx = new ActionContext(httpCtx, new RouteData(), new ActionDescriptor());
-            var viewResult = _engine.GetView(executingFilePath: null, viewPath: viewPath, isMainPage: true);
-            if (!viewResult.Success) throw new InvalidOperationException($"View '{viewPath}' not found.");
+            var viewResult = _engine.GetView(
+                executingFilePath: null,
+                viewPath: viewPath,
+                isMainPage: true
+            );
+            if (!viewResult.Success)
+                throw new InvalidOperationException($"View '{viewPath}' not found.");
 
-            var viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary()) { Model = model };
+            var viewData = new ViewDataDictionary(
+                new EmptyModelMetadataProvider(),
+                new ModelStateDictionary()
+            )
+            {
+                Model = model,
+            };
             var tempData = new TempDataDictionary(httpCtx, _tempData);
 
-            var viewCtx = new ViewContext(actionCtx, viewResult.View, viewData, tempData, sw, new HtmlHelperOptions());
+            var viewCtx = new ViewContext(
+                actionCtx,
+                viewResult.View,
+                viewData,
+                tempData,
+                sw,
+                new HtmlHelperOptions()
+            );
 
             await viewResult.View.RenderAsync(viewCtx);
 

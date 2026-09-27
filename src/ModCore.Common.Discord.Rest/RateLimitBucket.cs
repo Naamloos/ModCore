@@ -23,10 +23,11 @@
             {
                 manualResetEvent.Reset();
 
-                _ = Task.Delay((int)(reset_after * 1000)).ContinueWith(async x =>
-                {
-                    reset();
-                });
+                _ = Task.Delay((int)(reset_after * 1000))
+                    .ContinueWith(async x =>
+                    {
+                        reset();
+                    });
             }
             else
             {

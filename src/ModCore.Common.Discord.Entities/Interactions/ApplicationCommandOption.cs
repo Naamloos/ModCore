@@ -1,5 +1,5 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities.Interactions
 {
@@ -46,5 +46,8 @@ namespace ModCore.Common.Discord.Entities.Interactions
 
         [JsonPropertyName("autocomplete")]
         public Optional<bool> Autocomplete { get; set; }
+
+        [JsonPropertyName("file_types")]
+        public Optional<string[]> FileTypes { get; set; }
     }
 }

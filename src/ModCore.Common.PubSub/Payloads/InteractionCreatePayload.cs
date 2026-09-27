@@ -1,9 +1,9 @@
-﻿using ModCore.Common.Discord.Entities.Interactions;
-using ModCore.Common.PubSub.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.PubSub.Attributes;
 
 namespace ModCore.Common.PubSub.Payloads
 {

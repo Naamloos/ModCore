@@ -1,6 +1,6 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities.Interactions
 {

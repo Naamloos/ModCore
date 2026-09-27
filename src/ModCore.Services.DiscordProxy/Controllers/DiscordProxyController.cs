@@ -21,7 +21,7 @@ namespace ModCore.Services.DiscordProxy.Controllers
         [HttpDelete("{**path}")]
         public async Task ProxyAsync([FromRoute] string? path, CancellationToken cancellationToken)
         {
-            if(string.IsNullOrEmpty(path))
+            if (string.IsNullOrEmpty(path))
             {
                 Response.StatusCode = 404;
                 return;

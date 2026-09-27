@@ -34,7 +34,9 @@ namespace ModCore.Common.Database.Entities
 
         [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
+
         [JsonPropertyName("roles")]
-        public virtual ICollection<DatabaseRoleMenuRole> Roles { get; set; } = new HashSet<DatabaseRoleMenuRole>();
+        public virtual ICollection<DatabaseRoleMenuRole> Roles { get; set; } =
+            new HashSet<DatabaseRoleMenuRole>();
     }
 }

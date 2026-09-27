@@ -1,13 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.IO;
+﻿using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace ModCore.Common.Configuration
 {
     public class EnvFileConfigurationProvider : FileConfigurationProvider
     {
-        public EnvFileConfigurationProvider(FileConfigurationSource source) : base(source)
-        {
-        }
+        public EnvFileConfigurationProvider(FileConfigurationSource source)
+            : base(source) { }
 
         public override void Load(Stream stream)
         {

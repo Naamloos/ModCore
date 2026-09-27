@@ -10,11 +10,15 @@ namespace ModCore.Common.Database.Timers
     public record ReminderTimerData : ITimerData
     {
         [JsonPropertyName("channel_id")]
-        [JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)]
+        [JsonNumberHandling(
+            JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString
+        )]
         public ulong ChannelId { get; set; }
 
         [JsonPropertyName("user_id")]
-        [JsonNumberHandling(JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString)]
+        [JsonNumberHandling(
+            JsonNumberHandling.WriteAsString | JsonNumberHandling.AllowReadingFromString
+        )]
         public ulong UserId { get; set; }
 
         [JsonPropertyName("text")]

@@ -1,20 +1,20 @@
-﻿using InertiaCore;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+using InertiaCore;
 using Microsoft.AspNetCore.Mvc;
 using ModCore.Common.Cache;
 using ModCore.Common.Database;
+using ModCore.Common.Database.Entities;
 using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Entities.Serializer;
 using ModCore.Common.Discord.Rest;
+using ModCore.Common.Utils;
 using ModCore.Services.Web.Attributes;
 using ModCore.Services.Web.Gates;
 using ModCore.Services.Web.Middleware;
 using ModCore.Services.Web.RequestBodies;
 using ModCore.Services.Web.Services;
-using System.Text.Json.Serialization;
-using System.Text.Json;
-using ModCore.Common.Discord.Entities.Messages;
-using ModCore.Common.Database.Entities;
-using ModCore.Common.Utils;
 
 namespace ModCore.Services.Web.Controllers
 {
@@ -25,10 +25,15 @@ namespace ModCore.Services.Web.Controllers
     {
         [RouteMiddleware(typeof(RequireAuthentication))]
         [HttpGet]
-        public async Task<IActionResult> RoleMenuSettings([FromRoute] ulong server_id, [FromServices] DatabaseContext database)
+        public async Task<IActionResult> RoleMenuSettings(
+            [FromRoute] ulong server_id,
+            [FromServices] DatabaseContext database
+        )
         {
             // User permissions gate
-            var gateResponse = await this.GateAsync(new ServerPermissionGate(server_id, Permissions.Administrator));
+            var gateResponse = await this.GateAsync(
+                new ServerPermissionGate(server_id, Permissions.Administrator)
+            );
             if (gateResponse != null)
                 return gateResponse;
 
@@ -44,14 +49,31 @@ namespace ModCore.Services.Web.Controllers
 
             var channels = await this.GetGuildChannelsAsync(server_id);
 
-            return Inertia.Render("Dashboard/Servers/RoleMenus/Configure", new
-            {
-                Server = userServer != default ? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions) : null,
-                DatabaseServer = JsonSerializer.SerializeToDocument(dbServer, options: serializerOptions),
-                Channels = JsonSerializer.SerializeToDocument(channels, options: serializerOptions),
-                Menus = JsonSerializer.SerializeToDocument(dbServer.RoleMenus.ToList(), options: serializerOptions),
-                Roles = JsonSerializer.SerializeToDocument(await this.GetGuildRolesAsync(server_id), options: serializerOptions)
-            });
+            return Inertia.Render(
+                "Dashboard/Servers/RoleMenus/Configure",
+                new
+                {
+                    Server = userServer != default
+                        ? JsonSerializer.SerializeToDocument(userServer, options: serializerOptions)
+                        : null,
+                    DatabaseServer = JsonSerializer.SerializeToDocument(
+                        dbServer,
+                        options: serializerOptions
+                    ),
+                    Channels = JsonSerializer.SerializeToDocument(
+                        channels,
+                        options: serializerOptions
+                    ),
+                    Menus = JsonSerializer.SerializeToDocument(
+                        dbServer.RoleMenus.ToList(),
+                        options: serializerOptions
+                    ),
+                    Roles = JsonSerializer.SerializeToDocument(
+                        await this.GetGuildRolesAsync(server_id),
+                        options: serializerOptions
+                    ),
+                }
+            );
         }
 
         // Add a post method here to update the leveling settings

@@ -1,9 +1,9 @@
-﻿using ModCore.Common.Database.Timers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Common.Database.Timers;
 
 namespace ModCore.Services.Shard.Modules.Timers.ViewModels
 {
@@ -19,7 +19,8 @@ namespace ModCore.Services.Shard.Modules.Timers.ViewModels
         {
             Message = timerData.Text;
             var now = DateTimeOffset.UtcNow;
-            PingMessage = $"## ⏰ Hey, <@{timerData.UserId}>!\n-# At <t:{timerData.CreatedAt.ToUnixTimeSeconds()}:f> you set a reminder to trigger <t:{now.ToUnixTimeSeconds()}:R>!";
+            PingMessage =
+                $"## ⏰ Hey, <@{timerData.UserId}>!\n-# At <t:{timerData.CreatedAt.ToUnixTimeSeconds()}:f> you set a reminder to trigger <t:{now.ToUnixTimeSeconds()}:R>!";
         }
     }
 }

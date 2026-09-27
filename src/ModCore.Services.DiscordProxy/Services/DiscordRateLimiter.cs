@@ -17,20 +17,17 @@ namespace ModCore.Services.DiscordProxy.Services
         public async Task<HttpResponseMessage> ExecuteAsync(
             string routeKey,
             Func<CancellationToken, Task<HttpResponseMessage>> sendAsync,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             // As long as the client doesn't time out, we can keep trying
             while (true)
             {
-                var bucketKey = _routeToBucket.TryGetValue(
-                    routeKey,
-                    out var knownBucket)
-                        ? knownBucket
-                        : routeKey;
+                var bucketKey = _routeToBucket.TryGetValue(routeKey, out var knownBucket)
+                    ? knownBucket
+                    : routeKey;
 
-                var bucket = _buckets.GetOrAdd(
-                    bucketKey,
-                    _ => new BucketState());
+                var bucket = _buckets.GetOrAdd(bucketKey, _ => new BucketState());
 
                 await bucket.Lock.WaitAsync(cancellationToken);
 
@@ -46,16 +43,15 @@ namespace ModCore.Services.DiscordProxy.Services
                         bucketKey,
                         bucket,
                         response,
-                        cancellationToken);
+                        cancellationToken
+                    );
 
                     if (response.StatusCode != HttpStatusCode.TooManyRequests)
                     {
                         return response;
                     }
 
-                    var retryAfter = await GetRetryAfterAsync(
-                        response,
-                        cancellationToken);
+                    var retryAfter = await GetRetryAfterAsync(response, cancellationToken);
 
                     if (IsGlobalRateLimit(response))
                     {
@@ -78,8 +74,7 @@ namespace ModCore.Services.DiscordProxy.Services
             }
         }
 
-        private async Task WaitForGlobalLimitAsync(
-            CancellationToken cancellationToken)
+        private async Task WaitForGlobalLimitAsync(CancellationToken cancellationToken)
         {
             await _globalLock.WaitAsync(cancellationToken);
 
@@ -100,7 +95,8 @@ namespace ModCore.Services.DiscordProxy.Services
 
         private static async Task WaitForBucketAsync(
             BucketState bucket,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             var now = DateTimeOffset.UtcNow;
 
@@ -115,12 +111,10 @@ namespace ModCore.Services.DiscordProxy.Services
             string oldBucketKey,
             BucketState bucket,
             HttpResponseMessage response,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
-            if (TryGetHeader(
-                    response,
-                    "X-RateLimit-Bucket",
-                    out var discordBucket))
+            if (TryGetHeader(response, "X-RateLimit-Bucket", out var discordBucket))
             {
                 _routeToBucket[routeKey] = discordBucket;
 
@@ -130,38 +124,35 @@ namespace ModCore.Services.DiscordProxy.Services
                 }
             }
 
-            if (TryGetHeader(
-                    response,
-                    "X-RateLimit-Remaining",
-                    out var remainingText) &&
-                int.TryParse(
+            if (
+                TryGetHeader(response, "X-RateLimit-Remaining", out var remainingText)
+                && int.TryParse(
                     remainingText,
                     NumberStyles.Integer,
                     CultureInfo.InvariantCulture,
-                    out var remaining))
+                    out var remaining
+                )
+            )
             {
                 bucket.Remaining = remaining;
             }
 
-            if (TryGetHeader(
-                    response,
-                    "X-RateLimit-Reset-After",
-                    out var resetAfterText) &&
-                double.TryParse(
+            if (
+                TryGetHeader(response, "X-RateLimit-Reset-After", out var resetAfterText)
+                && double.TryParse(
                     resetAfterText,
                     NumberStyles.Float,
                     CultureInfo.InvariantCulture,
-                    out var resetAfterSeconds))
+                    out var resetAfterSeconds
+                )
+            )
             {
-                bucket.ResetAt = DateTimeOffset.UtcNow
-                    .AddSeconds(resetAfterSeconds);
+                bucket.ResetAt = DateTimeOffset.UtcNow.AddSeconds(resetAfterSeconds);
             }
 
             if (response.StatusCode == HttpStatusCode.TooManyRequests)
             {
-                var retryAfter = await GetRetryAfterAsync(
-                    response,
-                    cancellationToken);
+                var retryAfter = await GetRetryAfterAsync(response, cancellationToken);
 
                 if (IsGlobalRateLimit(response))
                 {
@@ -177,7 +168,8 @@ namespace ModCore.Services.DiscordProxy.Services
 
         private async Task SetGlobalLimitAsync(
             TimeSpan retryAfter,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
             await _globalLock.WaitAsync(cancellationToken);
 
@@ -191,34 +183,31 @@ namespace ModCore.Services.DiscordProxy.Services
             }
         }
 
-        private static bool IsGlobalRateLimit(
-            HttpResponseMessage response)
+        private static bool IsGlobalRateLimit(HttpResponseMessage response)
         {
-            return TryGetHeader(
-                       response,
-                       "X-RateLimit-Global",
-                       out var value) &&
-                   value.Equals(
-                       "true",
-                       StringComparison.OrdinalIgnoreCase);
+            return TryGetHeader(response, "X-RateLimit-Global", out var value)
+                && value.Equals("true", StringComparison.OrdinalIgnoreCase);
         }
 
         private static async Task<TimeSpan> GetRetryAfterAsync(
             HttpResponseMessage response,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken
+        )
         {
-            if (TryGetHeader(response, "Retry-After", out var retryAfterHeader) &&
-                double.TryParse(
+            if (
+                TryGetHeader(response, "Retry-After", out var retryAfterHeader)
+                && double.TryParse(
                     retryAfterHeader,
                     NumberStyles.Float,
                     CultureInfo.InvariantCulture,
-                    out var retryAfterSeconds))
+                    out var retryAfterSeconds
+                )
+            )
             {
                 return TimeSpan.FromSeconds(retryAfterSeconds);
             }
 
-            var body = await response.Content.ReadAsStringAsync(
-                cancellationToken);
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
             if (!string.IsNullOrWhiteSpace(body))
             {
@@ -226,12 +215,9 @@ namespace ModCore.Services.DiscordProxy.Services
                 {
                     using var json = JsonDocument.Parse(body);
 
-                    if (json.RootElement.TryGetProperty(
-                            "retry_after",
-                            out var retryAfterProperty))
+                    if (json.RootElement.TryGetProperty("retry_after", out var retryAfterProperty))
                     {
-                        return TimeSpan.FromSeconds(
-                            retryAfterProperty.GetDouble());
+                        return TimeSpan.FromSeconds(retryAfterProperty.GetDouble());
                     }
                 }
                 catch
@@ -246,7 +232,8 @@ namespace ModCore.Services.DiscordProxy.Services
         private static bool TryGetHeader(
             HttpResponseMessage response,
             string name,
-            out string value)
+            out string value
+        )
         {
             if (response.Headers.TryGetValues(name, out var headerValues))
             {
@@ -254,9 +241,7 @@ namespace ModCore.Services.DiscordProxy.Services
                 return !string.IsNullOrWhiteSpace(value);
             }
 
-            if (response.Content.Headers.TryGetValues(
-                    name,
-                    out var contentHeaderValues))
+            if (response.Content.Headers.TryGetValues(name, out var contentHeaderValues))
             {
                 value = contentHeaderValues.FirstOrDefault() ?? string.Empty;
                 return !string.IsNullOrWhiteSpace(value);
@@ -272,8 +257,7 @@ namespace ModCore.Services.DiscordProxy.Services
 
             public int Remaining { get; set; } = 1;
 
-            public DateTimeOffset ResetAt { get; set; } =
-                DateTimeOffset.MinValue;
+            public DateTimeOffset ResetAt { get; set; } = DateTimeOffset.MinValue;
         }
     }
 }

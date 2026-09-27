@@ -1,5 +1,6 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Interactions;
 
 namespace ModCore.Common.Discord.Entities.Messages
 {
@@ -43,5 +44,26 @@ namespace ModCore.Common.Discord.Entities.Messages
 
         [JsonPropertyName("flags")]
         public Optional<AttachmentFlags> Flags { get; set; }
+
+        [JsonPropertyName("title")]
+        public Optional<string> Title { get; set; }
+
+        [JsonPropertyName("placeholder")]
+        public Optional<string> Placeholder { get; set; }
+
+        [JsonPropertyName("placeholder_version")]
+        public Optional<int> PlaceholderVersion { get; set; }
+
+        [JsonPropertyName("duration_secs")]
+        public Optional<double> DurationSecs { get; set; }
+
+        [JsonPropertyName("clip_participants")]
+        public Optional<User[]> ClipParticipants { get; set; }
+
+        [JsonPropertyName("clip_created_at")]
+        public Optional<DateTimeOffset> ClipCreatedAt { get; set; }
+
+        [JsonPropertyName("application")]
+        public Optional<Application?> Application { get; set; }
     }
 }

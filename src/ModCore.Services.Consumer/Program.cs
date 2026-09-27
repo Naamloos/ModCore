@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -13,7 +14,6 @@ using ModCore.Services.Consumer.Handlers;
 using ModCore.Services.Consumer.Interactions.Framework;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-using System.Reflection;
 
 namespace ModCore.Services.Consumer
 {
@@ -27,30 +27,29 @@ namespace ModCore.Services.Consumer
                 .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
 
-            #if DEBUG
-            if(!ConfigurationHelper.CreateEnvFileIfNotExists())
+#if DEBUG
+            if (!ConfigurationHelper.CreateEnvFileIfNotExists())
             {
-                Console.WriteLine("Created a new env file as it was not found yet. Please fill it out and restart the application.");
+                Console.WriteLine(
+                    "Created a new env file as it was not found yet. Please fill it out and restart the application."
+                );
                 return;
             }
-            #endif
+#endif
 
             var jsonOptions = JsonSerializerOptionsFactory.GetOptions();
 
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(options =>
                 {
-                    options
-                        .ClearProviders()
-                        .AddSerilog(logger)
-                        .SetMinimumLevel(LogLevel.Debug);
+                    options.ClearProviders().AddSerilog(logger).SetMinimumLevel(LogLevel.Debug);
                 })
                 .ConfigureAppConfiguration(config =>
                 {
                     config
-                        #if DEBUG
+#if DEBUG
                         .AddEnvFile(ConfigurationHelper.GetDefaultEnvPath())
-                        #endif
+#endif
                         .AddEnvironmentVariables()
                         .Build();
                 })
@@ -65,14 +64,25 @@ namespace ModCore.Services.Consumer
                     services.AddStackExchangeRedisCache(setup =>
                     {
                         // get the configuration from the service collection
-                        var config = services.BuildServiceProvider().GetRequiredService<IConfiguration>();
+                        var config = services
+                            .BuildServiceProvider()
+                            .GetRequiredService<IConfiguration>();
                         setup.InstanceName = "ModCore";
-                        setup.Configuration = config.GetRequiredSection(ConfigurationHelper.GetConfigKeyString(ConfigKey.RedisConnectionString)).Value!;
+                        setup.Configuration = config
+                            .GetRequiredSection(
+                                ConfigurationHelper.GetConfigKeyString(
+                                    ConfigKey.RedisConnectionString
+                                )
+                            )
+                            .Value!;
                     });
 
                     // Register every handler as a service
-                    var handlerTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(BaseHandler)));
-                    foreach(var handlerType in handlerTypes)
+                    var handlerTypes = Assembly
+                        .GetExecutingAssembly()
+                        .GetTypes()
+                        .Where(t => !t.IsAbstract && t.IsSubclassOf(typeof(BaseHandler)));
+                    foreach (var handlerType in handlerTypes)
                     {
                         services.AddSingleton(handlerType);
                     }
@@ -98,7 +108,6 @@ namespace ModCore.Services.Consumer
                             services.AddScoped(typeof(IApplicationSubcommand), type);
                         }
                     }
-
 
                     // Consumer service!
                     services.AddHostedService<ConsumerHostedService>();

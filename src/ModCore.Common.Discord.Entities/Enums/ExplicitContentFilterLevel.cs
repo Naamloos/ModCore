@@ -10,6 +10,6 @@ namespace ModCore.Common.Discord.Entities.Enums
     {
         Disabled = 0,
         MembersWithoutRoles = 1,
-        AllMembers = 2
+        AllMembers = 2,
     }
 }

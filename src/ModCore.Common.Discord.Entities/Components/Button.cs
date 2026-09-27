@@ -1,11 +1,11 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using ModCore.Common.Discord.Entities.Guilds;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Guilds;
 
 namespace ModCore.Common.Discord.Entities.Components
 {
@@ -40,6 +40,6 @@ namespace ModCore.Common.Discord.Entities.Components
         Success = 3,
         Danger = 4,
         Link = 5,
-        Premium = 6
+        Premium = 6,
     }
 }

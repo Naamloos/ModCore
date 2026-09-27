@@ -1,109 +1,245 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
+using System.Globalization;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 
 namespace ModCore.Common.Discord.Rest
 {
     public class RateLimitedRest
     {
-        const short API_VERSION = 10;
-        const string API_BASE = "https://discord.com";
+        private readonly HttpClient httpClient;
+        private readonly JsonSerializerOptions jsonSerializerOptions;
+        private readonly bool proxyEnabled;
+        private readonly AuthenticationHeaderValue? authorization;
+        private readonly SemaphoreSlim requestLock = new(1, 1);
+        private readonly Dictionary<string, string> routeBuckets = new();
+        private readonly Dictionary<string, DateTimeOffset> resetTimes = new();
+        private DateTimeOffset globalReset;
 
-        private HttpClient httpClient;
-        private DiscordRestConfiguration configuration;
-        private JsonSerializerOptions jsonSerializerOptions;
-
-        private ConcurrentDictionary<string, RateLimitBucket> buckets;
-
-        private bool proxyEnabled = false;
-        private string baseAddress = "https://discord.com/";
-
-        public RateLimitedRest(DiscordRestConfiguration config, JsonSerializerOptions jsonSerializerOptions)
+        public RateLimitedRest(
+            DiscordRestConfiguration config,
+            JsonSerializerOptions jsonSerializerOptions
+        )
         {
             this.jsonSerializerOptions = jsonSerializerOptions;
-            buckets = new ConcurrentDictionary<string, RateLimitBucket>();
-            configuration = config;
-
-            proxyEnabled = !string.IsNullOrEmpty(config.RestProxy);
-
-            string baseAddress = (proxyEnabled ? config.RestProxy : API_BASE);
-
-            Console.WriteLine($"BaseAddress: {baseAddress}");
-
-            httpClient = new HttpClient()
+            proxyEnabled = !string.IsNullOrWhiteSpace(config.RestProxy);
+            var baseAddress = proxyEnabled ? config.RestProxy : "https://discord.com";
+            httpClient =
+                config.HttpMessageHandler == null
+                    ? new HttpClient()
+                    : new HttpClient(config.HttpMessageHandler, disposeHandler: false);
+            httpClient.BaseAddress = new Uri($"{baseAddress.TrimEnd('/')}/api/v10/");
+            httpClient.Timeout = TimeSpan.FromSeconds(60);
+            if (!string.IsNullOrEmpty(config.Token))
             {
-                BaseAddress = new Uri($"{baseAddress}/api/v{API_VERSION}/"),
-                Timeout = TimeSpan.FromSeconds(60) // Proxy might also hit a rate limit.
-            };
-
-            // DON'T use this httpclient elsewhere, like sentry or some shit. Just sayin.
-            httpClient.DefaultRequestHeaders.Add("Authorization", $"{configuration.AuthType} {configuration.Token}");
-            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("ModCore/3.0 (https://github.com/Naamloos/ModCore)");
+                authorization = new(config.AuthType, config.Token);
+            }
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
+                "DiscordBot (https://github.com/Naamloos/ModCore, 3.0)"
+            );
         }
 
-        public async ValueTask<HttpResponseMessage> RequestAsync(HttpMethod method, string route, string url, object? body = null, bool asForm = false)
+        public ValueTask<HttpResponseMessage> RequestAsync(
+            HttpMethod method,
+            string route,
+            string url,
+            object? body = null,
+            bool asForm = false
+        ) => RequestAsync(method, route, url, body, asForm, null, CancellationToken.None);
+
+        public async ValueTask<HttpResponseMessage> RequestAsync(
+            HttpMethod method,
+            string route,
+            string url,
+            object? body,
+            bool asForm,
+            string? auditLogReason,
+            CancellationToken cancellationToken
+        )
         {
-            RateLimitBucket? bucket = null;
-
-            if (!proxyEnabled)
+            if (Uri.TryCreate(url, UriKind.Absolute, out var absolute))
             {
-                // TODO (de)serialize from distributed cache
-                if (!buckets.TryGetValue(route, out bucket))
+                if (
+                    absolute.Scheme != "https"
+                    || absolute.Host != "discord.com"
+                    || !absolute.AbsolutePath.StartsWith("/api/", StringComparison.Ordinal)
+                )
+                    throw new ArgumentException("Only Discord API URLs are accepted.", nameof(url));
+                url = absolute.PathAndQuery[5..];
+                if (url.StartsWith("v10/", StringComparison.Ordinal))
+                    url = url[4..];
+            }
+
+            // The proxy owns all rate limiting and retries. Do not acquire local locks or inspect rate-limit headers here.
+            if (proxyEnabled)
+                return await SendAsync(
+                    method,
+                    url,
+                    body,
+                    asForm,
+                    auditLogReason,
+                    cancellationToken
+                );
+
+            // Serialize direct requests so an exhausted bucket cannot be raced by concurrent requests.
+            await requestLock.WaitAsync(cancellationToken);
+            try
+            {
+                var key = $"{method}:{route}";
+                var major = MajorResource(url);
+                for (var attempt = 0; ; attempt++)
                 {
-                    bucket = new RateLimitBucket();
-                    buckets.TryAdd(route, bucket);
+                    var bucketKey = routeBuckets.GetValueOrDefault(key, key) + ":" + major;
+                    var reset = resetTimes.GetValueOrDefault(bucketKey);
+                    if (globalReset > reset)
+                        reset = globalReset;
+                    var delay = reset - DateTimeOffset.UtcNow;
+                    if (delay > TimeSpan.Zero)
+                        await Task.Delay(delay, cancellationToken);
+
+                    var response = await SendAsync(
+                        method,
+                        url,
+                        body,
+                        asForm,
+                        auditLogReason,
+                        cancellationToken
+                    );
+                    if (response.Headers.TryGetValues("X-RateLimit-Bucket", out var hashes))
+                    {
+                        routeBuckets[key] = hashes.First();
+                        bucketKey = routeBuckets[key] + ":" + major;
+                    }
+                    if (
+                        HeaderNumber(response, "X-RateLimit-Remaining") is <= 0
+                        && HeaderNumber(response, "X-RateLimit-Reset-After") is double seconds
+                    )
+                        resetTimes[bucketKey] = DateTimeOffset.UtcNow.AddSeconds(
+                            Math.Max(0, seconds)
+                        );
+
+                    if (response.StatusCode != HttpStatusCode.TooManyRequests)
+                        return response;
+                    double? retryAfter = HeaderNumber(response, "Retry-After");
+                    var global = response.Headers.Contains("X-RateLimit-Global");
+                    try
+                    {
+                        using var json = JsonDocument.Parse(
+                            await response.Content.ReadAsStringAsync(cancellationToken)
+                        );
+                        if (
+                            json.RootElement.TryGetProperty("retry_after", out var retry)
+                            && retry.TryGetDouble(out var number)
+                        )
+                            retryAfter = number;
+                        if (json.RootElement.TryGetProperty("global", out var flag))
+                            global |= flag.ValueKind == JsonValueKind.True;
+                    }
+                    catch (JsonException) { }
+                    if (retryAfter is not double wait || !double.IsFinite(wait) || wait < 0)
+                        return response;
+                    var until = DateTimeOffset.UtcNow.AddSeconds(wait);
+                    if (global)
+                        globalReset = until;
+                    else
+                        resetTimes[bucketKey] = until;
+                    if (attempt >= 4)
+                        return response;
+                    response.Dispose();
                 }
-
-                await bucket.WaitAsync();
             }
-
-            var qualifiedUrl = url;
-            if(url.Contains("https://discord.com/api"))
+            finally
             {
-                qualifiedUrl = url.Replace("https://discord.com/api", $"{this.baseAddress}/api");
+                requestLock.Release();
             }
+        }
 
-            var request = new HttpRequestMessage(method, url);
-            if (body != null)
+        private async Task<HttpResponseMessage> SendAsync(
+            HttpMethod method,
+            string url,
+            object? body,
+            bool asForm,
+            string? reason,
+            CancellationToken cancellationToken
+        )
+        {
+            using var request = new HttpRequestMessage(method, url);
+            var parts = url.Split('?', 2)[0].Trim('/').Split('/');
+            var tokenAuthenticated =
+                parts[0] == "interactions"
+                || (parts[0] == "webhooks" && parts.Length >= 3)
+                || url.StartsWith("oauth2/token", StringComparison.Ordinal);
+            if (!tokenAuthenticated)
+                request.Headers.Authorization = authorization;
+            if (reason != null)
+                request.Headers.Add("X-Audit-Log-Reason", Uri.EscapeDataString(reason));
+            if (body is MultipartRequest multipart)
             {
-                if (!asForm)
+                var content = new MultipartFormDataContent();
+                if (multipart.Payload != null)
+                    content.Add(
+                        new StringContent(
+                            JsonSerializer.Serialize(multipart.Payload, jsonSerializerOptions),
+                            Encoding.UTF8,
+                            "application/json"
+                        ),
+                        "payload_json"
+                    );
+                foreach (var field in multipart.Fields)
+                    content.Add(new StringContent(field.Value), field.Key);
+                for (var i = 0; i < multipart.Files.Count; i++)
                 {
-                    request.Content = JsonContent.Create(body, options: jsonSerializerOptions);
+                    var file = multipart.Files[i];
+                    var bytes = new ByteArrayContent(file.Data);
+                    if (file.ContentType != null)
+                        bytes.Headers.ContentType = new(file.ContentType);
+                    content.Add(bytes, file.FieldName ?? $"files[{i}]", file.FileName);
+                }
+                request.Content = content;
+            }
+            else if (body != null)
+            {
+                if (asForm)
+                {
+                    if (body is not IEnumerable<KeyValuePair<string, string>> fields)
+                        throw new ArgumentException(
+                            "Form bodies must contain string key/value pairs.",
+                            nameof(body)
+                        );
+                    request.Content = new FormUrlEncodedContent(fields);
                 }
                 else
-                {
-                    IEnumerable<KeyValuePair<string, string>> formValues;
-
-                    if (body is IEnumerable<KeyValuePair<string, string>> keyValuePairs)
-                    {
-                        formValues = keyValuePairs;
-                    }
-                    else
-                    {
-                        formValues = body
-                            .GetType()
-                            .GetProperties()
-                            .Select(prop => new KeyValuePair<string, string>(
-                                prop.Name,
-                                prop.GetValue(body)?.ToString() ?? string.Empty
-                            ));
-                    }
-
-                    request.Content = new FormUrlEncodedContent(formValues);
-                }
+                    request.Content = JsonContent.Create(body, options: jsonSerializerOptions);
             }
+            return await httpClient.SendAsync(request, cancellationToken);
+        }
 
-            var response = await httpClient.SendAsync(request);
+        private static double? HeaderNumber(HttpResponseMessage response, string header) =>
+            response.Headers.TryGetValues(header, out var values)
+            && double.TryParse(
+                values.FirstOrDefault(),
+                NumberStyles.Float,
+                CultureInfo.InvariantCulture,
+                out var value
+            )
+            && double.IsFinite(value)
+                ? value
+                : null;
 
-            if (bucket is not null && response.Headers.Contains("X-Ratelimit-Remaining"))
+        private static string MajorResource(string url)
+        {
+            var parts = url.Split('?', 2)[0].Trim('/').Split('/');
+            if (parts.Length < 2)
+                return "";
+            return parts[0] switch
             {
-                var remaining = response.Headers.GetValues("X-RateLimit-Remaining");
-                var reset_after = response.Headers.GetValues("X-RateLimit-Reset-After");
-
-                await bucket.SignalDoneAsync(int.Parse(remaining.First()), float.Parse(reset_after.First()));
-            }
-
-            return response;
+                "channels" or "guilds" => parts[1],
+                "webhooks" => string.Join('/', parts.Skip(1).Take(2)),
+                _ => "",
+            };
         }
     }
 }

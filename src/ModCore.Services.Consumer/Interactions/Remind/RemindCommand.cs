@@ -1,7 +1,7 @@
-﻿using ModCore.Services.Consumer.Interactions.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ModCore.Services.Consumer.Interactions.Framework;
 
 namespace ModCore.Services.Consumer.Interactions.Remind
 {

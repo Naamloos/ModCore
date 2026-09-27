@@ -1,15 +1,15 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using ModCore.Common.Discord.Entities;
-using ModCore.Common.Discord.Entities.Enums;
-using ModCore.Common.Discord.Entities.Interactions;
-using ModCore.Common.InteractionFramework.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Interactions;
+using ModCore.Common.InteractionFramework.Attributes;
 
 namespace ModCore.Common.InteractionFramework
 {
@@ -22,7 +22,9 @@ namespace ModCore.Common.InteractionFramework
             classInstances.Add(this.GetType(), this);
         }
 
-        internal (Dictionary<string, MethodInfo>, List<ApplicationCommand>) LoadSlashCommands(IServiceProvider services)
+        internal (Dictionary<string, MethodInfo>, List<ApplicationCommand>) LoadSlashCommands(
+            IServiceProvider services
+        )
         {
             Dictionary<string, MethodInfo> executables = new();
             List<ApplicationCommand> commands = new();
@@ -37,7 +39,9 @@ namespace ModCore.Common.InteractionFramework
             }
         }
 
-        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadAsTopLevel(IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadAsTopLevel(
+            IServiceProvider services
+        )
         {
             var executables = new Dictionary<string, MethodInfo>();
 
@@ -58,7 +62,8 @@ namespace ModCore.Common.InteractionFramework
             options.AddRange(subGroups.Item2);
 
             // check if handler has the LaunchCommandOverride attribute, this command is the override for the launch command.
-            var launchCommandAttribute = this.GetType().GetCustomAttribute<LaunchCommandOverrideAttribute>();
+            var launchCommandAttribute = this.GetType()
+                .GetCustomAttribute<LaunchCommandOverrideAttribute>();
 
             var command = new ApplicationCommand()
             {
@@ -66,10 +71,16 @@ namespace ModCore.Common.InteractionFramework
                 Description = attr.Description,
                 NSFW = attr.Nsfw,
                 CanBeUsedInDM = attr.DmPermission,
-                Type = launchCommandAttribute != null? ApplicationCommandType.ActivityEntryPoint : ApplicationCommandType.ChatInput,
+                Type =
+                    launchCommandAttribute != null
+                        ? ApplicationCommandType.ActivityEntryPoint
+                        : ApplicationCommandType.ChatInput,
                 Options = options,
-                DefaultMemberPermissions = attr.Permissions == Permissions.None? Optional<Permissions>.None : attr.Permissions,
-                Handler = launchCommandAttribute != null? 1 : Optional<int>.None
+                DefaultMemberPermissions =
+                    attr.Permissions == Permissions.None
+                        ? Optional<Permissions>.None
+                        : attr.Permissions,
+                Handler = launchCommandAttribute != null ? 1 : Optional<int>.None,
             };
 
             foreach (var subCommand in subCommands.Item1)
@@ -85,7 +96,9 @@ namespace ModCore.Common.InteractionFramework
             return (executables, new List<ApplicationCommand>() { command });
         }
 
-        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadAsContainer(IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadAsContainer(
+            IServiceProvider services
+        )
         {
             var executables = new Dictionary<string, MethodInfo>();
             var appCommands = new List<ApplicationCommand>();
@@ -108,12 +121,16 @@ namespace ModCore.Common.InteractionFramework
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadCommands(Type parent, IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadCommands(
+            Type parent,
+            IServiceProvider services
+        )
         {
             var executables = new Dictionary<string, MethodInfo>();
             var appCommands = new List<ApplicationCommand>();
 
-            var methods = parent.GetMethods()
+            var methods = parent
+                .GetMethods()
                 .Where(x => x.GetCustomAttribute<SlashCommandAttribute>() != null)
                 .Where(x => x.GetParameters().Length > 0)
                 .Where(x => x.ReturnType == typeof(ValueTask));
@@ -122,19 +139,28 @@ namespace ModCore.Common.InteractionFramework
             {
                 var attr = method.GetCustomAttribute<SlashCommandAttribute>()!;
 
-                var launchCommandAttribute = method.GetCustomAttribute<LaunchCommandOverrideAttribute>();
+                var launchCommandAttribute =
+                    method.GetCustomAttribute<LaunchCommandOverrideAttribute>();
 
-                appCommands.Add(new ApplicationCommand()
-                {
-                    Name = attr.Name,
-                    Description = attr.Description,
-                    NSFW = attr.Nsfw,
-                    CanBeUsedInDM = attr.DmPermission,
-                    Options = loadOptions(method),
-                    DefaultMemberPermissions = attr.Permissions == Permissions.None ? Optional<Permissions>.None : attr.Permissions,
-                    Type = launchCommandAttribute != null ? ApplicationCommandType.ActivityEntryPoint : ApplicationCommandType.ChatInput,
-                    Handler = launchCommandAttribute != null ? 1 : Optional<int>.None
-                });
+                appCommands.Add(
+                    new ApplicationCommand()
+                    {
+                        Name = attr.Name,
+                        Description = attr.Description,
+                        NSFW = attr.Nsfw,
+                        CanBeUsedInDM = attr.DmPermission,
+                        Options = loadOptions(method),
+                        DefaultMemberPermissions =
+                            attr.Permissions == Permissions.None
+                                ? Optional<Permissions>.None
+                                : attr.Permissions,
+                        Type =
+                            launchCommandAttribute != null
+                                ? ApplicationCommandType.ActivityEntryPoint
+                                : ApplicationCommandType.ChatInput,
+                        Handler = launchCommandAttribute != null ? 1 : Optional<int>.None,
+                    }
+                );
 
                 executables.Add(attr.Name, method);
             }
@@ -142,12 +168,16 @@ namespace ModCore.Common.InteractionFramework
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadGroups(Type parent, IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommand>) loadGroups(
+            Type parent,
+            IServiceProvider services
+        )
         {
             var executables = new Dictionary<string, MethodInfo>();
             var appCommands = new List<ApplicationCommand>();
 
-            var groups = parent.GetNestedTypes()
+            var groups = parent
+                .GetNestedTypes()
                 .Where(x => x.GetCustomAttribute<SlashCommandAttribute>() is not null);
 
             foreach (var group in groups)
@@ -161,15 +191,20 @@ namespace ModCore.Common.InteractionFramework
                 options.AddRange(subGroups.Item2);
                 options.AddRange(subCommands.Item2);
 
-                appCommands.Add(new ApplicationCommand()
-                {
-                    Name = attr.Name.ToLowerInvariant(),
-                    Description = attr.Description,
-                    NSFW = attr.Nsfw,
-                    CanBeUsedInDM = attr.DmPermission,
-                    Options = options,
-                    DefaultMemberPermissions = attr.Permissions == Permissions.None ? Optional<Permissions>.None : attr.Permissions,
-                });
+                appCommands.Add(
+                    new ApplicationCommand()
+                    {
+                        Name = attr.Name.ToLowerInvariant(),
+                        Description = attr.Description,
+                        NSFW = attr.Nsfw,
+                        CanBeUsedInDM = attr.DmPermission,
+                        Options = options,
+                        DefaultMemberPermissions =
+                            attr.Permissions == Permissions.None
+                                ? Optional<Permissions>.None
+                                : attr.Permissions,
+                    }
+                );
 
                 foreach (var executable in subGroups.Item1)
                     executables.Add(executable.Key.ToLowerInvariant(), executable.Value);
@@ -180,12 +215,17 @@ namespace ModCore.Common.InteractionFramework
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, MethodInfo>, List<ApplicationCommandOption>) loadSubCommands(Type parent, string parentName, IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommandOption>) loadSubCommands(
+            Type parent,
+            string parentName,
+            IServiceProvider services
+        )
         {
             var executables = new Dictionary<string, MethodInfo>();
             var appCommands = new List<ApplicationCommandOption>();
 
-            var methods = parent.GetMethods()
+            var methods = parent
+                .GetMethods()
                 .Where(x => x.GetCustomAttribute<SlashCommandAttribute>() != null)
                 .Where(x => x.GetParameters().Length > 0)
                 .Where(x => x.ReturnType == typeof(ValueTask));
@@ -194,26 +234,36 @@ namespace ModCore.Common.InteractionFramework
             {
                 var attr = method.GetCustomAttribute<SlashCommandAttribute>()!;
 
-                appCommands.Add(new ApplicationCommandOption()
-                {
-                    Name = attr.Name,
-                    Description = attr.Description,
-                    Options = loadOptions(method),
-                    Type = ApplicationCommandOptionType.Subcommand
-                });
+                appCommands.Add(
+                    new ApplicationCommandOption()
+                    {
+                        Name = attr.Name,
+                        Description = attr.Description,
+                        Options = loadOptions(method),
+                        Type = ApplicationCommandOptionType.Subcommand,
+                    }
+                );
 
-                executables.Add(parentName.ToLowerInvariant() + " " + attr.Name.ToLowerInvariant(), method);
+                executables.Add(
+                    parentName.ToLowerInvariant() + " " + attr.Name.ToLowerInvariant(),
+                    method
+                );
             }
 
             return (executables, appCommands);
         }
 
-        private (Dictionary<string, MethodInfo>, List<ApplicationCommandOption>) loadSubGroups(Type parent, string parentName, IServiceProvider services)
+        private (Dictionary<string, MethodInfo>, List<ApplicationCommandOption>) loadSubGroups(
+            Type parent,
+            string parentName,
+            IServiceProvider services
+        )
         {
             var executables = new Dictionary<string, MethodInfo>();
             var appCommands = new List<ApplicationCommandOption>();
 
-            var groups = parent.GetNestedTypes()
+            var groups = parent
+                .GetNestedTypes()
                 .Where(x => x.GetCustomAttribute<SlashCommandAttribute>() is not null);
 
             foreach (var group in groups)
@@ -222,16 +272,21 @@ namespace ModCore.Common.InteractionFramework
 
                 var subCommands = loadSubCommands(group, attr.Name.ToLowerInvariant(), services);
 
-                appCommands.Add(new ApplicationCommandOption()
-                {
-                    Name = attr.Name,
-                    Description = attr.Description,
-                    Options = subCommands.Item2,
-                    Type = ApplicationCommandOptionType.SubcommandGroup
-                });
+                appCommands.Add(
+                    new ApplicationCommandOption()
+                    {
+                        Name = attr.Name,
+                        Description = attr.Description,
+                        Options = subCommands.Item2,
+                        Type = ApplicationCommandOptionType.SubcommandGroup,
+                    }
+                );
 
                 foreach (var executable in subCommands.Item1)
-                    executables.Add(parentName.ToLowerInvariant() + " " + executable.Key.ToLowerInvariant(), executable.Value);
+                    executables.Add(
+                        parentName.ToLowerInvariant() + " " + executable.Key.ToLowerInvariant(),
+                        executable.Value
+                    );
             }
 
             return (executables, appCommands);
@@ -254,7 +309,7 @@ namespace ModCore.Common.InteractionFramework
         {
             var constructor = type.GetConstructors()[0];
             List<object> injectedServices = new();
-            foreach(var parameter in constructor.GetParameters())
+            foreach (var parameter in constructor.GetParameters())
             {
                 injectedServices.Add(services.GetService(parameter.ParameterType)!);
             }
@@ -274,13 +329,19 @@ namespace ModCore.Common.InteractionFramework
             {
                 var attr = param.GetCustomAttribute<OptionAttribute>();
 
-                options.Add(new ApplicationCommandOption()
-                {
-                    Name = attr.Name.ToLowerInvariant(),
-                    Description = attr.Description,
-                    Type = attr.Type,
-                    Required = param.ParameterType.IsGenericType && param.ParameterType.GetGenericTypeDefinition() == typeof(Optional<>) ? false : true
-                });
+                options.Add(
+                    new ApplicationCommandOption()
+                    {
+                        Name = attr.Name.ToLowerInvariant(),
+                        Description = attr.Description,
+                        Type = attr.Type,
+                        Required =
+                            param.ParameterType.IsGenericType
+                            && param.ParameterType.GetGenericTypeDefinition() == typeof(Optional<>)
+                                ? false
+                                : true,
+                    }
+                );
             }
             return options;
         }

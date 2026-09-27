@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -13,9 +16,6 @@ using ModCore.Common.Utils;
 using Serilog;
 using Serilog.Core;
 using Serilog.Sinks.SystemConsole.Themes;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ModCore.Services.GatewayIngest
 {
@@ -29,29 +29,29 @@ namespace ModCore.Services.GatewayIngest
                 .WriteTo.Console(theme: AnsiConsoleTheme.Code)
                 .CreateLogger();
 
-            #if DEBUG
+#if DEBUG
             if (!ConfigurationHelper.CreateEnvFileIfNotExists())
             {
-                Console.WriteLine("Created a new env file as it was not found yet. Please fill it out and restart the application.");
+                Console.WriteLine(
+                    "Created a new env file as it was not found yet. Please fill it out and restart the application."
+                );
                 return;
             }
-            #endif
+#endif
 
             var jsonOptions = JsonSerializerOptionsFactory.GetOptions();
 
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(options =>
                 {
-                    options.ClearProviders()
-                    .AddSerilog(logger)
-                    .SetMinimumLevel(LogLevel.Debug);
+                    options.ClearProviders().AddSerilog(logger).SetMinimumLevel(LogLevel.Debug);
                 })
                 .ConfigureAppConfiguration(config =>
                 {
                     config
-                    #if DEBUG
+#if DEBUG
                         .AddEnvFile(ConfigurationHelper.GetDefaultEnvPath())
-                    #endif
+#endif
                         .AddEnvironmentVariables()
                         .Build();
                 })

@@ -12,7 +12,7 @@ namespace ModCore.Services.Jobs.Attributes
         public string JobName { get; set; }
         public string CronTrigger { get; set; }
 
-        public ModCoreJobAttribute(string jobName, string cronTrigger) 
+        public ModCoreJobAttribute(string jobName, string cronTrigger)
         {
             JobName = jobName;
             CronTrigger = cronTrigger;

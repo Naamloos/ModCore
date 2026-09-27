@@ -1,11 +1,11 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using ModCore.Common.PubSub.Attributes;
-using ModCore.Common.PubSub.Implementation;
-using ModCore.Common.PubSub.Payloads;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.PubSub.Attributes;
+using ModCore.Common.PubSub.Implementation;
+using ModCore.Common.PubSub.Payloads;
 
 namespace ModCore.Common.PubSub
 {
@@ -20,10 +20,8 @@ namespace ModCore.Common.PubSub
             channelNames = new Dictionary<Type, string>();
         }
 
-        public Task PublishAsync<T>(
-            T message,
-            CancellationToken cancellationToken = default
-        ) where T : IPubSubPayload
+        public Task PublishAsync<T>(T message, CancellationToken cancellationToken = default)
+            where T : IPubSubPayload
         {
             var channelName = getChannelName<T>();
             return _pubSubImplementation.PublishAsync(channelName, message, cancellationToken);
@@ -32,21 +30,22 @@ namespace ModCore.Common.PubSub
         public Task SubscribeAsync<T>(
             Func<T, CancellationToken, Task> handler,
             CancellationToken cancellationToken = default
-        ) where T : IPubSubPayload
+        )
+            where T : IPubSubPayload
         {
             var channelName = getChannelName<T>();
             return _pubSubImplementation.SubscribeAsync(channelName, handler, cancellationToken);
         }
 
-        public Task UnsubscribeAsync<T>(
-            CancellationToken cancellationToken = default
-        ) where T : IPubSubPayload
+        public Task UnsubscribeAsync<T>(CancellationToken cancellationToken = default)
+            where T : IPubSubPayload
         {
             var channelName = getChannelName<T>();
             return _pubSubImplementation.UnsubscribeAsync(channelName, cancellationToken);
         }
 
-        private string getChannelName<T>() where T : IPubSubPayload
+        private string getChannelName<T>()
+            where T : IPubSubPayload
         {
             var type = typeof(T);
 
@@ -57,9 +56,11 @@ namespace ModCore.Common.PubSub
 
             var channelAttribute = type.GetCustomAttribute<EventChannelAttribute>();
 
-            if(channelAttribute?.EventChannel == null)
+            if (channelAttribute?.EventChannel == null)
             {
-                throw new NotImplementedException("PubSub payloads must be decorated with the EventChannel attribute");
+                throw new NotImplementedException(
+                    "PubSub payloads must be decorated with the EventChannel attribute"
+                );
             }
 
             var name = Enum.GetName<EventChannels>(channelAttribute.EventChannel);

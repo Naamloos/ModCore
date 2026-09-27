@@ -1,28 +1,24 @@
 ﻿<DiscordView
-    xmlns="clr-namespace:ModCore.Common.Xaml;assembly=ModCore.Common.Xaml"
-    xmlns:Discord="clr-namespace:ModCore.Common.Discord.Entities.Components;assembly=ModCore.Common.Discord.Entities"
-	xmlns:x="clr-namespace:System;assembly=mscorlib"
+  xmlns="clr-namespace:ModCore.Common.Xaml;assembly=ModCore.Common.Xaml"
+  xmlns:Discord="clr-namespace:ModCore.Common.Discord.Entities.Components;assembly=ModCore.Common.Discord.Entities"
+  xmlns:x="clr-namespace:System;assembly=mscorlib"
 >
-	<Discord:Container
-		AccentColor="{Binding AccentColor}"
-	>
-		<!-- TODO: add ModCore logo to the right. Add a Section with a Thumbnail accessory. -->
-		<Discord:Container.Components>
-			<Discord:Section>
-				<Discord:Section.Components>
-					<Discord:TextDisplay Content="{Binding Welcome}"/>
-					<Discord:TextDisplay Content="{Binding MainDeveloper}"/>
-					<Discord:TextDisplay Content="{Binding Contribute}"/>
-				</Discord:Section.Components>
-				<Discord:Section.Accessory>
-					<Discord:Thumbnail
-						Media="{Binding AvatarMedia}"	
-					/>
-				</Discord:Section.Accessory>
-			</Discord:Section>
-			<Discord:TextDisplay Content="{Binding Donate}"/>
-			<Discord:TextDisplay Content="{Binding PreviousContributors}" />
-			<Discord:TextDisplay Content="{Binding Version}" />
-		</Discord:Container.Components>
-	</Discord:Container>
+  <Discord:Container AccentColor="{Binding AccentColor}">
+    <!-- TODO: add ModCore logo to the right. Add a Section with a Thumbnail accessory. -->
+    <Discord:Container.Components>
+      <Discord:Section>
+        <Discord:Section.Components>
+          <Discord:TextDisplay Content="{Binding Welcome}" />
+          <Discord:TextDisplay Content="{Binding MainDeveloper}" />
+          <Discord:TextDisplay Content="{Binding Contribute}" />
+        </Discord:Section.Components>
+        <Discord:Section.Accessory>
+          <Discord:Thumbnail Media="{Binding AvatarMedia}" />
+        </Discord:Section.Accessory>
+      </Discord:Section>
+      <Discord:TextDisplay Content="{Binding Donate}" />
+      <Discord:TextDisplay Content="{Binding PreviousContributors}" />
+      <Discord:TextDisplay Content="{Binding Version}" />
+    </Discord:Container.Components>
+  </Discord:Container>
 </DiscordView>

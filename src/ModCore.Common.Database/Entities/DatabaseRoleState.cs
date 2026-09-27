@@ -28,6 +28,7 @@ namespace ModCore.Common.Database.Entities
 
         [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
+
         [JsonIgnore]
         public virtual DatabaseUser User { get; set; }
     }

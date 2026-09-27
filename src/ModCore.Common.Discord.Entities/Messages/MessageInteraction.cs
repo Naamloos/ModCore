@@ -1,6 +1,6 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
+﻿using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 using ModCore.Common.Discord.Entities.Guilds;
-using System.Text.Json.Serialization;
 
 namespace ModCore.Common.Discord.Entities.Messages
 {

@@ -12,6 +12,8 @@
         RequestGuildMembers = 8,
         InvalidSession = 9,
         Hello = 10,
-        HeartbeatAck = 11
+        HeartbeatAck = 11,
+        RequestSoundboardSounds = 31,
+        RequestChannelInfo = 43,
     }
 }

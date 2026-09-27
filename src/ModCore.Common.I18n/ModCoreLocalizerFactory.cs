@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Localization;
-using ModCore.Common.Language.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.Localization;
+using ModCore.Common.Language.Resources;
 
 namespace ModCore.Common.Language
 {

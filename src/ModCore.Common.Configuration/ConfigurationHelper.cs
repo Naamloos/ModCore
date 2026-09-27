@@ -22,13 +22,17 @@ namespace ModCore.Common.Configuration
             if (!File.Exists(path))
             {
                 StringBuilder builder = new StringBuilder();
-                Enum.GetValues<ConfigKey>().ToList().ForEach(key =>
-                {
-                    var description = key.GetAttributeOfType<DescriptionAttribute>()?.Description ?? "No description available.";
-                    builder.AppendLine($"# {description}");
-                    builder.AppendLine($"{GetConfigKeyString(key)}=");
-                    builder.AppendLine();
-                });
+                Enum.GetValues<ConfigKey>()
+                    .ToList()
+                    .ForEach(key =>
+                    {
+                        var description =
+                            key.GetAttributeOfType<DescriptionAttribute>()?.Description
+                            ?? "No description available.";
+                        builder.AppendLine($"# {description}");
+                        builder.AppendLine($"{GetConfigKeyString(key)}=");
+                        builder.AppendLine();
+                    });
 
                 File.Create(path).Close();
                 File.WriteAllText(path, builder.ToString());
@@ -45,7 +49,7 @@ namespace ModCore.Common.Configuration
 
         public static string GetConfigKeyString(ConfigKey key)
         {
-            if(!Enum.IsDefined(typeof(ConfigKey), key))
+            if (!Enum.IsDefined(typeof(ConfigKey), key))
                 throw new ArgumentException($"Invalid config key: {key}", nameof(key));
 
             return ToSnakeCase(Enum.GetName<ConfigKey>(key)!);
@@ -54,13 +58,9 @@ namespace ModCore.Common.Configuration
         private static TAttribute? GetAttributeOfType<TAttribute>(this Enum enumValue)
             where TAttribute : Attribute
         {
-            var memberInfo = enumValue
-                .GetType()
-                .GetMember(enumValue.ToString())
-                .FirstOrDefault();
+            var memberInfo = enumValue.GetType().GetMember(enumValue.ToString()).FirstOrDefault();
 
-            return memberInfo?
-                .GetCustomAttribute<TAttribute>();
+            return memberInfo?.GetCustomAttribute<TAttribute>();
         }
 
         private static string ToSnakeCase(string value)
@@ -107,7 +107,9 @@ namespace ModCore.Common.Configuration
         /// <summary>
         /// URL of the proxy to use for Discord REST API requests. If empty, requests will be sent directly to Discord.
         /// </summary>
-        [Description("URL of the proxy to use for Discord REST API requests. If empty, requests will be sent directly to Discord.")]
+        [Description(
+            "URL of the proxy to use for Discord REST API requests. If empty, requests will be sent directly to Discord."
+        )]
         DiscordRestProxy,
 
         /// <summary>
@@ -119,7 +121,9 @@ namespace ModCore.Common.Configuration
         /// <summary>
         /// The current shard. This will be unique per shard instance, and is overridden on the container level. For debugging purposes, you want ID 0.
         /// </summary>
-        [Description("The current shard. This will be unique per shard instance, and is overridden on the container level. For debugging purposes, you want ID 0.")]
+        [Description(
+            "The current shard. This will be unique per shard instance, and is overridden on the container level. For debugging purposes, you want ID 0."
+        )]
         CurrentShard,
 
         /// <summary>
@@ -153,17 +157,21 @@ namespace ModCore.Common.Configuration
         PostgresPort,
 
         /// <summary>
-        /// Master key used for encryption and decryption of some database values. 
+        /// Master key used for encryption and decryption of some database values.
         /// This should be a random string of exactly 32 characters and must NOT change after being set.
         /// Doing so will render most of your database useless!
         /// </summary>
-        [Description("Master key used for encryption and decryption of some database values. This should be a random string of exactly 32 characters and must NOT change after being set. Doing so will render most of your database useless!")]
+        [Description(
+            "Master key used for encryption and decryption of some database values. This should be a random string of exactly 32 characters and must NOT change after being set. Doing so will render most of your database useless!"
+        )]
         MasterKey,
 
         /// <summary>
         /// Connection string for Redis cache. Not necessary in development, as cache will be in memory.
         /// </summary>
-        [Description("Connection string for Redis cache. Not necessary in development, as cache will be in memory.")]
+        [Description(
+            "Connection string for Redis cache. Not necessary in development, as cache will be in memory."
+        )]
         RedisConnectionString,
     }
 }

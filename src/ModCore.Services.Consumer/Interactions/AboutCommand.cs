@@ -21,7 +21,11 @@ namespace ModCore.Services.Consumer.Interactions
         private CacheService _cache;
         private IModCoreLocalizerFactory _localizerFactory;
 
-        public AboutCommand(DiscordRest rest, CacheService cache, IModCoreLocalizerFactory localizerFactory)
+        public AboutCommand(
+            DiscordRest rest,
+            CacheService cache,
+            IModCoreLocalizerFactory localizerFactory
+        )
         {
             _rest = rest;
             _cache = cache;
@@ -50,27 +54,35 @@ namespace ModCore.Services.Consumer.Interactions
             }
 
             var t = _localizerFactory.Get(interaction.Locale.Value);
-            var contribs = string.Join(", ", previousContribList.Select(x => $"[{x.Key}]({x.Value})"));
+            var contribs = string.Join(
+                ", ",
+                previousContribList.Select(x => $"[{x.Key}]({x.Value})")
+            );
 
             var message = new MessageBuilder()
                 .AddContainer(container =>
                 {
-                    container.AddSection(section =>
-                    {
-                        section.AddText(t["aboutWelcome"]);
-                        section.AddText(t["aboutMainDeveloper"]);
-                        section.AddText(t["aboutContribute"]);
-                    }, new Thumbnail()
-                    {
-                        Media = new UnfurledMediaItem()
-                        {
-                            Url = $"https://cdn.discordapp.com/avatars/{modcoreSelf!.Id}/{modcoreSelf!.AvatarHash}.png"
-                        }
-                    })
-                    .AddText(t["aboutDonate"])
-                    .AddText(t["aboutPreviousContribs", new { contribs }])
-                    .AddText("-# ModCore v3 ALPHA")
-                    .WithAccentColor(0x5865F2);
+                    container
+                        .AddSection(
+                            section =>
+                            {
+                                section.AddText(t["aboutWelcome"]);
+                                section.AddText(t["aboutMainDeveloper"]);
+                                section.AddText(t["aboutContribute"]);
+                            },
+                            new Thumbnail()
+                            {
+                                Media = new UnfurledMediaItem()
+                                {
+                                    Url =
+                                        $"https://cdn.discordapp.com/avatars/{modcoreSelf!.Id}/{modcoreSelf!.AvatarHash}.png",
+                                },
+                            }
+                        )
+                        .AddText(t["aboutDonate"])
+                        .AddText(t["aboutPreviousContribs", new { contribs }])
+                        .AddText("-# ModCore v3 ALPHA")
+                        .WithAccentColor(0x5865F2);
                 })
                 .WithFlags(MessageFlags.ComponentsV2 | MessageFlags.Ephemeral)
                 .BuildInteractionResponse();
@@ -94,7 +106,7 @@ namespace ModCore.Services.Consumer.Interactions
             { "Drake103", "https://github.com/Drake103" },
             { "Izumemori", "https://github.com/Izumemori" },
             { "OoLunar", "https://github.com/OoLunar" },
-            { "InFTord", "https://github.com/InFTord" }
+            { "InFTord", "https://github.com/InFTord" },
         };
     }
 }

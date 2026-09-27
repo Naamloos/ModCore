@@ -1,20 +1,20 @@
+using System.Diagnostics;
+using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using InertiaCore;
 using InertiaCore.Extensions;
-using ModCore.Services.Web.Middleware;
-using System.Diagnostics;
-using ModCore.Common.Discord.Rest;
-using ModCore.Common.Database;
-using ModCore.Services.Web.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
-using System.Globalization;
-using ModCore.Common.Discord.Entities.Serializer;
-using System.Text.Json.Serialization;
-using System.Text.Json;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using ModCore.Common.Cache;
-using ModCore.Common.Utils;
-using Tsavorite.core;
 using ModCore.Common.Configuration;
+using ModCore.Common.Database;
+using ModCore.Common.Discord.Entities.Serializer;
+using ModCore.Common.Discord.Rest;
+using ModCore.Common.Utils;
+using ModCore.Services.Web.Middleware;
+using ModCore.Services.Web.Services;
+using Tsavorite.core;
 
 namespace ModCore.Common.Web
 {
@@ -26,24 +26,30 @@ namespace ModCore.Common.Web
 
             // Add services to the container.
 
-            #if DEBUG
-            if(!ConfigurationHelper.CreateEnvFileIfNotExists())
+#if DEBUG
+            if (!ConfigurationHelper.CreateEnvFileIfNotExists())
             {
-                Console.WriteLine("Created a new env file as it was not found yet. Please fill it out and restart the application.");
+                Console.WriteLine(
+                    "Created a new env file as it was not found yet. Please fill it out and restart the application."
+                );
                 return;
             }
             builder.Configuration.AddEnvFile(ConfigurationHelper.GetDefaultEnvPath());
-            #endif
+#endif
 
             builder.Configuration.AddEnvironmentVariables();
 
             var jsonOptions = JsonSerializerOptionsFactory.GetOptions();
 
-            builder.Services.AddControllers()
+            builder
+                .Services.AddControllers()
                 .AddJsonOptions(options =>
                 {
-                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
-                    options.JsonSerializerOptions.Converters.Add(new OptionalJsonSerializerFactory());
+                    options.JsonSerializerOptions.DefaultIgnoreCondition =
+                        JsonIgnoreCondition.Never;
+                    options.JsonSerializerOptions.Converters.Add(
+                        new OptionalJsonSerializerFactory()
+                    );
                     options.JsonSerializerOptions.WriteIndented = true;
                 });
 
@@ -69,11 +75,12 @@ namespace ModCore.Common.Web
 
             builder.Services.AddSingleton(jsonOptions);
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = "Discord";
-            })
+            builder
+                .Services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = "Discord";
+                })
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/login";
@@ -85,13 +92,17 @@ namespace ModCore.Common.Web
                     options.ClientSecret = builder.Configuration["discord_client_secret"];
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                     options.SaveTokens = true;
-                    options.ClaimActions.MapCustomJson("urn:discord:avatar:url", user =>
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "https://cdn.discordapp.com/avatars/{0}/{1}.{2}",
-                            user.GetString("id"),
-                            user.GetString("avatar"),
-                            user.GetString("avatar").StartsWith("a_") ? "gif" : "png"));
+                    options.ClaimActions.MapCustomJson(
+                        "urn:discord:avatar:url",
+                        user =>
+                            string.Format(
+                                CultureInfo.InvariantCulture,
+                                "https://cdn.discordapp.com/avatars/{0}/{1}.{2}",
+                                user.GetString("id"),
+                                user.GetString("avatar"),
+                                user.GetString("avatar").StartsWith("a_") ? "gif" : "png"
+                            )
+                    );
                     options.Prompt = "none";
                     options.ClaimActions.MapJsonKey("urn:discord:id", "id");
 

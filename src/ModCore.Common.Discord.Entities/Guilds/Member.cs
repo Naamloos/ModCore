@@ -1,5 +1,6 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Users;
 
 namespace ModCore.Common.Discord.Entities.Guilds
 {
@@ -40,5 +41,14 @@ namespace ModCore.Common.Discord.Entities.Guilds
 
         [JsonPropertyName("communication_disabled_until")]
         public Optional<DateTimeOffset?> CommunicationDisabledUntil { get; set; }
+
+        [JsonPropertyName("banner")]
+        public Optional<string?> Banner { get; set; }
+
+        [JsonPropertyName("avatar_decoration_data")]
+        public Optional<AvatarDecorationData?> AvatarDecorationData { get; set; }
+
+        [JsonPropertyName("collectibles")]
+        public Optional<Collectible?> Collectibles { get; set; }
     }
 }

@@ -9,7 +9,8 @@ namespace ModCore.Common.Discord.Entities.Serializer
         public override Snowflake Read(
             ref Utf8JsonReader reader,
             Type typeToConvert,
-            JsonSerializerOptions options)
+            JsonSerializerOptions options
+        )
         {
             return reader.TokenType switch
             {
@@ -19,14 +20,16 @@ namespace ModCore.Common.Discord.Entities.Serializer
                     : throw new JsonException("Snowflake number value was not a valid UInt64."),
 
                 _ => throw new JsonException(
-                    $"Cannot deserialize Snowflake from token {reader.TokenType}.")
+                    $"Cannot deserialize Snowflake from token {reader.TokenType}."
+                ),
             };
         }
 
         public override void Write(
             Utf8JsonWriter writer,
             Snowflake value,
-            JsonSerializerOptions options)
+            JsonSerializerOptions options
+        )
         {
             writer.WriteStringValue(value.ToString());
         }
@@ -34,7 +37,8 @@ namespace ModCore.Common.Discord.Entities.Serializer
         public override Snowflake ReadAsPropertyName(
             ref Utf8JsonReader reader,
             Type typeToConvert,
-            JsonSerializerOptions options)
+            JsonSerializerOptions options
+        )
         {
             return ParseSnowflake(reader.GetString());
         }
@@ -42,7 +46,8 @@ namespace ModCore.Common.Discord.Entities.Serializer
         public override void WriteAsPropertyName(
             Utf8JsonWriter writer,
             Snowflake value,
-            JsonSerializerOptions options)
+            JsonSerializerOptions options
+        )
         {
             writer.WritePropertyName(value.ToString());
         }
@@ -54,11 +59,14 @@ namespace ModCore.Common.Discord.Entities.Serializer
                 throw new JsonException("Snowflake value was null or empty.");
             }
 
-            if (!ulong.TryParse(
+            if (
+                !ulong.TryParse(
                     value,
                     NumberStyles.None,
                     CultureInfo.InvariantCulture,
-                    out var snowflake))
+                    out var snowflake
+                )
+            )
             {
                 throw new JsonException($"Invalid Snowflake value '{value}'.");
             }

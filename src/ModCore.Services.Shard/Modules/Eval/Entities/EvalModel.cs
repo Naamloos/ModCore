@@ -1,13 +1,13 @@
-﻿using ModCore.Common.Database;
-using ModCore.Common.Discord.Gateway.EventData.Incoming;
-using ModCore.Common.Discord.Gateway;
-using ModCore.Common.Discord.Rest;
-using ModCore.Common.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Common.Database;
+using ModCore.Common.Discord.Gateway;
+using ModCore.Common.Discord.Gateway.EventData.Incoming;
+using ModCore.Common.Discord.Rest;
+using ModCore.Common.Utils;
 
 namespace ModCore.Services.Shard.Modules.Eval.Entities
 {
@@ -18,7 +18,12 @@ namespace ModCore.Services.Shard.Modules.Eval.Entities
         public MessageCreate Context { get; set; }
         public DatabaseContext Database { get; set; }
 
-        public EvalModel(Gateway gateway, DiscordRest rest, MessageCreate context, TransientService<DatabaseContext> database)
+        public EvalModel(
+            Gateway gateway,
+            DiscordRest rest,
+            MessageCreate context,
+            TransientService<DatabaseContext> database
+        )
         {
             Gateway = gateway;
             Rest = rest;

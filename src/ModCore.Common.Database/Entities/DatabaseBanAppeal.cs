@@ -23,10 +23,11 @@ namespace ModCore.Common.Database.Entities
 
         [JsonPropertyName("appeal_content")]
         [Column("appeal_content")]
-        public string AppealContent {  get; set; }
+        public string AppealContent { get; set; }
 
         [JsonIgnore]
         public virtual DatabaseUser User { get; set; }
+
         [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
     }

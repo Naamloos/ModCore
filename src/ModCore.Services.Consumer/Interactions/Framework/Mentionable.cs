@@ -19,11 +19,7 @@ namespace ModCore.Services.Consumer.Interactions.Framework
 
         public bool IsRole => Role is not null;
 
-        private Mentionable(
-            Snowflake id,
-            User? user,
-            Member? member,
-            Role? role)
+        private Mentionable(Snowflake id, User? user, Member? member, Role? role)
         {
             Id = id;
             User = user;
@@ -31,10 +27,7 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             Role = role;
         }
 
-        public static Mentionable FromUser(
-            Snowflake id,
-            User user,
-            Member? member = null)
+        public static Mentionable FromUser(Snowflake id, User user, Member? member = null)
         {
             return new Mentionable(id, user, member, null);
         }
@@ -49,7 +42,6 @@ namespace ModCore.Services.Consumer.Interactions.Framework
             if (this.IsUser || this.IsMember)
             {
                 return $"<@{Id}>";
-
             }
             else if (this.IsRole)
             {

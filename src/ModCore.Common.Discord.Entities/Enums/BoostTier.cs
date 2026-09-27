@@ -11,6 +11,6 @@ namespace ModCore.Common.Discord.Entities.Enums
         None = 0,
         Tier1 = 1,
         Tier2 = 2,
-        Tier3 = 3
+        Tier3 = 3,
     }
 }

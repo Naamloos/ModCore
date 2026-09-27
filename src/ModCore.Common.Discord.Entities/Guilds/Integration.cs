@@ -1,0 +1,55 @@
+using System.Text.Json.Serialization;
+
+namespace ModCore.Common.Discord.Entities.Guilds
+{
+    public record Integration
+    {
+        [JsonPropertyName("id")]
+        public Snowflake Id { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = default!;
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; } = default!;
+
+        [JsonPropertyName("enabled")]
+        public bool Enabled { get; set; }
+
+        [JsonPropertyName("syncing")]
+        public Optional<bool> Syncing { get; set; }
+
+        [JsonPropertyName("role_id")]
+        public Optional<Snowflake> RoleId { get; set; }
+
+        [JsonPropertyName("enable_emoticons")]
+        public Optional<bool> EnableEmoticons { get; set; }
+
+        [JsonPropertyName("expire_behavior")]
+        public Optional<int> ExpireBehavior { get; set; }
+
+        [JsonPropertyName("expire_grace_period")]
+        public Optional<int> ExpireGracePeriod { get; set; }
+
+        [JsonPropertyName("user")]
+        public Optional<User> User { get; set; }
+
+        [JsonPropertyName("account")]
+        public IntegrationAccount Account { get; set; } = default!;
+
+        [JsonPropertyName("synced_at")]
+        public Optional<DateTimeOffset> SyncedAt { get; set; }
+
+        [JsonPropertyName("subscriber_count")]
+        public Optional<int> SubscriberCount { get; set; }
+
+        [JsonPropertyName("revoked")]
+        public Optional<bool> Revoked { get; set; }
+
+        [JsonPropertyName("application")]
+        public Optional<IntegrationApplication> Application { get; set; }
+
+        [JsonPropertyName("scopes")]
+        public Optional<string[]> Scopes { get; set; }
+    }
+}

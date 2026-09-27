@@ -24,10 +24,7 @@ namespace ModCore.Services.Web.Middleware
             if (!db.Users.Any(x => x.UserId == ulongUid))
             {
                 // create new db user
-                db.Users.Add(new DatabaseUser
-                {
-                    UserId = ulongUid
-                });
+                db.Users.Add(new DatabaseUser { UserId = ulongUid });
                 await db.SaveChangesAsync();
             }
 

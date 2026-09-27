@@ -9,6 +9,6 @@ namespace ModCore.Common.Discord.Entities.Enums
     public enum TeamMembershipState
     {
         Invited = 1,
-        Accepted = 2
+        Accepted = 2,
     }
 }

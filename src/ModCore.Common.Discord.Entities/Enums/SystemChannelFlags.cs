@@ -14,6 +14,6 @@ namespace ModCore.Common.Discord.Entities.Enums
         SuppressGuildReminderNotifications = 1 << 2,
         SuppressJoinNotificationReplies = 1 << 3,
         SuppressRoleSubscriptionPurchaseNotifications = 1 << 4,
-        SuppressRoleSubscriptionPurchaseNotificationReplies = 1 << 5
+        SuppressRoleSubscriptionPurchaseNotificationReplies = 1 << 5,
     }
 }

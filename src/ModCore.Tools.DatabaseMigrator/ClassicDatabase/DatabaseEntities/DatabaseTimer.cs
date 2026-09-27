@@ -1,12 +1,12 @@
-﻿using ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ModCore.Tools.DatabaseMigrator.ClassicDatabase.JsonEntities;
+using Newtonsoft.Json;
 
 namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.DatabaseEntities
 {
@@ -35,10 +35,10 @@ namespace ModCore.Tools.DatabaseMigrator.ClassicDatabase.DatabaseEntities
         [Required]
         public string ActionData { get; set; }
 
-        public T GetData<T>() where T : class, ITimerData =>
-            JsonConvert.DeserializeObject<T>(ActionData);
+        public T GetData<T>()
+            where T : class, ITimerData => JsonConvert.DeserializeObject<T>(ActionData);
 
-        public void SetData<T>(T data) where T : class, ITimerData =>
-            ActionData = JsonConvert.SerializeObject(data);
+        public void SetData<T>(T data)
+            where T : class, ITimerData => ActionData = JsonConvert.SerializeObject(data);
     }
 }

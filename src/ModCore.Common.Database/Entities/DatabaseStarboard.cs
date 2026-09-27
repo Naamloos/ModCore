@@ -40,7 +40,9 @@ namespace ModCore.Common.Database.Entities
 
         [JsonIgnore]
         public virtual DatabaseGuild Guild { get; set; }
+
         [JsonIgnore]
-        public virtual ICollection<DatabaseStarboardItem> Items { get; set; } = new HashSet<DatabaseStarboardItem>();
+        public virtual ICollection<DatabaseStarboardItem> Items { get; set; } =
+            new HashSet<DatabaseStarboardItem>();
     }
 }

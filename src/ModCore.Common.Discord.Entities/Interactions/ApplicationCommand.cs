@@ -1,6 +1,6 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities.Enums;
 
 namespace ModCore.Common.Discord.Entities.Interactions
 {
@@ -27,7 +27,7 @@ namespace ModCore.Common.Discord.Entities.Interactions
         [JsonPropertyName("description")]
         public string Description { get; set; }
 
-        [JsonPropertyName("decription_localizations")]
+        [JsonPropertyName("description_localizations")]
         public Optional<Dictionary<string, string>?> DescriptionLocalizations { get; set; }
 
         [JsonPropertyName("options")]
@@ -50,5 +50,14 @@ namespace ModCore.Common.Discord.Entities.Interactions
         /// </summary>
         [JsonPropertyName("handler")]
         public Optional<int> Handler { get; set; }
+
+        [JsonPropertyName("default_permission")]
+        public Optional<bool?> DefaultPermission { get; set; }
+
+        [JsonPropertyName("integration_types")]
+        public Optional<int[]> IntegrationTypes { get; set; }
+
+        [JsonPropertyName("contexts")]
+        public Optional<int[]?> Contexts { get; set; }
     }
 }

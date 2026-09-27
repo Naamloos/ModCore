@@ -1,9 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace ModCore.Common.Database
 {
@@ -23,12 +23,10 @@ namespace ModCore.Common.Database
                 ["postgres_password"] = obj["postgres_password"]!.GetValue<string>(),
                 ["postgres_port"] = obj["postgres_port"]!.GetValue<int>().ToString(),
                 ["postgres_host"] = obj["postgres_host"]!.GetValue<string>(),
-                ["master_key"] = obj["master_key"]!.GetValue<string>()
+                ["master_key"] = obj["master_key"]!.GetValue<string>(),
             };
 
-            var config = new ConfigurationBuilder()
-                .AddInMemoryCollection(configValues)
-                .Build();
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configValues).Build();
 
             return new DatabaseContext(config);
         }

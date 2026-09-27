@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using ModCore.Common.Discord.Rest;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using ModCore.Common.Discord.Rest;
 
 namespace ModCore.Common.InteractionFramework
 {

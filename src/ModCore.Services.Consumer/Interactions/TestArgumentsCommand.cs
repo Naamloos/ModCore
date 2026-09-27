@@ -1,4 +1,8 @@
-﻿using ModCore.Common.Discord.Entities;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Text;
+using ModCore.Common.Discord.Entities;
 using ModCore.Common.Discord.Entities.Channels;
 using ModCore.Common.Discord.Entities.Components;
 using ModCore.Common.Discord.Entities.Enums;
@@ -8,10 +12,6 @@ using ModCore.Common.Discord.Entities.Messages;
 using ModCore.Common.Discord.Entities.Utils;
 using ModCore.Common.Discord.Rest;
 using ModCore.Services.Consumer.Interactions.Framework;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
 
 namespace ModCore.Services.Consumer.Interactions
 {
@@ -19,11 +19,14 @@ namespace ModCore.Services.Consumer.Interactions
     {
         [Name("Option One")]
         OptionOne,
+
         [Name("Option Two")]
         OptionTwo,
+
         [Name("Option Three")]
-        OptionThree
+        OptionThree,
     }
+
     public class TestArgumentsCommand : BaseApplicationCommand
     {
         public override string Name => "this_is_a_test";
@@ -38,7 +41,8 @@ namespace ModCore.Services.Consumer.Interactions
         }
 
         [ApplicationCommandHandler]
-        public async Task HandleAsync(Interaction interaction,
+        public async Task HandleAsync(
+            Interaction interaction,
             [Description("User to mention")] User targetuser,
             [Description("Channel to mention")] Channel targetchannel,
             [Description("Role to mention")] Role targetrole,
@@ -51,11 +55,12 @@ namespace ModCore.Services.Consumer.Interactions
             [Description("Optional text to mention")] string optionaltext = ""
         )
         {
-            var swagIsImage = swag.ContentType.HasValue && swag.ContentType.Value.StartsWith("image/");
+            var swagIsImage =
+                swag.ContentType.HasValue && swag.ContentType.Value.StartsWith("image/");
             await _rest.CreateInteractionResponseAsync(
-                interaction.Id, 
-                interaction.Token, 
-                InteractionResponseType.ChannelMessageWithSource, 
+                interaction.Id,
+                interaction.Token,
+                InteractionResponseType.ChannelMessageWithSource,
                 new MessageBuilder()
                     .AddContainer(container =>
                     {
@@ -67,26 +72,31 @@ namespace ModCore.Services.Consumer.Interactions
                         container.AddText($"Text input: {targettext}");
                         container.AddText($"Enum input: {Enum.GetName(testEnum)}");
                         container.AddText($"Mentionable input: {mentionable.Mention()}");
-                        container.AddText($"Optional input: {(optionaltext.Length > 0 ? optionaltext : "NONE PROVIDED")}");
+                        container.AddText(
+                            $"Optional input: {(optionaltext.Length > 0 ? optionaltext : "NONE PROVIDED")}"
+                        );
 
-                        container.AddSection(section =>
-                        {
-                            section.AddText("Swag attachment");
-                        }, swagIsImage? new Thumbnail()
-                        {
-                            Media = new UnfurledMediaItem()
+                        container.AddSection(
+                            section =>
                             {
-                                Url = swag.Url
-                            }
-                        } : new Button()
-                        {
-                            Style = ButtonStyle.Link,
-                            Label = "View Swag",
-                            Url = swag.Url,
-                        });
+                                section.AddText("Swag attachment");
+                            },
+                            swagIsImage
+                                ? new Thumbnail()
+                                {
+                                    Media = new UnfurledMediaItem() { Url = swag.Url },
+                                }
+                                : new Button()
+                                {
+                                    Style = ButtonStyle.Link,
+                                    Label = "View Swag",
+                                    Url = swag.Url,
+                                }
+                        );
                     })
                     .WithFlags(MessageFlags.Ephemeral)
-                    .BuildInteractionResponse());
+                    .BuildInteractionResponse()
+            );
         }
     }
 }

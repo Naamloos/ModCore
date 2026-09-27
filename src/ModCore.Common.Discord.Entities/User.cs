@@ -1,6 +1,7 @@
-﻿using ModCore.Common.Discord.Entities;
-using ModCore.Common.Discord.Entities.Enums;
 using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Users;
 
 namespace ModCore.Common.Discord.Entities
 {
@@ -60,6 +61,18 @@ namespace ModCore.Common.Discord.Entities
         private const string MENTION_FORMAT = "<@{0}>";
         public string Mention => string.Format(MENTION_FORMAT, Id);
 
-        public string AvatarUrl => !string.IsNullOrEmpty(AvatarHash) ? $"https://cdn.discordapp.com/avatars/{Id}/{AvatarHash}.png" : $"https://cdn.discordapp.com/embed/avatars/{Id % 5}.png";
+        public string AvatarUrl =>
+            !string.IsNullOrEmpty(AvatarHash)
+                ? $"https://cdn.discordapp.com/avatars/{Id}/{AvatarHash}.png"
+                : $"https://cdn.discordapp.com/embed/avatars/{Id % 5}.png";
+
+        [JsonPropertyName("avatar_decoration_data")]
+        public Optional<AvatarDecorationData?> AvatarDecorationData { get; set; }
+
+        [JsonPropertyName("collectibles")]
+        public Optional<Collectible?> Collectibles { get; set; }
+
+        [JsonPropertyName("primary_guild")]
+        public Optional<UserPrimaryGuild?> PrimaryGuild { get; set; }
     }
 }

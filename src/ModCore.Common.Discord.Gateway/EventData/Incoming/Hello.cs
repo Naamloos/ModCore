@@ -1,5 +1,5 @@
-﻿using ModCore.Common.Discord.Gateway.Events;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using ModCore.Common.Discord.Gateway.Events;
 
 namespace ModCore.Common.Discord.Gateway.EventData.Incoming
 {

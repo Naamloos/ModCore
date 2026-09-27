@@ -8,9 +8,7 @@ namespace ModCore.Services.DiscordProxy
         {
             path = path.Trim('/');
 
-            var parts = path.Split(
-                '/',
-                StringSplitOptions.RemoveEmptyEntries);
+            var parts = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
             for (var i = 0; i < parts.Length; i++)
             {

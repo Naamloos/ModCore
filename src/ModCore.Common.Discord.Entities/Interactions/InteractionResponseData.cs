@@ -3,7 +3,8 @@
 namespace ModCore.Common.Discord.Entities.Interactions
 {
     [JsonDerivedType(typeof(InteractionMessageResponse))]
-    public abstract record InteractionResponseData
-    {
-    }
+    [JsonDerivedType(typeof(InteractionMessageData))]
+    [JsonDerivedType(typeof(InteractionAutocompleteData))]
+    [JsonDerivedType(typeof(InteractionModalData))]
+    public abstract record InteractionResponseData { }
 }

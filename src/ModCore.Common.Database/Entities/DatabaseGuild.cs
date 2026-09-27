@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace ModCore.Common.Database.Entities
 {
@@ -68,48 +68,71 @@ namespace ModCore.Common.Database.Entities
         // Having everything referencing the base guild means we can easily delete one guild's
         // data by cascading everything. ModCore will have a data retention period of 1 year.
         [JsonIgnore]
-        public virtual ICollection<DatabaseLevelData> LevelData { get; set; } = new HashSet<DatabaseLevelData>();
+        public virtual ICollection<DatabaseLevelData> LevelData { get; set; } =
+            new HashSet<DatabaseLevelData>();
+
         [JsonPropertyName("starboards")]
-        public virtual ICollection<DatabaseStarboard> Starboards { get; set; } = new HashSet<DatabaseStarboard>();
+        public virtual ICollection<DatabaseStarboard> Starboards { get; set; } =
+            new HashSet<DatabaseStarboard>();
+
         [JsonIgnore]
         public virtual ICollection<DatabaseTag> Tags { get; set; } = new HashSet<DatabaseTag>();
+
         [JsonIgnore]
-        public virtual ICollection<DatabaseNicknameState> NicknameStates { get; set; } = new HashSet<DatabaseNicknameState>();
+        public virtual ICollection<DatabaseNicknameState> NicknameStates { get; set; } =
+            new HashSet<DatabaseNicknameState>();
+
         [JsonIgnore]
-        public virtual ICollection<DatabaseRoleState> RoleStates { get; set; } = new HashSet<DatabaseRoleState>();
+        public virtual ICollection<DatabaseRoleState> RoleStates { get; set; } =
+            new HashSet<DatabaseRoleState>();
+
         [JsonIgnore]
-        public virtual ICollection<DatabaseOverrideState> OverrideStates { get; set; } = new HashSet<DatabaseOverrideState>();
+        public virtual ICollection<DatabaseOverrideState> OverrideStates { get; set; } =
+            new HashSet<DatabaseOverrideState>();
+
         [JsonPropertyName("auto_roles")]
-        public virtual ICollection<DatabaseAutoRole> AutoRoles { get; set; } = new HashSet<DatabaseAutoRole>();
+        public virtual ICollection<DatabaseAutoRole> AutoRoles { get; set; } =
+            new HashSet<DatabaseAutoRole>();
+
         [JsonIgnore]
-        public virtual ICollection<DatabaseInfraction> Infractions { get; set; } = new HashSet<DatabaseInfraction>();
+        public virtual ICollection<DatabaseInfraction> Infractions { get; set; } =
+            new HashSet<DatabaseInfraction>();
+
         [JsonIgnore]
-        public virtual ICollection<DatabaseBanAppeal> BanAppeals { get; set; } = new HashSet<DatabaseBanAppeal>();
+        public virtual ICollection<DatabaseBanAppeal> BanAppeals { get; set; } =
+            new HashSet<DatabaseBanAppeal>();
+
         [JsonIgnore]
-        public virtual ICollection<DatabaseTicket> Tickets { get; set; } = new HashSet<DatabaseTicket>();
+        public virtual ICollection<DatabaseTicket> Tickets { get; set; } =
+            new HashSet<DatabaseTicket>();
+
         [JsonPropertyName("role_menus")]
-        public virtual ICollection<DatabaseRoleMenu> RoleMenus { get; set; } = new HashSet<DatabaseRoleMenu>();
+        public virtual ICollection<DatabaseRoleMenu> RoleMenus { get; set; } =
+            new HashSet<DatabaseRoleMenu>();
 
         /// <summary>
         /// When this is null / doesn't exist, Logger is disabled.
         /// </summary>
         [JsonPropertyName("logger_settings")]
-        public virtual DatabaseLoggerSettings LoggerSettings { get; set; } = new DatabaseLoggerSettings();
+        public virtual DatabaseLoggerSettings LoggerSettings { get; set; } =
+            new DatabaseLoggerSettings();
 
         /// <summary>
         /// When this is null / doesn't exist, Welcomer is disabled.
         /// </summary>
         [JsonPropertyName("welcome_settings")]
-        public virtual DatabaseWelcomeSettings WelcomeSettings { get; set; } = new DatabaseWelcomeSettings();
+        public virtual DatabaseWelcomeSettings WelcomeSettings { get; set; } =
+            new DatabaseWelcomeSettings();
 
         [JsonPropertyName("level_settings")]
-        public virtual DatabaseLevelSettings LevelSettings { get; set; } = new DatabaseLevelSettings();
+        public virtual DatabaseLevelSettings LevelSettings { get; set; } =
+            new DatabaseLevelSettings();
     }
 
     public enum EmbedMessageLinks
     {
         Disabled = 0,
         Prefixed = 1,
-        Always = 2
+        Always = 2,
     }
 }

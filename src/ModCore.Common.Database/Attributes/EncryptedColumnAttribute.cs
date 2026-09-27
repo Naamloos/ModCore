@@ -9,6 +9,7 @@ namespace ModCore.Common.Database.Attributes
     public class EncryptedColumnAttribute : Attribute
     {
         public string[] ContextPropertyNames { get; private set; }
+
         public EncryptedColumnAttribute(params string[] contextPropertyNames)
         {
             this.ContextPropertyNames = contextPropertyNames;

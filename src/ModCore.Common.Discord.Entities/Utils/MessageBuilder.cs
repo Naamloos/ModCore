@@ -49,13 +49,17 @@ namespace ModCore.Common.Discord.Entities.Utils
             return this;
         }
 
-        public MessageBuilder WithReply(Snowflake messageId, Snowflake? guildId = null, bool failIfNotExists = true)
+        public MessageBuilder WithReply(
+            Snowflake messageId,
+            Snowflake? guildId = null,
+            bool failIfNotExists = true
+        )
         {
             _messageReference = new MessageReference
             {
                 MessageId = messageId,
                 GuildId = guildId is not null ? guildId : Optional.None,
-                FailIfNotExists = failIfNotExists
+                FailIfNotExists = failIfNotExists,
             };
             return this;
         }
@@ -109,13 +113,17 @@ namespace ModCore.Common.Discord.Entities.Utils
 
             return new CreateMessage
             {
-                Content = _isComponentsV2 ? Optional.None : (_content is not null ? _content : Optional.None),
+                Content = _isComponentsV2
+                    ? Optional.None
+                    : (_content is not null ? _content : Optional.None),
                 IsTTs = _tts ? _tts : Optional.None,
                 Embeds = _isComponentsV2 ? [] : (_embeds?.ToArray() ?? []),
-                AllowedMentions = _allowedMentions is not null? _allowedMentions : Optional.None,
-                MessageReference = _messageReference is not null ? _messageReference : Optional.None,
+                AllowedMentions = _allowedMentions is not null ? _allowedMentions : Optional.None,
+                MessageReference = _messageReference is not null
+                    ? _messageReference
+                    : Optional.None,
                 Components = _components?.ToArray() ?? [],
-                Flags = finalFlags
+                Flags = finalFlags,
             };
         }
 
@@ -133,7 +141,7 @@ namespace ModCore.Common.Discord.Entities.Utils
                 Embeds = messageData.Embeds,
                 AllowedMentions = messageData.AllowedMentions,
                 Components = messageData.Components,
-                Flags = messageData.Flags
+                Flags = messageData.Flags,
             };
         }
     }
@@ -155,44 +163,66 @@ namespace ModCore.Common.Discord.Entities.Utils
             return section;
         }
     }
+
     public class ActionRowBuilder
     {
         private readonly List<Component> _childComponents = new();
 
-        public ActionRowBuilder AddButton(string customId, string label, ButtonStyle style = ButtonStyle.Primary, bool disabled = false, Emoji? emoji = null)
+        public ActionRowBuilder AddButton(
+            string customId,
+            string label,
+            ButtonStyle style = ButtonStyle.Primary,
+            bool disabled = false,
+            Emoji? emoji = null
+        )
         {
-            _childComponents.Add(new Button
-            {
-                CustomId = customId,
-                Label = label,
-                Style = style,
-                Disabled = disabled,
-                Emoji = emoji is not null? emoji : Optional.None
-            });
+            _childComponents.Add(
+                new Button
+                {
+                    CustomId = customId,
+                    Label = label,
+                    Style = style,
+                    Disabled = disabled,
+                    Emoji = emoji is not null ? emoji : Optional.None,
+                }
+            );
             return this;
         }
 
-        public ActionRowBuilder AddLinkButton(string url, string label, bool disabled = false, Emoji? emoji = null)
+        public ActionRowBuilder AddLinkButton(
+            string url,
+            string label,
+            bool disabled = false,
+            Emoji? emoji = null
+        )
         {
-            _childComponents.Add(new Button
-            {
-                Url = url,
-                Label = label,
-                Style = ButtonStyle.Link,
-                Disabled = disabled,
-                Emoji = emoji is not null ? emoji : Optional.None
-            });
+            _childComponents.Add(
+                new Button
+                {
+                    Url = url,
+                    Label = label,
+                    Style = ButtonStyle.Link,
+                    Disabled = disabled,
+                    Emoji = emoji is not null ? emoji : Optional.None,
+                }
+            );
             return this;
         }
 
-        public ActionRowBuilder AddSelectMenu(string customId, List<SelectOption> options, string? placeholder = null)
+        public ActionRowBuilder AddSelectMenu(
+            string customId,
+            List<SelectOption> options,
+            string? placeholder = null
+        )
         {
-            _childComponents.Add(new StringSelect
-            {
-                CustomId = customId,
-                Options = options,
-                Placeholder = placeholder is not null ? placeholder : Optional.None
-            });
+            _childComponents.Add(
+                new StringSelect
+                {
+                    CustomId = customId,
+                    Options = options,
+                    Placeholder = placeholder is not null ? placeholder : Optional.None,
+                }
+            );
             return this;
         }
 
@@ -240,11 +270,13 @@ namespace ModCore.Common.Discord.Entities.Utils
 
         public ContainerBuilder AddSeparator(bool visible = true, int? spacing = null)
         {
-            _nestedComponents.Add(new Separator
-            {
-                Divider = visible,
-                Spacing = spacing is not null ? (int)spacing : Optional.None
-            });
+            _nestedComponents.Add(
+                new Separator
+                {
+                    Divider = visible,
+                    Spacing = spacing is not null ? (int)spacing : Optional.None,
+                }
+            );
             return this;
         }
 
@@ -256,12 +288,13 @@ namespace ModCore.Common.Discord.Entities.Utils
             return this;
         }
 
-        public Container Build() => new Container
-        {
-            AccentColor = _accentColor is not null ? _accentColor : Optional.None,
-            Spoiler = _spoiler is not null ? (bool)_spoiler : Optional.None,
-            Components = _nestedComponents
-        };
+        public Container Build() =>
+            new Container
+            {
+                AccentColor = _accentColor is not null ? _accentColor : Optional.None,
+                Spoiler = _spoiler is not null ? (bool)_spoiler : Optional.None,
+                Components = _nestedComponents,
+            };
     }
 
     public class EmbedBuilder
@@ -269,22 +302,42 @@ namespace ModCore.Common.Discord.Entities.Utils
         private Embed _embed = new();
         private List<EmbedField>? _fields;
 
-        public EmbedBuilder WithTitle(string title) { _embed = _embed with { Title = title }; return this; }
-        public EmbedBuilder WithDescription(string description) { _embed = _embed with { Description = description }; return this; }
-        public EmbedBuilder WithColor(int hexColor) { _embed = _embed with { Color = hexColor }; return this; }
+        public EmbedBuilder WithTitle(string title)
+        {
+            _embed = _embed with { Title = title };
+            return this;
+        }
+
+        public EmbedBuilder WithDescription(string description)
+        {
+            _embed = _embed with { Description = description };
+            return this;
+        }
+
+        public EmbedBuilder WithColor(int hexColor)
+        {
+            _embed = _embed with { Color = hexColor };
+            return this;
+        }
 
         public EmbedBuilder AddField(string name, string value, bool inline = false)
         {
             _fields ??= new List<EmbedField>();
-            _fields.Add(new EmbedField()
-            {
-                Name = name,
-                Value = value,
-                Inline = inline
-            });
+            _fields.Add(
+                new EmbedField()
+                {
+                    Name = name,
+                    Value = value,
+                    Inline = inline,
+                }
+            );
             return this;
         }
 
-        public Embed Build() => _embed with { Fields = _fields is not null? _fields : Optional.None };
+        public Embed Build() =>
+            _embed with
+            {
+                Fields = _fields is not null ? _fields : Optional.None,
+            };
     }
 }

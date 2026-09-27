@@ -9,8 +9,7 @@ namespace ModCore.Common.Configuration
         {
             using var reader = new StreamReader(stream);
 
-            var values = new Dictionary<string, string>(
-                StringComparer.OrdinalIgnoreCase);
+            var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
             while (reader.Peek() >= 0)
             {
@@ -91,17 +90,12 @@ namespace ModCore.Common.Configuration
         {
             rawValue = StripInlineComment(rawValue).Trim();
 
-            if (rawValue.Length >= 2 &&
-                rawValue[0] == '"' &&
-                rawValue[^1] == '"')
+            if (rawValue.Length >= 2 && rawValue[0] == '"' && rawValue[^1] == '"')
             {
-                return UnescapeDoubleQuotedValue(
-                    rawValue[1..^1]);
+                return UnescapeDoubleQuotedValue(rawValue[1..^1]);
             }
 
-            if (rawValue.Length >= 2 &&
-                rawValue[0] == '\'' &&
-                rawValue[^1] == '\'')
+            if (rawValue.Length >= 2 && rawValue[0] == '\'' && rawValue[^1] == '\'')
             {
                 return rawValue[1..^1];
             }
@@ -171,16 +165,18 @@ namespace ModCore.Common.Configuration
 
                 char next = value[++i];
 
-                builder.Append(next switch
-                {
-                    'n' => '\n',
-                    'r' => '\r',
-                    't' => '\t',
-                    '\\' => '\\',
-                    '"' => '"',
-                    '$' => '$',
-                    _ => next
-                });
+                builder.Append(
+                    next switch
+                    {
+                        'n' => '\n',
+                        'r' => '\r',
+                        't' => '\t',
+                        '\\' => '\\',
+                        '"' => '"',
+                        '$' => '$',
+                        _ => next,
+                    }
+                );
             }
 
             return builder.ToString();
@@ -188,17 +184,22 @@ namespace ModCore.Common.Configuration
 
         private static string ExpandVariables(
             string value,
-            IReadOnlyDictionary<string, string> values)
+            IReadOnlyDictionary<string, string> values
+        )
         {
-            return VariableRegex().Replace(value, match =>
-            {
-                string key = match.Groups["key"].Value;
+            return VariableRegex()
+                .Replace(
+                    value,
+                    match =>
+                    {
+                        string key = match.Groups["key"].Value;
 
-                if (values.TryGetValue(key, out string? existingValue))
-                    return existingValue;
+                        if (values.TryGetValue(key, out string? existingValue))
+                            return existingValue;
 
-                return Environment.GetEnvironmentVariable(key) ?? string.Empty;
-            });
+                        return Environment.GetEnvironmentVariable(key) ?? string.Empty;
+                    }
+                );
         }
 
         [GeneratedRegex(@"\$\{(?<key>[A-Za-z_][A-Za-z0-9_]*)\}")]

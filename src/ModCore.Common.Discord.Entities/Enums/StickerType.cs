@@ -9,6 +9,6 @@ namespace ModCore.Common.Discord.Entities.Enums
     public enum StickerType
     {
         Standard = 1,
-        Guild = 2
+        Guild = 2,
     }
 }

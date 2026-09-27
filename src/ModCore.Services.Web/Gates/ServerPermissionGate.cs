@@ -1,5 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using ModCore.Common.Cache;
 using ModCore.Common.Discord.Entities.Enums;
@@ -21,7 +20,9 @@ namespace ModCore.Services.Web.Gates
 
         public async Task<IActionResult?> CheckAsync(HttpContext httpContext)
         {
-            var userId = ulong.Parse(httpContext.User.Claims.FirstOrDefault(x => x.Type == "urn:discord:id")?.Value);
+            var userId = ulong.Parse(
+                httpContext.User.Claims.FirstOrDefault(x => x.Type == "urn:discord:id")?.Value
+            );
             var restClient = httpContext.RequestServices.GetRequiredService<DiscordRest>();
             var cacheHandler = httpContext.RequestServices.GetRequiredService<CacheService>();
 
@@ -51,7 +52,10 @@ namespace ModCore.Services.Web.Gates
 
             // check permissions from member's roles
             var roles = guild.Roles.Where(x => member.Value.Roles.Contains(x.Id));
-            var permissions = roles.Aggregate(Permissions.None, (current, role) => current | role.Permissions);
+            var permissions = roles.Aggregate(
+                Permissions.None,
+                (current, role) => current | role.Permissions
+            );
 
             if ((permissions & _permissions) == _permissions)
                 return null;

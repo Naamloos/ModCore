@@ -1,11 +1,11 @@
-﻿using ModCore.Common.Discord.Entities.Enums;
-using ModCore.Common.Discord.Entities.Guilds;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities.Enums;
+using ModCore.Common.Discord.Entities.Guilds;
 
 namespace ModCore.Common.Discord.Entities.Components
 {
@@ -28,6 +28,9 @@ namespace ModCore.Common.Discord.Entities.Components
 
         [JsonPropertyName("disabled")]
         public Optional<bool> Disabled { get; set; } = Optional<bool>.None;
+
+        [JsonPropertyName("required")]
+        public Optional<bool> Required { get; set; }
     }
 
     public class SelectOption

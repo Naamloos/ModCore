@@ -1,10 +1,10 @@
-﻿using ModCore.Common.Database;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using ModCore.Common.Database;
 using ModCore.Common.Database.Entities;
 using ModCore.Services.Jobs.Jobs;
 using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ModCore.Services.Jobs
 {
@@ -34,12 +34,14 @@ namespace ModCore.Services.Jobs
 
             var scheduler = await _schedulerFactory.GetScheduler(token);
 
-            var job = JobBuilder.Create<TimerJob>()
+            var job = JobBuilder
+                .Create<TimerJob>()
                 .WithIdentity(JOB_IDENTIFIER)
                 .UsingJobData("id", timer.TimerId)
                 .Build();
 
-            var trigger = TriggerBuilder.Create()
+            var trigger = TriggerBuilder
+                .Create()
                 .WithIdentity(JOB_TRIGGER_IDENTIFIER)
                 .StartAt(timer.TriggersAt)
                 .Build();

@@ -11,6 +11,6 @@ namespace ModCore.Common.Discord.Entities.Enums
         Default = 0,
         Explicit = 1,
         Safe = 2,
-        AgeRestricted = 3
+        AgeRestricted = 3,
     }
 }

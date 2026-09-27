@@ -1,6 +1,4 @@
-﻿using ModCore.Common.Discord.Entities;
-using ModCore.Common.Discord.Entities.Serializer;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -9,6 +7,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
+using ModCore.Common.Discord.Entities;
+using ModCore.Common.Discord.Entities.Serializer;
 
 namespace ModCore.Common.Utils
 {
@@ -18,14 +18,14 @@ namespace ModCore.Common.Utils
         {
             var options = new JsonSerializerOptions()
             {
-                Converters = { new OptionalJsonSerializerFactory() },
+                Converters = { new OptionalJsonSerializerFactory(), new ComponentJsonSerializer() },
                 TypeInfoResolver = new DefaultJsonTypeInfoResolver
                 {
-                    Modifiers = { HandleOptional }
+                    Modifiers = { HandleOptional },
                 },
                 DefaultIgnoreCondition = JsonIgnoreCondition.Never,
                 WriteIndented = true,
-                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
             };
 
             return options;
@@ -35,12 +35,22 @@ namespace ModCore.Common.Utils
         {
             foreach (var propertyInfo in typeInfo.Properties)
             {
-                if (!propertyInfo.PropertyType.IsGenericType || propertyInfo.PropertyType.GetGenericTypeDefinition() != typeof(Optional<>))
+                if (propertyInfo.PropertyType == typeof(IdiotBool))
+                {
+                    propertyInfo.ShouldSerialize = (_, property) =>
+                        property is IdiotBool marker && marker.Value;
+                    continue;
+                }
+                if (
+                    !propertyInfo.PropertyType.IsGenericType
+                    || propertyInfo.PropertyType.GetGenericTypeDefinition() != typeof(Optional<>)
+                )
                 {
                     continue;
                 }
 
-                propertyInfo.ShouldSerialize = (_, property) => ((IOptional)property)?.HasValue ?? false;
+                propertyInfo.ShouldSerialize = (_, property) =>
+                    ((IOptional)property)?.HasValue ?? false;
             }
         }
     }

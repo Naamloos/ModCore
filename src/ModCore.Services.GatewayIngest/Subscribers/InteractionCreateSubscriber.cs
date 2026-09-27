@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.Extensions.Logging;
 using ModCore.Common.Discord.Gateway;
 using ModCore.Common.Discord.Gateway.EventData.Incoming;
 using ModCore.Common.Discord.Gateway.Events;
 using ModCore.Common.PubSub;
 using ModCore.Common.PubSub.Payloads;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace ModCore.Services.GatewayIngest.Subscribers
 {
@@ -17,7 +17,10 @@ namespace ModCore.Services.GatewayIngest.Subscribers
         private ILogger<InteractionCreateSubscriber> _logger;
         private readonly PubSubService _pubsub;
 
-        public InteractionCreateSubscriber(ILogger<InteractionCreateSubscriber> logger, PubSubService pubsub)
+        public InteractionCreateSubscriber(
+            ILogger<InteractionCreateSubscriber> logger,
+            PubSubService pubsub
+        )
         {
             this._logger = logger;
             this._pubsub = pubsub;
@@ -25,12 +28,14 @@ namespace ModCore.Services.GatewayIngest.Subscribers
 
         public async ValueTask HandleEvent(InteractionCreate data)
         {
-            _logger.LogInformation("Received InteractionCreate event with ID {Id} and Type {Type}", data.Id, data.Type);
-            await this._pubsub.PublishAsync<InteractionCreatePayload>(new()
-            {
-                ShardId = this.Gateway.ShardId,
-                Interaction = data
-            });
+            _logger.LogInformation(
+                "Received InteractionCreate event with ID {Id} and Type {Type}",
+                data.Id,
+                data.Type
+            );
+            await this._pubsub.PublishAsync<InteractionCreatePayload>(
+                new() { ShardId = this.Gateway.ShardId, Interaction = data }
+            );
         }
     }
 }

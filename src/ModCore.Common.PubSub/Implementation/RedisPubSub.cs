@@ -13,21 +13,23 @@ namespace ModCore.Common.PubSub.Implementation
 
         public RedisPubSub(
             IConnectionMultiplexer redis,
-            ILogger<RedisPubSub> logger, JsonSerializerOptions? options = null)
+            ILogger<RedisPubSub> logger,
+            JsonSerializerOptions? options = null
+        )
         {
             _redis = redis;
             _logger = logger;
 
-            _jsonOptions = options ?? new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
+            _jsonOptions =
+                options
+                ?? new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
         }
 
         public async Task PublishAsync<T>(
             string channel,
             T message,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default
+        )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -35,15 +37,14 @@ namespace ModCore.Common.PubSub.Implementation
 
             var payload = JsonSerializer.Serialize(message, _jsonOptions);
 
-            await subscriber.PublishAsync(
-                RedisChannel.Literal(channel),
-                payload);
+            await subscriber.PublishAsync(RedisChannel.Literal(channel), payload);
         }
 
         public async Task SubscribeAsync<T>(
             string channel,
             Func<T, CancellationToken, Task> handler,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default
+        )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -60,7 +61,8 @@ namespace ModCore.Common.PubSub.Implementation
 
                         var message = JsonSerializer.Deserialize<T>(
                             value.ToString()!,
-                            _jsonOptions);
+                            _jsonOptions
+                        );
 
                         if (message is null)
                             return;
@@ -76,21 +78,23 @@ namespace ModCore.Common.PubSub.Implementation
                         _logger.LogError(
                             ex,
                             "Failed to handle Redis message on channel {Channel}",
-                            channel);
+                            channel
+                        );
                     }
-                });
+                }
+            );
         }
 
         public async Task UnsubscribeAsync(
             string channel,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default
+        )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var subscriber = _redis.GetSubscriber();
 
-            await subscriber.UnsubscribeAsync(
-                RedisChannel.Literal(channel));
+            await subscriber.UnsubscribeAsync(RedisChannel.Literal(channel));
         }
     }
 }

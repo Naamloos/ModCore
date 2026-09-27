@@ -31,10 +31,7 @@ namespace ModCore.Common.Web.Controllers
                 return Redirect("/dashboard");
             }
 
-            return Inertia.Render("Home", new
-            {
-                dotnetVersion = Environment.Version
-            });
+            return Inertia.Render("Home", new { dotnetVersion = Environment.Version });
         }
     }
 }
